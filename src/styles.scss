@@ -1,0 +1,19 @@
+/* ==========================================================================
+   Portfolio Blog - Global Styles
+   Modular Architecture: Each partial handles a specific concern
+   ========================================================================== */
+
+@use 'styles/variables';
+@use 'styles/themes';
+@use 'styles/reset';
+@use 'styles/typography';
+@use 'styles/buttons';
+@use 'styles/forms';
+@use 'styles/components';
+@use 'styles/tables';
+@use 'styles/utilities';
+@use 'styles/animations';
+@use 'styles/material-overrides';
+@use 'styles/content';
+@use 'styles/print';
+@use 'styles/accessibility';

@@ -1,0 +1,47 @@
+﻿# === Build output ===
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# === Dependencies ===
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# === IDE ===
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/
+
+# === Angular cache ===
+/.angular/cache
+.sass-cache/
+
+# === Test & Coverage ===
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# === OS files ===
+.DS_Store
+Thumbs.db
+
+# === Test artifacts ===
+test-results/
+/test-screenshots/
+
+# === Archives & Temporary ===
+*.tar
+*.tar.gz
+*.zip
+*.tmp
+*.bak_removed
+*.backup_*
