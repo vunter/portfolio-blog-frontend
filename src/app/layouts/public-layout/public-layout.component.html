@@ -1,0 +1,186 @@
+﻿ <!-- Skip to content link for accessibility -->
+ <a href="#main-content" class="skip-link">{{ i18n.t('a11y.skipToContent') }}</a>
+ 
+ <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()">
+ <header class="header">
+ <div class="header__container">
+ <a routerLink="/" class="header__logo">
+ <span class="logo-text">{{ ownerName() }}</span>
+ </a>
+ <nav class="header__nav" aria-label="Main navigation">
+ <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ i18n.t('nav.home') }}</a>
+ <a routerLink="/blog" routerLinkActive="active">{{ i18n.t('nav.blog') }}</a>
+ <a routerLink="/tags" routerLinkActive="active">{{ i18n.t('nav.tags') }}</a>
+ <a routerLink="/about" routerLinkActive="active">{{ i18n.t('nav.about') }}</a>
+ <a routerLink="/search" routerLinkActive="active">{{ i18n.t('nav.search') }}</a>
+ </nav>
+ <div class="header__actions">
+ <div class="lang-dropdown">
+ <button class="toggle-btn" (click)="toggleLangMenu($event)" title="Language">
+ <span class="toggle-label"> {{ currentLangLabel() }}</span>
+ <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+ </button>
+ @if (langMenuOpen()) {
+ <div class="lang-dropdown__menu">
+ <button class="lang-dropdown__item" [class.active]="i18n.language() === 'en'" (click)="selectLanguage('en')"> English</button>
+ <button class="lang-dropdown__item" [class.active]="i18n.language() === 'pt'" (click)="selectLanguage('pt')"> Português</button>
+ <button class="lang-dropdown__item" [class.active]="i18n.language() === 'es'" (click)="selectLanguage('es')"> Español</button>
+ <button class="lang-dropdown__item" [class.active]="i18n.language() === 'it'" (click)="selectLanguage('it')"> Italiano</button>
+ </div>
+ }
+ </div>
+ <app-theme-toggle variant="segmented" />
+ @if (authStore.isAuthenticated()) {
+ <div class="user-menu">
+ <button class="user-menu__trigger" (click)="toggleUserMenu($event)">
+ <span class="user-menu__avatar">{{ authStore.userInitials() }}</span>
+ <span class="user-menu__name">{{ authStore.userDisplayName() }}</span>
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+ </button>
+ @if (userMenuOpen()) {
+ <div class="user-menu__dropdown">
+ <div class="user-menu__header">
+ <span class="user-menu__avatar user-menu__avatar--lg">{{ authStore.userInitials() }}</span>
+ <div class="user-menu__info">
+ <span class="user-menu__display-name">{{ authStore.userDisplayName() }}</span>
+ <span class="user-menu__role">{{ authStore.user()?.role }}</span>
+ </div>
+ </div>
+ <div class="user-menu__divider"></div>
+ @if (authStore.isEditor()) {
+ <a routerLink="/admin" class="user-menu__item" (click)="closeUserMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+ {{ i18n.t('nav.dashboard') }}
+ </a>
+ }
+ @if (authStore.isDev()) {
+ <a routerLink="/resume" class="user-menu__item" (click)="closeUserMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+ {{ i18n.t('nav.resume') }}
+ </a>
+ }
+ <a routerLink="/profile" class="user-menu__item" (click)="closeUserMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+ {{ i18n.t('nav.myProfile') }}
+ </a>
+ <div class="user-menu__divider"></div>
+ <button class="user-menu__item user-menu__item--danger" (click)="logout()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+ {{ i18n.t('nav.logout') }}
+ </button>
+ </div>
+ }
+ </div>
+ } @else {
+ <a routerLink="/auth/login" class="btn btn--primary">{{ i18n.t('nav.login') }}</a>
+ }
+ </div>
+ <button
+ class="mobile-menu-btn"
+ (click)="toggleMobileMenu()"
+ [attr.aria-expanded]="mobileMenuOpen()"
+ aria-controls="mobile-menu"
+ [attr.aria-label]="i18n.t('nav.mobileMenuToggle')"
+ >
+ <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+ </button>
+ </div>
+ @if (mobileMenuOpen()) {
+ <div class="mobile-menu-overlay" (click)="closeMobileMenu()"></div>
+ <div class="mobile-menu" id="mobile-menu" role="dialog" [attr.aria-label]="i18n.t('nav.mobileMenu')">
+ <nav class="mobile-nav" aria-label="Mobile navigation">
+ <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">{{ i18n.t('nav.home') }}</a>
+ <a routerLink="/blog" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.blog') }}</a>
+ <a routerLink="/tags" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.tags') }}</a>
+ <a routerLink="/about" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.about') }}</a>
+ <a routerLink="/search" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.search') }}</a>
+ </nav>
+ @if (authStore.isAuthenticated()) {
+ <div class="mobile-auth">
+ <div class="mobile-auth__user">
+ <span class="user-menu__avatar">{{ authStore.userInitials() }}</span>
+ <span>{{ authStore.userDisplayName() }}</span>
+ </div>
+ @if (authStore.isEditor()) {
+ <a routerLink="/admin" class="mobile-nav-link" (click)="closeMobileMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+ {{ i18n.t('nav.dashboard') }}
+ </a>
+ }
+ @if (authStore.isDev()) {
+ <a routerLink="/resume" class="mobile-nav-link" (click)="closeMobileMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+ {{ i18n.t('nav.resume') }}
+ </a>
+ }
+ <a routerLink="/profile" class="mobile-nav-link" (click)="closeMobileMenu()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+ {{ i18n.t('nav.myProfile') }}
+ </a>
+ <button class="mobile-nav-link mobile-nav-link--danger" (click)="logout()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+ {{ i18n.t('nav.logout') }}
+ </button>
+ </div>
+ } @else {
+ <div class="mobile-auth">
+ <a routerLink="/auth/login" class="btn btn--primary" style="width: 100%; justify-content: center;" (click)="closeMobileMenu()">{{ i18n.t('nav.login') }}</a>
+ </div>
+ }
+ <div class="mobile-actions">
+ <div class="mobile-lang-selector">
+ <button class="mobile-lang-btn" [class.active]="i18n.language() === 'en'" (click)="i18n.setLanguage('en')">EN</button>
+ <button class="mobile-lang-btn" [class.active]="i18n.language() === 'pt'" (click)="i18n.setLanguage('pt')">PT</button>
+ <button class="mobile-lang-btn" [class.active]="i18n.language() === 'es'" (click)="i18n.setLanguage('es')">ES</button>
+ <button class="mobile-lang-btn" [class.active]="i18n.language() === 'it'" (click)="i18n.setLanguage('it')">IT</button>
+ </div>
+ <app-theme-toggle variant="segmented" />
+ </div>
+ </div>
+ }
+ </header>
+ <main id="main-content" class="main" role="main"><router-outlet /></main>
+ <footer class="footer" role="contentinfo">
+ <div class="footer__container">
+ <div class="footer__content">
+ <div class="footer__brand"><span>{{ ownerName() }}</span></div>
+ <p class="footer__description">{{ i18n.t('footer.description') }}</p>
+ </div>
+ <div class="footer__links">
+ <div class="footer__column">
+ <h4>{{ i18n.t('footer.navigation') }}</h4>
+ <a routerLink="/">{{ i18n.t('nav.home') }}</a>
+ <a routerLink="/blog">{{ i18n.t('nav.blog') }}</a>
+ <a routerLink="/tags">{{ i18n.t('nav.tags') }}</a>
+ <a routerLink="/search">{{ i18n.t('nav.search') }}</a>
+ </div>
+ <div class="footer__column">
+ <h4>{{ i18n.t('footer.legal') }}</h4>
+ <a routerLink="/privacy">{{ i18n.t('footer.privacy') }}</a>
+ <a routerLink="/terms">{{ i18n.t('footer.terms') }}</a>
+ </div>
+ <div class="footer__column">
+ <h4>{{ i18n.t('footer.social') }}</h4>
+ @if (ownerGithub()) {
+ <a [href]="ownerGithub()" target="_blank" rel="noopener">GitHub</a>
+ }
+ @if (ownerLinkedin()) {
+ <a [href]="ownerLinkedin()" target="_blank" rel="noopener">LinkedIn</a>
+ }
+ @if (ownerEmail()) {
+ <a [href]="'mailto:' + ownerEmail()">Email</a>
+ }
+ </div>
+ </div>
+ </div>
+ <div class="footer__bottom"><p>&copy; {{ currentYear }} {{ ownerName() }}. {{ i18n.t('footer.copyright') }}</p></div>
+ </footer>
+
+ @if (showScrollTop()) {
+ <button class="scroll-to-top" (click)="scrollToTop()" [attr.aria-label]="'Scroll to top'">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+ <polyline points="18 15 12 9 6 15"/>
+ </svg>
+ </button>
+ }
+ </div>
