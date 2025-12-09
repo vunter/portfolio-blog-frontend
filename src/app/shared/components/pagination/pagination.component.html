@@ -1,0 +1,48 @@
+﻿<nav class="pagination" [attr.aria-label]="i18n.t('pagination.label')">
+ <button
+ class="pagination__btn"
+ [disabled]="currentPage() === 0"
+ (click)="goToPage(0)"
+ [attr.aria-label]="i18n.t('pagination.first')"
+ >
+ ««
+ </button>
+
+ <button
+ class="pagination__btn"
+ [disabled]="currentPage() === 0"
+ (click)="goToPage(currentPage() - 1)"
+ [attr.aria-label]="i18n.t('pagination.previous')"
+ >
+ «
+ </button>
+
+ @for (page of visiblePages(); track page) {
+ <button
+ class="pagination__btn"
+ [class.pagination__btn--active]="page === currentPage()"
+ (click)="goToPage(page)"
+ [attr.aria-current]="page === currentPage() ? 'page' : null"
+ >
+ {{ page + 1 }}
+ </button>
+ }
+
+ <button
+ class="pagination__btn"
+ [disabled]="currentPage() === computedTotalPages() - 1 || computedTotalPages() === 0"
+ (click)="goToPage(currentPage() + 1)"
+ [attr.aria-label]="i18n.t('pagination.next')"
+ >
+ »
+ </button>
+
+ <button
+ class="pagination__btn"
+ [disabled]="currentPage() === computedTotalPages() - 1 || computedTotalPages() === 0"
+ (click)="goToPage(computedTotalPages() - 1)"
+ [attr.aria-label]="i18n.t('pagination.last')"
+ >
+ »»
+ </button>
+</nav>
