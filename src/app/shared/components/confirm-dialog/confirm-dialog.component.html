@@ -1,0 +1,47 @@
+﻿@if (dialogService.visible()) {
+ <div class="confirm-overlay" (click)="dialogService.cancel()" (keydown)="onTabTrap($event)" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message">
+ <div class="confirm-modal confirm-modal--{{ dialogService.options().type ?? 'info' }}" (click)="$event.stopPropagation()">
+ <div class="confirm-modal__icon">
+ @switch (dialogService.options().type ?? 'info') {
+ @case ('danger') {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <circle cx="12" cy="12" r="10"/>
+ <line x1="15" y1="9" x2="9" y2="15"/>
+ <line x1="9" y1="9" x2="15" y2="15"/>
+ </svg>
+ }
+ @case ('warning') {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+ <line x1="12" y1="9" x2="12" y2="13"/>
+ <line x1="12" y1="17" x2="12.01" y2="17"/>
+ </svg>
+ }
+ @default {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <circle cx="12" cy="12" r="10"/>
+ <line x1="12" y1="16" x2="12" y2="12"/>
+ <line x1="12" y1="8" x2="12.01" y2="8"/>
+ </svg>
+ }
+ }
+ </div>
+ <h3 class="confirm-modal__title" id="confirm-dialog-title">{{ dialogService.options().title }}</h3>
+ <p class="confirm-modal__message" id="confirm-dialog-message">{{ dialogService.options().message }}</p>
+ <div class="confirm-modal__actions">
+ <button class="btn btn-secondary" (click)="dialogService.cancel()">
+ {{ dialogService.options().cancelText ?? 'Cancel' }}
+ </button>
+ <button
+ class="btn"
+ [class.btn-danger]="dialogService.options().type === 'danger'"
+ [class.btn-warning]="dialogService.options().type === 'warning'"
+ [class.btn-primary]="dialogService.options().type === 'info' || !dialogService.options().type"
+ (click)="dialogService.accept()"
+ >
+ {{ dialogService.options().confirmText ?? 'Confirm' }}
+ </button>
+ </div>
+ </div>
+ </div>
+}
