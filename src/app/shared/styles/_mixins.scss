@@ -1,0 +1,91 @@
+// ==========================================================================
+// Shared SCSS Mixins — CSS-02: Extract duplicate patterns
+// ==========================================================================
+
+/// Section title with gradient underline accent
+/// Used across all portfolio section components
+@mixin section-title {
+  font-size: clamp(1.5rem, 2.5vw, 2rem); // CSS-07: fluid typography
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color), var(--accent-light));
+    margin: 1rem auto 0;
+    border-radius: var(--radius-sm, 2px);
+  }
+}
+
+/// Section container card
+@mixin section-container {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl, 16px);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+/// Full-width section-alt pattern (safe for mobile — CSS-06 fix)
+@mixin section-alt {
+  background: var(--section-alt-bg, var(--bg-secondary, #f8fafc));
+  margin-left: -2rem;
+  margin-right: -2rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 1rem;
+  }
+
+  .container {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+}
+
+/// Hero-style button (larger variant)
+@mixin btn-hero {
+  padding: 1rem 2.5rem;
+  border-radius: var(--radius-md, 0.5rem);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-slow, 0.3s ease);
+  border: 2px solid var(--accent-color);
+
+  @media (max-width: 768px) {
+    padding: 0.8rem 2rem;
+    font-size: var(--font-size-sm, 0.9rem);
+  }
+}
+
+/// Card base styles
+@mixin card($radius: var(--radius-lg, 12px)) {
+  background: var(--card-bg);
+  border-radius: $radius;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+/// Skill tag pill
+@mixin skill-tag {
+  background: var(--accent-tint);
+  color: var(--accent-light);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: var(--font-size-sm, 0.9rem);
+  border: 1px solid var(--accent-tint-strong);
+  transition: all var(--transition-slow, 0.3s ease);
+
+  &:hover {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+  }
+}
