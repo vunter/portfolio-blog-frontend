@@ -1,0 +1,84 @@
+﻿<div class="media-library">
+ <!-- Tabs -->
+ <div class="tabs">
+ <button class="tab" [class.active]="activeTab() === 'library'"
+ (click)="setTab('library')">
+ {{ i18n.t('admin.media.library') }}
+ </button>
+ <button class="tab" [class.active]="activeTab() === 'upload'"
+ (click)="setTab('upload')">
+ {{ i18n.t('admin.media.uploadNew') }}
+ </button>
+ </div>
+
+ <!-- Upload Tab -->
+ @if (activeTab() === 'upload') {
+ <div class="upload-section">
+ <app-media-upload
+ [purpose]="purpose() || 'GENERAL'"
+ [showUrlInput]="false"
+ [showPreview]="true"
+ (uploaded)="onNewUpload($event)"
+ />
+ </div>
+ }
+
+ <!-- Library Tab -->
+ @if (activeTab() === 'library') {
+ @if (loading()) {
+ <div class="loading">
+ <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+ </svg>
+ <span>{{ i18n.t('admin.media.loading') }}</span>
+ </div>
+ }
+
+ @if (!loading() && assets().length === 0) {
+ <div class="empty">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+ <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+ <circle cx="8.5" cy="8.5" r="1.5"/>
+ <polyline points="21 15 16 10 5 21"/>
+ </svg>
+ <p>{{ i18n.t('admin.media.noAssets') }}</p>
+ <button class="btn-primary" (click)="setTab('upload')">
+ {{ i18n.t('admin.media.uploadFirst') }}
+ </button>
+ </div>
+ }
+
+ @if (!loading() && assets().length > 0) {
+ <div class="grid">
+ @for (asset of assets(); track asset.id) {
+ <div class="asset-card" [class.selected]="selectedAssetId() === asset.id"
+ (click)="selectAsset(asset)" role="button" tabindex="0"
+ (keydown.enter)="selectAsset(asset)" (keydown.space)="selectAsset(asset)">
+ <div class="asset-thumb">
+ <img [src]="asset.url" [alt]="asset.altText || asset.originalFilename" loading="lazy" />
+ </div>
+ <div class="asset-info">
+ <span class="asset-name" [title]="asset.originalFilename">{{ asset.originalFilename }}</span>
+ <span class="asset-meta">{{ formatFileSize(asset.fileSize) }} · {{ asset.createdAt | date:'shortDate' }}</span>
+ </div>
+ <button class="btn-delete" (click)="deleteAsset(asset, $event)" title="Delete">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <polyline points="3 6 5 6 21 6"/>
+ <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+ </svg>
+ </button>
+ </div>
+ }
+ </div>
+
+ <!-- Pagination -->
+ @if (totalPages > 1) {
+ <div class="pagination">
+ <button [disabled]="currentPage() === 0" (click)="prevPage()">←</button>
+ <span>{{ currentPage() + 1 }} / {{ totalPages }}</span>
+ <button [disabled]="currentPage() >= totalPages - 1" (click)="nextPage()">→</button>
+ </div>
+ }
+ }
+ }
+</div>
