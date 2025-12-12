@@ -1,0 +1,89 @@
+﻿@if (showBanner()) {
+ <div class="cookie-backdrop" (click)="$event.stopPropagation()">
+ <div class="cookie-banner" role="dialog" aria-label="Cookie consent">
+ <div class="cookie-header">
+ <svg class="cookie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+ <circle cx="12" cy="12" r="10"/>
+ <circle cx="8" cy="9" r="1" fill="currentColor"/>
+ <circle cx="15" cy="8" r="1" fill="currentColor"/>
+ <circle cx="10" cy="14" r="1" fill="currentColor"/>
+ <circle cx="16" cy="13" r="1" fill="currentColor"/>
+ </svg>
+ <h3>{{ i18n.t('cookie.banner.title') }}</h3>
+ </div>
+
+ <p class="cookie-description">{{ i18n.t('cookie.banner.description') }}</p>
+
+ @if (showSettings()) {
+ <div class="cookie-categories">
+ <!-- Necessary — always on -->
+ <div class="cookie-category">
+ <div class="category-header">
+ <div class="category-info">
+ <span class="category-name">{{ i18n.t('cookie.category.necessary') }}</span>
+ <span class="category-badge mandatory">{{ i18n.t('cookie.category.always') }}</span>
+ </div>
+ <label class="toggle disabled">
+ <input type="checkbox" checked disabled />
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <p class="category-desc">{{ i18n.t('cookie.category.necessaryDesc') }}</p>
+ </div>
+
+ <!-- Functional -->
+ <div class="cookie-category">
+ <div class="category-header">
+ <div class="category-info">
+ <span class="category-name">{{ i18n.t('cookie.category.functional') }}</span>
+ </div>
+ <label class="toggle">
+ <input type="checkbox" [checked]="functionalEnabled()" (change)="functionalEnabled.set(!functionalEnabled())" />
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <p class="category-desc">{{ i18n.t('cookie.category.functionalDesc') }}</p>
+ </div>
+
+ <!-- Analytics -->
+ <div class="cookie-category">
+ <div class="category-header">
+ <div class="category-info">
+ <span class="category-name">{{ i18n.t('cookie.category.analytics') }}</span>
+ </div>
+ <label class="toggle">
+ <input type="checkbox" [checked]="analyticsEnabled()" (change)="analyticsEnabled.set(!analyticsEnabled())" />
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <p class="category-desc">{{ i18n.t('cookie.category.analyticsDesc') }}</p>
+ </div>
+ </div>
+ }
+
+ <div class="cookie-actions">
+ @if (showSettings()) {
+ <button class="btn btn-primary" (click)="savePreferences()">
+ {{ i18n.t('cookie.banner.savePreferences') }}
+ </button>
+ } @else {
+ <button class="btn btn-primary" (click)="acceptAll()">
+ {{ i18n.t('cookie.banner.acceptAll') }}
+ </button>
+ <button class="btn btn-outline" (click)="rejectOptional()">
+ {{ i18n.t('cookie.banner.rejectOptional') }}
+ </button>
+ <button class="btn btn-text" (click)="toggleSettings()">
+ {{ i18n.t('cookie.banner.customize') }}
+ </button>
+ }
+ </div>
+
+ <div class="cookie-footer">
+ <a class="privacy-link" (click)="goToPrivacy()" (keydown.enter)="goToPrivacy()" tabindex="0">
+ {{ i18n.t('cookie.privacyLink') }}
+ </a>
+ </div>
+ </div>
+ </div>
+}
