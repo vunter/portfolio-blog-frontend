@@ -1,0 +1,196 @@
+/* --------------------------------------------------------------------------
+   Markdown Content Styles
+   -------------------------------------------------------------------------- */
+.markdown-content {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-primary);
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+  h3 { font-size: 1.25em; }
+  h4 { font-size: 1em; }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  a {
+    color: var(--primary-color);
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--primary-hover);
+    }
+  }
+
+  ul, ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+    list-style: disc;
+  }
+
+  ol {
+    list-style: decimal;
+  }
+
+  li {
+    margin-bottom: 0.25em;
+  }
+
+  blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid var(--primary-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.875em;
+    background: var(--bg-secondary);
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm);
+  }
+
+  pre {
+    margin: 1em 0;
+    padding: 1em;
+    background: var(--code-bg);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+  }
+
+  table {
+    width: 100%;
+    margin: 1em 0;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 0.75em;
+    border: 1px solid var(--border-color);
+    text-align: left;
+  }
+
+  th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 2em 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Prism.js Code Highlighting Overrides
+   -------------------------------------------------------------------------- */
+pre[class*="language-"],
+code[class*="language-"] {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+}
+
+pre[class*="language-"] {
+  background: var(--code-bg, #1e293b) !important;
+  border: 1px solid var(--code-border, rgba(59, 130, 246, 0.2)) !important;
+  border-radius: var(--radius-md, 8px) !important;
+  padding: 1.25rem !important;
+  margin: 1em 0 !important;
+  overflow-x: auto !important;
+}
+
+/* Ensure ALL pre/code blocks are dark with light text (no theme can break this) */
+.markdown-content pre,
+.article-content pre {
+  background: var(--code-bg, #1e293b) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid var(--code-border, rgba(59, 130, 246, 0.2)) !important;
+}
+
+.markdown-content pre code,
+.article-content pre code {
+  background: none !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
+
+/* Inline code (not inside pre) */
+.markdown-content > code,
+.markdown-content p code,
+.markdown-content li code,
+.markdown-content td code,
+.markdown-content h1 code,
+.markdown-content h2 code,
+.markdown-content h3 code,
+.markdown-content h4 code,
+.article-content > code,
+.article-content p code,
+.article-content li code,
+.article-content td code,
+.article-content h1 code,
+.article-content h2 code,
+.article-content h3 code,
+.article-content h4 code {
+  background: var(--code-inline-bg, rgba(99, 102, 241, 0.1)) !important;
+  color: var(--code-inline-text, #6366f1) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 4px !important;
+  font-family: 'Fira Code', 'Consolas', monospace !important;
+  font-size: 0.875em !important;
+  border: 1px solid var(--code-border, rgba(0, 0, 0, 0.1)) !important;
+}
+
+/* Prism token colors - ensure they override everything */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: #999 !important; }
+.token.punctuation { color: #ccc !important; }
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol { color: #f8c555 !important; }
+.token.boolean,
+.token.number,
+.token.function { color: #f08d49 !important; }
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin { color: #cc99cd !important; }
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex,
+.token.variable { color: #7ec699 !important; }
+.token.operator,
+.token.entity,
+.token.url { color: #67cdcc !important; }
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted { color: #e2777a !important; }
+.token.function-name { color: #6196cc !important; }
+.token.inserted { color: #7ec699 !important; }
