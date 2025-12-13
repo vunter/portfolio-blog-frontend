@@ -1,0 +1,299 @@
+/* Dark Theme (optional) */
+[data-theme="dark"],
+.theme-dark {
+  --primary-hover: #60a5fa;
+  --primary-light: rgba(59, 130, 246, 0.2);
+  
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --card-bg: rgba(30, 41, 59, 0.5);
+  --card-bg-hover: rgba(30, 41, 59, 0.8);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+
+  --border-color: rgba(59, 130, 246, 0.2);
+  --border-hover: rgba(59, 130, 246, 0.5);
+  
+  --header-bg: rgba(15, 23, 42, 0.95);
+  --header-border: rgba(59, 130, 246, 0.2);
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.15);
+
+  /* Sidebar - Dark theme */
+  --sidebar-bg: #0f172a;
+  --sidebar-text: rgba(203, 213, 225, 0.7);
+  --sidebar-text-hover: #f1f5f9;
+  --sidebar-border: rgba(59, 130, 246, 0.15);
+  --sidebar-item-hover: rgba(59, 130, 246, 0.1);
+
+  /* Auth Pages - Dark theme */
+  --auth-gradient-from: #1e1b4b;
+  --auth-gradient-to: #312e81;
+  --auth-card-bg: #1e293b;
+  --auth-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --auth-heading: #f1f5f9;
+  --auth-subtext: #94a3b8;
+  --auth-label: #cbd5e1;
+  --auth-input-bg: #0f172a;
+  --auth-input-border: #334155;
+  --auth-input-disabled-bg: #1e293b;
+  --auth-checkbox-text: #94a3b8;
+  --auth-toggle-icon: #64748b;
+  --auth-toggle-icon-hover: #94a3b8;
+  --auth-footer-text: #64748b;
+
+  /* Forms - Dark theme */
+  --input-bg: #0f172a;
+  --input-border: #334155;
+  --input-focus-ring: rgba(59, 130, 246, 0.2);
+  --input-disabled-bg: #1e293b;
+
+  /* Cards - Dark theme */
+  --card-shadow: var(--shadow-md);
+  --card-shadow-lg: var(--shadow-lg);
+
+  /* Overlay - Dark theme */
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+  --modal-bg: #1e293b;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* Icon tints - Dark theme */
+  --primary-tint: rgba(59, 130, 246, 0.15);
+  --success-tint: rgba(34, 197, 94, 0.15);
+  --warning-tint: rgba(245, 158, 11, 0.15);
+  --info-tint: rgba(59, 130, 246, 0.15);
+  --error-tint: rgba(239, 68, 68, 0.15);
+  --secondary-tint: rgba(148, 163, 184, 0.15);
+
+  /* Icon solid colors - Dark theme */
+  --icon-primary: #818cf8;
+  --icon-success: #4ade80;
+  --icon-warning: #fbbf24;
+  --icon-info: #60a5fa;
+  --icon-error: #f87171;
+  --icon-secondary: #94a3b8;
+
+  /* Status badges - Dark theme */
+  --badge-success-bg: rgba(34, 197, 94, 0.15);
+  --badge-success-text: #4ade80;
+  --badge-warning-bg: rgba(245, 158, 11, 0.15);
+  --badge-warning-text: #fbbf24;
+  --badge-error-bg: rgba(239, 68, 68, 0.15);
+  --badge-error-text: #f87171;
+  --badge-info-bg: rgba(59, 130, 246, 0.15);
+  --badge-info-text: #60a5fa;
+  --badge-secondary-bg: rgba(148, 163, 184, 0.15);
+  --badge-secondary-text: #94a3b8;
+  --badge-pending-bg: rgba(245, 158, 11, 0.15);
+  --badge-pending-text: #fbbf24;
+
+  /* Semantic text colors for alerts - Dark theme */
+  --alert-info-text: #7dd3fc;
+  --alert-success-text: #4ade80;
+  --alert-warning-text: #fbbf24;
+  --alert-error-text: #f87171;
+
+  /* Semantic light backgrounds - Dark theme overrides */
+  --success-light: rgba(34, 197, 94, 0.15);
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --error-light: rgba(239, 68, 68, 0.15);
+  --info-light: rgba(14, 165, 233, 0.15);
+
+  /* Button variants - Dark theme */
+  --error-hover: #ef4444;
+  --danger-hover: #ef4444;
+  --success-btn-hover: #4ade80;
+
+  /* Status indicators - Dark theme */
+  --status-active: #4ade80;
+  --status-inactive: #64748b;
+
+  /* Toggle - Dark theme */
+  --toggle-off-bg: #475569;
+  --toggle-knob: #e2e8f0;
+
+  /* Code blocks - Dark theme */
+  --code-border: rgba(59, 130, 246, 0.2);
+  --code-inline-bg: rgba(59, 130, 246, 0.15);
+  --code-inline-text: #93c5fd;
+
+  /* Misc - Dark theme */
+  --focus-ring: rgba(59, 130, 246, 0.4);
+  --separator-hover: rgba(59, 130, 246, 0.05);
+  --pending-border: #fbbf24;
+  --link-delete-bg: rgba(239, 68, 68, 0.1);
+  --link-delete-text: #f87171;
+  --link-delete-border: 1px solid rgba(239, 68, 68, 0.3);
+
+  /* Accent / Blue tints - Dark theme */
+  --accent-tint: rgba(59, 130, 246, 0.15);
+  --accent-tint-border: rgba(59, 130, 246, 0.3);
+  --accent-tint-strong: rgba(59, 130, 246, 0.4);
+  --accent-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+  --accent-shadow-lg: 0 20px 40px rgba(59, 130, 246, 0.3);
+  --accent-shadow-sm: 0 4px 12px rgba(59, 130, 246, 0.2);
+  --accent-shadow-scroll: 0 4px 20px rgba(59, 130, 246, 0.5);
+  --learning-dashed-border: rgba(59, 130, 246, 0.4);
+  --learning-dashed-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.08));
+  --section-alt-bg: rgba(30, 41, 59, 0.3);
+  --danger-item-hover: rgba(239, 68, 68, 0.15);
+  --danger-item-color: #f87171;
+  --dropdown-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Light Theme */
+[data-theme="light"],
+.theme-light {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #dbeafe;
+  --primary-dark: #1d4ed8;
+  
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f8fafc;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b; /* A11Y-02: WCAG AA 4.5:1 contrast */
+
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --header-border: #e2e8f0;
+  
+  --shadow-glow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  /* Sidebar - Light theme */
+  --sidebar-bg: #1e293b;
+  --sidebar-text: rgba(255, 255, 255, 0.7);
+  --sidebar-text-hover: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-item-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-item-active: var(--primary-color);
+
+  /* Auth Pages - Light theme */
+  --auth-gradient-from: #667eea;
+  --auth-gradient-to: #764ba2;
+  --auth-card-bg: #ffffff;
+  --auth-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --auth-heading: #1a1a1a;
+  --auth-subtext: #666666;
+  --auth-label: #374151;
+  --auth-input-bg: #ffffff;
+  --auth-input-border: #e5e7eb;
+  --auth-input-disabled-bg: #f9fafb;
+  --auth-checkbox-text: #4b5563;
+  --auth-toggle-icon: #9ca3af;
+  --auth-toggle-icon-hover: #6b7280;
+  --auth-footer-text: #6b7280;
+
+  /* Forms - Light theme */
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-focus-border: var(--primary-color);
+  --input-focus-ring: rgba(59, 130, 246, 0.1);
+  --input-disabled-bg: #f9fafb;
+
+  /* Cards - Light theme */
+  --card-shadow: var(--shadow-md);
+  --card-shadow-lg: var(--shadow-lg);
+
+  /* Overlay - Light theme */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --modal-bg: #ffffff;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  /* Icon tints - Light theme */
+  --primary-tint: rgba(99, 102, 241, 0.1);
+  --success-tint: rgba(34, 197, 94, 0.1);
+  --warning-tint: rgba(245, 158, 11, 0.1);
+  --info-tint: rgba(59, 130, 246, 0.1);
+  --error-tint: rgba(239, 68, 68, 0.1);
+  --secondary-tint: rgba(107, 114, 128, 0.1);
+
+  /* Icon solid colors - Light theme */
+  --icon-primary: #6366f1;
+  --icon-success: #22c55e;
+  --icon-warning: #f59e0b;
+  --icon-info: #3b82f6;
+  --icon-error: #ef4444;
+  --icon-secondary: #6b7280;
+
+  /* Status badges - Light theme */
+  --badge-success-bg: #dcfce7;
+  --badge-success-text: #166534;
+  --badge-warning-bg: #fef3c7;
+  --badge-warning-text: #92400e;
+  --badge-error-bg: #fef2f2;
+  --badge-error-text: #dc2626;
+  --badge-info-bg: #dbeafe;
+  --badge-info-text: #1e40af;
+  --badge-secondary-bg: #e5e7eb;
+  --badge-secondary-text: #6b7280;
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #92400e;
+
+  /* Semantic text colors for alerts - Light theme */
+  --alert-info-text: #0c4a6e;
+  --alert-success-text: #065f46;
+  --alert-warning-text: #92400e;
+  --alert-error-text: #991b1b;
+
+  /* Button variants - Light theme */
+  --error-hover: #dc2626;
+  --danger-bg: #dc2626;
+  --danger-hover: #b91c1c;
+  --success-btn-bg: #22c55e;
+  --success-btn-hover: #16a34a;
+
+  /* Status indicators - Light theme */
+  --status-active: #22c55e;
+  --status-inactive: #9ca3af;
+
+  /* Toggle - Light theme */
+  --toggle-off-bg: #d1d5db;
+  --toggle-knob: #ffffff;
+
+  /* Code blocks - Light theme */
+  --code-bg: #1e293b;
+  --code-text: #e2e8f0;
+  --code-border: rgba(0, 0, 0, 0.15);
+  --code-inline-bg: rgba(99, 102, 241, 0.1);
+  --code-inline-text: #6366f1;
+
+  /* Misc - Light theme */
+  --focus-ring: rgba(59, 130, 246, 0.3);
+  --separator-hover: rgba(59, 130, 246, 0.02);
+  --dashed-border-hover: var(--primary-color);
+  --pending-border: #f59e0b;
+  --link-delete-bg: #fef2f2;
+  --link-delete-text: #dc2626;
+  --link-delete-border: 1px solid rgba(239, 68, 68, 0.2);
+
+  /* Accent / Blue tints - Light theme */
+  --accent-color: #2563eb;
+  --accent-light: #1d4ed8;
+  --accent-tint: rgba(59, 130, 246, 0.1);
+  --accent-tint-border: rgba(59, 130, 246, 0.2);
+  --accent-tint-strong: rgba(59, 130, 246, 0.3);
+  --accent-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  --accent-shadow-lg: 0 20px 40px rgba(59, 130, 246, 0.2);
+  --accent-shadow-sm: 0 4px 12px rgba(59, 130, 246, 0.15);
+  --accent-shadow-scroll: 0 4px 20px rgba(59, 130, 246, 0.4);
+  --learning-dashed-border: rgba(59, 130, 246, 0.3);
+  --learning-dashed-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.05));
+  --btn-spinner-border: rgba(255, 255, 255, 0.3);
+  --section-alt-bg: rgba(243, 244, 246, 0.8);
+  --danger-item-hover: rgba(239, 68, 68, 0.1);
+  --danger-item-color: #ef4444;
+  --dropdown-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}

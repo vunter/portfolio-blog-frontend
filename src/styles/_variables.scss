@@ -1,0 +1,226 @@
+/* ==========================================================================
+   Portfolio Blog - Global Styles
+   Angular 20 + Angular Material
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   CSS Custom Properties (Design Tokens)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Primary Colors — CSS-04: Aligned with light theme for brand consistency */
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #dbeafe;
+  --primary-dark: #1d4ed8;
+
+  /* Secondary Colors */
+  --secondary-color: #64748b;
+  --secondary-hover: #475569;
+
+  /* Semantic Colors */
+  --success-color: #10b981;
+  --success-light: #d1fae5;
+  --warning-color: #f59e0b;
+  --warning-light: #fef3c7;
+  --error-color: #ef4444;
+  --error-light: #fee2e2;
+  --info-color: #0ea5e9;
+  --info-light: #e0f2fe;
+
+  /* Neutral Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b; /* A11Y-02: WCAG AA 4.5:1 contrast ratio on white */
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+
+  /* Header */
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --header-border: #e2e8f0;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Typography */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Andale Mono', monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  /* Layout */
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --container-max-width: 1200px;
+
+  /* Sidebar */
+  --sidebar-bg: #1e293b;
+  --sidebar-text: rgba(255, 255, 255, 0.7);
+  --sidebar-text-hover: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-item-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-item-active: var(--primary-color);
+
+  /* Auth Pages */
+  --auth-gradient-from: #667eea;
+  --auth-gradient-to: #764ba2;
+  --auth-card-bg: #ffffff;
+  --auth-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --auth-heading: #1a1a1a;
+  --auth-subtext: #666666;
+  --auth-label: #374151;
+  --auth-input-bg: #ffffff;
+  --auth-input-border: #e5e7eb;
+  --auth-input-disabled-bg: #f9fafb;
+  --auth-checkbox-text: #4b5563;
+  --auth-toggle-icon: #9ca3af;
+  --auth-toggle-icon-hover: #6b7280;
+  --auth-footer-text: #6b7280;
+
+  /* Forms (global) */
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-focus-border: var(--primary-color);
+  --input-focus-ring: rgba(99, 102, 241, 0.1);
+  --input-disabled-bg: #f9fafb;
+
+  /* Cards */
+  --card-shadow: var(--shadow-md);
+  --card-shadow-lg: var(--shadow-lg);
+
+  /* Overlay */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --modal-bg: #ffffff;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  /* Icon tints (background behind icons) */
+  --primary-tint: rgba(99, 102, 241, 0.1);
+  --success-tint: rgba(34, 197, 94, 0.1);
+  --warning-tint: rgba(245, 158, 11, 0.1);
+  --info-tint: rgba(59, 130, 246, 0.1);
+  --error-tint: rgba(239, 68, 68, 0.1);
+  --secondary-tint: rgba(107, 114, 128, 0.1);
+
+  /* Icon solid colors */
+  --icon-primary: #6366f1;
+  --icon-success: #22c55e;
+  --icon-warning: #f59e0b;
+  --icon-info: #3b82f6;
+  --icon-error: #ef4444;
+  --icon-secondary: #6b7280;
+
+  /* Status badges (inline) */
+  --badge-success-bg: #dcfce7;
+  --badge-success-text: #166534;
+  --badge-warning-bg: #fef3c7;
+  --badge-warning-text: #92400e;
+  --badge-error-bg: #fef2f2;
+  --badge-error-text: #dc2626;
+  --badge-info-bg: #dbeafe;
+  --badge-info-text: #1e40af;
+  --badge-secondary-bg: #e5e7eb;
+  --badge-secondary-text: #6b7280;
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #92400e;
+
+  /* Semantic text colors for alerts */
+  --alert-info-text: #0c4a6e;
+  --alert-success-text: #065f46;
+  --alert-warning-text: #92400e;
+  --alert-error-text: #991b1b;
+
+  /* Button variants */
+  --error-hover: #dc2626;
+  --danger-bg: #dc2626;
+  --danger-hover: #b91c1c;
+  --success-btn-bg: #22c55e;
+  --success-btn-hover: #16a34a;
+
+  /* Status indicators */
+  --status-active: #22c55e;
+  --status-inactive: #9ca3af;
+
+  /* Toggle */
+  --toggle-off-bg: #d1d5db;
+  --toggle-knob: #ffffff;
+
+  /* Code blocks */
+  --code-bg: #1e293b;
+  --code-text: #e2e8f0;
+  --code-border: rgba(0, 0, 0, 0.15);
+  --code-inline-bg: rgba(99, 102, 241, 0.1);
+  --code-inline-text: #6366f1;
+
+  /* Misc */
+  --focus-ring: rgba(99, 102, 241, 0.3);
+  --separator-hover: rgba(99, 102, 241, 0.02);
+  --dashed-border-hover: var(--primary-color);
+  --pending-border: #f59e0b;
+  --link-delete-bg: #fef2f2;
+  --link-delete-text: #dc2626;
+  --link-delete-border: 1px solid rgba(239, 68, 68, 0.2);
+
+  /* Accent / Blue tints (used in public pages, home) */
+  --accent-color: #3b82f6;
+  --accent-light: #60a5fa;
+  --accent-tint: rgba(59, 130, 246, 0.1);
+  --accent-tint-border: rgba(59, 130, 246, 0.2);
+  --accent-tint-strong: rgba(59, 130, 246, 0.3);
+  --accent-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  --accent-shadow-lg: 0 20px 40px rgba(59, 130, 246, 0.2);
+  --accent-shadow-sm: 0 4px 12px rgba(59, 130, 246, 0.15);
+  --accent-shadow-scroll: 0 4px 20px rgba(59, 130, 246, 0.4);
+  --learning-dashed-border: rgba(59, 130, 246, 0.3);
+  --learning-dashed-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.05));
+  --btn-spinner-border: rgba(255, 255, 255, 0.3);
+  --section-alt-bg: rgba(243, 244, 246, 0.8);
+  --danger-item-hover: rgba(239, 68, 68, 0.1);
+  --danger-item-color: #ef4444;
+  --dropdown-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
