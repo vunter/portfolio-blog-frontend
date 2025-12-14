@@ -1,0 +1,114 @@
+﻿<div class="article-list-page">
+ <header class="page-header">
+ <h1>{{ i18n.t('blog.title') }}</h1>
+ <p>{{ i18n.t('blog.subtitle') }}</p>
+ </header>
+
+ <div class="date-filter">
+ <label>
+ {{ i18n.t('blog.dateFilter.from') }}
+ <input type="date" [lang]="i18n.language()" [value]="dateFrom()" (change)="onDateFromChange($event)" />
+ </label>
+ <label>
+ {{ i18n.t('blog.dateFilter.to') }}
+ <input type="date" [lang]="i18n.language()" [value]="dateTo()" (change)="onDateToChange($event)" />
+ </label>
+ @if (dateFrom() || dateTo()) {
+ <button class="date-filter__clear" (click)="clearDateFilter()">{{ i18n.t('blog.dateFilter.clear') }}</button>
+ }
+ </div>
+
+ <div class="content-wrapper">
+ <main class="main-content">
+ @if (loading()) {
+ <div class="articles-grid">
+ @for (i of [1,2,3,4,5,6]; track i) {
+ <app-skeleton variant="card" />
+ }
+ </div>
+ } @else if (error()) {
+ <app-empty-state
+ [title]="i18n.t('blog.error.title')"
+ [message]="i18n.t('blog.error.message')"
+ >
+ <button actions class="retry-btn" (click)="loadArticles(currentPage())">{{ i18n.t('blog.error.retry') }}</button>
+ </app-empty-state>
+ } @else if (articles().length === 0) {
+ <app-empty-state
+ [title]="i18n.t('blog.noArticles')"
+ [message]="i18n.t('blog.noArticlesHint')"
+ />
+ } @else {
+ <div class="articles-grid">
+ @for (article of articles(); track article.id) {
+ <app-article-card [article]="article" />
+ }
+ </div>
+
+ @if (totalPages() > 1) {
+ <app-pagination
+ [currentPage]="currentPage()"
+ [totalPages]="totalPages()"
+ (pageChange)="onPageChange($event)"
+ />
+ }
+ }
+ </main>
+
+ <aside class="sidebar">
+ <section class="sidebar-section">
+ <h3>Tags</h3>
+ @if (tagsLoading()) {
+ <app-loading-spinner [inline]="true" [size]="24" />
+ } @else {
+ <div class="tags-cloud">
+ @for (tag of tags(); track tag.id) {
+ <a
+ [routerLink]="['/blog/tag', tag.slug]"
+ class="tag-chip"
+ [style.background-color]="tag.color || '#6366f1'"
+ >
+ {{ tag.name }}
+ <span class="tag-chip__count">{{ tag.articleCount }}</span>
+ </a>
+ }
+ </div>
+ }
+ </section>
+
+ <section class="sidebar-section">
+ <h3>{{ i18n.t('blog.newsletter.title') }}</h3>
+ <p>{{ i18n.t('blog.newsletter.description') }}</p>
+ <form class="newsletter-form" (submit)="subscribeNewsletter($event)">
+ <input
+ type="email"
+ [placeholder]="i18n.t('blog.newsletter.placeholder')"
+ required
+ [(ngModel)]="newsletterEmail"
+ name="newsletterEmail"
+ />
+ <button type="submit" [disabled]="newsletterSubmitting()">{{ newsletterSubmitting() ? i18n.t('blog.newsletter.subscribing') : i18n.t('blog.newsletter.subscribe') }}</button>
+ </form>
+ </section>
+
+ @if (popularArticles().length > 0) {
+ <section class="sidebar-section">
+ <h3>{{ i18n.t('blog.popular') }}</h3>
+ <ul class="popular-list">
+ @for (article of popularArticles(); track article.id) {
+ <li>
+ <a [routerLink]="['/blog', article.slug]" class="popular-item">
+ <span class="popular-item__title">{{ article.title }}</span>
+ <span class="popular-item__views">
+ <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3C4.5 3 1.7 5.3 1 8c.7 2.7 3.5 5 7 5s6.3-2.3 7-5c-.7-2.7-3.5-5-7-5zm0 8a3 3 0 110-6 3 3 0 010 6z"/></svg>
+ {{ article.viewCount }}
+ </span>
+ </a>
+ </li>
+ }
+ </ul>
+ </section>
+ }
+ </aside>
+ </div>
+</div>
