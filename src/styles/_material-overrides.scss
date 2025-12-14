@@ -1,0 +1,47 @@
+/* --------------------------------------------------------------------------
+   Angular Material Custom Theme Overrides
+   -------------------------------------------------------------------------- */
+.mat-mdc-snack-bar-container {
+  &.success-snackbar .mdc-snackbar__surface {
+    background: var(--success-color);
+  }
+
+  &.error-snackbar .mdc-snackbar__surface {
+    background: var(--error-color);
+  }
+
+  &.warning-snackbar .mdc-snackbar__surface {
+    background: var(--warning-color);
+  }
+
+  &.info-snackbar .mdc-snackbar__surface {
+    background: var(--info-color);
+  }
+}
+
+/* Angular Material Form Field Customizations */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  font-size: var(--font-size-xs);
+}
+
+/* Angular Material Button Customizations */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  border-radius: var(--radius-md) !important;
+}
+
+/* Angular Material Card Customizations */
+.mat-mdc-card {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Angular Material Dialog Customizations */
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: var(--radius-lg);
+}
