@@ -1,0 +1,93 @@
+﻿<div class="search-page">
+ <header class="search-header">
+ <h1>{{ i18n.t('search.title') }}</h1>
+ <div class="search-box">
+ <svg
+ class="search-icon"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ >
+ <circle cx="11" cy="11" r="8" />
+ <path d="m21 21-4.35-4.35" />
+ </svg>
+ <input
+ type="text"
+ [(ngModel)]="searchQuery"
+ (ngModelChange)="onSearchChange($event)"
+ [placeholder]="i18n.t('search.placeholder')"
+ class="search-input"
+ autocomplete="off"
+ />
+ @if (searchQuery()) {
+ <button
+ type="button"
+ class="clear-btn"
+ (click)="clearSearch()"
+ [attr.aria-label]="i18n.t('search.clearLabel')"
+ >
+ 
+ </button>
+ }
+
+ @if (showSuggestions() && suggestions().length > 0) {
+ <div class="suggestions" role="listbox" [attr.aria-label]="i18n.t('search.suggestions')">
+ @for (suggestion of suggestions(); track suggestion.text) {
+ <button
+ type="button"
+ class="suggestion-item"
+ role="option"
+ (click)="selectSuggestion(suggestion)"
+ >
+ <span class="suggestion-type">{{ suggestion.type }}</span>
+ <span class="suggestion-value">{{ suggestion.text }}</span>
+ </button>
+ }
+ </div>
+ }
+ </div>
+ </header>
+
+ <main class="search-results">
+ @if (loading()) {
+ <app-loading-spinner [inline]="true" [message]="i18n.t('search.loading')" />
+ } @else if (hasSearched() && results().length === 0) {
+ <app-empty-state
+ icon="search"
+ [title]="i18n.t('search.noResults')"
+ [message]="i18n.t('search.noResultsHint')"
+ >
+ <button class="btn btn-primary" (click)="clearSearch()">
+ {{ i18n.t('search.clear') }}
+ </button>
+ </app-empty-state>
+ } @else if (results().length > 0) {
+ <div class="results-info">
+ <span>{{ totalElements() }} {{ i18n.t('blog.search.results') }} "{{ currentQuery() }}"</span>
+ </div>
+ <div class="results-grid">
+ @for (article of results(); track article.id) {
+ <app-article-card [article]="article" />
+ }
+ </div>
+ @if (totalPages() > 1) {
+ <app-pagination
+ [currentPage]="currentPage()"
+ [totalPages]="totalPages()"
+ [totalElements]="totalElements()"
+ [pageSize]="pageSize()"
+ (pageChange)="onPageChange($event)"
+ />
+ }
+ } @else {
+ <div class="search-suggestions">
+ <h2>{{ i18n.t('search.suggestions') }}</h2>
+ <ul>
+ <li>{{ i18n.t('search.suggestion1') }}</li>
+ <li>{{ i18n.t('search.suggestion2') }}</li>
+ <li>{{ i18n.t('search.suggestion3') }}</li>
+ </ul>
+ </div>
+ }
+ </main>
+</div>
