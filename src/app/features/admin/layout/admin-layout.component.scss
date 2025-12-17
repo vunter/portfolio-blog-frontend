@@ -1,0 +1,318 @@
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--color-primary, #2563eb);
+      color: #fff;
+      padding: 8px 16px;
+      z-index: 1000;
+      transition: top 0.2s;
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 0 0 4px 0;
+
+      &:focus {
+        top: 0;
+      }
+    }
+
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg-secondary, #f3f4f6);
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text-hover, white);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: width 0.3s ease, background 0.3s;
+
+      .sidebar-collapsed & {
+        width: 72px;
+      }
+    }
+
+    .sidebar__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    .sidebar__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--sidebar-text-hover, white);
+      font-weight: 700;
+      font-size: 1.25rem;
+
+      .logo-icon {
+        display: flex;
+        align-items: center;
+        font-size: 0;
+        line-height: 0;
+      }
+    }
+
+    .sidebar__toggle {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--sidebar-item-hover);
+      border-radius: 8px;
+      color: var(--sidebar-text-hover, white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background: var(--sidebar-item-hover);
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+        stroke-width: 2;
+      }
+    }
+
+    .sidebar__nav {
+      flex: 1;
+      min-height: 0;
+      padding: 1rem 0.75rem;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: 0.25rem;
+
+      &:hover {
+        background: var(--sidebar-item-hover);
+        color: var(--sidebar-text-hover, white);
+      }
+
+      &.active {
+        background: var(--sidebar-item-active, var(--primary-color, #6366f1));
+        color: white;
+      }
+
+      .sidebar-collapsed & {
+        justify-content: center;
+        padding: 0.75rem;
+      }
+    }
+
+    .nav-item__icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 100%;
+        height: 100%;
+        stroke-width: 2;
+      }
+    }
+
+    .nav-item__label {
+      font-size: 0.9375rem;
+      white-space: nowrap;
+    }
+
+    .sidebar__footer {
+      padding: 1rem 0.75rem;
+      border-top: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+
+      .sidebar-collapsed & {
+        justify-content: center;
+      }
+    }
+
+    .user-info__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--primary-color, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+      color: white;
+    }
+
+    .user-info__details {
+      overflow: hidden;
+    }
+
+    .user-info__name {
+      display: block;
+      font-weight: 500;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-info__role {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--sidebar-text);
+      text-transform: capitalize;
+    }
+
+    .back-link {
+      border-top: 1px solid var(--sidebar-border);
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .logout-link {
+      margin-top: 0.25rem;
+      border: none;
+      background: none;
+      font-size: inherit;
+      cursor: pointer;
+      width: 100%;
+    }
+    .logout-link:hover {
+      background: var(--link-delete-bg) !important;
+      color: var(--error-color) !important;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+
+      .sidebar-collapsed & {
+        margin-left: 72px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 72px;
+      }
+
+      .sidebar__toggle {
+        display: none;
+      }
+
+      .main-content {
+        margin-left: 72px;
+      }
+
+      .logo-text,
+      .nav-item__label,
+      .user-info__details {
+        display: none !important;
+      }
+
+      .nav-item,
+      .user-info {
+        justify-content: center;
+      }
+    }
+
+    .lang-toggle {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      justify-content: center;
+
+      &.collapsed {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .lang-btn {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--sidebar-border);
+      background: transparent;
+      color: var(--sidebar-text);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: var(--sidebar-item-hover);
+        color: var(--sidebar-text-hover, white);
+      }
+
+      &.active {
+        background: var(--primary-color, #6366f1);
+        color: white;
+        border-color: var(--primary-color, #6366f1);
+      }
+    }
+
+    // INC-03: Connection lost banner
+    .connection-lost-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 1rem;
+      background: var(--warning-bg, #fef3cd);
+      color: var(--warning-text, #856404);
+      border: 1px solid var(--warning-border, #ffc107);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .reconnect-btn {
+      margin-left: auto;
+      padding: 0.25rem 0.75rem;
+      background: var(--warning-text, #856404);
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
