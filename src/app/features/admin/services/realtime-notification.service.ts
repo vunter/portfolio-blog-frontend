@@ -1,0 +1,144 @@
+import { Injectable, signal, computed, NgZone, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../../environments/environment';
+import { NotificationService } from '../../../core/services/notification.service';
+import { I18nService } from '../../../core/services/i18n.service';
+
+// TODO F-331: Extract maxReconnectAttempts and baseDelay to InjectionToken<RealtimeConfig>
+
+export interface ServerNotificationEvent {
+  type: string;
+  action: string;
+  title: string;
+  data: Record<string, unknown>;
+  timestamp: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class RealtimeNotificationService {
+  private readonly zone = inject(NgZone);
+  private readonly notifications = inject(NotificationService);
+  private readonly i18n = inject(I18nService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private eventSource: EventSource | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 10;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private readonly _connected = signal(false);
+  private readonly _events = signal<ServerNotificationEvent[]>([]);
+  private readonly _unreadCount = signal(0);
+
+  readonly connected = this._connected.asReadonly();
+  readonly events = this._events.asReadonly();
+  readonly unreadCount = this._unreadCount.asReadonly();
+  readonly hasUnread = computed(() => this._unreadCount() > 0);
+
+  constructor() {
+    // CRIT-02: Use DestroyRef for cleanup instead of OnDestroy
+    this.destroyRef.onDestroy(() => this.disconnect());
+  }
+
+  connect(): void {
+    if (this.eventSource || !isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const url = `${environment.apiUrl}/${environment.apiVersion}/admin/notifications/stream`;
+
+    this.zone.runOutsideAngular(() => {
+      this.eventSource = new EventSource(url, { withCredentials: true });
+
+      this.eventSource.onopen = () => {
+        this.zone.run(() => {
+          this._connected.set(true);
+          this.reconnectAttempts = 0;
+        });
+      };
+
+      this.eventSource.addEventListener('article', (e: MessageEvent) => {
+        this.handleEvent(e);
+      });
+
+      this.eventSource.addEventListener('comment', (e: MessageEvent) => {
+        this.handleEvent(e);
+      });
+
+      this.eventSource.addEventListener('subscriber', (e: MessageEvent) => {
+        this.handleEvent(e);
+      });
+
+      this.eventSource.addEventListener('contact', (e: MessageEvent) => {
+        this.handleEvent(e);
+      });
+
+      this.eventSource.addEventListener('auth', (e: MessageEvent) => {
+        this.handleEvent(e);
+      });
+
+      this.eventSource.onerror = () => {
+        this.zone.run(() => {
+          this._connected.set(false);
+          this.eventSource?.close();
+          this.eventSource = null;
+          this.scheduleReconnect();
+        });
+      };
+    });
+  }
+
+  disconnect(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    this._connected.set(false);
+    this.reconnectAttempts = 0;
+  }
+
+  markAllRead(): void {
+    this._unreadCount.set(0);
+  }
+
+  clearEvents(): void {
+    this._events.set([]);
+    this._unreadCount.set(0);
+  }
+
+  private handleEvent(event: MessageEvent): void {
+    try {
+      const data: ServerNotificationEvent = JSON.parse(event.data);
+      this.zone.run(() => {
+        this._events.update(current => [data, ...current].slice(0, 50));
+        this._unreadCount.update(c => Math.min(c + 1, 99));
+        this.notifications.info(data.title);
+      });
+    } catch {
+      // Ignore malformed events
+    }
+  }
+
+  // INC-11: Signal indicating max reconnection attempts exhausted
+  private readonly _connectionLost = signal(false);
+  readonly connectionLost = this._connectionLost.asReadonly();
+
+  private scheduleReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      // INC-11: Notify user that real-time connection was lost
+      this._connectionLost.set(true);
+      this.notifications.error(
+        this.i18n.t('admin.notifications.connectionLost')
+      );
+      return;
+    }
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    this.reconnectAttempts++;
+    this.reconnectTimer = setTimeout(() => this.connect(), delay);
+  }
+}
