@@ -1,0 +1,230 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadDashboardData()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="dashboard">
+ <header class="dashboard__header">
+ <h1>{{ i18n.t('admin.dashboard.title') }}</h1>
+ <p>{{ i18n.t('admin.dashboard.welcome') }}</p>
+ </header>
+
+ <!-- Stats Grid -->
+ <section class="stats-grid">
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--primary">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+ <polyline points="14 2 14 8 20 8"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.totalArticles || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.totalArticles') }}</span>
+ </div>
+ <a routerLink="/admin/articles" class="stat-card__link">{{ i18n.t('admin.dashboard.viewAll') }}</a>
+ </div>
+
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--success">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+ <polyline points="22 4 12 14.01 9 11.01"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.publishedArticles || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.published') }}</span>
+ </div>
+ </div>
+
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--warning">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M12 20h9"/>
+ <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.draftArticles || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.drafts') }}</span>
+ </div>
+ </div>
+
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--info">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+ <circle cx="12" cy="12" r="3"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ formatNumber(stats()?.totalViews || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.views') }}</span>
+ </div>
+ </div>
+
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--secondary">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.totalComments || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.comments') }}</span>
+ </div>
+ @if (stats()?.pendingComments) {
+ <span class="stat-card__badge">{{ stats()?.pendingComments }} {{ i18n.t('admin.dashboard.pending') }}</span>
+ }
+ </div>
+
+ @if (authStore.isAdmin()) {
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--primary">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+ <circle cx="9" cy="7" r="4"/>
+ <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+ <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.totalUsers || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.users') }}</span>
+ </div>
+ <a routerLink="/admin/users" class="stat-card__link">{{ i18n.t('admin.dashboard.manage') }}</a>
+ </div>
+ }
+
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--success">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+ <line x1="7" y1="7" x2="7.01" y2="7"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.totalTags || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.tags') }}</span>
+ </div>
+ <a routerLink="/admin/tags" class="stat-card__link">{{ i18n.t('admin.dashboard.manage') }}</a>
+ </div>
+
+ @if (authStore.isAdmin()) {
+ <div class="stat-card">
+ <div class="stat-card__icon stat-card__icon--info">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+ <polyline points="22,6 12,13 2,6"/>
+ </svg>
+ </div>
+ <div class="stat-card__content">
+ <span class="stat-card__value">{{ stats()?.newsletterSubscribers || 0 }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.dashboard.subscribers') }}</span>
+ </div>
+ <a routerLink="/admin/newsletter" class="stat-card__link">{{ i18n.t('admin.dashboard.viewList') }}</a>
+ </div>
+ }
+ </section>
+
+ <!-- Quick Actions -->
+ <section class="quick-actions">
+ <h2>{{ i18n.t('admin.dashboard.quickActions') }}</h2>
+ <div class="actions-grid">
+ <a routerLink="/admin/articles/new" class="action-card">
+ <div class="action-card__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <line x1="12" y1="5" x2="12" y2="19"/>
+ <line x1="5" y1="12" x2="19" y2="12"/>
+ </svg>
+ </div>
+ <span>{{ i18n.t('admin.dashboard.newArticle') }}</span>
+ </a>
+ <a routerLink="/resume" class="action-card">
+ <div class="action-card__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+ <polyline points="14 2 14 8 20 8"/>
+ <line x1="16" y1="13" x2="8" y2="13"/>
+ <line x1="16" y1="17" x2="8" y2="17"/>
+ <polyline points="10 9 9 9 8 9"/>
+ </svg>
+ </div>
+ <span>{{ i18n.t('admin.dashboard.editResume') }}</span>
+ </a>
+ <a routerLink="/admin/tags" class="action-card">
+ <div class="action-card__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+ <line x1="7" y1="7" x2="7.01" y2="7"/>
+ </svg>
+ </div>
+ <span>{{ i18n.t('admin.dashboard.newTag') }}</span>
+ </a>
+ <a routerLink="/admin/comments" class="action-card">
+ <div class="action-card__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+ </svg>
+ </div>
+ <span>{{ i18n.t('admin.dashboard.moderateComments') }}</span>
+ </a>
+ <a routerLink="/admin/analytics" class="action-card">
+ <div class="action-card__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <line x1="18" y1="20" x2="18" y2="10"/>
+ <line x1="12" y1="20" x2="12" y2="4"/>
+ <line x1="6" y1="20" x2="6" y2="14"/>
+ </svg>
+ </div>
+ <span>{{ i18n.t('admin.dashboard.viewAnalytics') }}</span>
+ </a>
+ </div>
+ </section>
+
+ <!-- Recent Activity -->
+ <section class="recent-activity">
+ <h2>{{ i18n.t('admin.dashboard.recentActivity') }}</h2>
+ <div class="activity-list">
+ @for (activity of recentActivity(); track activity.id) {
+ <div class="activity-item">
+ <div class="activity-item__icon" [class]="'activity-item__icon--' + activity.type">
+ @switch (activity.type) {
+ @case ('article') {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+ </svg>
+ }
+ @case ('comment') {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+ </svg>
+ }
+ @case ('user') {
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+ <circle cx="12" cy="7" r="4"/>
+ </svg>
+ }
+ }
+ </div>
+ <div class="activity-item__content">
+ <p class="activity-item__text">
+ <strong>{{ activity.action }}</strong>: {{ activity.title }}
+ </p>
+ <span class="activity-item__time">{{ formatDate(activity.createdAt) }}</span>
+ </div>
+ </div>
+ } @empty {
+ <p class="no-activity">{{ i18n.t('admin.dashboard.noActivity') }}</p>
+ }
+ </div>
+ </section>
+</div>
+}
