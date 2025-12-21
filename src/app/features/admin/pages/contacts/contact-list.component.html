@@ -1,0 +1,155 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadMessages()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="contact-list">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.contacts.title') }}</h1>
+ </div>
+ </header>
+
+ <div class="filters">
+ <input
+ type="search"
+ class="search-input"
+ [placeholder]="i18n.t('admin.common.search')"
+ [ngModel]="searchQuery()"
+ (ngModelChange)="searchQuery.set($event)"
+ />
+ <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+ <option value="">{{ i18n.t('admin.common.allStatuses') }}</option>
+ <option value="unread">{{ i18n.t('admin.contacts.unread') }}</option>
+ <option value="read">{{ i18n.t('admin.contacts.read') }}</option>
+ </select>
+ </div>
+
+ <div class="table-container">
+ <table class="data-table">
+ <thead>
+ <tr>
+ <th>{{ i18n.t('common.name') }}</th>
+ <th>{{ i18n.t('common.email') }}</th>
+ <th>{{ i18n.t('common.title') }}</th>
+ <th class="th-date" (click)="toggleSortOrder()">
+ <span class="sortable-header">
+ {{ i18n.t('admin.newsletter.subscribedAt').split(' ')[0] || 'Date' }}
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="sort-icon">
+ @if (sortAsc()) {
+ <polyline points="18 15 12 9 6 15"/>
+ } @else {
+ <polyline points="6 9 12 15 18 9"/>
+ }
+ </svg>
+ </span>
+ </th>
+ <th>{{ i18n.t('common.status') }}</th>
+ <th>{{ i18n.t('common.actions') }}</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (msg of filteredMessages(); track msg.id) {
+ <tr
+ class="message-row"
+ [class.unread]="!msg.read"
+ (click)="toggleExpand(msg.id)"
+ >
+ <td class="td-name">{{ msg.name }}</td>
+ <td>
+ <a [href]="'mailto:' + msg.email" class="email-link" (click)="$event.stopPropagation()">
+ {{ msg.email }}
+ </a>
+ </td>
+ <td>{{ msg.subject }}</td>
+ <td>{{ formatDate(msg.createdAt) }}</td>
+ <td>
+ @if (!msg.read) {
+ <span class="status-badge status-badge--unread">
+ {{ i18n.t('admin.contacts.unread') }}
+ </span>
+ }
+ </td>
+ <td class="td-actions" (click)="$event.stopPropagation()">
+ @if (!msg.read) {
+ <button
+ class="action-btn action-btn--primary"
+ (click)="markAsRead(msg)"
+ [title]="i18n.t('admin.contacts.markRead')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="20 6 9 17 4 12"/>
+ </svg>
+ </button>
+ }
+ <button
+ class="action-btn action-btn--danger"
+ (click)="deleteMessage(msg)"
+ [title]="i18n.t('admin.contacts.delete')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="3 6 5 6 21 6"/>
+ <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+ </svg>
+ </button>
+ </td>
+ </tr>
+ @if (expandedId() === msg.id) {
+ <tr class="expanded-row">
+ <td colspan="6">
+ <div class="message-body">
+ <p>{{ msg.message }}</p>
+ </div>
+ </td>
+ </tr>
+ }
+ } @empty {
+ <tr>
+ <td colspan="6" class="empty-message">
+ {{ i18n.t('admin.contacts.noMessages') }}
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+
+ @if (totalPages() > 1) {
+ <div class="pagination">
+ <button
+ class="pagination-btn"
+ [disabled]="currentPage() === 0"
+ (click)="goToPage(0)"
+ [title]="i18n.t('common.first')"
+ >«</button>
+ <button
+ class="pagination-btn"
+ [disabled]="currentPage() === 0"
+ (click)="goToPage(currentPage() - 1)"
+ [title]="i18n.t('common.previous')"
+ >‹</button>
+ <span class="pagination-info">
+ {{ currentPage() + 1 }} / {{ totalPages() }}
+ <small>({{ totalElements() }})</small>
+ </span>
+ <button
+ class="pagination-btn"
+ [disabled]="currentPage() >= totalPages() - 1"
+ (click)="goToPage(currentPage() + 1)"
+ [title]="i18n.t('common.next')"
+ >›</button>
+ <button
+ class="pagination-btn"
+ [disabled]="currentPage() >= totalPages() - 1"
+ (click)="goToPage(totalPages() - 1)"
+ [title]="i18n.t('common.last')"
+ >»</button>
+ </div>
+ }
+</div>
+}

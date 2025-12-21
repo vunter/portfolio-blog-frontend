@@ -1,0 +1,218 @@
+.contact-list {
+  max-width: 1100px;
+}
+
+select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--card-bg, white);
+  color: var(--text-primary, #1a1a1a);
+  &:focus { outline: none; border-color: var(--primary-color, #6366f1); }
+}
+
+.table-container {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+  }
+
+  th {
+    background: var(--bg-secondary, #f9fafb);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary, #666);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.th-date {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sort-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+.message-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: var(--bg-secondary, #f9fafb);
+  }
+
+  &.unread {
+    background: var(--unread-bg, rgba(99, 102, 241, 0.06));
+    font-weight: 500;
+
+    &:hover {
+      background: var(--unread-bg-hover, rgba(99, 102, 241, 0.1));
+    }
+  }
+}
+
+.td-name {
+  white-space: nowrap;
+}
+
+.email-link {
+  color: var(--primary-color, #6366f1);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &--unread {
+    background: var(--badge-warning-bg, #fef3c7);
+    color: var(--badge-warning-text, #92400e);
+  }
+}
+
+.td-actions {
+  white-space: nowrap;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--bg-secondary, #f3f4f6);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  margin-right: 0.25rem;
+  transition: all 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
+
+  &--primary:hover {
+    background: var(--primary-color, #6366f1);
+    color: white;
+  }
+
+  &--danger:hover {
+    background: var(--link-delete-bg);
+    color: var(--link-delete-text);
+  }
+}
+
+.expanded-row td {
+  padding: 0 !important;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.message-body {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-secondary, #f9fafb);
+  border-top: 1px solid var(--border-color, #e5e7eb);
+
+  p {
+    margin: 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-size: 0.9375rem;
+    color: var(--text-primary, #1a1a1a);
+  }
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--text-secondary, #666);
+  padding: 3rem !important;
+}
+
+@media (max-width: 768px) {
+  .data-table th:nth-child(2),
+  .data-table td:nth-child(2) {
+    display: none;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, white);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-primary, #1a1a1a);
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-color, #6366f1);
+    color: white;
+    border-color: var(--primary-color, #6366f1);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+  padding: 0 0.75rem;
+
+  small {
+    color: var(--text-secondary, #999);
+    margin-left: 0.25rem;
+  }
+}
