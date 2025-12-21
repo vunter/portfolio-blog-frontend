@@ -1,0 +1,84 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadComments()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="comment-list">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.comments.title') }}</h1>
+ <p>{{ i18n.t('admin.comments.subtitle') }}</p>
+ </div>
+ </header>
+
+ <div class="filters">
+ <input
+ type="search"
+ class="search-input"
+ [placeholder]="i18n.t('admin.common.search')"
+ [ngModel]="searchQuery()"
+ (ngModelChange)="searchQuery.set($event)"
+ />
+ <select [(ngModel)]="statusFilter" (ngModelChange)="loadComments()">
+ <option value="">{{ i18n.t('common.all') }}</option>
+ <option value="PENDING">{{ i18n.t('admin.comments.pending') }}</option>
+ <option value="APPROVED">{{ i18n.t('admin.comments.approved') }}</option>
+ <option value="REJECTED">{{ i18n.t('admin.comments.rejected') }}</option>
+ </select>
+ </div>
+
+ <div class="comments-container">
+ @for (comment of filteredComments(); track comment.id) {
+ <div class="comment-card" [class.comment-card--pending]="comment.status === 'PENDING'">
+ <div class="comment-card__header">
+ <div class="comment-card__author">
+ <div class="avatar">{{ comment.authorName?.charAt(0) || 'A' }}</div>
+ <div>
+ <span class="author-name">{{ comment.authorName }}</span>
+ <span class="author-email">{{ comment.authorEmail }}</span>
+ </div>
+ </div>
+ <span class="status-badge" [class]="'status-badge--' + comment.status.toLowerCase()">
+ {{ getStatusLabel(comment.status) }}
+ </span>
+ </div>
+ <p class="comment-card__content">{{ comment.content }}</p>
+ <div class="comment-card__footer">
+ <a [href]="'/blog/' + comment.articleSlug" target="_blank" class="article-link">
+ {{ comment.articleTitle }}
+ </a>
+ <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+ </div>
+ <div class="comment-card__actions">
+ @if (comment.status === 'PENDING') {
+ <button class="btn btn-success" (click)="approve(comment)">{{ i18n.t('admin.comments.approve') }}</button>
+ <button class="btn btn-danger" (click)="reject(comment)">{{ i18n.t('admin.comments.reject') }}</button>
+ } @else if (comment.status === 'APPROVED') {
+ <button class="btn btn-secondary" (click)="reject(comment)">{{ i18n.t('admin.comments.reject') }}</button>
+ } @else {
+ <button class="btn btn-secondary" (click)="approve(comment)">{{ i18n.t('admin.comments.approve') }}</button>
+ }
+ <button class="btn btn-danger-outline" (click)="deleteComment(comment)">{{ i18n.t('common.delete') }}</button>
+ </div>
+ </div>
+ } @empty {
+ <p class="no-comments">{{ i18n.t('admin.comments.noComments') }}</p>
+ }
+ </div>
+
+ @if (totalPages() > 1) {
+ <app-pagination
+ [currentPage]="currentPage()"
+ [totalPages]="totalPages()"
+ [totalElements]="totalElements()"
+ [pageSize]="pageSize()"
+ (pageChange)="onPageChange($event)"
+ />
+ }
+</div>
+}
