@@ -1,0 +1,98 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadRequests()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="role-request-list">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.roleRequests.title') }}</h1>
+ <p>{{ i18n.t('admin.roleRequests.subtitle') }}</p>
+ </div>
+ </header>
+
+ @if (requests().length === 0) {
+ <div class="empty-state">
+ <svg width="64" height="64" fill="none" stroke="var(--text-tertiary, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24">
+ <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+ </svg>
+ <h3>{{ i18n.t('admin.roleRequests.empty') }}</h3>
+ <p>{{ i18n.t('admin.roleRequests.emptyMessage') }}</p>
+ </div>
+ } @else {
+ <div class="table-container">
+ <table class="data-table" aria-label="Role Requests">
+ <thead>
+ <tr>
+ <th>{{ i18n.t('admin.roleRequests.userColumn') }}</th>
+ <th>{{ i18n.t('admin.roleRequests.currentRoleColumn') }}</th>
+ <th>{{ i18n.t('admin.roleRequests.requestedRoleColumn') }}</th>
+ <th>{{ i18n.t('admin.roleRequests.reasonColumn') }}</th>
+ <th>{{ i18n.t('admin.roleRequests.dateColumn') }}</th>
+ <th>{{ i18n.t('common.actions') }}</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (req of requests(); track req.id) {
+ <tr>
+ <td>
+ <div class="user-info">
+ <div class="avatar">{{ (req.userName || req.userEmail || '?').charAt(0).toUpperCase() }}</div>
+ <div class="user-details">
+ <span class="user-name">{{ req.userName || '—' }}</span>
+ <span class="user-email">{{ req.userEmail || '—' }}</span>
+ </div>
+ </div>
+ </td>
+ <td>
+ <span class="role-badge" [class]="'role-badge--' + (req.currentRole || 'viewer').toLowerCase()">
+ {{ req.currentRole || 'VIEWER' }}
+ </span>
+ </td>
+ <td>
+ <span class="role-badge role-badge--requested" [class]="'role-badge--' + req.requestedRole.toLowerCase()">
+ {{ req.requestedRole }}
+ </span>
+ </td>
+ <td class="reason-cell">
+ <span [title]="req.reason || ''">{{ req.reason || '—' }}</span>
+ </td>
+ <td>{{ formatDate(req.createdAt) }}</td>
+ <td>
+ <div class="actions">
+ <button
+ class="action-btn action-btn--approve"
+ (click)="approve(req)"
+ [title]="i18n.t('admin.roleRequests.approve')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="20 6 9 17 4 12"/>
+ </svg>
+ <span class="action-label">{{ i18n.t('admin.roleRequests.approve') }}</span>
+ </button>
+ <button
+ class="action-btn action-btn--reject"
+ (click)="reject(req)"
+ [title]="i18n.t('admin.roleRequests.reject')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <line x1="18" y1="6" x2="6" y2="18"/>
+ <line x1="6" y1="6" x2="18" y2="18"/>
+ </svg>
+ <span class="action-label">{{ i18n.t('admin.roleRequests.reject') }}</span>
+ </button>
+ </div>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ }
+</div>
+}
