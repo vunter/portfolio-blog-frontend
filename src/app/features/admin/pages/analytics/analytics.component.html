@@ -1,0 +1,137 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadAnalytics()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="analytics">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.analytics.title') }}</h1>
+ <p>{{ i18n.t('admin.analytics.subtitle') }}</p>
+ </div>
+ <div class="period-selector">
+ <button
+ [class.active]="period() === '7d'"
+ (click)="setPeriod('7d')"
+ >{{ i18n.t('admin.analytics.7days') }}</button>
+ <button
+ [class.active]="period() === '30d'"
+ (click)="setPeriod('30d')"
+ >{{ i18n.t('admin.analytics.30days') }}</button>
+ <button
+ [class.active]="period() === '90d'"
+ (click)="setPeriod('90d')"
+ >{{ i18n.t('admin.analytics.90days') }}</button>
+ </div>
+ </header>
+
+ <!-- Stats Overview -->
+ <section class="stats-grid">
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(data()?.totalViews || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.pageViews') }}</span>
+ </div>
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(data()?.uniqueVisitors || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.uniqueVisitors') }}</span>
+ </div>
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(data()?.totalLikes || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.totalLikes') }}</span>
+ </div>
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(data()?.totalShares || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.totalShares') }}</span>
+ </div>
+ </section>
+
+ <div class="charts-grid">
+ <!-- Views Chart -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('admin.analytics.viewsPerDay') }}</h3>
+ <div class="chart-placeholder">
+ @if ((data()?.dailyViews || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg>
+ <p>{{ i18n.t('admin.analytics.noData') }}</p>
+ </div>
+ } @else {
+ <div class="bar-chart">
+ @for (day of data()?.dailyViews || []; track day.date) {
+ <div
+ class="bar"
+ [style.height.%]="getBarHeight(day.count)"
+ [title]="day.date + ': ' + day.count + ' views'"
+ ></div>
+ }
+ </div>
+ }
+ </div>
+ </div>
+
+ <!-- Top Referrers -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('admin.analytics.topReferrers') }}</h3>
+ <div class="sources-list">
+ @if ((data()?.topReferrers || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+ <p>{{ i18n.t('admin.analytics.noData') }}</p>
+ </div>
+ } @else {
+ @for (ref of data()?.topReferrers || []; track ref.referrer) {
+ <div class="source-item">
+ <div class="source-info">
+ <span class="source-name">{{ ref.referrer }}</span>
+ <span class="source-percentage">{{ ref.count }}</span>
+ </div>
+ <div class="source-bar">
+ <div
+ class="source-bar__fill"
+ [style.width.%]="getReferrerWidth(ref.count)"
+ ></div>
+ </div>
+ </div>
+ }
+ }
+ </div>
+ </div>
+ </div>
+
+ <!-- Top Articles -->
+ <section class="top-articles">
+ <h3>{{ i18n.t('admin.analytics.topArticles') }}</h3>
+ <div class="articles-table">
+ <table>
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>{{ i18n.t('admin.analytics.articleColumn') }}</th>
+ <th>{{ i18n.t('admin.articles.viewsColumn') }}</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (article of data()?.topArticles || []; track article.slug; let i = $index) {
+ <tr>
+ <td class="rank">{{ i + 1 }}</td>
+ <td>
+ <a [href]="'/blog/' + article.slug" target="_blank">{{ article.title }}</a>
+ </td>
+ <td class="views">{{ formatNumber(article.views) }}</td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="3" class="empty">{{ i18n.t('admin.analytics.noData') }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </section>
+</div>
+}
