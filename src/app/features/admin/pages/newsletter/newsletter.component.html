@@ -1,0 +1,143 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else if (error()) {
+ <div class="admin-error">
+ <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+ <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('admin.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadSubscribers()">{{ i18n.t('admin.common.retry') }}</button>
+ </div>
+} @else {
+<div class="newsletter">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.newsletter.title') }}</h1>
+ <p>{{ i18n.t('admin.newsletter.subtitle') }}</p>
+ </div>
+ <button class="btn btn-primary" (click)="exportSubscribers()">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+ <polyline points="7 10 12 15 17 10"/>
+ <line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ {{ i18n.t('admin.newsletter.exportCsv') }}
+ </button>
+ </header>
+
+ <!-- Stats -->
+ <div class="stats-row">
+ <div class="stat-box">
+ <span class="stat-value">{{ totalSubscribers() }}</span>
+ <span class="stat-label">{{ i18n.t('admin.newsletter.totalSubscribers') }}</span>
+ </div>
+ <div class="stat-box">
+ <span class="stat-value">{{ activeSubscribers() }}</span>
+ <span class="stat-label">{{ i18n.t('admin.newsletter.active') }}</span>
+ </div>
+ <div class="stat-box">
+ <span class="stat-value">{{ newThisMonth() }}</span>
+ <span class="stat-label">{{ i18n.t('admin.newsletter.newThisMonth') }}</span>
+ </div>
+ </div>
+
+ <!-- Filters -->
+ <div class="filters">
+ <div class="search-box">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <circle cx="11" cy="11" r="8"/>
+ <path d="m21 21-4.35-4.35"/>
+ </svg>
+ <input
+ type="text"
+ [(ngModel)]="searchTerm"
+ (ngModelChange)="onSearch()"
+ [placeholder]="i18n.t('admin.newsletter.searchPlaceholder')"
+ />
+ </div>
+ <select [(ngModel)]="statusFilter" (ngModelChange)="loadSubscribers()">
+ <option value="">{{ i18n.t('common.all') }}</option>
+ <option value="active">{{ i18n.t('admin.newsletter.active') }}</option>
+ <option value="unsubscribed">{{ i18n.t('admin.newsletter.cancelled') }}</option>
+ </select>
+ </div>
+
+ <!-- Table -->
+ <div class="table-container">
+ <table class="data-table" aria-label="Newsletter subscribers">
+ <thead>
+ <tr>
+ <th>
+ <input
+ type="checkbox"
+ [checked]="allSelected()"
+ (change)="toggleSelectAll()"
+ />
+ </th>
+ <th>{{ i18n.t('common.email') }}</th>
+ <th>{{ i18n.t('common.status') }}</th>
+ <th>{{ i18n.t('admin.newsletter.subscribedAt') }}</th>
+ <th>{{ i18n.t('common.actions') }}</th>
+ </tr>
+ </thead>
+ <tbody>
+ @for (subscriber of subscribers(); track subscriber.id) {
+ <tr>
+ <td>
+ <input
+ type="checkbox"
+ [checked]="isSelected(subscriber.id)"
+ (change)="toggleSelect(subscriber.id)"
+ />
+ </td>
+ <td>{{ subscriber.email }}</td>
+ <td>
+ <span
+ class="status-badge"
+ [class.active]="subscriber.active"
+ >
+ {{ subscriber.active ? i18n.t('common.active') : i18n.t('admin.newsletter.cancelled') }}
+ </span>
+ </td>
+ <td>{{ formatDate(subscriber.subscribedAt) }}</td>
+ <td>
+ <button
+ class="action-btn action-btn--danger"
+ (click)="deleteSubscriber(subscriber)"
+ [title]="i18n.t('admin.newsletter.remove')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="3 6 5 6 21 6"/>
+ <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+ </svg>
+ </button>
+ </td>
+ </tr>
+ } @empty {
+ <tr>
+ <td colspan="5" class="empty-message">{{ i18n.t('admin.newsletter.noSubscribers') }}</td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+
+ @if (selectedIds().length > 0) {
+ <div class="bulk-actions">
+ <span>{{ selectedIds().length }} {{ i18n.t('admin.newsletter.selected') }}</span>
+ <button class="btn btn-danger" (click)="deleteSelected()">
+ {{ i18n.t('admin.newsletter.removeSelected') }}
+ </button>
+ </div>
+ }
+
+ @if (totalPages() > 1) {
+ <app-pagination
+ [currentPage]="currentPage()"
+ [totalPages]="totalPages()"
+ [totalElements]="totalElements()"
+ [pageSize]="pageSize()"
+ (pageChange)="onPageChange($event)"
+ />
+ }
+</div>
+}
