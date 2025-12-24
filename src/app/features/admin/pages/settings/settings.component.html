@@ -1,0 +1,228 @@
+﻿@if (loading()) {
+ <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+} @else {
+<div class="settings" [formGroup]="settingsForm">
+ <header class="page-header">
+ <h1>{{ i18n.t('admin.settings.title') }}</h1>
+ <p>{{ i18n.t('admin.settings.subtitle') }}</p>
+ </header>
+
+ <!-- Language Settings -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.language') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.languageLabel') }}</h3>
+ <p>{{ i18n.t('admin.settings.languageDesc') }}</p>
+ </div>
+ <div class="lang-selector">
+ <button
+ class="lang-option"
+ [class.active]="i18n.language() === 'en'"
+ (click)="i18n.setLanguage('en')"
+ >
+ English
+ </button>
+ <button
+ class="lang-option"
+ [class.active]="i18n.language() === 'pt'"
+ (click)="i18n.setLanguage('pt')"
+ >
+ Português
+ </button>
+ <button
+ class="lang-option"
+ [class.active]="i18n.language() === 'es'"
+ (click)="i18n.setLanguage('es')"
+ >
+ Español
+ </button>
+ <button
+ class="lang-option"
+ [class.active]="i18n.language() === 'it'"
+ (click)="i18n.setLanguage('it')"
+ >
+ Italiano
+ </button>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- General Settings -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.general') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.siteName') }}</h3>
+ <p>{{ i18n.t('admin.settings.siteNameDesc') }}</p>
+ </div>
+ <input
+ type="text"
+ formControlName="siteName"
+ class="setting-input"
+ />
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.description') }}</h3>
+ <p>{{ i18n.t('admin.settings.descriptionDesc') }}</p>
+ </div>
+ <textarea
+ formControlName="siteDescription"
+ rows="3"
+ class="setting-input"
+ ></textarea>
+ </div>
+ </div>
+ </section>
+
+ <!-- Comments Settings -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.comments') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.allowComments') }}</h3>
+ <p>{{ i18n.t('admin.settings.allowCommentsDesc') }}</p>
+ </div>
+ <label class="toggle">
+ <input type="checkbox" formControlName="commentsEnabled" />
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.moderation') }}</h3>
+ <p>{{ i18n.t('admin.settings.moderationDesc') }}</p>
+ </div>
+ <label class="toggle">
+ <input type="checkbox" formControlName="commentModeration" />
+ <span class="toggle-slider"></span>
+ </label>
+ </div>
+ </div>
+ </section>
+
+ <!-- Cache Settings -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.cache') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.clearCache') }}</h3>
+ <p>{{ i18n.t('admin.settings.clearCacheDesc') }}</p>
+ </div>
+ <button
+ class="btn btn-secondary"
+ (click)="clearCache()"
+ [disabled]="clearing()"
+ >
+ {{ clearing() ? i18n.t('admin.settings.clearing') : i18n.t('admin.settings.clearCache') }}
+ </button>
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.cacheStatus') }}</h3>
+ <p>{{ i18n.t('admin.settings.cacheStatusDesc') }}</p>
+ </div>
+ <div class="cache-stats">
+ <span>{{ i18n.t('admin.settings.entries') }} {{ cacheStats().entries }}</span>
+ <span>{{ i18n.t('admin.settings.size') }} {{ cacheStats().size }}</span>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- Social Links -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.social') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>GitHub</h3>
+ </div>
+ <input
+ type="text"
+ formControlName="githubUrl"
+ placeholder="https://github.com/username"
+ class="setting-input"
+ />
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>LinkedIn</h3>
+ </div>
+ <input
+ type="text"
+ formControlName="linkedinUrl"
+ placeholder="https://linkedin.com/in/username"
+ class="setting-input"
+ />
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>Twitter</h3>
+ </div>
+ <input
+ type="text"
+ formControlName="twitterUrl"
+ placeholder="https://twitter.com/username"
+ class="setting-input"
+ />
+ </div>
+ </div>
+ </section>
+
+ <!-- INC-03: Export & Import -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.exportImport') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.exportJson') }}</h3>
+ <p>{{ i18n.t('admin.settings.exportJsonDesc') }}</p>
+ </div>
+ <button class="btn btn-secondary" (click)="exportBlogJson()" [disabled]="exporting()">
+ {{ exporting() ? i18n.t('admin.settings.exporting') : i18n.t('admin.settings.export') }}
+ </button>
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.exportMarkdown') }}</h3>
+ <p>{{ i18n.t('admin.settings.exportMarkdownDesc') }}</p>
+ </div>
+ <button class="btn btn-secondary" (click)="exportMarkdown()" [disabled]="exportingMd()">
+ {{ exportingMd() ? i18n.t('admin.settings.exporting') : i18n.t('admin.settings.export') }}
+ </button>
+ </div>
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.importData') }}</h3>
+ <p>{{ i18n.t('admin.settings.importDataDesc') }}</p>
+ </div>
+ <div class="import-actions">
+ <input
+ type="file"
+ accept=".json"
+ class="file-input"
+ #fileInput
+ (change)="onImportFileSelected($event)"
+ />
+ <button class="btn btn-secondary" (click)="fileInput.click()" [disabled]="importing()">
+ {{ importing() ? i18n.t('admin.settings.importing') : i18n.t('admin.settings.import') }}
+ </button>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <div class="actions">
+ <button class="btn btn-primary" (click)="saveSettings()" [disabled]="saving()">
+ {{ saving() ? i18n.t('common.saving') : i18n.t('admin.settings.saveSettings') }}
+ </button>
+ </div>
+</div>
+}
