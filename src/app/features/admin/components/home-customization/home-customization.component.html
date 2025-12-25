@@ -1,0 +1,149 @@
+﻿@if (loading()) {
+ <div class="hc-loading">
+ <div class="spinner"></div>
+ <span>{{ i18n.t('common.loading') }}</span>
+ </div>
+} @else {
+ <!-- Locale Selector -->
+ @if (availableLocales().length > 1) {
+ <div class="locale-bar">
+ <span class="locale-label">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <circle cx="12" cy="12" r="10"/>
+ <line x1="2" y1="12" x2="22" y2="12"/>
+ <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+ </svg>
+ {{ i18n.t('admin.profile.hcLocale') }}
+ </span>
+ <div class="locale-tabs">
+ @for (loc of availableLocales(); track loc) {
+ <button type="button"
+ class="locale-tab"
+ [class.active]="currentLocale === loc"
+ (click)="switchLocale(loc)">
+ {{ getLocaleName(loc) }}
+ </button>
+ }
+ </div>
+ </div>
+ }
+
+ <div class="hc-form">
+ <div class="form-grid">
+ <div class="form-group full-width">
+ <label for="hc_hero_description">{{ i18n.t('resume.profile.hcHeroDescription') }}</label>
+ <textarea id="hc_hero_description" [(ngModel)]="hcForm.hero_description" name="hc_hero_description" rows="3" [placeholder]="i18n.t('resume.profile.hcHeroDescriptionPlaceholder')"></textarea>
+ </div>
+ <div class="form-group full-width">
+ <label for="hc_sidebar_bio">{{ i18n.t('resume.profile.hcSidebarBio') }}</label>
+ <textarea id="hc_sidebar_bio" [(ngModel)]="hcForm.sidebar_bio" name="hc_sidebar_bio" rows="2" [placeholder]="i18n.t('resume.profile.hcSidebarBioPlaceholder')"></textarea>
+ </div>
+ <div class="form-group full-width">
+ <label for="hc_contact_description">{{ i18n.t('resume.profile.hcContactDescription') }}</label>
+ <textarea id="hc_contact_description" [(ngModel)]="hcForm.contact_description" name="hc_contact_description" rows="2" [placeholder]="i18n.t('resume.profile.hcContactDescriptionPlaceholder')"></textarea>
+ </div>
+ <div class="form-group">
+ <label for="hc_availability">{{ i18n.t('resume.profile.hcAvailability') }}</label>
+ <select id="hc_availability" [(ngModel)]="hcForm.availability_status" name="hc_availability">
+ <option value="">{{ i18n.t('resume.profile.selectOption') }}</option>
+ @for (opt of availabilityStatusOptions; track opt.value) {
+ <option [value]="opt.value">{{ i18n.t(opt.labelKey) }}</option>
+ }
+ </select>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.hcWorkMode') }}</label>
+ <app-multi-select
+ [options]="workModeOptions"
+ [value]="workMode"
+ [placeholder]="i18n.t('resume.profile.selectOption')"
+ (selectionChange)="workMode = $event"
+ />
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.hcTimezone') }}</label>
+ <app-multi-select
+ [options]="timezoneOptions"
+ [value]="timezone"
+ [placeholder]="i18n.t('resume.profile.selectOption')"
+ (selectionChange)="timezone = $event"
+ />
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.hcEmploymentType') }}</label>
+ <app-multi-select
+ [options]="employmentTypeOptions"
+ [value]="employmentType"
+ [placeholder]="i18n.t('resume.profile.selectOption')"
+ (selectionChange)="employmentType = $event"
+ />
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.hcHighlight1') }}</label>
+ <div class="highlight-row">
+ <input type="text" [(ngModel)]="hcForm.highlight_1_value" name="hc_h1_value" [placeholder]="i18n.t('resume.profile.hcHighlightValuePlaceholder')">
+ <input type="text" [(ngModel)]="hcForm.highlight_1_label" name="hc_h1_label" [placeholder]="i18n.t('resume.profile.hcHighlightLabelPlaceholder')">
+ </div>
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.hcHighlight2') }}</label>
+ <div class="highlight-row">
+ <input type="text" [(ngModel)]="hcForm.highlight_2_value" name="hc_h2_value" [placeholder]="i18n.t('resume.profile.hcHighlightValuePlaceholder')">
+ <input type="text" [(ngModel)]="hcForm.highlight_2_label" name="hc_h2_label" [placeholder]="i18n.t('resume.profile.hcHighlightLabelPlaceholder')">
+ </div>
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.hcHighlight3') }}</label>
+ <div class="highlight-row">
+ <input type="text" [(ngModel)]="hcForm.highlight_3_value" name="hc_h3_value" [placeholder]="i18n.t('resume.profile.hcHighlightValuePlaceholder')">
+ <input type="text" [(ngModel)]="hcForm.highlight_3_label" name="hc_h3_label" [placeholder]="i18n.t('resume.profile.hcHighlightLabelPlaceholder')">
+ </div>
+ </div>
+ </div>
+
+ <!-- Actions -->
+ <div class="hc-actions">
+ <button type="button" class="btn btn-secondary" (click)="openPreview()" [disabled]="saving()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+ <circle cx="12" cy="12" r="3"></circle>
+ </svg>
+ {{ i18n.t('admin.profile.hcPreview') }}
+ </button>
+ <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+ @if (saving()) {
+ <span class="spinner-sm"></span>
+ {{ i18n.t('admin.profile.saving') }}
+ } @else {
+ {{ i18n.t('admin.profile.hcSave') }}
+ }
+ </button>
+ </div>
+ </div>
+
+ <!-- Floating Preview Button -->
+ @if (showFabs()) {
+ <div class="fab-group">
+ <button type="button" class="fab-btn fab-preview" (click)="openPreview()" [disabled]="saving()" [title]="i18n.t('admin.profile.hcPreview')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+ <circle cx="12" cy="12" r="3"></circle>
+ </svg>
+ <span class="fab-label">{{ i18n.t('admin.profile.hcPreview') }}</span>
+ </button>
+ <button type="button" class="fab-btn fab-hc-save" (click)="save()" [disabled]="saving()" [title]="i18n.t('admin.profile.hcSave')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+ <polyline points="17 21 17 13 7 13 7 21"></polyline>
+ <polyline points="7 3 7 8 15 8"></polyline>
+ </svg>
+ <span class="fab-label">{{ saving() ? i18n.t('admin.profile.saving') : i18n.t('admin.profile.hcSave') }}</span>
+ </button>
+ </div>
+ }
+
+ <!-- Preview Modal -->
+ @if (showPreview()) {
+ <app-home-preview-modal [profile]="previewProfile()" (close)="showPreview.set(false)" />
+ }
+}
