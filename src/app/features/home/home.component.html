@@ -1,0 +1,54 @@
+﻿<div class="home-page" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()">
+ <!-- F-500: Profile selector — uncomment when multi-dev is ready
+ <app-profile-selector />
+ -->
+ <!-- UX-01: Error fallback when profile fails to load -->
+ @if (profileService.error()) {
+ <div class="error-fallback" role="alert">
+ <div class="error-fallback__icon"></div>
+ <h2 class="error-fallback__title">{{ i18n.t('home.error.title') }}</h2>
+ <p class="error-fallback__desc">{{ i18n.t('home.error.description') }}</p>
+ <button class="error-fallback__retry" (click)="profileService.retry()">
+ {{ i18n.t('home.error.retry') }}
+ </button>
+ </div>
+ } @else if (profileService.loading() && !profileService.loaded()) {
+ <!-- UX-02: Loading skeleton -->
+ <div class="loading-skeleton">
+ <div class="skeleton-hero">
+ <div class="skeleton-circle"></div>
+ <div class="skeleton-line skeleton-line--lg"></div>
+ <div class="skeleton-line skeleton-line--md"></div>
+ </div>
+ <div class="skeleton-sections">
+ @for (i of [1,2,3]; track i) {
+ <div class="skeleton-card">
+ <div class="skeleton-line skeleton-line--sm"></div>
+ <div class="skeleton-line"></div>
+ <div class="skeleton-line"></div>
+ <div class="skeleton-line skeleton-line--md"></div>
+ </div>
+ }
+ </div>
+ </div>
+ } @else {
+ <div class="main-layout">
+ <!-- Main Content (Portfolio) -->
+ <main class="portfolio-content">
+ <app-hero-section [profile]="profileService.profile()" />
+ <app-skills-section [profile]="profileService.profile()" />
+ <app-experience-section [profile]="profileService.profile()" />
+ <app-projects-section [profile]="profileService.profile()" />
+ <app-education-section [profile]="profileService.profile()" />
+ <app-languages-section [profile]="profileService.profile()" />
+ <app-proficiency-section [profile]="profileService.profile()" />
+ <app-learning-section [profile]="profileService.profile()" />
+ <app-testimonials-section [profile]="profileService.profile()" />
+ <app-contact-section [profile]="profileService.profile()" />
+ </main>
+
+ <!-- Blog Sidebar -->
+ <app-sidebar-section [profile]="profileService.profile()" />
+ </div>
+ }
+</div>
