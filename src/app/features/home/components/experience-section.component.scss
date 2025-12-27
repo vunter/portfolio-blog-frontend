@@ -1,0 +1,111 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+
+.section { margin-bottom: 2rem; }
+
+.container {
+  @include m.section-container;
+}
+
+.section-title {
+  @include m.section-title;
+}
+
+.timeline {
+  position: relative;
+  padding: 2rem 0 2rem 2rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-color, #3b82f6);
+  opacity: 0.6;
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: stretch;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.timeline-dot {
+  position: absolute;
+  left: calc(-2rem + 1px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full, 50%);
+  background: var(--accent-light, #60a5fa);
+  border: 3px solid var(--bg-primary, #0f172a);
+  box-shadow: 0 0 0 3px var(--accent-light, #60a5fa), 0 0 12px rgba(96, 165, 250, 0.4);
+  z-index: 2;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-card {
+  @include m.card;
+  /* CSS-09: Removed backdrop-filter on opaque background */
+  transition: all var(--transition-slow, 0.3s ease);
+}
+
+.timeline-card:hover {
+  border-color: var(--accent-light);
+  background: var(--card-bg-hover);
+  box-shadow: var(--accent-shadow-sm);
+}
+
+.timeline-card h3 {
+  color: var(--accent-light);
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-card .company {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-card .date {
+  color: var(--accent-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.timeline-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timeline-card li {
+  color: var(--text-secondary);
+  padding-left: 1.5rem;
+  position: relative;
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+.timeline-card li::before {
+  content: '\25B8';
+  position: absolute;
+  left: 0;
+  color: var(--accent-color);
+}

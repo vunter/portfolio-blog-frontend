@@ -1,0 +1,30 @@
+﻿<section id="experience" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.exp.title') }}</h2>
+ <div class="timeline">
+ @if (experiences(); as exps) {
+ @for (exp of exps; track exp.id ?? $index) {
+ <div class="timeline-item">
+ <div class="timeline-dot"></div>
+ <div class="timeline-content">
+ <div class="timeline-card">
+ <h3>{{ exp.position }}</h3>
+ <div class="company">{{ exp.company }}</div>
+ <div class="date">{{ exp.startDate }}@if (exp.endDate) { - {{ exp.endDate }}}</div>
+ <ul>
+ @for (bullet of exp.bullets; track $index) {
+ <li>{{ bullet }}</li>
+ }
+ </ul>
+ </div>
+ </div>
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.exp.noData') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+</section>
