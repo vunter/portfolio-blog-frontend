@@ -1,0 +1,52 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+
+.section { margin-bottom: 2rem; }
+
+.container {
+  @include m.section-container;
+}
+
+.section-title {
+  @include m.section-title;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.skill-card {
+  @include m.card;
+  transition: all var(--transition-slow, 0.3s ease);
+  /* CSS-09: Removed backdrop-filter on opaque background */
+}
+
+.skill-card:hover {
+  border-color: var(--accent-color);
+  background: var(--card-bg-hover);
+  transform: translateY(-10px);
+  box-shadow: var(--accent-shadow-lg);
+}
+
+.skill-card h3 {
+  color: var(--accent-light);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  @include m.skill-tag;
+}
+
+@media (max-width: 768px) {
+  .skills-grid { grid-template-columns: 1fr; }
+}
