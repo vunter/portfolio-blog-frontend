@@ -1,0 +1,195 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+.section { margin-bottom: 2rem; }
+.container {
+  @include m.section-container;
+}
+.section-title {
+  @include m.section-title;
+}
+.github-highlight {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border-color);
+}
+.github-highlight svg {
+  color: var(--accent-light);
+  margin-bottom: 0.5rem;
+}
+.github-text {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.github-link {
+  color: var(--accent-light);
+  text-decoration: none;
+  font-weight: 600;
+}
+.github-repos-section {
+  margin: 2rem 0;
+}
+.repos-title {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+.repos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.repo-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  padding: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &::after {
+    content: '↗';
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.85rem;
+    opacity: 0.5;
+    color: var(--text-secondary);
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+}
+.repo-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: var(--accent-shadow-sm);
+
+  &::after {
+    opacity: 1;
+    color: var(--accent-light);
+  }
+}
+.repo-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent-color);
+}
+.repo-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.repo-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.repo-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.repo-lang {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.lang-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full, 50%);
+}
+.repo-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.repo-updated {
+  margin-left: auto;
+  font-size: 0.75rem;
+}
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.project-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  transition: all var(--transition-slow, 0.3s ease);
+  /* CSS-09: Removed backdrop-filter on opaque background */
+  display: flex;
+  flex-direction: column;
+}
+.project-card:hover {
+  border-color: var(--accent-color);
+  background: var(--card-bg-hover);
+  transform: translateY(-10px);
+  box-shadow: var(--accent-shadow-lg);
+}
+.project-image {
+  width: 100%;
+  height: 150px;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+.project-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.project-content h3 {
+  color: var(--accent-light);
+  margin-bottom: 0.5rem;
+}
+.project-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.tech-tag {
+  background: var(--accent-tint);
+  color: var(--accent-light);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.85rem;
+  border: 1px solid var(--accent-tint-strong);
+}
+.project-link {
+  color: var(--accent-light);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.project-confidential {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
