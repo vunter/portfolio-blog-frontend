@@ -1,0 +1,44 @@
+﻿<section id="languages" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.lang.title') }}</h2>
+ <div class="lang-grid">
+ <div class="lang-card">
+ <h4>{{ i18n.t('home.lang.languages') }}</h4>
+ <div class="language-list">
+ @if (profileLanguages(); as langs) {
+ @for (lang of langs; track lang.id ?? $index) {
+ <div class="language-item">
+ <span class="language-name">{{ lang.name }}</span>
+ <span class="language-proficiency">{{ lang.proficiency }}</span>
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.lang.noLanguages') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+ <div class="lang-card">
+ <h4>{{ i18n.t('home.lang.availability') }}</h4>
+ <div class="availability-list">
+ @if (workModeDisplay() || timezoneDisplay() || employmentTypeDisplay()) {
+ @if (workModeDisplay()) {
+ <div>&#x2705; {{ workModeDisplay() }}</div>
+ }
+ @if (timezoneDisplay()) {
+ <div>&#x1F550; {{ timezoneDisplay() }}</div>
+ }
+ @if (employmentTypeDisplay()) {
+ <div>&#x1F4BC; {{ employmentTypeDisplay() }}</div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.lang.noAvailability') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+ </div>
+ </div>
+</section>
