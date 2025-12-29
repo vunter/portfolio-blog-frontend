@@ -1,0 +1,42 @@
+﻿<aside class="blog-sidebar">
+ <div class="sidebar-section author-card">
+ <div class="author-avatar">{{ initials() }}</div>
+ <h3>{{ displayName() }}</h3>
+ <p>{{ sidebarBio() ?? i18n.t('home.sidebar.bio') }}</p>
+ </div>
+
+ <div class="sidebar-section">
+ <h4>{{ i18n.t('home.sidebar.recentPosts') }}</h4>
+ @if (recentPosts().length > 0) {
+ <ul class="recent-posts">
+ @for (post of recentPosts(); track post.id) {
+ <li>
+ <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+ <span class="post-date">{{ post.createdAt | date:'MMM d, y' }}</span>
+ </li>
+ }
+ </ul>
+ } @else {
+ <p class="no-posts">{{ i18n.t('home.sidebar.noPosts') }}</p>
+ }
+ <a routerLink="/blog" class="view-all-link">{{ i18n.t('home.sidebar.viewAll') }}</a>
+ </div>
+
+ <div class="sidebar-section">
+ <h4>{{ i18n.t('home.sidebar.popularTags') }}</h4>
+ <div class="tag-cloud">
+ @if (hasTags()) {
+ @for (tag of tags(); track tag) {
+ <span class="tag">{{ tag }}</span>
+ }
+ } @else {
+ <p class="no-tags">{{ i18n.t('home.sidebar.noTags') }}</p>
+ }
+ </div>
+ </div>
+
+ <!-- INC-07: Newsletter subscribe form in sidebar -->
+ <div class="sidebar-section">
+ <app-newsletter-subscribe />
+ </div>
+</aside>
