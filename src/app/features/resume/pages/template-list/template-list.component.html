@@ -1,0 +1,119 @@
+﻿<div class="template-list">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('resume.templates.title') }}</h1>
+ <p>{{ i18n.t('resume.templates.subtitle') }}</p>
+ </div>
+ <a routerLink="/resume/editor" class="btn btn-primary">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <line x1="12" y1="5" x2="12" y2="19"/>
+ <line x1="5" y1="12" x2="19" y2="12"/>
+ </svg>
+ {{ i18n.t('resume.templates.new') }}
+ </a>
+ </header>
+
+ @if (loading()) {
+ <app-loading-spinner [inline]="true" [message]="i18n.t('resume.templates.loading')" />
+ } @else {
+ <div class="templates-grid">
+ @for (template of templates(); track template.id) {
+ <div class="template-card">
+ <div class="template-card__preview">
+ @if (template.thumbnailUrl) {
+ <img [src]="template.thumbnailUrl" [alt]="template.name" loading="lazy" />
+ } @else {
+ <div class="template-card__placeholder">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+ <polyline points="14 2 14 8 20 8"/>
+ <line x1="16" y1="13" x2="8" y2="13"/>
+ <line x1="16" y1="17" x2="8" y2="17"/>
+ </svg>
+ </div>
+ }
+ @if (template.isDefault) {
+ <span class="default-badge">{{ i18n.t('resume.templates.default') }}</span>
+ }
+ </div>
+ <div class="template-card__content">
+ <h3>{{ template.name }}</h3>
+ @if (template.description) {
+ <p>{{ template.description }}</p>
+ }
+ <div class="template-card__meta">
+ <span>{{ i18n.t('resume.templates.updatedAt') }} {{ formatDate(template.updatedAt) }}</span>
+ </div>
+ </div>
+ <div class="template-card__actions">
+ <a
+ [routerLink]="['/resume/editor', template.id]"
+ class="action-btn"
+ [title]="i18n.t('common.edit')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+ <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+ </svg>
+ </a>
+ <a
+ [routerLink]="['/resume/preview', template.id]"
+ class="action-btn"
+ [title]="i18n.t('resume.templates.preview')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+ <circle cx="12" cy="12" r="3"/>
+ </svg>
+ </a>
+ <button
+ class="action-btn"
+ (click)="generatePdf(template)"
+ [title]="i18n.t('resume.templates.generatePdf')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+ <polyline points="7 10 12 15 17 10"/>
+ <line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ </button>
+ <button
+ class="action-btn"
+ (click)="duplicateTemplate(template)"
+ [title]="i18n.t('resume.templates.duplicate')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+ <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+ </svg>
+ </button>
+ @if (!template.isDefault) {
+ <button
+ class="action-btn action-btn--danger"
+ (click)="deleteTemplate(template)"
+ [title]="i18n.t('common.delete')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="3 6 5 6 21 6"/>
+ <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+ </svg>
+ </button>
+ }
+ </div>
+ </div>
+ } @empty {
+ <div class="empty-state">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+ <polyline points="14 2 14 8 20 8"/>
+ </svg>
+ <h3>{{ i18n.t('resume.templates.noTemplates') }}</h3>
+ <p>{{ i18n.t('resume.templates.createFirst') }}</p>
+ <a routerLink="/resume/editor" class="btn btn-primary">
+ {{ i18n.t('resume.templates.create') }}
+ </a>
+ </div>
+ }
+ </div>
+ }
+</div>
