@@ -1,0 +1,167 @@
+﻿<div class="generate-page">
+ <nav class="breadcrumb">
+ <a routerLink="/admin/profile" class="breadcrumb-link">{{ i18n.t('resume.generate.breadcrumbProfile') }}</a>
+ <span class="breadcrumb-sep">/</span>
+ <span class="breadcrumb-current">{{ i18n.t('resume.generate.breadcrumbGenerate') }}</span>
+ </nav>
+
+ <div class="page-header">
+ <h1>{{ i18n.t('resume.generate.title') }}</h1>
+ <p class="subtitle">{{ i18n.t('resume.generate.subtitle') }}</p>
+ <div class="actions">
+ <div class="lang-selector" [title]="i18n.t('resume.generate.resumeLang')">
+ <label class="lang-label"></label>
+ <button
+ class="lang-btn"
+ [class.active]="resumeLang() === 'en'"
+ (click)="setResumeLang('en')"
+ >EN</button>
+ <button
+ class="lang-btn"
+ [class.active]="resumeLang() === 'pt'"
+ (click)="setResumeLang('pt')"
+ >PT</button>
+ <button
+ class="lang-btn"
+ [class.active]="resumeLang() === 'es'"
+ (click)="setResumeLang('es')"
+ >ES</button>
+ <button
+ class="lang-btn"
+ [class.active]="resumeLang() === 'it'"
+ (click)="setResumeLang('it')"
+ >IT</button>
+ </div>
+ <button class="btn-secondary" (click)="generate()" [disabled]="loading()">
+ {{ loading() ? i18n.t('resume.generate.generating') : ' ' + i18n.t('resume.generate.generate') }}
+ </button>
+ <button class="btn-primary" (click)="downloadPdf()" [disabled]="!htmlContent() || generatingPdf()">
+ {{ generatingPdf() ? i18n.t('resume.generate.generatingPdf') : '⬇ ' + i18n.t('resume.generate.downloadPdf') }}
+ </button>
+ <button class="btn-secondary" (click)="download()" [disabled]="!htmlContent()">
+ ⬇ {{ i18n.t('resume.generate.downloadHtml') }}
+ </button>
+ <button class="btn-template" (click)="openSaveModal()" [disabled]="!htmlContent()">
+ {{ i18n.t('resume.generate.saveTemplate') }}
+ </button>
+ <button class="btn-update-template" (click)="openUpdateModal()" [disabled]="!htmlContent()">
+ {{ i18n.t('resume.generate.updateTemplate') }}
+ </button>
+ </div>
+ </div>
+
+ @if (successMessage()) {
+ <div class="message success">{{ successMessage() }}</div>
+ }
+
+ @if (errorMessage()) {
+ <div class="message error">{{ errorMessage() }}</div>
+ }
+
+ @if (loading()) {
+ <div class="loading">{{ i18n.t('resume.generate.generatingResume') }}</div>
+ } @else if (htmlContent()) {
+ <div class="preview-container">
+ <div class="preview-label">{{ i18n.t('resume.generate.preview') }}</div>
+ <!-- F-338: Restricted sandbox — no allow-scripts, no allow-popups -->
+ <iframe
+ class="resume-iframe"
+ [srcdoc]="trustedHtml()"
+ sandbox="allow-same-origin"
+ title="Resume Preview"
+ ></iframe>
+ </div>
+ } @else {
+ <div class="empty-state">
+ <div class="empty-icon"></div>
+ <h2>{{ i18n.t('resume.generate.empty') }}</h2>
+ <p [innerHTML]="i18n.t('resume.generate.emptyHint')"></p>
+ </div>
+ }
+
+ <!-- Save as Template Modal -->
+ @if (showSaveModal()) {
+ <div class="modal-overlay" (click)="closeSaveModal()">
+ <div class="modal" (click)="$event.stopPropagation()">
+ <div class="modal-header">
+ <h2>{{ i18n.t('resume.generate.templateModalTitle') }}</h2>
+ <button class="modal-close" (click)="closeSaveModal()"></button>
+ </div>
+ <div class="modal-body">
+ <div class="form-group">
+ <label for="templateName">{{ i18n.t('resume.generate.templateName') }} *</label>
+ <input
+ id="templateName"
+ type="text"
+ [(ngModel)]="templateName"
+ [placeholder]="i18n.t('resume.generate.templateNamePlaceholder')"
+ maxlength="100"
+ [disabled]="savingTemplate()"
+ />
+ </div>
+ <div class="form-group">
+ <label for="templateDescription">{{ i18n.t('resume.generate.templateDescription') }}</label>
+ <textarea
+ id="templateDescription"
+ [(ngModel)]="templateDescription"
+ [placeholder]="i18n.t('resume.generate.templateDescPlaceholder')"
+ rows="3"
+ maxlength="500"
+ [disabled]="savingTemplate()"
+ ></textarea>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button class="btn-secondary" (click)="closeSaveModal()" [disabled]="savingTemplate()">{{ i18n.t('resume.generate.cancel') }}</button>
+ <button class="btn-primary" (click)="saveAsTemplate()" [disabled]="!templateName.trim() || savingTemplate()">
+ {{ savingTemplate() ? i18n.t('resume.generate.saveTemplateSaving') : i18n.t('resume.generate.saveTemplateBtn') }}
+ </button>
+ </div>
+ </div>
+ </div>
+ }
+
+ <!-- Update Existing Template Modal -->
+ @if (showUpdateModal()) {
+ <div class="modal-overlay" (click)="closeUpdateModal()">
+ <div class="modal" (click)="$event.stopPropagation()">
+ <div class="modal-header">
+ <h2>{{ i18n.t('resume.generate.updateTemplateTitle') }}</h2>
+ <button class="modal-close" (click)="closeUpdateModal()"></button>
+ </div>
+ <div class="modal-body">
+ @if (loadingTemplates()) {
+ <p class="loading-text">{{ i18n.t('resume.generate.loadingTemplates') }}</p>
+ } @else if (existingTemplates().length === 0) {
+ <p class="empty-text">{{ i18n.t('resume.generate.noTemplatesFound') }}</p>
+ } @else {
+ <p class="help-text">{{ i18n.t('resume.generate.selectTemplateHint') }}</p>
+ <div class="template-list">
+ @for (tpl of existingTemplates(); track tpl.id) {
+ <button
+ class="template-item"
+ [class.selected]="selectedTemplateId() === tpl.id"
+ (click)="selectedTemplateId.set(tpl.id)"
+ >
+ <div class="template-item-info">
+ <strong>{{ tpl.name }}</strong>
+ <span class="template-meta">{{ tpl.alias ? '/' + tpl.alias : tpl.slug }} · {{ tpl.status }}</span>
+ </div>
+ @if (tpl.isDefault) {
+ <span class="default-badge">{{ i18n.t('resume.generate.defaultBadge') }}</span>
+ }
+ </button>
+ }
+ </div>
+ }
+ </div>
+ <div class="modal-footer">
+ <button class="btn-secondary" (click)="closeUpdateModal()" [disabled]="updatingTemplate()">{{ i18n.t('resume.generate.cancel') }}</button>
+ <button class="btn-primary" (click)="updateExistingTemplate()" [disabled]="!selectedTemplateId() || updatingTemplate()">
+ {{ updatingTemplate() ? i18n.t('resume.generate.updating') : i18n.t('resume.generate.updateTemplateBtn') }}
+ </button>
+ </div>
+ </div>
+ </div>
+ }
+</div>
