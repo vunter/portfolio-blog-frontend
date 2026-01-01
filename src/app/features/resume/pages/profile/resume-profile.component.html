@@ -1,0 +1,873 @@
+﻿<div class="profile-page">
+ @if (!embedded()) {
+ <div class="page-header">
+ <h1>{{ i18n.t('resume.profile.title') }}</h1>
+ <p class="subtitle">{{ i18n.t('resume.profile.subtitle') }}</p>
+ </div>
+ }
+
+ @if (loading()) {
+ <div class="loading">{{ i18n.t('resume.profile.loading') }}</div>
+ } @else {
+ <!-- Locale Selector -->
+ @if (availableLocales().length > 0) {
+ <div class="locale-bar">
+ <div class="translation-label">
+ <span class="section-icon"></span>
+ <span>{{ i18n.t('resume.profile.profileLanguage') }}</span>
+ </div>
+ <div class="locale-tabs">
+ @for (loc of availableLocales(); track loc) {
+ <button type="button"
+ class="locale-tab"
+ [class.active]="currentLocale === loc"
+ (click)="switchLocale(loc)">
+ {{ getLocaleName(loc) }}
+ </button>
+ }
+ <button type="button" class="locale-tab new-locale" (click)="toggleNewLocaleMenu($event)"
+ [class.active]="showNewLocaleMenu()"
+ [title]="i18n.t('resume.profile.translateToCreate')">
+ +
+ </button>
+ @if (showNewLocaleMenu()) {
+ <div class="new-locale-dropdown">
+ @for (loc of remainingLocales(); track loc) {
+ <button type="button" class="new-locale-option" (click)="addNewLocale(loc)">
+ {{ getLocaleName(loc) }}
+ </button>
+ }
+ @if (remainingLocales().length === 0) {
+ <span class="new-locale-empty">{{ i18n.t('resume.profile.allLocalesCreated') }}</span>
+ }
+ </div>
+ }
+ </div>
+ </div>
+ }
+
+ <!-- Translation Bar (always visible) -->
+ <div class="translation-bar">
+ <div class="translation-label">
+ <span class="section-icon"></span>
+ <span>{{ i18n.t('resume.profile.translateProfile') }}</span>
+ </div>
+ <div class="translation-controls">
+ <select [(ngModel)]="targetLang" name="targetLang" class="lang-select">
+ <option value="EN"> English</option>
+ <option value="PT-BR"> Português (BR)</option>
+ <option value="PT-PT"> Português (PT)</option>
+ <option value="ES"> Español</option>
+ <option value="FR"> Français</option>
+ <option value="DE"> Deutsch</option>
+ <option value="IT"> Italiano</option>
+ <option value="NL"> Nederlands</option>
+ <option value="PL"> Polski</option>
+ <option value="RU"> Русский</option>
+ <option value="JA"> 日本語</option>
+ <option value="ZH"> 中文</option>
+ </select>
+ <button type="button" class="btn-translate" (click)="translateProfile()" [disabled]="translating()">
+ {{ translating() ? i18n.t('resume.profile.translating') : i18n.t('resume.profile.translate') }}
+ </button>
+ </div>
+ @if (translateMessage()) {
+ <div class="translate-msg" [class.error]="translateError()">{{ translateMessage() }}</div>
+ }
+ <div class="translate-hint">
+ {{ i18n.t('resume.profile.translateHint') }}
+ </div>
+ </div>
+
+ <form (ngSubmit)="save()" class="profile-form">
+
+ <!-- Personal Info (hidden when embedded in admin profile) -->
+ @if (!embedded()) {
+ <section class="form-section">
+ <div class="section-collapse-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('personalInfo')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.personalInfo') }}
+ </h2>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('personalInfo')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['personalInfo']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['personalInfo']) {
+ <div class="form-grid">
+ <div class="form-group full-width">
+ <label for="fullName">{{ i18n.t('resume.profile.fullName') }}</label>
+ <input id="fullName" type="text" [(ngModel)]="profile.fullName" name="fullName" required
+ [class.input-error]="getFieldError('fullName') || (formSubmitted() && !profile.fullName)"
+ [placeholder]="i18n.t('resume.profile.fullNamePlaceholder')">
+ @if (getFieldError('fullName')) {
+ <span class="field-error">{{ getFieldError('fullName') }}</span>
+ } @else if (formSubmitted() && !profile.fullName) {
+ <span class="field-error">{{ i18n.t('resume.profile.fullName') }} is required</span>
+ }
+ </div>
+ <div class="form-group">
+ <label for="title">{{ i18n.t('resume.profile.titleLabel') }}</label>
+ <input id="title" type="text" [(ngModel)]="profile.title" name="title" [placeholder]="i18n.t('resume.profile.titlePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label for="email">{{ i18n.t('resume.profile.email') }}</label>
+ <input id="email" type="email" [(ngModel)]="profile.email" name="email"
+ [class.input-error]="getFieldError('email')"
+ [placeholder]="i18n.t('resume.profile.emailPlaceholder')">
+ @if (getFieldError('email')) {
+ <span class="field-error">{{ getFieldError('email') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label for="phone">{{ i18n.t('resume.profile.phone') }}</label>
+ <input id="phone" type="text" [(ngModel)]="profile.phone" name="phone" [placeholder]="i18n.t('resume.profile.phonePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label for="linkedin">LinkedIn</label>
+ <input id="linkedin" type="text" [(ngModel)]="profile.linkedin" name="linkedin" [placeholder]="i18n.t('resume.profile.linkedinPlaceholder')">
+ </div>
+ <div class="form-group">
+ <label for="github">GitHub</label>
+ <input id="github" type="text" [(ngModel)]="profile.github" name="github" [placeholder]="i18n.t('resume.profile.githubPlaceholder')">
+ </div>
+ <div class="form-group">
+ <label for="website">Website</label>
+ <input id="website" type="text" [(ngModel)]="profile.website" name="website" [placeholder]="i18n.t('resume.profile.websitePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label for="location">{{ i18n.t('resume.profile.location') }}</label>
+ <input id="location" type="text" [(ngModel)]="profile.location" name="location" [placeholder]="i18n.t('resume.profile.locationPlaceholder')">
+ </div>
+ </div>
+ }
+ </section>
+ }
+
+ <!-- Professional Summary -->
+ <section class="form-section">
+ <div class="section-collapse-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('summary')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.professionalSummary') }}
+ </h2>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('summary')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['summary']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['summary']) {
+ <div class="form-group full-width">
+ <label for="summary">{{ i18n.t('resume.profile.summaryLabel') }}</label>
+ <textarea id="summary" [(ngModel)]="profile.professionalSummary" name="professionalSummary" rows="5" [placeholder]="i18n.t('resume.profile.summaryPlaceholder')"></textarea>
+ </div>
+ }
+ </section>
+
+ <!-- Education -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('education')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.education') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addEducation()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('education')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['education']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['education']) {
+ @for (edu of profile.educations; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('educations', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeEducation($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.institution') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="edu.institution" [name]="'edu_inst_' + $index"
+ [class.input-error]="getFieldError('educations[' + $index + '].institution')"
+ [placeholder]="i18n.t('resume.profile.institutionPlaceholder')">
+ @if (getFieldError('educations[' + $index + '].institution')) {
+ <span class="field-error">{{ getFieldError('educations[' + $index + '].institution') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.location') }}</label>
+ <input type="text" [(ngModel)]="edu.location" [name]="'edu_loc_' + $index" [placeholder]="i18n.t('resume.profile.locationCityPlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.degree') }}</label>
+ <input type="text" [(ngModel)]="edu.degree" [name]="'edu_deg_' + $index" [placeholder]="i18n.t('resume.profile.degreePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.fieldOfStudy') }}</label>
+ <input type="text" [(ngModel)]="edu.fieldOfStudy" [name]="'edu_field_' + $index" [placeholder]="i18n.t('resume.profile.fieldOfStudyPlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.startDate') }}</label>
+ <input type="text" [(ngModel)]="edu.startDate" [name]="'edu_start_' + $index" [placeholder]="i18n.t('resume.profile.startDatePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.endDate') }}</label>
+ <input type="text" [(ngModel)]="edu.endDate" [name]="'edu_end_' + $index" [placeholder]="i18n.t('resume.profile.endDatePlaceholder')">
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.description') }}</label>
+ <textarea [(ngModel)]="edu.description" [name]="'edu_desc_' + $index" rows="2" [placeholder]="i18n.t('resume.profile.educationDescPlaceholder')"></textarea>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Languages -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('languages')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.languages') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addLanguage()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('languages')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['languages']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['languages']) {
+ @for (lang of profile.languages; track $index) {
+ <div class="entry-card entry-card--inline" [class.entry-card--error]="hasEntryError('languages', $index)">
+ <div class="form-grid cols-3">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.language') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="lang.name" [name]="'lang_name_' + $index"
+ [class.input-error]="getFieldError('languages[' + $index + '].name')"
+ [placeholder]="i18n.t('resume.profile.languagePlaceholder')">
+ @if (getFieldError('languages[' + $index + '].name')) {
+ <span class="field-error">{{ getFieldError('languages[' + $index + '].name') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.proficiency') }}</label>
+ <input type="text" [(ngModel)]="lang.proficiency" [name]="'lang_prof_' + $index" [placeholder]="i18n.t('resume.profile.proficiencyPlaceholder')">
+ </div>
+ <div class="form-group" style="display:flex;align-items:flex-end;">
+ <button type="button" class="btn-remove" (click)="removeLanguage($index)"></button>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Skills -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('skills')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.technicalSkills') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addSkill()">{{ i18n.t('resume.profile.addCategory') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('skills')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['skills']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['skills']) {
+ @for (skill of profile.skills; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('skills', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeSkill($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.category') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="skill.category" [name]="'skill_cat_' + $index"
+ [class.input-error]="getFieldError('skills[' + $index + '].category')"
+ [placeholder]="i18n.t('resume.profile.categoryPlaceholder')">
+ @if (getFieldError('skills[' + $index + '].category')) {
+ <span class="field-error">{{ getFieldError('skills[' + $index + '].category') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.contentHtml') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="skill.content" [name]="'skill_content_' + $index"
+ [class.input-error]="getFieldError('skills[' + $index + '].content')"
+ [placeholder]="i18n.t('resume.profile.skillsPlaceholder')">
+ @if (getFieldError('skills[' + $index + '].content')) {
+ <span class="field-error">{{ getFieldError('skills[' + $index + '].content') }}</span>
+ }
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Interests -->
+ <section class="form-section">
+ <div class="section-collapse-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('interests')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.interests') }}
+ </h2>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('interests')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['interests']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['interests']) {
+ <div class="form-group full-width">
+ <label for="interests">{{ i18n.t('resume.profile.interestsLabel') }}</label>
+ <textarea id="interests" [(ngModel)]="profile.interests" name="interests" rows="3" [placeholder]="i18n.t('resume.profile.interestsPlaceholder')"></textarea>
+ </div>
+ }
+ </section>
+
+ <!-- Professional Experience -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('experience')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.experience') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addExperience()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('experience')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['experience']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['experience']) {
+ @for (exp of profile.experiences; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('experiences', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeExperience($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.company') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="exp.company" [name]="'exp_company_' + $index"
+ [class.input-error]="getFieldError('experiences[' + $index + '].company')"
+ [placeholder]="i18n.t('resume.profile.companyPlaceholder')">
+ @if (getFieldError('experiences[' + $index + '].company')) {
+ <span class="field-error">{{ getFieldError('experiences[' + $index + '].company') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.position') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="exp.position" [name]="'exp_position_' + $index"
+ [class.input-error]="getFieldError('experiences[' + $index + '].position')"
+ [placeholder]="i18n.t('resume.profile.positionPlaceholder')">
+ @if (getFieldError('experiences[' + $index + '].position')) {
+ <span class="field-error">{{ getFieldError('experiences[' + $index + '].position') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.startDate') }}</label>
+ <input type="text" [(ngModel)]="exp.startDate" [name]="'exp_start_' + $index" [placeholder]="i18n.t('resume.profile.startDatePlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.endDateOptional') }}</label>
+ <input type="text" [(ngModel)]="exp.endDate" [name]="'exp_end_' + $index" [placeholder]="i18n.t('resume.profile.endDateOptionalPlaceholder')">
+ </div>
+ </div>
+ <div class="form-group full-width bullets-section">
+ <label>{{ i18n.t('resume.profile.experienceDescLabel') }}</label>
+ <textarea [(ngModel)]="exp._bulletsText" [name]="'exp_bullets_' + $index" rows="6" [placeholder]="i18n.t('resume.profile.experienceDescPlaceholder')"></textarea>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Certifications -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('certifications')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.certifications') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addCertification()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('certifications')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['certifications']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['certifications']) {
+ @for (cert of profile.certifications; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('certifications', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeCertification($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.name') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="cert.name" [name]="'cert_name_' + $index"
+ [class.input-error]="getFieldError('certifications[' + $index + '].name')"
+ [placeholder]="i18n.t('resume.profile.certNamePlaceholder')">
+ @if (getFieldError('certifications[' + $index + '].name')) {
+ <span class="field-error">{{ getFieldError('certifications[' + $index + '].name') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.issuer') }}</label>
+ <input type="text" [(ngModel)]="cert.issuer" [name]="'cert_issuer_' + $index" [placeholder]="i18n.t('resume.profile.issuerPlaceholder')">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.credentialUrl') }}</label>
+ <input type="text" [(ngModel)]="cert.credentialUrl" [name]="'cert_url_' + $index" placeholder="https://...">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.issueDate') }}</label>
+ <input type="text" [(ngModel)]="cert.issueDate" [name]="'cert_date_' + $index" [placeholder]="i18n.t('resume.profile.issueDatePlaceholder')">
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.description') }}</label>
+ <input type="text" [(ngModel)]="cert.description" [name]="'cert_desc_' + $index" [placeholder]="i18n.t('resume.profile.briefDescPlaceholder')">
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Additional Info -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('additionalInfo')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.additionalInfo') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addAdditionalInfo()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('additionalInfo')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['additionalInfo']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['additionalInfo']) {
+ @for (info of profile.additionalInfo; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('additionalInfo', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeAdditionalInfo($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.label') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="info.label" [name]="'info_label_' + $index"
+ [class.input-error]="getFieldError('additionalInfo[' + $index + '].label')"
+ [placeholder]="i18n.t('resume.profile.labelPlaceholder')">
+ @if (getFieldError('additionalInfo[' + $index + '].label')) {
+ <span class="field-error">{{ getFieldError('additionalInfo[' + $index + '].label') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.contentHtml') }}</label>
+ <input type="text" [(ngModel)]="info.content" [name]="'info_content_' + $index" [placeholder]="i18n.t('resume.profile.descriptionPlaceholder')">
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Testimonials -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('testimonials')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.testimonials') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addTestimonial()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('testimonials')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['testimonials']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['testimonials']) {
+ @for (t of profile.testimonials; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('testimonials', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeTestimonial($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.authorName') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="t.authorName" [name]="'test_author_' + $index"
+ [class.input-error]="getFieldError('testimonials[' + $index + '].authorName')"
+ placeholder="John Doe">
+ @if (getFieldError('testimonials[' + $index + '].authorName')) {
+ <span class="field-error">{{ getFieldError('testimonials[' + $index + '].authorName') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.authorRole') }}</label>
+ <input type="text" [(ngModel)]="t.authorRole" [name]="'test_role_' + $index" placeholder="CTO">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.authorCompany') }}</label>
+ <input type="text" [(ngModel)]="t.authorCompany" [name]="'test_company_' + $index" placeholder="Tech Corp">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.authorImage') }}</label>
+ <input type="url" [(ngModel)]="t.authorImageUrl" [name]="'test_img_' + $index" placeholder="https://...">
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('resume.profile.testimonialText') }} <span class="required">*</span></label>
+ <textarea [(ngModel)]="t.text" [name]="'test_text_' + $index" rows="3"
+ [class.input-error]="getFieldError('testimonials[' + $index + '].text')"
+ [placeholder]="i18n.t('resume.profile.testimonialPlaceholder')"></textarea>
+ @if (getFieldError('testimonials[' + $index + '].text')) {
+ <span class="field-error">{{ getFieldError('testimonials[' + $index + '].text') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.accentColor') }}</label>
+ <div class="accent-color-selector">
+ <label class="accent-option" [class.selected]="t.accentColor === 'accent'">
+ <input type="radio" [(ngModel)]="t.accentColor" [name]="'test_color_' + $index" value="accent">
+ <span class="accent-swatch accent-swatch-accent"></span>
+ <span>Accent</span>
+ </label>
+ <label class="accent-option" [class.selected]="t.accentColor === 'success'">
+ <input type="radio" [(ngModel)]="t.accentColor" [name]="'test_color_' + $index" value="success">
+ <span class="accent-swatch accent-swatch-success"></span>
+ <span>Success</span>
+ </label>
+ <label class="accent-option" [class.selected]="t.accentColor === 'warning'">
+ <input type="radio" [(ngModel)]="t.accentColor" [name]="'test_color_' + $index" value="warning">
+ <span class="accent-swatch accent-swatch-warning"></span>
+ <span>Warning</span>
+ </label>
+ </div>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Proficiencies -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('proficiencies')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.proficiencies') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addProficiency()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('proficiencies')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['proficiencies']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['proficiencies']) {
+ @for (p of profile.proficiencies; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('proficiencies', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeProficiency($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.skillName') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="p.skillName" [name]="'prof_name_' + $index"
+ [class.input-error]="getFieldError('proficiencies[' + $index + '].skillName')"
+ placeholder="Java">
+ @if (getFieldError('proficiencies[' + $index + '].skillName')) {
+ <span class="field-error">{{ getFieldError('proficiencies[' + $index + '].skillName') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.category') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="p.category" [name]="'prof_cat_' + $index"
+ [class.input-error]="getFieldError('proficiencies[' + $index + '].category')"
+ placeholder="Backend">
+ @if (getFieldError('proficiencies[' + $index + '].category')) {
+ <span class="field-error">{{ getFieldError('proficiencies[' + $index + '].category') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.percentage') }} ({{ p.percentage || 0 }}%)</label>
+ <div class="range-slider-container">
+ <input type="range" min="0" max="100" [(ngModel)]="p.percentage" [name]="'prof_pct_' + $index" class="styled-range"
+ [style.background]="getSliderGradient(p.percentage)">
+ </div>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.icon') }}</label>
+ <div class="icon-input-row">
+ <input type="text" [(ngModel)]="p.icon" [name]="'prof_icon_' + $index" placeholder="fab fa-java">
+ @if (p.icon) {
+ <span class="icon-preview"><i [class]="p.icon"></i></span>
+ }
+ <button type="button" class="btn-icon-picker" (click)="openIconPicker($index)" title="Browse icons"></button>
+ @if (iconPickerIndex() === $index) {
+ <div class="picker-backdrop" (click)="closeIconPicker()"></div>
+ <div class="picker-modal-container" (click)="closeIconPicker()">
+ <div class="picker-modal" (click)="$event.stopPropagation()">
+ <div class="icon-picker-header">
+ <span class="icon-picker-title">Choose Icon</span>
+ <button type="button" class="btn-close-picker" (click)="closeIconPicker()"></button>
+ </div>
+ @if (p.icon) {
+ <div class="icon-picker-selected">
+ <span>Selected:</span>
+ <i [class]="p.icon"></i>
+ <code>{{ p.icon }}</code>
+ </div>
+ }
+ <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'icon_search_' + $index" placeholder="Search icons..." (ngModelChange)="filterIcons()">
+ @if (faIconsLoading()) {
+ <div class="picker-loading">Loading icons...</div>
+ }
+ <div class="icon-grid">
+ @for (ic of filteredIcons(); track $index) {
+ <button type="button" class="icon-option" [class.selected]="p.icon === ic.class" (click)="selectIcon(ic.class)" [title]="ic.label">
+ <i [class]="ic.class"></i>
+ <span class="icon-label">{{ ic.label }}</span>
+ </button>
+ }
+ </div>
+ </div>
+ </div>
+ }
+ </div>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Projects -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('projects')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.projects') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addProject()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('projects')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['projects']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['projects']) {
+ @for (proj of profile.projects; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('projects', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeProject($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.projectTitle') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="proj.title" [name]="'proj_title_' + $index"
+ [class.input-error]="getFieldError('projects[' + $index + '].title')"
+ placeholder="My App">
+ @if (getFieldError('projects[' + $index + '].title')) {
+ <span class="field-error">{{ getFieldError('projects[' + $index + '].title') }}</span>
+ }
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('common.description') }}</label>
+ <textarea [(ngModel)]="proj.description" [name]="'proj_desc_' + $index" rows="2" [placeholder]="i18n.t('resume.profile.descriptionPlaceholder')"></textarea>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.imageUrl') }}</label>
+ <input type="url" [(ngModel)]="proj.imageUrl" [name]="'proj_img_' + $index" placeholder="https://...">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.projectUrl') }}</label>
+ <input type="url" [(ngModel)]="proj.projectUrl" [name]="'proj_url_' + $index" placeholder="https://...">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.repoUrl') }}</label>
+ <input type="url" [(ngModel)]="proj.repoUrl" [name]="'proj_repo_' + $index" placeholder="https://github.com/...">
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.techTags') }}</label>
+ <input type="text" [(ngModel)]="proj._techTagsText" [name]="'proj_tags_' + $index" placeholder="Java, Spring, Docker">
+ </div>
+ <div class="form-group">
+ <label>
+ <input type="checkbox" [(ngModel)]="proj.featured" [name]="'proj_featured_' + $index">
+ {{ i18n.t('resume.profile.featured') }}
+ </label>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Learning Topics -->
+ <section class="form-section">
+ <div class="section-header-row">
+ <h2 class="section-title section-title-clickable" (click)="toggleSection('learningTopics')">
+ <span class="section-icon"></span>
+ {{ i18n.t('resume.profile.learningTopics') }}
+ </h2>
+ <button type="button" class="btn-add" (click)="addLearningTopic()">{{ i18n.t('resume.profile.add') }}</button>
+ <button type="button" class="collapse-toggle" (click)="toggleSection('learningTopics')" title="Collapse/Expand">
+ <span class="chevron-icon" [class.collapsed]="collapsedSections()['learningTopics']">▾</span>
+ </button>
+ </div>
+ @if (!collapsedSections()['learningTopics']) {
+ @for (lt of profile.learningTopics; track $index) {
+ <div class="entry-card" [class.entry-card--error]="hasEntryError('learningTopics', $index)">
+ <div class="entry-header">
+ <span class="entry-number">#{{ $index + 1 }}</span>
+ <button type="button" class="btn-remove" (click)="removeLearningTopic($index)"></button>
+ </div>
+ <div class="form-grid">
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.topicTitle') }} <span class="required">*</span></label>
+ <input type="text" [(ngModel)]="lt.title" [name]="'lt_title_' + $index"
+ [class.input-error]="getFieldError('learningTopics[' + $index + '].title')"
+ placeholder="Cloud Architecture">
+ @if (getFieldError('learningTopics[' + $index + '].title')) {
+ <span class="field-error">{{ getFieldError('learningTopics[' + $index + '].title') }}</span>
+ }
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.emoji') }}</label>
+ <div class="icon-input-row">
+ <input type="text" [(ngModel)]="lt.emoji" [name]="'lt_emoji_' + $index" placeholder="fas fa-cloud">
+ @if (lt.emoji) {
+ <span class="icon-preview">
+ @if (lt.emoji.startsWith('fa')) {
+ <i [class]="lt.emoji"></i>
+ } @else if (lt.emoji.startsWith('http')) {
+ <img [src]="lt.emoji" alt="icon" class="custom-icon-img">
+ } @else {
+ <span class="emoji-preview-text">{{ lt.emoji }}</span>
+ }
+ </span>
+ }
+ <button type="button" class="btn-icon-picker" (click)="toggleEmojiPicker($index)" title="Browse icons" [attr.aria-expanded]="emojiPickerIndex() === $index" aria-haspopup="dialog"></button>
+ @if (emojiPickerIndex() === $index) {
+ <div class="picker-backdrop" (click)="closeEmojiPicker()"></div>
+ <div class="picker-modal-container" (click)="closeEmojiPicker()">
+ <div class="picker-modal picker-modal-lg" (click)="$event.stopPropagation()">
+ <div class="icon-picker-header">
+ <span class="icon-picker-title">Choose Icon / Emoji</span>
+ <button type="button" class="btn-close-picker" (click)="closeEmojiPicker()"></button>
+ </div>
+ @if (lt.emoji) {
+ <div class="icon-picker-selected">
+ <span>Selected:</span>
+ @if (lt.emoji.startsWith('fa')) {
+ <i [class]="lt.emoji"></i>
+ } @else if (lt.emoji.startsWith('http')) {
+ <img [src]="lt.emoji" alt="icon" class="custom-icon-img">
+ } @else {
+ <span class="emoji-preview-text">{{ lt.emoji }}</span>
+ }
+ <code>{{ lt.emoji }}</code>
+ </div>
+ }
+ <div class="picker-tabs">
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'icons'" (click)="topicPickerTab.set('icons')">Icons</button>
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'emojis'" (click)="topicPickerTab.set('emojis')">Emojis</button>
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'url'" (click)="topicPickerTab.set('url')">Image URL</button>
+ </div>
+ @if (topicPickerTab() === 'icons') {
+ <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'lt_icon_search_' + $index" placeholder="Search icons..." (ngModelChange)="filterIcons()">
+ @if (faIconsLoading()) {
+ <div class="picker-loading">Loading icons from CDN...</div>
+ }
+ <div class="icon-grid">
+ @for (ic of filteredIcons(); track $index) {
+ <button type="button" class="icon-option" [class.selected]="lt.emoji === ic.class" (click)="selectEmoji(ic.class)" [title]="ic.label">
+ <i [class]="ic.class"></i>
+ <span class="icon-label">{{ ic.label }}</span>
+ </button>
+ }
+ </div>
+ }
+ @if (topicPickerTab() === 'emojis') {
+ <emoji-picker class="emoji-picker-embedded" (emoji-click)="onEmojiPicked($event)"></emoji-picker>
+ }
+ @if (topicPickerTab() === 'url') {
+ <div class="url-input-section">
+ <label>Paste image URL:</label>
+ <input type="text" [(ngModel)]="customIconUrl" [name]="'lt_url_' + $index" placeholder="https://example.com/icon.svg" class="icon-search">
+ @if (customIconUrl) {
+ <div class="url-preview">
+ <img [src]="customIconUrl" alt="preview" class="url-preview-img">
+ </div>
+ }
+ <button type="button" class="btn-apply-url" [disabled]="!customIconUrl" (click)="selectEmoji(customIconUrl)">Apply</button>
+ </div>
+ }
+ </div>
+ </div>
+ }
+ </div>
+ </div>
+ <div class="form-group full-width">
+ <label>{{ i18n.t('common.description') }}</label>
+ <textarea [(ngModel)]="lt.description" [name]="'lt_desc_' + $index" rows="2" [placeholder]="i18n.t('resume.profile.descriptionPlaceholder')"></textarea>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.profile.colorTheme') }}</label>
+ <div class="color-input-row">
+ <input type="color" [(ngModel)]="lt.colorTheme" [name]="'lt_color_' + $index">
+ <span>{{ lt.colorTheme || '#6366f1' }}</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ }
+ }
+ </section>
+
+ <!-- Actions -->
+ <div class="form-actions">
+ <a routerLink="/resume/generate" class="btn-generate">
+ {{ i18n.t('resume.profile.generateResume') }}
+ </a>
+ <button type="submit" class="btn-primary" [disabled]="saving()">
+ {{ saving() ? i18n.t('resume.profile.saving') : i18n.t('resume.profile.saveProfile') + ' (' + currentLocale.toUpperCase() + ')' }}
+ </button>
+ </div>
+
+ @if (successMessage()) {
+ <div class="message success">{{ successMessage() }}</div>
+ }
+ @if (errorMessage()) {
+ <div class="message error">
+ {{ errorMessage() }}
+ @if (Object.keys(fieldErrors()).length > 0) {
+ <ul class="field-errors-summary">
+ @for (entry of Object.entries(fieldErrors()); track entry[0]) {
+ <li><strong>{{ entry[0] }}:</strong> {{ entry[1] }}</li>
+ }
+ </ul>
+ }
+ </div>
+ }
+ </form>
+ }
+
+ <!-- Floating Action Buttons -->
+ @if (!embedded()) {
+ <div class="fab-group">
+ <button type="button" class="fab-btn fab-save" (click)="save()" [disabled]="saving()" [title]="i18n.t('resume.profile.saveProfile')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+ <polyline points="17 21 17 13 7 13 7 21"></polyline>
+ <polyline points="7 3 7 8 15 8"></polyline>
+ </svg>
+ <span class="fab-label">{{ saving() ? i18n.t('resume.profile.saving') : i18n.t('resume.profile.saveProfile') }}</span>
+ </button>
+ <a routerLink="/resume/generate" class="fab-btn fab-generate" [title]="i18n.t('resume.profile.generateResume')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+ <polyline points="14 2 14 8 20 8"></polyline>
+ <line x1="16" y1="13" x2="8" y2="13"></line>
+ <line x1="16" y1="17" x2="8" y2="17"></line>
+ <polyline points="10 9 9 9 8 9"></polyline>
+ </svg>
+ <span class="fab-label">{{ i18n.t('resume.profile.generateResume') }}</span>
+ </a>
+ </div>
+ }
+</div>
