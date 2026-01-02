@@ -1,0 +1,151 @@
+﻿<div class="template-editor" [class.theme-dark]="themeService.isDark()">
+ <!-- Header -->
+ <header class="editor-header">
+ <div class="header-left">
+ <a routerLink="/resume/templates" class="back-btn" [title]="i18n.t('resume.editor.backToTemplates')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="15 18 9 12 15 6"/>
+ </svg>
+ </a>
+ <input type="text" [(ngModel)]="templateName" class="template-name-input" [placeholder]="i18n.t('resume.editor.templateNamePlaceholder')"/>
+ <span class="save-status" [class.saved]="!hasChanges()">{{ hasChanges() ? i18n.t('resume.editor.unsaved') : i18n.t('resume.editor.saved') }}</span>
+ </div>
+ <div class="header-actions">
+ <div class="view-toggle">
+ <button [class.active]="viewMode() === 'split'" (click)="viewMode.set('split')" [title]="i18n.t('resume.editor.viewSplit')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+ </button>
+ <button [class.active]="viewMode() === 'code'" (click)="viewMode.set('code')" [title]="i18n.t('resume.editor.viewCode')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+ </button>
+ <button [class.active]="viewMode() === 'preview'" (click)="viewMode.set('preview')" [title]="i18n.t('resume.editor.viewPreview')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+ </button>
+ </div>
+ <button class="btn btn-outline" (click)="downloadPdf()" [disabled]="generatingPdf()">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+ {{ generatingPdf() ? i18n.t('resume.editor.generating') : 'PDF' }}
+ </button>
+ <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+ {{ saving() ? i18n.t('resume.editor.saving') : i18n.t('resume.editor.save') }}
+ </button>
+ </div>
+ </header>
+
+ <!-- Main Editor Area -->
+ <div class="editor-main" [class.view-split]="viewMode() === 'split'" [class.view-code]="viewMode() === 'code'" [class.view-preview]="viewMode() === 'preview'">
+ <!-- Sidebar -->
+ <aside class="editor-sidebar">
+ <div class="sidebar-section">
+ <h3>{{ i18n.t('resume.editor.settings') }}</h3>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.editor.description') }}</label>
+ <textarea [(ngModel)]="templateDescription" rows="3" [placeholder]="i18n.t('resume.editor.descriptionPlaceholder')"></textarea>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.editor.status') }}</label>
+ <select [(ngModel)]="templateStatus">
+ <option value="DRAFT">{{ i18n.t('resume.editor.draft') }}</option>
+ <option value="ACTIVE">{{ i18n.t('resume.editor.active') }}</option>
+ <option value="ARCHIVED">{{ i18n.t('resume.editor.archived') }}</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.editor.paperSize') }}</label>
+ <select [(ngModel)]="paperSize">
+ <option value="A4">A4</option>
+ <option value="LETTER">{{ i18n.t('resume.editor.letter') }}</option>
+ <option value="LEGAL">Legal</option>
+ </select>
+ </div>
+ <div class="form-group checkbox">
+ <label><input type="checkbox" [(ngModel)]="isDefault"/>{{ i18n.t('resume.editor.defaultTemplate') }}</label>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.editor.aliasLabel') }}</label>
+ <input type="text" [(ngModel)]="templateAlias" placeholder="ex: leonardo-catananti"/>
+ <small class="help-text">{{ i18n.t('resume.editor.aliasHelp') }}</small>
+ </div>
+ </div>
+ <div class="sidebar-section">
+ <h3>{{ i18n.t('resume.editor.importFromProfile') }}</h3>
+ <p class="help-text">{{ i18n.t('resume.editor.importHint') }}</p>
+ <div class="import-profile-actions">
+ <div class="import-lang-selector">
+ <button class="import-lang-btn" [class.active]="importLang() === 'en'" (click)="importLang.set('en')">EN</button>
+ <button class="import-lang-btn" [class.active]="importLang() === 'pt'" (click)="importLang.set('pt')">PT</button>
+ <button class="import-lang-btn" [class.active]="importLang() === 'es'" (click)="importLang.set('es')">ES</button>
+ <button class="import-lang-btn" [class.active]="importLang() === 'it'" (click)="importLang.set('it')">IT</button>
+ </div>
+ <button class="import-profile-btn" (click)="importFromProfile()" [disabled]="importingProfile()">
+ {{ importingProfile() ? i18n.t('resume.editor.importing') : i18n.t('resume.editor.importBtn') }}
+ </button>
+ </div>
+ </div>
+ <div class="sidebar-section">
+ <h3>{{ i18n.t('resume.editor.codeSnippets') }}</h3>
+ <div class="snippets">
+ <button class="snippet-btn" (click)="insertSnippet('header')">Header</button>
+ <button class="snippet-btn" (click)="insertSnippet('section')">Section</button>
+ <button class="snippet-btn" (click)="insertSnippet('experience')">Experience</button>
+ <button class="snippet-btn" (click)="insertSnippet('education')">Education</button>
+ <button class="snippet-btn" (click)="insertSnippet('skills')">Skills</button>
+ </div>
+ </div>
+ <div class="sidebar-section">
+ <h3>{{ i18n.t('resume.editor.dynamicVariables') }}</h3>
+ <p class="help-text">{{ i18n.t('resume.editor.clickToInsert') }}</p>
+ <div class="variables-list">
+ @for (variable of variables(); track variable.key) {
+ <button class="variable-btn" (click)="insertVariable(variable.key)">
+ <code>{{ '{{' + variable.key + '}}' }}</code>
+ <span>{{ variable.label }}</span>
+ </button>
+ }
+ </div>
+ </div>
+ </aside>
+
+ <!-- Code Editor Panel -->
+ @if (viewMode() !== 'preview') {
+ <div class="code-panel">
+ <div class="editor-tabs">
+ <button [class.active]="activeTab() === 'html'" (click)="switchTab('html')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>HTML
+ </button>
+ <button [class.active]="activeTab() === 'css'" (click)="switchTab('css')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg>CSS
+ </button>
+ </div>
+ <div class="monaco-container" #monacoContainer></div>
+ </div>
+ }
+
+ <!-- Preview Panel -->
+ @if (viewMode() !== 'code') {
+ <div class="preview-panel">
+ <div class="preview-header">
+ <span>{{ i18n.t('resume.editor.livePreview') }}</span>
+ <div class="preview-actions">
+ <button class="icon-btn" (click)="zoomOut()" [title]="i18n.t('resume.editor.zoomOut')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+ </button>
+ <span class="zoom-level">{{ zoomLevel() }}%</span>
+ <button class="icon-btn" (click)="zoomIn()" [title]="i18n.t('resume.editor.zoomIn')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+ </button>
+ <button class="icon-btn" (click)="refreshPreview()" [title]="i18n.t('resume.editor.refreshPreview')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+ </button>
+ </div>
+ </div>
+ <div class="preview-content" [style.transform]="'scale(' + zoomLevel() / 100 + ')'">
+ <div class="paper" [class.paper-a4]="paperSize === 'A4'" [class.paper-letter]="paperSize === 'LETTER'" [class.paper-legal]="paperSize === 'LEGAL'">
+ <iframe #previewIframe [srcdoc]="previewHtml()" sandbox="" [title]="i18n.t('resume.editor.resumePreview')"></iframe>
+ </div>
+ </div>
+ </div>
+ }
+ </div>
+</div>
