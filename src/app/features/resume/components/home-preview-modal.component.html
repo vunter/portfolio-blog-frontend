@@ -1,0 +1,33 @@
+﻿<div class="preview-overlay" (click)="close.emit()" (keydown.escape)="close.emit()">
+ <div class="preview-container" (click)="$event.stopPropagation()">
+ <div class="preview-header">
+ <h2>{{ i18n.t('resume.preview.title') }}</h2>
+ <span class="preview-badge">{{ i18n.t('resume.preview.livePreview') }}</span>
+ <button class="preview-close" (click)="close.emit()" [title]="i18n.t('resume.preview.close')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <line x1="18" y1="6" x2="6" y2="18"></line>
+ <line x1="6" y1="6" x2="18" y2="18"></line>
+ </svg>
+ </button>
+ </div>
+ <div class="preview-body" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()">
+ <div class="home-preview">
+ <div class="main-layout">
+ <main class="portfolio-content">
+ <app-hero-section [profile]="profile()" />
+ <app-skills-section [profile]="profile()" />
+ <app-experience-section [profile]="profile()" />
+ <app-projects-section [profile]="profile()" />
+ <app-education-section [profile]="profile()" />
+ <app-languages-section [profile]="profile()" />
+ <app-proficiency-section [profile]="profile()" />
+ <app-learning-section [profile]="profile()" />
+ <app-testimonials-section [profile]="profile()" />
+ <app-contact-section [profile]="profile()" />
+ </main>
+ <app-sidebar-section [profile]="profile()" />
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
