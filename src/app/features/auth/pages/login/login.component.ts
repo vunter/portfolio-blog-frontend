@@ -1,0 +1,95 @@
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { from, switchMap, tap } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { AuthStore } from '../../../../core/auth/auth.store';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { I18nService } from '../../../../core/services/i18n.service';
+import { RecaptchaService } from '../../../../core/services/recaptcha.service';
+import { ThemeToggleComponent } from '../../../../shared/components/theme-toggle/theme-toggle.component';
+
+@Component({
+  selector: 'app-login',
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class LoginComponent {
+  private authService = inject(AuthService);
+  private authStore = inject(AuthStore);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private notification = inject(NotificationService);
+  private recaptcha = inject(RecaptchaService);
+  private fb = inject(FormBuilder);
+  i18n = inject(I18nService);
+
+  loginForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+    rememberMe: [false],
+  });
+
+  showPassword = signal(false);
+  loading = signal(false);
+  error = signal<string | null>(null);
+
+  onSubmit(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      this.error.set(this.i18n.t('auth.login.fillAllFields'));
+      return;
+    }
+
+    const { email, password, rememberMe } = this.loginForm.getRawValue();
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    from(this.recaptcha.execute('login')).pipe(
+      switchMap(recaptchaToken => this.authService
+        .login({
+          email: email!,
+          password: password!,
+          rememberMe: rememberMe!,
+          recaptchaToken: recaptchaToken ?? undefined,
+        })
+      ),
+      tap((response) => {
+        this.authStore.setAuthenticated();
+        if (response.expiresIn) {
+          this.authStore.setTokenExpiry(response.expiresIn);
+        }
+      }),
+      switchMap(() => this.authService.getCurrentUser()),
+    )
+      .subscribe({
+        next: (user) => {
+          this.authStore.login(user);
+          this.notification.success(this.i18n.t('auth.login.success'));
+
+          // #21: Role-based default redirect — VIEWER goes to /profile, others to /admin
+          const defaultRoute = user.role === 'VIEWER' ? '/profile' : '/admin';
+          const returnUrl =
+            this.route.snapshot.queryParams['returnUrl'] || defaultRoute;
+          // Prevent open redirect: only allow relative URLs starting with /
+          const safeUrl = returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : defaultRoute;
+          this.router.navigateByUrl(safeUrl);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          if (err.status === 401) {
+            this.error.set(this.i18n.t('auth.login.invalidCredentials'));
+          } else if (err.status === 429) {
+            this.error.set(
+              this.i18n.t('auth.login.tooManyAttempts')
+            );
+          } else {
+            this.error.set(this.i18n.t('auth.login.genericError'));
+          }
+        },
+      });
+  }
+}
