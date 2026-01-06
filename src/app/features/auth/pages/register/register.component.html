@@ -1,0 +1,172 @@
+﻿<div class="auth-page">
+ <app-theme-toggle variant="floating" />
+ <div class="auth-lang-toggle">
+ <button
+ class="auth-lang-btn"
+ [class.active]="i18n.language() === 'en'"
+ (click)="i18n.setLanguage('en')"
+ >EN</button>
+ <button
+ class="auth-lang-btn"
+ [class.active]="i18n.language() === 'pt'"
+ (click)="i18n.setLanguage('pt')"
+ >PT</button>
+ <button
+ class="auth-lang-btn"
+ [class.active]="i18n.language() === 'es'"
+ (click)="i18n.setLanguage('es')"
+ >ES</button>
+ <button
+ class="auth-lang-btn"
+ [class.active]="i18n.language() === 'it'"
+ (click)="i18n.setLanguage('it')"
+ >IT</button>
+ </div>
+ <div class="auth-card">
+ <div class="auth-header">
+ <h1>{{ i18n.t('auth.register.title') }}</h1>
+ <p>{{ i18n.t('auth.register.subtitle') }}</p>
+ </div>
+
+ <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+ @if (error()) {
+ <div class="error-alert" role="alert">
+ {{ error() }}
+ </div>
+ }
+
+ <div class="form-group">
+ <label for="name">{{ i18n.t('auth.register.name') }} <span class="required">*</span></label>
+ <input
+ type="text"
+ id="name"
+ formControlName="name"
+ [placeholder]="i18n.t('auth.register.namePlaceholder')"
+ [disabled]="loading()"
+ [class.input-error]="(registerForm.get('name')?.touched && registerForm.get('name')?.invalid) || fieldErrors()['name']"
+ />
+ @if (registerForm.get('name')?.touched && registerForm.get('name')?.hasError('required')) {
+ <span class="field-error">{{ i18n.t('auth.register.nameRequired') }}</span>
+ } @else if (registerForm.get('name')?.touched && registerForm.get('name')?.hasError('minlength')) {
+ <span class="field-error">{{ i18n.t('auth.register.nameTooShort') }}</span>
+ } @else if (fieldErrors()['name']) {
+ <span class="field-error">{{ fieldErrors()['name'] }}</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="email">{{ i18n.t('auth.register.email') }} <span class="required">*</span></label>
+ <input
+ type="email"
+ id="email"
+ formControlName="email"
+ [placeholder]="i18n.t('auth.register.emailPlaceholder')"
+ [disabled]="loading()"
+ [class.input-error]="(registerForm.get('email')?.touched && registerForm.get('email')?.invalid) || fieldErrors()['email']"
+ />
+ @if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')) {
+ <span class="field-error">{{ i18n.t('auth.register.emailRequired') }}</span>
+ } @else if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')) {
+ <span class="field-error">{{ i18n.t('auth.register.emailInvalid') }}</span>
+ } @else if (fieldErrors()['email']) {
+ <span class="field-error">{{ fieldErrors()['email'] }}</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="password">{{ i18n.t('auth.register.password') }} <span class="required">*</span></label>
+ <div class="password-input">
+ <input
+ [type]="showPassword() ? 'text' : 'password'"
+ id="password"
+ formControlName="password"
+ placeholder="••••••••••••"
+ [disabled]="loading()"
+ [class.input-error]="(registerForm.get('password')?.touched && registerForm.get('password')?.invalid) || fieldErrors()['password']"
+ />
+ <button
+ type="button"
+ class="toggle-password"
+ (click)="showPassword.set(!showPassword())"
+ [attr.aria-label]="showPassword() ? i18n.t('auth.login.hidePassword') : i18n.t('auth.login.showPassword')"
+ >
+ @if (showPassword()) {
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+ <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+ <line x1="1" y1="1" x2="23" y2="23"/>
+ </svg>
+ } @else {
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+ <circle cx="12" cy="12" r="3"/>
+ </svg>
+ }
+ </button>
+ </div>
+ @if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')) {
+ <span class="field-error">{{ i18n.t('auth.register.passwordRequired') }}</span>
+ } @else if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')) {
+ <span class="field-error">{{ i18n.t('auth.register.passwordTooShort') }}</span>
+ } @else if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('pattern')) {
+ <span class="field-error">{{ i18n.t('auth.register.passwordWeak') }}</span>
+ } @else if (fieldErrors()['password']) {
+ <span class="field-error">{{ fieldErrors()['password'] }}</span>
+ } @else {
+ <span class="field-hint">{{ i18n.t('auth.register.passwordHint') }}</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="confirmPassword">{{ i18n.t('auth.register.confirmPassword') }} <span class="required">*</span></label>
+ <div class="password-input">
+ <input
+ [type]="showConfirmPassword() ? 'text' : 'password'"
+ id="confirmPassword"
+ formControlName="confirmPassword"
+ placeholder="••••••••••••"
+ [disabled]="loading()"
+ [class.input-error]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || (registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value && registerForm.get('confirmPassword')?.value))"
+ />
+ <button
+ type="button"
+ class="toggle-password"
+ (click)="showConfirmPassword.set(!showConfirmPassword())"
+ >
+ @if (showConfirmPassword()) {
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+ <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+ <line x1="1" y1="1" x2="23" y2="23"/>
+ </svg>
+ } @else {
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+ <circle cx="12" cy="12" r="3"/>
+ </svg>
+ }
+ </button>
+ </div>
+ @if (registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.hasError('required')) {
+ <span class="field-error">{{ i18n.t('auth.register.confirmPasswordRequired') }}</span>
+ } @else if (registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.value && registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value) {
+ <span class="field-error">{{ i18n.t('auth.register.passwordMismatch') }}</span>
+ }
+ </div>
+
+ <button type="submit" class="submit-btn" [disabled]="loading()">
+ @if (loading()) {
+ <span class="spinner"></span>
+ {{ i18n.t('auth.register.loading') }}
+ } @else {
+ {{ i18n.t('auth.register.submit') }}
+ }
+ </button>
+ </form>
+
+ <div class="auth-footer">
+ <p>
+ {{ i18n.t('auth.register.hasAccount') }}
+ <a routerLink="/auth/login">{{ i18n.t('auth.register.loginLink') }}</a>
+ </p>
+ </div>
+ </div>
+</div>
