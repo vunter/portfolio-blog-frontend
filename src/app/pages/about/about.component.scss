@@ -1,0 +1,19 @@
+.about-page { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
+.about-container { color: var(--text-primary); }
+.about-container h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 2rem; }
+.about-container h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+.about-container p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 1rem; }
+.about-intro { margin-bottom: 2rem; }
+.about-details { margin-bottom: 2rem; }
+.headline { font-size: 1.125rem; font-weight: 500; color: var(--primary-color); }
+.about-skills { margin-bottom: 2rem; }
+.skills-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.skill-tag {
+  padding: 0.375rem 0.75rem;
+  background: var(--accent-tint, rgba(99, 102, 241, 0.1));
+  color: var(--primary-color, #6366f1);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.about-site { margin-bottom: 2rem; }
