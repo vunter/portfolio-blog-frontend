@@ -1,0 +1,42 @@
+﻿<div class="not-found">
+ <div class="not-found__content">
+ <h1 class="not-found__code">404</h1>
+ <h2 class="not-found__title">{{ i18n.t('notFound.title') }}</h2>
+ <p class="not-found__description">
+ {{ i18n.t('notFound.description') }}
+ </p>
+ <div class="not-found__actions">
+ <a routerLink="/" class="btn btn-primary" [attr.aria-label]="i18n.t('notFound.goHome')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+ <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+ <polyline points="9 22 9 12 15 12 15 22" />
+ </svg>
+ {{ i18n.t('notFound.goHome') }}
+ </a>
+ <a routerLink="/blog" class="btn btn-secondary" [attr.aria-label]="i18n.t('notFound.goToBlog')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+ <circle cx="11" cy="11" r="8" />
+ <path d="m21 21-4.35-4.35" />
+ </svg>
+ {{ i18n.t('notFound.goToBlog') }}
+ </a>
+ </div>
+ </div>
+ <div class="not-found__illustration">
+ <svg viewBox="0 0 200 200" fill="none">
+ <circle cx="100" cy="100" r="80" fill="var(--primary-tint, #EEF2FF)" />
+ <circle cx="100" cy="100" r="60" fill="var(--primary-light, #E0E7FF)" />
+ <circle cx="100" cy="100" r="40" fill="var(--primary-light, #C7D2FE)" />
+ <text
+ x="100"
+ y="115"
+ text-anchor="middle"
+ font-size="48"
+ font-weight="bold"
+ fill="var(--primary-color, #6366F1)"
+ >
+ ?
+ </text>
+ </svg>
+ </div>
+</div>
