@@ -1,0 +1,270 @@
+﻿<div class="profile-page">
+ <header class="page-header">
+ <div>
+ <h1>{{ i18n.t('admin.profile.title') }}</h1>
+ <p class="subtitle">{{ i18n.t('admin.profile.subtitle') }}</p>
+ </div>
+ </header>
+
+ @if (loading()) {
+ <div class="loading-state">
+ <div class="spinner"></div>
+ <span>{{ i18n.t('common.loading') }}</span>
+ </div>
+ } @else {
+ <div class="profile-layout">
+ <!-- Avatar section -->
+ <div class="form-card avatar-card">
+ <div class="avatar-section">
+ <div class="avatar-upload-wrapper" (click)="triggerAvatarUpload()" [class.uploading]="uploadingAvatar()">
+ @if (form.avatarUrl && !uploadingAvatar()) {
+ <img [src]="form.avatarUrl" [alt]="form.name" class="avatar-preview" />
+ } @else if (uploadingAvatar()) {
+ <div class="avatar-placeholder">
+ <div class="spinner"></div>
+ </div>
+ } @else {
+ <div class="avatar-placeholder">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+ <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+ <circle cx="12" cy="7" r="4"/>
+ </svg>
+ </div>
+ }
+ <div class="avatar-overlay">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+ <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+ <circle cx="12" cy="13" r="4"/>
+ </svg>
+ <span>{{ i18n.t('admin.profile.changeAvatar') }}</span>
+ </div>
+ </div>
+ <input
+ #avatarFileInput
+ type="file"
+ accept="image/jpeg,image/png,image/gif,image/webp"
+ capture="user"
+ class="visually-hidden"
+ (change)="onAvatarFileSelected($event)"
+ />
+ <div class="avatar-info">
+ <h3>{{ form.name || i18n.t('admin.profile.unnamed') }}</h3>
+ <span class="role-badge">{{ user()?.role }}</span>
+ <p class="member-since">{{ i18n.t('admin.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Personal Info -->
+ <div class="form-card">
+ <h2>
+ <span class="section-icon"></span>
+ {{ i18n.t('admin.profile.personalInfo') }}
+ </h2>
+
+ <div class="form-group">
+ <label for="name">{{ i18n.t('admin.profile.nameLabel') }} <span class="required">*</span></label>
+ <input
+ type="text"
+ id="name"
+ name="name"
+ [(ngModel)]="form.name"
+ [class.input-error]="fieldErrors()['name'] || (formSubmitted() && !form.name)"
+ [placeholder]="i18n.t('admin.profile.namePlaceholder')"
+ [disabled]="saving()"
+ />
+ @if (fieldErrors()['name']) {
+ <span class="field-error">{{ fieldErrors()['name'] }}</span>
+ } @else if (formSubmitted() && !form.name) {
+ <span class="field-error">Name is required</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="email">{{ i18n.t('admin.profile.emailLabel') }} <span class="required">*</span></label>
+ <input
+ type="email"
+ id="email"
+ name="email"
+ [(ngModel)]="form.email"
+ [class.input-error]="fieldErrors()['email']"
+ [placeholder]="i18n.t('admin.profile.emailPlaceholder')"
+ [disabled]="saving()"
+ />
+ @if (fieldErrors()['email']) {
+ <span class="field-error">{{ fieldErrors()['email'] }}</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="username">{{ i18n.t('admin.profile.usernameLabel') }}</label>
+ <input
+ type="text"
+ id="username"
+ name="username"
+ [(ngModel)]="form.username"
+ [placeholder]="i18n.t('admin.profile.usernamePlaceholder')"
+ [disabled]="saving()"
+ />
+ </div>
+
+ <div class="form-group">
+ <label for="avatarUrl">{{ i18n.t('admin.profile.avatarLabel') }}</label>
+ <input
+ type="url"
+ id="avatarUrl"
+ name="avatarUrl"
+ [(ngModel)]="form.avatarUrl"
+ [placeholder]="i18n.t('admin.profile.avatarPlaceholder')"
+ [disabled]="saving()"
+ />
+ <span class="form-hint">{{ i18n.t('admin.profile.avatarHint') }}</span>
+ </div>
+
+ <div class="form-group">
+ <label for="bio">{{ i18n.t('admin.profile.bioLabel') }}</label>
+ <textarea
+ id="bio"
+ name="bio"
+ [(ngModel)]="form.bio"
+ rows="4"
+ [placeholder]="i18n.t('admin.profile.bioPlaceholder')"
+ [disabled]="saving()"
+ ></textarea>
+ </div>
+ </div>
+
+ <!-- Save account button -->
+ <div class="form-actions">
+ <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+ @if (saving()) {
+ <span class="spinner-sm"></span>
+ {{ i18n.t('admin.profile.saving') }}
+ } @else {
+ {{ i18n.t('admin.profile.save') }}
+ }
+ </button>
+ </div>
+
+ <!-- Change password -->
+ <div class="form-card">
+ <h2>
+ <span class="section-icon"></span>
+ {{ i18n.t('admin.profile.changePassword') }}
+ </h2>
+ <p class="section-hint">{{ i18n.t('admin.profile.passwordHint') }}</p>
+
+ <div class="form-group">
+ <label for="currentPassword">{{ i18n.t('admin.profile.currentPassword') }}</label>
+ <input
+ type="password"
+ id="currentPassword"
+ name="currentPassword"
+ [(ngModel)]="form.currentPassword"
+ [placeholder]="i18n.t('admin.profile.currentPasswordPlaceholder')"
+ [disabled]="saving()"
+ />
+ </div>
+
+ <div class="form-group">
+ <label for="newPassword">{{ i18n.t('admin.profile.newPassword') }}</label>
+ <input
+ type="password"
+ id="newPassword"
+ name="newPassword"
+ [(ngModel)]="form.newPassword"
+ [class.input-error]="fieldErrors()['newPassword']"
+ [placeholder]="i18n.t('admin.profile.newPasswordPlaceholder')"
+ [disabled]="saving()"
+ />
+ @if (fieldErrors()['newPassword']) {
+ <span class="field-error">{{ fieldErrors()['newPassword'] }}</span>
+ }
+ </div>
+
+ <div class="form-group">
+ <label for="confirmPassword">{{ i18n.t('admin.profile.confirmNewPassword') }}</label>
+ <input
+ type="password"
+ id="confirmPassword"
+ name="confirmPassword"
+ [(ngModel)]="form.confirmPassword"
+ [class.input-error]="fieldErrors()['confirmPassword']"
+ [placeholder]="i18n.t('admin.profile.confirmPasswordPlaceholder')"
+ [disabled]="saving()"
+ />
+ @if (fieldErrors()['confirmPassword']) {
+ <span class="field-error">{{ fieldErrors()['confirmPassword'] }}</span>
+ }
+ </div>
+
+ <div class="form-actions" style="margin-top: 1rem;">
+ <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+ @if (saving()) {
+ <span class="spinner-sm"></span>
+ {{ i18n.t('admin.profile.saving') }}
+ } @else {
+ {{ i18n.t('admin.profile.save') }}
+ }
+ </button>
+ </div>
+ </div>
+
+ <!-- Request Dev Role -->
+ @if (user()?.role === 'VIEWER' || user()?.role === 'EDITOR') {
+ <div class="form-card">
+ <h2>
+ <span class="section-icon"></span>
+ {{ i18n.t('profile.roleRequest.title') }}
+ </h2>
+ <p class="section-hint">{{ i18n.t('profile.roleRequest.description') }}</p>
+
+ @if (roleRequest(); as req) {
+ <div class="role-request-status" [class]="'role-request-status--' + req.status.toLowerCase()">
+ <div class="role-request-status__header">
+ <span class="role-request-status__badge">{{ i18n.t('profile.roleRequest.status.' + req.status) }}</span>
+ <span class="role-request-status__date">{{ req.createdAt | date:'mediumDate' }}</span>
+ </div>
+ @if (req.reason) {
+ <p class="role-request-status__reason">{{ req.reason }}</p>
+ }
+ @if (req.status === 'REJECTED') {
+ <p class="role-request-status__hint">{{ i18n.t('profile.roleRequest.rejectedHint') }}</p>
+ }
+ </div>
+ }
+
+ @if (canRequestUpgrade) {
+ <div class="form-group">
+ <label for="roleReason">{{ i18n.t('profile.roleRequest.reasonLabel') }}</label>
+ <textarea
+ id="roleReason"
+ name="roleReason"
+ [(ngModel)]="roleRequestReason"
+ rows="3"
+ [placeholder]="i18n.t('profile.roleRequest.reasonPlaceholder')"
+ [disabled]="submittingRoleRequest()"
+ maxlength="1000"
+ ></textarea>
+ </div>
+
+ <div class="form-actions" style="margin-top: 1rem;">
+ <button
+ type="button"
+ class="btn btn-accent"
+ (click)="submitRoleRequest()"
+ [disabled]="submittingRoleRequest()">
+ @if (submittingRoleRequest()) {
+ <span class="spinner-sm"></span>
+ {{ i18n.t('profile.roleRequest.submitting') }}
+ } @else {
+ {{ i18n.t('profile.roleRequest.submit') }}
+ }
+ </button>
+ </div>
+ }
+ </div>
+ }
+ </div>
+ }
+</div>
