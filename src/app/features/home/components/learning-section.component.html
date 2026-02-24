@@ -1,0 +1,32 @@
+﻿<section id="learning" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.learning.title') }}</h2>
+ <div class="learning-grid">
+ @if (hasLearningTopics()) {
+ @for (topic of learningTopics(); track topic.id ?? topic.title) {
+ <div class="learning-card" [class]="topic.colorTheme ? 'learning-' + topic.colorTheme : ''">
+ <h3>
+ @switch (getIconType(topic.emoji)) {
+ @case ('fa') {
+ <i [class]="topic.emoji"></i>
+ }
+ @case ('img') {
+ <img [src]="topic.emoji" class="topic-icon" alt="" />
+ }
+ @case ('emoji') {
+ <span class="topic-emoji">{{ topic.emoji }}</span>
+ }
+ }
+ {{ topic.title }}
+ </h3>
+ <p>{{ topic.description }}</p>
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.learning.noData') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+</section>

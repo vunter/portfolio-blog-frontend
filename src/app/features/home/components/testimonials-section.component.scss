@@ -1,0 +1,46 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+.section { margin-bottom: 2rem; }
+.container {
+  @include m.section-container;
+}
+.section-title {
+  @include m.section-title;
+}
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+@media (max-width: 992px) {
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.testimonial-card {
+  @include m.card;
+}
+.testimonial-accent { border-left: 4px solid var(--accent-light); }
+.testimonial-success { border-left: 4px solid var(--success-color); }
+.testimonial-warning { border-left: 4px solid #f59e0b; }
+.testimonial-text {
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+.testimonial-author strong {
+  color: var(--text-primary);
+  display: block;
+}
+.testimonial-author span {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}

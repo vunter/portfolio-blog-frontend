@@ -1,0 +1,38 @@
+﻿<section id="contact" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.contact.title') }}</h2>
+ <div class="contact-content">
+ <p>{{ contactDescription() ?? i18n.t('home.contact.desc') }}</p>
+
+ <!-- Availability Badge -->
+ <div class="availability-badge">
+ <span class="availability-dot"></span>
+ {{ availabilityText() ?? i18n.t('home.contact.available') }}
+ </div>
+
+ <div class="contact-buttons">
+ <a [href]="'mailto:' + email()" class="btn btn-primary">{{ i18n.t('home.contact.sendEmail') }}</a>
+ <a [href]="linkedinUrl()" class="btn btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
+ <a [href]="githubUrl()" class="btn btn-secondary" target="_blank" rel="noopener">GitHub</a>
+ <button class="btn btn-outline btn-download" (click)="downloadResume()" [disabled]="downloadingResume()">
+ @if (downloadingResume()) {
+ <span class="btn-spinner"></span>
+ {{ i18n.t('home.contact.downloading') }}
+ } @else {
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+ <polyline points="7 10 12 15 17 10"/>
+ <line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ {{ i18n.t('home.contact.downloadCV') }}
+ }
+ </button>
+ </div>
+
+ <!-- Contact Form -->
+ <div class="contact-form-wrapper">
+ <app-contact-form />
+ </div>
+ </div>
+ </div>
+</section>

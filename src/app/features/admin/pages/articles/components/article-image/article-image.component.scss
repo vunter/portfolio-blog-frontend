@@ -1,0 +1,119 @@
+:host {
+  display: block;
+}
+
+.form-card {
+  background: var(--card-bg, white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
+  margin-bottom: 1.5rem;
+
+  h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+    margin: 0 0 1rem;
+  }
+}
+
+.image-upload {
+  .image-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .image-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg-secondary, #f3f4f6);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-muted, #9ca3af);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+
+    svg {
+      width: 32px;
+      height: 32px;
+      stroke-width: 1.5;
+    }
+
+    span {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.image-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    background: var(--card-bg, white);
+    color: var(--text-primary, #1a1a1a);
+  }
+}
+
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, white);
+  border-radius: 6px;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--primary-color, #6366f1);
+    color: white;
+    border-color: var(--primary-color, #6366f1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.file-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

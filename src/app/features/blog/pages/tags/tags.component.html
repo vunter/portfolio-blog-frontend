@@ -1,0 +1,39 @@
+﻿<div class="tags-page">
+ <header class="page-header">
+ <h1>{{ i18n.t('blog.tags.title') }}</h1>
+ <p>{{ i18n.t('blog.tags.subtitle') }}</p>
+ </header>
+
+ @if (loading()) {
+ <app-loading-spinner [inline]="true" [message]="i18n.t('blog.tags.loading')" />
+ } @else {
+ <div class="tags-grid">
+ @for (tag of tags(); track tag.id) {
+ <a
+ [routerLink]="['/blog/tag', tag.slug]"
+ class="tag-card"
+ [style.border-color]="tag.color || '#6366f1'"
+ >
+ <div
+ class="tag-card__icon"
+ [style.background-color]="tag.color || '#6366f1'"
+ >
+ #
+ </div>
+ <div class="tag-card__content">
+ <h2 class="tag-card__name">{{ tag.name }}</h2>
+ @if (tag.description) {
+ <p class="tag-card__description">{{ tag.description }}</p>
+ }
+ <span class="tag-card__count">
+ {{ tag.articleCount }}
+ {{ tag.articleCount === 1 ? i18n.t('blog.tags.article') : i18n.t('blog.tags.articles') }}
+ </span>
+ </div>
+ </a>
+ } @empty {
+ <p class="no-tags">{{ i18n.t('blog.tags.noTags') }}</p>
+ }
+ </div>
+ }
+</div>

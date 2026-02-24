@@ -1,0 +1,35 @@
+﻿<section id="proficiency" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.proficiency.title') }}</h2>
+ <div class="proficiency-container">
+ @if (hasProficiencies()) {
+ @for (prof of proficiencies(); track prof.id ?? prof.skillName) {
+ <div class="proficiency-item">
+ <div class="proficiency-header">
+ <span class="proficiency-name" [id]="'prof-' + prof.skillName.toLowerCase().replace(' ', '-')">
+ @switch (getIconType(prof.icon)) {
+ @case ('fa') {
+ <i [class]="prof.icon"></i>
+ }
+ @case ('img') {
+ <img [src]="prof.icon" class="prof-icon" alt="" />
+ }
+ @case ('emoji') {
+ <span class="prof-emoji">{{ prof.icon }}</span>
+ }
+ }
+ {{ prof.skillName }}
+ </span>
+ <span class="proficiency-value">{{ prof.percentage }}%</span>
+ </div>
+ <div class="proficiency-bar" role="progressbar" [attr.aria-valuenow]="prof.percentage" aria-valuemin="0" aria-valuemax="100" [attr.aria-labelledby]="'prof-' + prof.skillName.toLowerCase().replace(' ', '-')"><div class="proficiency-fill" [style.width.%]="prof.percentage"></div></div>
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.proficiency.noData') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+</section>

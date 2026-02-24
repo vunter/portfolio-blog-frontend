@@ -1,0 +1,65 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+.section { margin-bottom: 2rem; }
+.container {
+  @include m.section-container;
+}
+.section-title {
+  @include m.section-title;
+}
+.education-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.edu-card {
+  @include m.card;
+  transition: all var(--transition-slow, 0.3s ease);
+}
+.edu-card:hover {
+  border-color: var(--accent-color);
+  background: var(--card-bg-hover);
+}
+.edu-card h3 {
+  color: var(--accent-light);
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+.edu-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.edu-institution {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.edu-year {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+.edu-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}
+.cert-link {
+  color: var(--accent-light);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.75rem;
+}
+.learning-card {
+  background: linear-gradient(135deg, var(--accent-tint), rgba(96, 165, 250, 0.05));
+  border: 2px dashed var(--learning-dashed-border);
+}
+.coming-soon {
+  color: var(--accent-light);
+  font-weight: 600;
+  font-style: italic;
+  margin-top: 0.75rem;
+}

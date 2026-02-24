@@ -1,0 +1,63 @@
+@use '../../../shared/styles/mixins' as m;
+
+:host { display: block; }
+.section { margin-bottom: 2rem; }
+.container {
+  @include m.section-container;
+}
+.section-title {
+  @include m.section-title;
+}
+.proficiency-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.proficiency-item {
+  margin-bottom: 2rem;
+}
+.proficiency-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.proficiency-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 1.1rem;
+    color: var(--accent-light, #60a5fa);
+  }
+}
+.prof-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.prof-emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+:host .proficiency-value {
+  color: var(--accent-light, #60a5fa);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.proficiency-bar {
+  background: var(--bg-tertiary, #334155);
+  border-radius: var(--radius-lg, 10px);
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.proficiency-fill {
+  background: linear-gradient(90deg, var(--accent-color, #3b82f6), var(--accent-light, #60a5fa));
+  height: 100%;
+  border-radius: var(--radius-lg, 10px);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  transition: width 1s ease-in-out;
+}

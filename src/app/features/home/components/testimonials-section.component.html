@@ -1,0 +1,22 @@
+﻿<section id="testimonials" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.testimonials.title') }}</h2>
+ <div class="testimonials-grid">
+ @if (hasTestimonials()) {
+ @for (testimonial of testimonials(); track testimonial.id ?? testimonial.authorName; let i = $index) {
+ <div class="testimonial-card" [class]="getAccentClass(testimonial, i)">
+ <p class="testimonial-text">{{ testimonial.text }}</p>
+ <div class="testimonial-author">
+ <strong>{{ testimonial.authorName }}</strong>
+ <span>{{ testimonial.authorRole }}{{ testimonial.authorCompany ? ' at ' + testimonial.authorCompany : '' }}</span>
+ </div>
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.testimonials.noData') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+</section>

@@ -1,0 +1,50 @@
+﻿<div class="multi-select" [class.open]="dropdownOpen()" #container>
+ <div class="multi-select__control" (click)="onControlClick()">
+ <div class="multi-select__tags-and-input">
+ @for (val of selectedValues(); track val) {
+ <span class="multi-select__chip">
+ {{ getLabel(val) }}
+ <button type="button" class="multi-select__chip-remove" (click)="removeValue(val, $event)" aria-label="Remove">×</button>
+ </span>
+ }
+ <input
+ #searchInput
+ type="text"
+ class="multi-select__input"
+ [placeholder]="selectedValues().length ? '' : placeholder()"
+ [value]="searchTerm()"
+ (input)="onSearchInput($event)"
+ (focus)="openDropdown()"
+ (keydown)="onKeydown($event)"
+ autocomplete="off"
+ />
+ </div>
+ <button type="button" class="multi-select__toggle" (click)="toggleDropdown($event)" tabindex="-1">
+ <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+ <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+ </svg>
+ </button>
+ </div>
+
+ @if (dropdownOpen()) {
+ <div class="multi-select__dropdown">
+ @if (filteredOptions().length === 0) {
+ <div class="multi-select__no-results">{{ i18n.t('search.noResults') }}</div>
+ }
+ @for (opt of filteredOptions(); track opt.value; let idx = $index) {
+ <div
+ class="multi-select__option"
+ [class.highlighted]="idx === highlightedIndex()"
+ [class.selected]="isSelected(opt.value)"
+ (mouseenter)="highlightedIndex.set(idx)"
+ (mousedown)="selectOption(opt, $event)"
+ >
+ <span class="multi-select__option-check">
+ @if (isSelected(opt.value)) { }
+ </span>
+ <span>{{ i18n.t(opt.labelKey) }}</span>
+ </div>
+ }
+ </div>
+ }
+</div>

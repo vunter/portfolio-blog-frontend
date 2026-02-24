@@ -1,0 +1,94 @@
+﻿<div class="template-preview">
+ <header class="preview-header">
+ <div class="header-left">
+ <a routerLink="/resume/templates" class="back-btn">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="15 18 9 12 15 6"/>
+ </svg>
+ Templates
+ </a>
+ <h1>{{ template()?.name }}</h1>
+ </div>
+ <div class="header-actions">
+ <a [routerLink]="['/resume/editor', template()?.id]" [class.disabled]="!template()?.id" class="btn btn-secondary">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+ <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+ </svg>
+ {{ i18n.t('resume.preview.edit') }}
+ </a>
+ <button class="btn btn-primary" (click)="generatePdf()" [disabled]="generating()">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+ <polyline points="7 10 12 15 17 10"/>
+ <line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ {{ generating() ? i18n.t('resume.preview.generating') : i18n.t('resume.preview.generatePdf') }}
+ </button>
+ </div>
+ </header>
+
+ <div class="preview-layout">
+ <!-- Sidebar -->
+ <aside class="preview-sidebar">
+ <h3>{{ i18n.t('resume.preview.exportOptions') }}</h3>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.preview.format') }}</label>
+ <select [(ngModel)]="pdfOptions.format">
+ <option value="A4">A4</option>
+ <option value="Letter">Letter</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label>{{ i18n.t('resume.preview.margins') }}</label>
+ <div class="margins-grid">
+ <input type="number" [(ngModel)]="pdfOptions.margins.top" [placeholder]="i18n.t('resume.preview.marginTop')" />
+ <input type="number" [(ngModel)]="pdfOptions.margins.right" [placeholder]="i18n.t('resume.preview.marginRight')" />
+ <input type="number" [(ngModel)]="pdfOptions.margins.bottom" [placeholder]="i18n.t('resume.preview.marginBottom')" />
+ <input type="number" [(ngModel)]="pdfOptions.margins.left" [placeholder]="i18n.t('resume.preview.marginLeft')" />
+ </div>
+ </div>
+ <div class="form-group">
+ <label>
+ <input type="checkbox" [(ngModel)]="pdfOptions.includeBackground" />
+ {{ i18n.t('resume.preview.includeBackground') }}
+ </label>
+ </div>
+
+ <!-- Dynamic Variables -->
+ @if (detectedVariables().length > 0) {
+ <h3 class="section-title">{{ i18n.t('resume.preview.templateVariables') }}</h3>
+ <div class="variables-form">
+ @for (variable of detectedVariables(); track variable) {
+ <div class="form-group">
+ <label>{{ formatVariableName(variable) }}</label>
+ <input 
+ type="text" 
+ [placeholder]="'{{' + variable + '}}'"
+ [ngModel]="templateVariables()[variable] || ''"
+ (ngModelChange)="updateVariable(variable, $event)"
+ />
+ </div>
+ }
+ </div>
+ <button class="btn btn-secondary btn-full" (click)="applyVariables()">
+ {{ i18n.t('resume.preview.applyVariables') }}
+ </button>
+ }
+ </aside>
+
+ <!-- Preview -->
+ <main class="preview-main">
+ @if (loading()) {
+ <app-loading-spinner [inline]="true" [message]="i18n.t('resume.preview.loadingPreview')" />
+ } @else {
+ <div class="preview-container">
+ <iframe
+ [srcdoc]="previewHtml()"
+ sandbox="allow-same-origin"
+ ></iframe>
+ </div>
+ }
+ </main>
+ </div>
+</div>

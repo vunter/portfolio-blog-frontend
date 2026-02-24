@@ -1,0 +1,27 @@
+﻿@switch (variant()) {
+ @case ('card') {
+ <div class="skeleton-card">
+ <div class="skeleton-image shimmer"></div>
+ <div class="skeleton-body">
+ <div class="skeleton-tags">
+ <div class="skeleton-tag shimmer"></div>
+ <div class="skeleton-tag shimmer"></div>
+ </div>
+ <div class="skeleton-title shimmer"></div>
+ <div class="skeleton-title skeleton-title--short shimmer"></div>
+ <div class="skeleton-text shimmer"></div>
+ <div class="skeleton-text shimmer"></div>
+ <div class="skeleton-footer">
+ <div class="skeleton-avatar shimmer"></div>
+ <div class="skeleton-name shimmer"></div>
+ </div>
+ </div>
+ </div>
+ }
+ @case ('text') {
+ <div class="skeleton-text shimmer"></div>
+ }
+ @case ('circle') {
+ <div class="skeleton-circle shimmer"></div>
+ }
+}

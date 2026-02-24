@@ -1,0 +1,17 @@
+﻿<div class="form-card">
+ <h3>{{ i18n.t('admin.articleForm.tagsSection') }}</h3>
+ <div class="tags-selection">
+ @for (tag of tags(); track tag.id) {
+ <label class="tag-checkbox">
+ <input
+ type="checkbox"
+ [checked]="isTagSelected(tag.id)"
+ (change)="onToggleTag(tag.id)"
+ />
+ <span class="tag-name" [style.border-color]="tag.color">
+ {{ tag.name }}
+ </span>
+ </label>
+ }
+ </div>
+</div>

@@ -1,0 +1,38 @@
+﻿<section id="education" class="section">
+ <div class="container">
+ <h2 class="section-title">{{ i18n.t('home.edu.title') }}</h2>
+ <div class="education-grid">
+ @if (hasProfileData()) {
+ @for (edu of educations(); track edu.id ?? $index) {
+ <div class="edu-card">
+ <h3> {{ edu.degree }}</h3>
+ <div class="edu-title">{{ edu.fieldOfStudy }}</div>
+ <div class="edu-institution">{{ edu.institution }}@if (edu.location) {, {{ edu.location }}}</div>
+ <div class="edu-year">{{ edu.startDate }}@if (edu.endDate) { - {{ edu.endDate }}}</div>
+ @if (edu.description) {
+ <p class="edu-description">{{ edu.description }}</p>
+ }
+ </div>
+ }
+ @for (cert of certifications(); track cert.id ?? $index) {
+ <div class="edu-card">
+ <h3> {{ cert.name }}</h3>
+ @if (cert.description) {
+ <div class="edu-title">{{ cert.description }}</div>
+ }
+ @if (cert.issuer) {
+ <div class="edu-institution">{{ cert.issuer }}</div>
+ }
+ @if (cert.credentialUrl) {
+ <a [href]="cert.credentialUrl" target="_blank" rel="noopener" class="cert-link">{{ i18n.t('home.edu.viewCert') }}</a>
+ }
+ </div>
+ }
+ } @else {
+ <div class="empty-state">
+ <p>{{ i18n.t('home.edu.noData') }}</p>
+ </div>
+ }
+ </div>
+ </div>
+</section>
