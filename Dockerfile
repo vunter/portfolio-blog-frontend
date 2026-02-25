@@ -1,24 +1,14 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# F-410: TODO: Externalize Nexus registry URL to build arg
-# Configure npm to use local Nexus proxy
-ARG NPM_REGISTRY=http://192.168.1.214:30081/repository/npm-proxy/
+# Use npm registry (defaults to npmjs.org for CI; override for local Nexus)
+ARG NPM_REGISTRY=https://registry.npmjs.org/
 RUN npm config set registry $NPM_REGISTRY
 
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npx ng build --configuration=production
-
-# F-406: Nexus credentials are in a separate build stage and discarded in final image
-# Publish build tarball to Nexus (best-effort)
-ARG NEXUS_USERNAME=""
-ARG NEXUS_PASSWORD=""
-RUN if [ -n "$NEXUS_USERNAME" ]; then \
-      npm config set //192.168.1.214:30081/repository/npm-hosted/:_auth=$(echo -n "$NEXUS_USERNAME:$NEXUS_PASSWORD" | base64) && \
-      npm publish --registry http://192.168.1.214:30081/repository/npm-hosted/ || true; \
-    fi
 
 FROM nginx:alpine
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
