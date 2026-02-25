@@ -14,6 +14,8 @@ export interface LoginResponse {
   expiresIn: number;
   email: string;
   name: string;
+  mfaRequired?: boolean;
+  mfaToken?: string;
 }
 
 export interface PasswordResetRequest {
@@ -51,6 +53,33 @@ export interface UserResponse {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// ============================================
+// MFA / TWO-FACTOR AUTHENTICATION
+// ============================================
+
+export interface MfaSetupResponse {
+  qrCodeDataUri: string;
+  secretKey: string;
+  method: 'TOTP' | 'EMAIL';
+}
+
+export interface MfaStatusResponse {
+  mfaEnabled: boolean;
+  methods: string[];
+  preferredMethod?: string;
+}
+
+export interface MfaVerifyRequest {
+  code: string;
+  method: 'TOTP' | 'EMAIL';
+}
+
+export interface MfaLoginVerifyRequest {
+  mfaToken: string;
+  code: string;
+  method: 'TOTP' | 'EMAIL';
 }
 
 // ============================================

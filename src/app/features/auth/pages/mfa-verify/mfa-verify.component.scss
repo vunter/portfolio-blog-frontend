@@ -1,0 +1,28 @@
+/* Shared auth styles from _components.scss */
+
+.mfa-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.mfa-link-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary, #6366f1);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  padding: 0.25rem 0.5rem;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

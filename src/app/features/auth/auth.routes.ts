@@ -9,6 +9,11 @@ export const authRoutes: Routes = [
       import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'mfa-verify',
+    loadComponent: () =>
+      import('./pages/mfa-verify/mfa-verify.component').then((m) => m.MfaVerifyComponent),
+  },
+  {
     path: 'register',
     canActivate: [guestGuard],
     loadComponent: () =>

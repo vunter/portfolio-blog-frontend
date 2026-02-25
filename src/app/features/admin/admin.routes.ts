@@ -126,6 +126,14 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'admin.sidebar.settings' },
       },
+      {
+        path: 'security',
+        loadComponent: () =>
+          import('./pages/security/security-settings.component').then(
+            (m) => m.SecuritySettingsComponent
+          ),
+        data: { breadcrumb: 'admin.sidebar.security' },
+      },
     ],
   },
 ];

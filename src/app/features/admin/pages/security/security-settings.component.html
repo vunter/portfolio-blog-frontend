@@ -1,0 +1,117 @@
+<div class="security-settings">
+  <h2>{{ i18n.t('admin.security.title') }}</h2>
+  <p class="section-desc">{{ i18n.t('admin.security.description') }}</p>
+
+  @if (loading()) {
+    <div class="loading-spinner">
+      <span class="spinner"></span>
+      {{ i18n.t('common.loading') }}
+    </div>
+  } @else {
+    <!-- MFA Status Card -->
+    <div class="mfa-card">
+      <div class="mfa-card-header">
+        <div class="mfa-status-badge" [class.enabled]="mfaStatus()?.mfaEnabled">
+          @if (mfaStatus()?.mfaEnabled) {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            {{ i18n.t('admin.security.enabled') }}
+          } @else {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            {{ i18n.t('admin.security.disabled') }}
+          }
+        </div>
+      </div>
+
+      @if (mfaStatus()?.mfaEnabled) {
+        <div class="mfa-methods">
+          <h4>{{ i18n.t('admin.security.activeMethods') }}</h4>
+          <ul>
+            @for (method of mfaStatus()?.methods ?? []; track method) {
+              <li>
+                @if (method === 'TOTP') {
+                  🔐 {{ i18n.t('admin.security.authenticatorApp') }}
+                } @else {
+                  📧 {{ i18n.t('admin.security.emailOtp') }}
+                }
+                @if (method === mfaStatus()?.preferredMethod) {
+                  <span class="preferred-badge">{{ i18n.t('admin.security.preferred') }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+
+        <button class="btn btn-danger" (click)="disableMfa()" [disabled]="disabling()">
+          @if (disabling()) {
+            <span class="spinner"></span>
+          }
+          {{ i18n.t('admin.security.disableMfa') }}
+        </button>
+      } @else {
+        <!-- Setup options -->
+        @if (!showSetup()) {
+          <div class="setup-options">
+            <h4>{{ i18n.t('admin.security.chooseMethod') }}</h4>
+            <div class="setup-btns">
+              <button class="btn btn-primary" (click)="setupTotp()" [disabled]="enabling()">
+                🔐 {{ i18n.t('admin.security.setupTotp') }}
+              </button>
+              <button class="btn btn-secondary" (click)="enableEmail()" [disabled]="enabling()">
+                📧 {{ i18n.t('admin.security.setupEmail') }}
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- TOTP Setup Flow -->
+      @if (showSetup() && setupData()) {
+        <div class="totp-setup">
+          <h4>{{ i18n.t('admin.security.scanQr') }}</h4>
+          <p>{{ i18n.t('admin.security.scanQrDesc') }}</p>
+
+          <div class="qr-container">
+            <img [src]="setupData()!.qrCodeDataUri" alt="QR Code" width="250" height="250" />
+          </div>
+
+          <div class="secret-key">
+            <label>{{ i18n.t('admin.security.manualKey') }}</label>
+            <code>{{ setupData()!.secretKey }}</code>
+          </div>
+
+          <form class="verify-form" [formGroup]="verifyForm" (ngSubmit)="verifySetup()">
+            <div class="form-group">
+              <label for="verify-code">{{ i18n.t('admin.security.enterCode') }}</label>
+              <input
+                type="text"
+                id="verify-code"
+                formControlName="code"
+                placeholder="000000"
+                maxlength="6"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+                pattern="[0-9]*"
+              />
+            </div>
+            <div class="setup-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="verifying()">
+                @if (verifying()) {
+                  <span class="spinner"></span>
+                }
+                {{ i18n.t('admin.security.verifyAndEnable') }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="cancelSetup()">
+                {{ i18n.t('common.cancel') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  }
+</div>

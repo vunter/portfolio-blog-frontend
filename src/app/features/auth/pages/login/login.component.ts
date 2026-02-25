@@ -58,12 +58,29 @@ export class LoginComponent {
         })
       ),
       tap((response) => {
+        // If MFA is required, redirect to MFA verify page instead of completing login
+        if (response.mfaRequired && response.mfaToken) {
+          this.loading.set(false);
+          this.router.navigate(['/auth/mfa-verify'], {
+            state: {
+              mfaToken: response.mfaToken,
+              email: response.email,
+            },
+          });
+          return;
+        }
         this.authStore.setAuthenticated();
         if (response.expiresIn) {
           this.authStore.setTokenExpiry(response.expiresIn);
         }
       }),
-      switchMap(() => this.authService.getCurrentUser()),
+      // Skip the rest of the pipeline if MFA is required
+      switchMap((response) => {
+        if (response.mfaRequired) {
+          return [];
+        }
+        return this.authService.getCurrentUser();
+      }),
     )
       .subscribe({
         next: (user) => {
