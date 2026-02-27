@@ -1,4 +1,3 @@
-// TODO F-364: Standardize test data language to English
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NotificationService, Notification } from './notification.service';
 
@@ -23,16 +22,16 @@ describe('NotificationService', () => {
 
   describe('success', () => {
     it('should add a success notification', () => {
-      service.success('Artigo criado com sucesso');
+      service.success('Article created successfully');
 
       expect(service.notifications().length).toBe(1);
       expect(service.notifications()[0].type).toBe('success');
-      expect(service.notifications()[0].message).toBe('Artigo criado com sucesso');
+      expect(service.notifications()[0].message).toBe('Article created successfully');
       expect(service.hasNotifications()).toBeTrue();
     });
 
     it('should return a notification id', () => {
-      const id = service.success('Tag salva');
+      const id = service.success('Tag saved');
       expect(id).toBeTruthy();
       expect(typeof id).toBe('string');
     });
@@ -56,11 +55,11 @@ describe('NotificationService', () => {
 
   describe('error', () => {
     it('should add an error notification', () => {
-      service.error('Erro ao salvar artigo');
+      service.error('Failed to save article');
 
       expect(service.notifications().length).toBe(1);
       expect(service.notifications()[0].type).toBe('error');
-      expect(service.notifications()[0].message).toBe('Erro ao salvar artigo');
+      expect(service.notifications()[0].message).toBe('Failed to save article');
     });
 
     it('should default to 8000ms duration for errors', fakeAsync(() => {
@@ -76,27 +75,27 @@ describe('NotificationService', () => {
 
   describe('warning', () => {
     it('should add a warning notification', () => {
-      service.warning('Alterações não salvas');
+      service.warning('Unsaved changes');
 
       expect(service.notifications()[0].type).toBe('warning');
-      expect(service.notifications()[0].message).toBe('Alterações não salvas');
+      expect(service.notifications()[0].message).toBe('Unsaved changes');
     });
   });
 
   describe('info', () => {
     it('should add an info notification', () => {
-      service.info('Artigo salvo automaticamente');
+      service.info('Article auto-saved');
 
       expect(service.notifications()[0].type).toBe('info');
-      expect(service.notifications()[0].message).toBe('Artigo salvo automaticamente');
+      expect(service.notifications()[0].message).toBe('Article auto-saved');
     });
   });
 
   describe('multiple notifications', () => {
     it('should show multiple notifications simultaneously', () => {
-      service.success('Artigo criado');
+      service.success('Article created');
       service.info('Draft auto-saved');
-      service.warning('Conteúdo longo');
+      service.warning('Long content');
 
       expect(service.notifications().length).toBe(3);
     });

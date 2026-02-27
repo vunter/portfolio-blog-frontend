@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, ElementRef, AfterViewInit, ChangeDetectionStrategy, DestroyRef, viewChild } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ElementRef, AfterViewInit, ChangeDetectionStrategy, DestroyRef, viewChild, afterNextRender, Injector } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,8 +16,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
 import { ArticleResponse, ArticleRequest, TagResponse, ArticleStatus } from '../../../../models';
 
-// TODO F-325: Create shared monaco.d.ts type declarations
-declare const monaco: any;
+// Monaco type declarations provided by shared/types/monaco.d.ts
 
 interface ArticleForm {
   title: FormControl<string>;
@@ -52,6 +51,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly monacoLoader = inject(MonacoLoaderService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   readonly i18n = inject(I18nService);
 
   isEditMode = signal(false);
@@ -70,6 +70,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private resizing = false;
   private resizeContainer: HTMLElement | null = null;
   private resizeCleanup: (() => void) | null = null;
+  private rafPending = false;
 
   private monacoEditor: any = null;
   private monacoLoaded = false;
@@ -93,7 +94,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   articleId: string | null = null;
 
-  // TODO F-383: Add keyboard shortcuts help panel or tooltip
+  readonly keyboardShortcutsTitle = 'Ctrl+S: Save · Ctrl+P: Preview · Esc: Exit fullscreen';
+
   // ANG20-06: Moved from @HostListener to host property
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.isFullscreen()) {
@@ -175,15 +177,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleFullscreen(): void {
     this.isFullscreen.update(v => !v);
-    // Give Angular time to update template, then re-layout Monaco
-    // TODO F-327: Use afterNextRender() or ResizeObserver instead of setTimeout
-    setTimeout(() => {
+    afterNextRender(() => {
       this.monacoEditor?.layout();
-    }, 50);
+    }, { injector: this.injector });
   }
 
   // ===== Resize Split Panes =====
-  // TODO F-350: Add requestAnimationFrame throttling to resize handler
 
   onResizeStart(event: MouseEvent): void {
     event.preventDefault();
@@ -227,14 +226,19 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private onResizeMove(clientX: number): void {
     if (!this.resizing || !this.resizeContainer) return;
-    const rect = this.resizeContainer.getBoundingClientRect();
-    const total = rect.width;
-    const offsetX = clientX - rect.left;
-    const pct = Math.max(20, Math.min(80, (offsetX / total) * 100));
-    this.splitLeft.set(`${pct}`);
-    this.splitRight.set(`${100 - pct}`);
-    // Monaco needs explicit layout call during resize
-    this.monacoEditor?.layout();
+    if (this.rafPending) return;
+    this.rafPending = true;
+    requestAnimationFrame(() => {
+      this.rafPending = false;
+      if (!this.resizing || !this.resizeContainer) return;
+      const rect = this.resizeContainer.getBoundingClientRect();
+      const total = rect.width;
+      const offsetX = clientX - rect.left;
+      const pct = Math.max(20, Math.min(80, (offsetX / total) * 100));
+      this.splitLeft.set(`${pct}`);
+      this.splitRight.set(`${100 - pct}`);
+      this.monacoEditor?.layout();
+    });
   }
 
   // ===== Auto-save =====
@@ -349,10 +353,10 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (prevMode === 'preview') {
       // Recreate Monaco when switching back from preview
-      setTimeout(() => this.loadMonaco(), 0);
+      afterNextRender(() => this.loadMonaco(), { injector: this.injector });
     } else if (this.monacoEditor) {
       // Layout update for split mode toggle
-      setTimeout(() => this.monacoEditor?.layout(), 50);
+      afterNextRender(() => this.monacoEditor?.layout(), { injector: this.injector });
     }
   }
 

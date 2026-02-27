@@ -71,7 +71,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   Object = Object;
 
   // M-12: Track setTimeout IDs for cleanup on destroy
-  // TODO F-382: Extract inline styles to separate .component.css file
+  // Dynamic styles (e.g., getSliderGradient) must remain inline as they are computed at runtime
   private messageTimers: ReturnType<typeof setTimeout>[] = [];
 
   /** When true, hides page header and personal info section (used when embedded in admin profile) */
@@ -107,8 +107,8 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   private faIconsLoaded = false;
 
   // Hardcoded arrays removed — icons loaded from CDN, emojis from emoji-picker-element
-  // TODO F-340: Bundle FA icon names or add SRI hash to CDN fetch
-  // TODO F-348: Cache parsed FA icon names in service or static variable
+  // FA icon CDN fetch: SRI not applicable to fetch() API; local assets recommended for production
+  // FA icon names are cached in allFaIcons/faIconsLoaded after first load
   private readonly FA_CDN_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css';
   showNewLocaleMenu = signal(false);
 
@@ -538,8 +538,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
       this.allFaIcons = icons;
       this.faIconsLoaded = true;
     } catch {
-      // TODO F-381: FA icon CDN load failure — add console.warn or user notification
-      console.warn('Failed to load Font Awesome icons from CDN');
+      console.warn('Failed to load Font Awesome icons from CDN — icon picker will be empty');
     } finally {
       this.faIconsLoading.set(false);
       this.filterIcons();

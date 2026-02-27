@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, AfterViewInit, ElementRef, ChangeDetectionStrategy, DestroyRef, afterNextRender, Injector } from '@angular/core';
+import { Component, inject, signal, OnInit, ElementRef, ChangeDetectionStrategy, DestroyRef, afterNextRender, Injector } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -9,8 +9,8 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ResumeTemplate, PdfGenerationRequest } from '../../../../models';
 
-// TODO F-334: Use afterNextRender cleanup callback for simpler teardown
-// TODO F-353: Add debounceTime to resize listener
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent, debounceTime } from 'rxjs';
 
 interface PdfOptions {
   format: 'A4' | 'Letter';
@@ -25,7 +25,7 @@ interface PdfOptions {
   styleUrl: './template-preview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TemplatePreviewComponent implements OnInit, AfterViewInit {
+export class TemplatePreviewComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private resumeService = inject(ResumeService);
   private notification = inject(NotificationService);
@@ -53,21 +53,22 @@ export class TemplatePreviewComponent implements OnInit, AfterViewInit {
     includeBackground: true,
   };
 
+  constructor() {
+    // F-334: afterNextRender handles SSR check and runs after first render
+    afterNextRender(() => {
+      this.updatePreviewScale();
+      fromEvent(window, 'resize').pipe(
+        debounceTime(150),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.updatePreviewScale());
+    }, { injector: this.injector });
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.templateId = id;
       this.loadTemplate(id);
-    }
-  }
-
-  private resizeHandler = () => this.updatePreviewScale();
-
-  ngAfterViewInit(): void {
-    this.updatePreviewScale();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', this.resizeHandler);
-      this.destroyRef.onDestroy(() => window.removeEventListener('resize', this.resizeHandler));
     }
   }
 
@@ -179,8 +180,10 @@ export class TemplatePreviewComponent implements OnInit, AfterViewInit {
         <body>${html}</body>
       </html>
     `;
-    // SECURITY: bypassSecurityTrustHtml is required for iframe [srcdoc] binding.
-    // User variable values are HTML-escaped above. Iframe sandbox restricts execution.
+    // SEC-F-01: bypassSecurityTrustHtml is required here because Angular's built-in
+    // sanitization strips all content from iframe [srcdoc] bindings. User variable values
+    // are HTML-escaped above via escapeHtml(). The iframe in the template uses sandbox=""
+    // to restrict script execution and same-origin access.
     this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(fullHtml));
     this.notification.success(this.i18n.t('resume.preview.variablesApplied'));
   }
@@ -195,7 +198,9 @@ export class TemplatePreviewComponent implements OnInit, AfterViewInit {
         <body>${template.htmlContent || ''}</body>
       </html>
     `;
-    // SECURITY: bypassSecurityTrustHtml required for iframe [srcdoc]. Content is admin-managed template data.
+    // SEC-F-01: bypassSecurityTrustHtml is required here because Angular's built-in
+    // sanitization strips all content from iframe [srcdoc] bindings. Content is admin-managed
+    // template data — no third-party/untrusted input. Iframe sandbox restricts execution.
     this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(html));
   }
 

@@ -1,4 +1,3 @@
-// TODO F-363: Standardize test descriptions to English
 import { TestBed } from '@angular/core/testing';
 import {
   provideHttpClient,
@@ -133,7 +132,7 @@ describe('errorInterceptor', () => {
     expect(notificationSpy.error).toHaveBeenCalledWith('Data conflict');
   });
 
-  it('should show "Muitas requisições" for 429', () => {
+  it('should show "Too many requests" for 429', () => {
     http.post('/api/v1/admin/auth/login/v2', {}).subscribe({
       error: () => {},
     });
@@ -155,7 +154,7 @@ describe('errorInterceptor', () => {
     );
   });
 
-  it('should show "Erro interno" for 500', () => {
+  it('should show "Internal server error" for 500', () => {
     http.get('/api/v1/articles').subscribe({
       error: () => {},
     });
@@ -166,7 +165,7 @@ describe('errorInterceptor', () => {
     expect(notificationSpy.error).toHaveBeenCalledWith('Internal server error');
   });
 
-  it('should show "temporariamente indisponível" for 502/503/504', () => {
+  it('should show "Server temporarily unavailable" for 502/503/504', () => {
     http.get('/api/v1/articles').subscribe({
       error: () => {},
     });

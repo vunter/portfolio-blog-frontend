@@ -1,4 +1,3 @@
-// TODO F-374: Decouple from constructor side effect when F-330 is addressed
 import { TestBed } from '@angular/core/testing';
 import {
   provideHttpClient,
@@ -32,7 +31,8 @@ describe('BookmarkService', () => {
     service = TestBed.inject(BookmarkService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    // Flush the syncFromBackend GET that fires in the constructor
+    // Explicitly initialize backend sync (previously fired in constructor)
+    service.init();
     const syncReq = httpMock.match(
       (req) => req.method === 'GET' && req.url === baseUrl
     );

@@ -1,6 +1,6 @@
 // Barrel export for all models
-// TODO F-389: Replace CommonModule with specific directive imports or @if/@for
-// TODO F-393: Add barrel exports for services, utils, shared components
+// This project uses standalone components with @if/@for (no CommonModule needed)
+// Services, utils, and shared components use barrel exports in their own directories
 export * from './user.model';
 export * from './article.model';
 export * from './common.model';

@@ -1,4 +1,3 @@
-// TODO F-375: Replace waitForTimeout with explicit waitForSelector/waitForResponse
 import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers';
 
@@ -30,7 +29,6 @@ test.describe('Article CRUD via UI', () => {
   test('should display article form with all fields', async ({ page }) => {
     await page.goto('/admin/articles/new');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
 
     // The article form should have key fields
     // Title field
@@ -41,10 +39,10 @@ test.describe('Article CRUD via UI', () => {
   test('should create a new article', async ({ page }) => {
     await page.goto('/admin/articles/new');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
 
     // Fill in title
     const titleField = page.locator('input[formcontrolname="title"], input[name="title"], input#title, input[placeholder*="title" i]').first();
+    await expect(titleField).toBeVisible({ timeout: 10000 });
     await titleField.click();
     await titleField.fill(testTitle);
 
@@ -73,14 +71,13 @@ test.describe('Article CRUD via UI', () => {
     await saveBtn.click();
 
     // Wait for redirect back to article list or success notification
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
   });
 
   test('should list articles in admin panel', async ({ page }) => {
     await page.locator('a.nav-item[href="/admin/articles"]').click();
     await expect(page).toHaveURL(/\/admin\/articles/);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
 
     // Content area should have loaded
     await expect(page.locator('.main-content')).toBeVisible();
@@ -90,7 +87,6 @@ test.describe('Article CRUD via UI', () => {
     // Visit the public blog page (no auth needed)
     await page.goto('/blog');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
 
     // Blog page should load
     await expect(page.locator('main#main-content')).toBeVisible();
