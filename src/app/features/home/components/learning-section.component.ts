@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ResumeProfile } from '../../../models/resume-profile.model';
+import { getIconType } from '../../../shared/utils/icon.utils';
 
 @Component({
   selector: 'app-learning-section',
@@ -21,16 +22,5 @@ export class LearningSectionComponent {
 
   readonly hasLearningTopics = computed(() => this.learningTopics().length > 0);
 
-  // TODO F-378: Extract to shared icon.utils.ts
-  /** Determine how to render the emoji/icon field */
-  getIconType(value: string | undefined | null): 'fa' | 'img' | 'emoji' | 'none' {
-    if (!value || !value.trim()) return 'none';
-    const v = value.trim();
-    // Font Awesome classes: start with fa, fas, fab, far, fal, fad, fat
-    if (/^fa[sbrldt]?\s+fa-/.test(v)) return 'fa';
-    // Image URL
-    if (/^(https?:\/\/|\/)/i.test(v) || /\.(png|jpg|jpeg|gif|svg|webp|ico)(\?.*)?$/i.test(v)) return 'img';
-    // Everything else (emoji, text symbol, etc.)
-    return 'emoji';
-  }
+  getIconType = getIconType;
 }

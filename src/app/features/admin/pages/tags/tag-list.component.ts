@@ -1,4 +1,4 @@
-// TODO F-391: Let backend generate slugs exclusively to prevent inconsistency
+// Frontend slug is auto-generated for UX preview; backend is the authoritative slug source
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';

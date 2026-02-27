@@ -1,4 +1,3 @@
-// TODO F-375: Replace waitForTimeout with explicit waitForSelector/waitForResponse
 import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers';
 
@@ -27,7 +26,7 @@ test.describe('Internationalization (i18n)', () => {
       await page.locator('.login-lang-btn:has-text("PT")').click();
 
       // Wait for text to change
-      await page.waitForTimeout(500);
+      await expect(page.locator('label[for="password"]')).toContainText(/senha/i);
 
       // PT button should now be active
       const ptBtn = page.locator('.login-lang-btn:has-text("PT")');
@@ -44,12 +43,10 @@ test.describe('Internationalization (i18n)', () => {
 
       // Switch to PT
       await page.locator('.login-lang-btn:has-text("PT")').click();
-      await page.waitForTimeout(500);
       await expect(page.locator('label[for="password"]')).toContainText(/senha/i);
 
       // Switch back to EN
       await page.locator('.login-lang-btn:has-text("EN")').click();
-      await page.waitForTimeout(500);
       await expect(page.locator('label[for="password"]')).toContainText(/password/i);
     });
   });
@@ -62,9 +59,6 @@ test.describe('Internationalization (i18n)', () => {
       // Switch to PT in sidebar
       const ptBtn = page.locator('.lang-toggle .lang-btn:has-text("PT")');
       await ptBtn.click();
-      await page.waitForTimeout(500);
-
-      // PT should be active
       await expect(ptBtn).toHaveClass(/active/);
 
       // Nav items should reflect Portuguese labels
@@ -77,7 +71,6 @@ test.describe('Internationalization (i18n)', () => {
       // Switch back to EN
       const enBtn = page.locator('.lang-toggle .lang-btn:has-text("EN")');
       await enBtn.click();
-      await page.waitForTimeout(500);
       await expect(enBtn).toHaveClass(/active/);
     });
 
@@ -86,12 +79,11 @@ test.describe('Internationalization (i18n)', () => {
 
       // Switch to PT
       await page.locator('.lang-toggle .lang-btn:has-text("PT")').click();
-      await page.waitForTimeout(500);
+      await expect(page.locator('.lang-toggle .lang-btn:has-text("PT")')).toHaveClass(/active/);
 
       // Navigate to Articles
       await page.locator('a.nav-item[href="/admin/articles"]').click();
       await expect(page).toHaveURL(/\/admin\/articles/);
-      await page.waitForTimeout(500);
 
       // PT should still be active
       const ptBtn = page.locator('.lang-toggle .lang-btn:has-text("PT")');
@@ -116,7 +108,7 @@ test.describe('Internationalization (i18n)', () => {
 
         // Click to toggle
         await langBtn.click();
-        await page.waitForTimeout(500);
+        await expect(langBtn).not.toHaveText(initialText!);
 
         const newText = await langBtn.textContent();
         // Text should have changed (EN→PT or PT→EN)
@@ -124,7 +116,7 @@ test.describe('Internationalization (i18n)', () => {
 
         // Toggle back
         await langBtn.click();
-        await page.waitForTimeout(500);
+        await expect(langBtn).toHaveText(initialText!);
       }
     });
   });

@@ -10,7 +10,7 @@ import { BreadcrumbsComponent, Breadcrumb } from '../../../shared/components/bre
 import { RealtimeNotificationService } from '../services/realtime-notification.service';
 import { SafeIconPipe } from '../pipes/safe-icon.pipe';
 
-// TODO F-332: Support dynamic breadcrumbs via route resolver data
+// Breadcrumbs are built dynamically from route data (see breadcrumbs computed signal below)
 
 /**
  * SEC-05: Refactored MenuItem to use string icon names instead of SafeHtml.

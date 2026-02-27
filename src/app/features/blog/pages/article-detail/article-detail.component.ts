@@ -1,12 +1,11 @@
-// TODO F-387: Standardize error pattern - NotificationService for transient, signal for persistent
-// TODO F-388: Extract addCopyButtons/buildTableOfContents to utility service
+// Error handling: NotificationService for transient errors, null article signal for persistent load failures
+// DOM utilities (addCopyButtons, buildTableOfContents) are coupled to Renderer2/NgZone — kept inline
 import {
   Component,
   inject,
   signal,
   untracked,
   OnInit,
-  OnDestroy,
   ChangeDetectionStrategy,
   computed,
   effect,
@@ -21,6 +20,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarkdownModule } from 'ngx-markdown';
+// PERF-F-02: PrismJS is lazy-loaded only when article content is rendered,
+// instead of being included in global scripts (which blocked initial page load).
+// ngx-markdown auto-detects window.Prism for syntax highlighting.
 import { ArticleService } from '../../services/article.service';
 import { CommentService } from '../../services/comment.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -57,11 +59,10 @@ interface TocItem {
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(window:scroll)': 'onWindowScroll()',
-  },
+  // PERF-F-03: Scroll listener moved from host binding to NgZone.runOutsideAngular()
+  // to prevent unnecessary change detection on every scroll event.
 })
-export class ArticleDetailComponent implements OnInit, OnDestroy {
+export class ArticleDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly articleService = inject(ArticleService);
   private readonly commentService = inject(CommentService);
@@ -118,6 +119,10 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
   private headingsProcessed = false;
   private codeBlocksProcessed = false;
   private headingObserver: IntersectionObserver | null = null;
+  // PERF-F-06: Store cleanup functions for event listeners to prevent memory leaks
+  private readonly eventCleanups: Array<() => void> = [];
+  // PERF-F-03: Bound reference for scroll listener cleanup
+  private readonly boundScrollHandler = () => this.onWindowScroll();
 
   tocItems = computed(() => {
     const content = this.article()?.content;
@@ -146,6 +151,20 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
   private isLanguageReload = false;
 
   constructor() {
+    // F-328: DestroyRef-based cleanup replaces manual ngOnDestroy
+    this.destroyRef.onDestroy(() => {
+      this.headingObserver?.disconnect();
+      if (this.scrollThrottleTimer) {
+        clearTimeout(this.scrollThrottleTimer);
+        this.scrollThrottleTimer = null;
+      }
+      if (isPlatformBrowser(this.platformId)) {
+        window.removeEventListener('scroll', this.boundScrollHandler);
+      }
+      this.eventCleanups.forEach(cleanup => cleanup());
+      this.eventCleanups.length = 0;
+    });
+
     // Reload article when language changes (to get localized content)
     // BUG-19 FIX: Use untracked() for loading() to prevent infinite loop.
     // Without untracked, the effect depends on loading(), so every time
@@ -178,14 +197,13 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
         this.loadArticle(slug);
       }
     });
-  }
 
-  // TODO F-328: Migrate to DestroyRef + takeUntilDestroyed() pattern
-  ngOnDestroy(): void {
-    this.headingObserver?.disconnect();
-    if (this.scrollThrottleTimer) {
-      clearTimeout(this.scrollThrottleTimer);
-      this.scrollThrottleTimer = null;
+    // PERF-F-03: Register scroll listener outside Angular zone to prevent change detection
+    // on every scroll event. The handler only updates signals when throttle timer fires.
+    if (isPlatformBrowser(this.platformId)) {
+      this.zone.runOutsideAngular(() => {
+        window.addEventListener('scroll', this.boundScrollHandler, { passive: true });
+      });
     }
   }
 
@@ -211,7 +229,7 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
     }
 
     // Add copy buttons to code blocks using Renderer2
-    // TODO F-347: Store click handler references for cleanup in ngOnDestroy
+    // PERF-F-06: Click handler references stored in eventCleanups, cleaned up via DestroyRef
     if (!this.codeBlocksProcessed) {
       const codeBlocks = hostEl.querySelectorAll('.article-content pre');
       if (codeBlocks.length > 0) {
@@ -227,7 +245,8 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
           this.renderer.setAttribute(btn, 'title', this.i18n.t('blog.copyCode'));
           // F-337: Use Renderer2 instead of innerHTML to avoid bypassing Angular sanitization
           this.setCopyIcon(btn);
-          this.renderer.listen(btn, 'click', () => {
+          // PERF-F-06: Store unlisten function for cleanup in ngOnDestroy
+          const unlisten = this.renderer.listen(btn, 'click', () => {
             const code = pre.querySelector('code')?.textContent || pre.textContent || '';
             navigator.clipboard.writeText(code).then(() => {
               this.zone.run(() => {
@@ -243,6 +262,7 @@ export class ArticleDetailComponent implements OnInit, OnDestroy {
               });
             });
           });
+          this.eventCleanups.push(unlisten);
           this.renderer.appendChild(wrapper, btn);
         });
         this.codeBlocksProcessed = true;

@@ -1,18 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ResumeTemplate, ResumeTemplateRequest, PdfGenerationRequest, PageResponse } from '../../../models';
-import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ResumeService {
   private api = inject(ApiService);
-  // TODO F-322: Extend ApiService with getBlob()/getText() and remove direct HttpClient usage
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
 
   getTemplates(): Observable<ResumeTemplate[]> {
     return this.api.get<PageResponse<ResumeTemplate>>('/resume/templates').pipe(
@@ -67,14 +62,10 @@ export class ResumeService {
   }
 
   generatePdf(request: PdfGenerationRequest): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/resume/pdf/generate`, request, {
-      responseType: 'blob',
-    });
+    return this.api.postBlob('/resume/pdf/generate', request);
   }
 
   previewHtml(templateId: string): Observable<string> {
-    return this.http.get(`${this.baseUrl}/resume/templates/${templateId}/preview`, {
-      responseType: 'text',
-    });
+    return this.api.getText(`/resume/templates/${templateId}/preview`);
   }
 }

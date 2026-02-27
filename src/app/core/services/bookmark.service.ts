@@ -3,8 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
-// TODO F-330: Move syncFromBackend() to explicit init() or APP_INITIALIZER
-
 @Injectable({
   providedIn: 'root',
 })
@@ -20,6 +18,11 @@ export class BookmarkService {
   readonly count = computed(() => this.bookmarks().size);
 
   constructor() {
+    // Sync is triggered externally via init() (e.g., APP_INITIALIZER or root component)
+  }
+
+  /** Initialize backend sync. Call once after app bootstrap. */
+  init(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.syncFromBackend();
     }

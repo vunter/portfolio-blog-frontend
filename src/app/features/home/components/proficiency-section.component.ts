@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ResumeProfile } from '../../../models/resume-profile.model';
+import { getIconType } from '../../../shared/utils/icon.utils';
 
 @Component({
   selector: 'app-proficiency-section',
@@ -21,13 +22,5 @@ export class ProficiencySectionComponent {
 
   readonly hasProficiencies = computed(() => this.proficiencies().length > 0);
 
-  // TODO F-378: Extract to shared icon.utils.ts
-  /** Determine how to render the icon field */
-  getIconType(value: string | undefined | null): 'fa' | 'img' | 'emoji' | 'none' {
-    if (!value || !value.trim()) return 'none';
-    const v = value.trim();
-    if (/^fa[sbrldt]?\s+fa-/.test(v)) return 'fa';
-    if (/^(https?:\/\/|\/)/i.test(v) || /\.(png|jpg|jpeg|gif|svg|webp|ico)(\?.*)?$/i.test(v)) return 'img';
-    return 'emoji';
-  }
+  getIconType = getIconType;
 }

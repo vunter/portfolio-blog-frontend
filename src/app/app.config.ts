@@ -25,6 +25,7 @@ import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { refreshTokenInterceptor } from './core/interceptors/refresh-token.interceptor';
 import { AuthStore } from './core/auth/auth.store';
+import { BookmarkService } from './core/services/bookmark.service';
 
 registerLocaleData(localePt);
 registerLocaleData(localeEs);
@@ -33,6 +34,11 @@ registerLocaleData(localeIt);
 function initializeAuth(): () => void {
   const authStore = inject(AuthStore);
   return () => authStore.initFromStorage();
+}
+
+function initializeBookmarks(): () => void {
+  const bookmarkService = inject(BookmarkService);
+  return () => bookmarkService.init();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -47,6 +53,10 @@ export const appConfig: ApplicationConfig = {
         refreshTokenInterceptor,
         errorInterceptor,
       ]),
+      // SEC-F-07: XSRF protection — Angular reads the XSRF-TOKEN cookie set by the backend
+      // and attaches it as X-XSRF-TOKEN header on mutation requests. The backend validates
+      // the header against the cookie to prevent cross-subdomain CSRF attacks. All HTTP
+      // requests go through ApiService/AuthService which use this shared HttpClient config.
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',
@@ -66,6 +76,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeBookmarks,
       multi: true,
     },
     provideServiceWorker('ngsw-worker.js', {

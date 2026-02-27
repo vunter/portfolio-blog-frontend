@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, input, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { DownloadService } from '../../../core/services/download.service';
@@ -16,8 +16,7 @@ import { ResumeProfile } from '../../../models/resume-profile.model';
 })
 export class ContactSectionComponent {
   readonly i18n = inject(I18nService);
-  // TODO F-329: Use ApiService instead of direct HttpClient for consistency
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private notification = inject(NotificationService);
   private downloadService = inject(DownloadService);
 
@@ -74,9 +73,8 @@ export class ContactSectionComponent {
     this.downloadingResume.set(true);
     const lang = this.i18n.language();
     const alias = environment.ownerAlias;
-    const url = `${environment.apiUrl}/${environment.apiVersion}/public/resume/${alias}/pdf?lang=${lang}&t=${Date.now()}`;
 
-    this.http.get(url, { responseType: 'blob' }).subscribe({
+    this.api.getBlob(`/public/resume/${alias}/pdf`, { lang, t: Date.now() }).subscribe({
       next: (blob) => {
         const name = this.profile()?.fullName ?? 'Resume';
         const safeName = name.replace(/\s+/g, '_');

@@ -1,18 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ResumeProfile, ResumeProfileRequest } from '../../../models';
-import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ResumeProfileService {
   private api = inject(ApiService);
-  // TODO F-323: Extend ApiService with getBlob()/getText() and remove direct HttpClient usage
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
 
   getProfile(locale: string = 'en'): Observable<ResumeProfile> {
     return this.api.get<ResumeProfile>('/resume/profile', { locale });
@@ -31,26 +27,15 @@ export class ResumeProfileService {
   }
 
   generateHtml(locale: string = 'en'): Observable<string> {
-    return this.http.get(`${this.baseUrl}/resume/profile/generate-html`, {
-      responseType: 'text',
-      params: { locale },
-    });
+    return this.api.getText('/resume/profile/generate-html', { locale });
   }
 
   downloadHtml(locale: string = 'en'): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.baseUrl}/resume/profile/download-html`, {
-      responseType: 'blob',
-      observe: 'response',
-      params: { locale },
-    });
+    return this.api.getBlobResponse('/resume/profile/download-html', { locale });
   }
 
   downloadPdf(locale: string = 'en'): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.baseUrl}/resume/profile/download-pdf`, {
-      responseType: 'blob',
-      observe: 'response',
-      params: { locale },
-    });
+    return this.api.getBlobResponse('/resume/profile/download-pdf', { locale });
   }
 
   /**
@@ -58,19 +43,13 @@ export class ResumeProfileService {
    * Returns the translated profile without saving it.
    */
   translateProfile(targetLang: string, sourceLang: string = 'en'): Observable<ResumeProfile> {
-    return this.http.post<ResumeProfile>(
-      `${this.baseUrl}/resume/profile/translate`,
-      null,
-      { params: { targetLang, sourceLang } }
-    );
+    return this.api.post<ResumeProfile>('/resume/profile/translate', null, { targetLang, sourceLang });
   }
 
   /**
    * Check if the translation service is available.
    */
   getTranslationStatus(): Observable<{ available: boolean; provider: string; supportedLanguages: string[] }> {
-    return this.http.get<{ available: boolean; provider: string; supportedLanguages: string[] }>(
-      `${this.baseUrl}/resume/profile/translate/status`
-    );
+    return this.api.get<{ available: boolean; provider: string; supportedLanguages: string[] }>('/resume/profile/translate/status');
   }
 }

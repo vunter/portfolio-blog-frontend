@@ -4,7 +4,10 @@ import { environment } from '../../../../environments/environment';
 import { NotificationService } from '../../../core/services/notification.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
-// TODO F-331: Extract maxReconnectAttempts and baseDelay to InjectionToken<RealtimeConfig>
+/** Reconnection configuration constants */
+const MAX_RECONNECT_ATTEMPTS = 10;
+const RECONNECT_BASE_DELAY_MS = 1000;
+const RECONNECT_MAX_DELAY_MS = 30000;
 
 export interface ServerNotificationEvent {
   type: string;
@@ -24,7 +27,6 @@ export class RealtimeNotificationService {
 
   private eventSource: EventSource | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   private readonly _connected = signal(false);
@@ -129,7 +131,7 @@ export class RealtimeNotificationService {
   readonly connectionLost = this._connectionLost.asReadonly();
 
   private scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+    if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
       // INC-11: Notify user that real-time connection was lost
       this._connectionLost.set(true);
       this.notifications.error(
@@ -137,7 +139,7 @@ export class RealtimeNotificationService {
       );
       return;
     }
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    const delay = Math.min(RECONNECT_BASE_DELAY_MS * Math.pow(2, this.reconnectAttempts), RECONNECT_MAX_DELAY_MS);
     this.reconnectAttempts++;
     this.reconnectTimer = setTimeout(() => this.connect(), delay);
   }

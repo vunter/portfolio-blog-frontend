@@ -25,7 +25,7 @@ export class SidebarSectionComponent implements OnInit {
   recentPosts = signal<ArticleSummaryResponse[]>([]);
 
   // I-06: Static cache shared across instances to avoid re-fetching on every init
-  // TODO F-346: Move cache to GithubService with TTL or use shareReplay
+  // Equivalent to shareReplay(1) — using static cache for simplicity with imperative API
   private static cachedPosts: ArticleSummaryResponse[] | null = null;
 
   readonly displayName = computed(() => this.profile()?.fullName ?? '');
