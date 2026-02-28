@@ -6,7 +6,7 @@ import {
   withComputed,
   patchState,
 } from '@ngrx/signals';
-import { switchMap } from 'rxjs';
+import { switchMap, catchError, tap, of, map, firstValueFrom } from 'rxjs';
 import { UserResponse } from '../../models';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
@@ -123,7 +123,7 @@ export const AuthStore = signalStore(
         storage.set(STORAGE_KEYS.USER, user);
       },
 
-      initFromStorage() {
+      initFromStorage(): Promise<void> {
         // Try localStorage first, fall back to legacy sessionStorage
         const storedAuth =
           storage.get<boolean>(STORAGE_KEYS.IS_AUTHENTICATED) ??
@@ -135,62 +135,59 @@ export const AuthStore = signalStore(
           storage.get<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT) ??
           storage.getSession<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT);
 
-        if (storedAuth && user) {
-          // SEC-F-03: Load cached user data optimistically for UI (name, role display),
-          // but do NOT set isAuthenticated until the server validates the session.
-          // This prevents a stale/stolen localStorage flag from granting access.
-          patchState(store, { user, isAuthenticated: false, isLoading: true, tokenExpiresAt: tokenExpiresAt ?? null });
-
-          // Migrate legacy sessionStorage to localStorage
-          storage.set(STORAGE_KEYS.USER, user);
-          if (tokenExpiresAt) storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, tokenExpiresAt);
-
-          // Helper: attempt token refresh, then validate session
-          const refreshAndValidate = () => {
-            authService.refreshToken({}).pipe(
-              switchMap((response) => {
-                if (response.expiresIn) {
-                  const newExpiry = Date.now() + response.expiresIn * 1000;
-                  patchState(store, { tokenExpiresAt: newExpiry });
-                  storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, newExpiry);
-                }
-                return authService.getCurrentUser();
-              })
-            ).subscribe({
-              next: (freshUser) => {
-                patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
-                storage.set(STORAGE_KEYS.USER, freshUser);
-                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
-              },
-              error: () => {
-                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
-                storage.remove(STORAGE_KEYS.USER);
-                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
-                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
-              },
-            });
-          };
-
-          // Validate session with the server via /admin/users/me before trusting the token.
-          const isExpired = tokenExpiresAt != null && Date.now() >= tokenExpiresAt;
-          if (!isExpired) {
-            authService.getCurrentUser().subscribe({
-              next: (freshUser) => {
-                // Server confirmed the session — now mark as authenticated
-                patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
-                storage.set(STORAGE_KEYS.USER, freshUser);
-                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
-              },
-              error: () => {
-                // Access token invalid — try refresh before giving up
-                refreshAndValidate();
-              },
-            });
-          } else {
-            // Access token expired — try refresh token (valid up to 7 days with rememberMe)
-            refreshAndValidate();
-          }
+        if (!storedAuth || !user) {
+          return Promise.resolve();
         }
+
+        // SEC-F-03: Load cached user data optimistically for UI (name, role display),
+        // but do NOT set isAuthenticated until the server validates the session.
+        // This prevents a stale/stolen localStorage flag from granting access.
+        patchState(store, { user, isAuthenticated: false, isLoading: true, tokenExpiresAt: tokenExpiresAt ?? null });
+
+        // Migrate legacy sessionStorage to localStorage
+        storage.set(STORAGE_KEYS.USER, user);
+        if (tokenExpiresAt) storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, tokenExpiresAt);
+
+        // Build the refresh-then-validate observable
+        const refreshAndValidate$ = authService.refreshToken({}).pipe(
+          tap((response) => {
+            if (response.expiresIn) {
+              const newExpiry = Date.now() + response.expiresIn * 1000;
+              patchState(store, { tokenExpiresAt: newExpiry });
+              storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, newExpiry);
+            }
+          }),
+          switchMap(() => authService.getCurrentUser())
+        );
+
+        // If token is known-expired, skip the 401 round-trip and refresh directly.
+        // Otherwise validate first — the interceptor handles 401→refresh transparently.
+        const isExpired = tokenExpiresAt != null && Date.now() >= tokenExpiresAt;
+        const auth$ = isExpired
+          ? refreshAndValidate$
+          : authService.getCurrentUser().pipe(
+              catchError(() => refreshAndValidate$)
+            );
+
+        // Return a Promise so APP_INITIALIZER waits for auth to resolve
+        // before the app bootstraps and route guards run.
+        return firstValueFrom(
+          auth$.pipe(
+            tap((freshUser) => {
+              patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
+              storage.set(STORAGE_KEYS.USER, freshUser);
+              storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
+            }),
+            catchError(() => {
+              patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+              storage.remove(STORAGE_KEYS.USER);
+              storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+              storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+              return of(null);
+            }),
+            map(() => void 0)
+          )
+        );
       },
     };
   })
