@@ -31,7 +31,7 @@ registerLocaleData(localePt);
 registerLocaleData(localeEs);
 registerLocaleData(localeIt);
 
-function initializeAuth(): () => void {
+function initializeAuth(): () => Promise<void> {
   const authStore = inject(AuthStore);
   return () => authStore.initFromStorage();
 }
