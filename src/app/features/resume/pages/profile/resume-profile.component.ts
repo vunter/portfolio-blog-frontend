@@ -305,16 +305,14 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
         location: this.profile.location,
         professionalSummary: this.profile.professionalSummary,
         interests: this.profile.interests,
-        workMode: this.profile.workMode,
-        timezone: this.profile.timezone,
-        employmentType: this.profile.employmentType,
+        // workMode/timezone/employmentType omitted — managed by HC component
         educations: (this.profile.educations || []).map((e, i) => ({ ...e, sortOrder: i })),
         experiences,
         skills: (this.profile.skills || []).map((s, i) => ({ ...s, sortOrder: i })),
         languages: (this.profile.languages || []).map((l, i) => ({ ...l, sortOrder: i })),
         certifications: (this.profile.certifications || []).map((c, i) => ({ ...c, sortOrder: i })),
         additionalInfo: (this.profile.additionalInfo || []).map((a, i) => ({ ...a, sortOrder: i })),
-        homeCustomization: (this.profile.homeCustomization || []).map((h, i) => ({ ...h, sortOrder: i })),
+        // homeCustomization omitted — managed by HC component; null tells backend to skip
         testimonials: (this.profile.testimonials || []).map((t, i) => ({ ...t, sortOrder: i })),
         proficiencies: (this.profile.proficiencies || []).map((p, i) => ({ ...p, sortOrder: i })),
         projects: (this.profile.projects || []).map((proj, i) => {

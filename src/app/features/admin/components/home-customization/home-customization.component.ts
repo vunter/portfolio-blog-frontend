@@ -119,17 +119,8 @@ export class HomeCustomizationComponent implements OnInit {
       workMode: merged.workMode,
       timezone: merged.timezone,
       employmentType: merged.employmentType,
-      educations: merged.educations?.map((e, i) => ({ ...e, sortOrder: i })),
-      experiences: merged.experiences?.map((e, i) => ({ ...e, sortOrder: i })),
-      skills: merged.skills?.map((s, i) => ({ ...s, sortOrder: i })),
-      languages: merged.languages?.map((l, i) => ({ ...l, sortOrder: i })),
-      certifications: merged.certifications?.map((c, i) => ({ ...c, sortOrder: i })),
-      additionalInfo: merged.additionalInfo?.map((a, i) => ({ ...a, sortOrder: i })),
+      // Only send HC-managed child arrays; omit others so backend preserves them
       homeCustomization: merged.homeCustomization,
-      testimonials: merged.testimonials?.map((t, i) => ({ ...t, sortOrder: i })),
-      proficiencies: merged.proficiencies?.map((p, i) => ({ ...p, sortOrder: i })),
-      projects: merged.projects?.map((p, i) => ({ ...p, sortOrder: i })),
-      learningTopics: merged.learningTopics?.map((lt, i) => ({ ...lt, sortOrder: i })),
     };
 
     this.profileService.saveProfile(request, this.currentLocale).subscribe({
