@@ -235,9 +235,11 @@
  name="authorName"
  required
  #nameField="ngModel"
+ [attr.aria-describedby]="nameField.touched && nameField.invalid ? 'comment-name-error' : null"
+ [attr.aria-invalid]="nameField.touched && nameField.invalid"
  />
  @if (nameField.touched && nameField.invalid) {
- <span class="field-error">{{ i18n.t('article.comments.nameRequired') }}</span>
+ <span class="field-error" id="comment-name-error" role="alert">{{ i18n.t('article.comments.nameRequired') }}</span>
  }
  </div>
  <div class="comment-form__field">
@@ -263,9 +265,11 @@
  required
  minlength="10"
  #contentField="ngModel"
+ [attr.aria-describedby]="contentField.touched && contentField.invalid ? 'comment-content-error' : null"
+ [attr.aria-invalid]="contentField.touched && contentField.invalid"
  ></textarea>
  @if (contentField.touched && contentField.invalid) {
- <span class="field-error">{{ i18n.t('article.comments.contentMinLength') }}</span>
+ <span class="field-error" id="comment-content-error" role="alert">{{ i18n.t('article.comments.contentMinLength') }}</span>
  }
  </div>
 

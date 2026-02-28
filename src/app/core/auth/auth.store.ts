@@ -6,6 +6,7 @@ import {
   withComputed,
   patchState,
 } from '@ngrx/signals';
+import { switchMap } from 'rxjs';
 import { UserResponse } from '../../models';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
@@ -124,7 +125,7 @@ export const AuthStore = signalStore(
 
       initFromStorage() {
         // Try localStorage first, fall back to legacy sessionStorage
-        const isAuthenticated =
+        const storedAuth =
           storage.get<boolean>(STORAGE_KEYS.IS_AUTHENTICATED) ??
           storage.getSession<boolean>(STORAGE_KEYS.IS_AUTHENTICATED);
         const user =
@@ -134,23 +135,60 @@ export const AuthStore = signalStore(
           storage.get<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT) ??
           storage.getSession<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT);
 
-        if (isAuthenticated && user) {
-          patchState(store, { user, isAuthenticated: true, tokenExpiresAt: tokenExpiresAt ?? null });
+        if (storedAuth && user) {
+          // SEC-F-03: Load cached user data optimistically for UI (name, role display),
+          // but do NOT set isAuthenticated until the server validates the session.
+          // This prevents a stale/stolen localStorage flag from granting access.
+          patchState(store, { user, isAuthenticated: false, isLoading: true, tokenExpiresAt: tokenExpiresAt ?? null });
+
           // Migrate legacy sessionStorage to localStorage
           storage.set(STORAGE_KEYS.USER, user);
-          storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
           if (tokenExpiresAt) storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, tokenExpiresAt);
-          // Background refresh: pick up role changes without requiring re-login.
-          // Skip if the access token is already expired to avoid a 401 console error.
+
+          // Helper: attempt token refresh, then validate session
+          const refreshAndValidate = () => {
+            authService.refreshToken({}).pipe(
+              switchMap((response) => {
+                if (response.expiresIn) {
+                  const newExpiry = Date.now() + response.expiresIn * 1000;
+                  patchState(store, { tokenExpiresAt: newExpiry });
+                  storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, newExpiry);
+                }
+                return authService.getCurrentUser();
+              })
+            ).subscribe({
+              next: (freshUser) => {
+                patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
+                storage.set(STORAGE_KEYS.USER, freshUser);
+                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
+              },
+              error: () => {
+                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+                storage.remove(STORAGE_KEYS.USER);
+                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+              },
+            });
+          };
+
+          // Validate session with the server via /admin/users/me before trusting the token.
           const isExpired = tokenExpiresAt != null && Date.now() >= tokenExpiresAt;
           if (!isExpired) {
             authService.getCurrentUser().subscribe({
               next: (freshUser) => {
-                patchState(store, { user: freshUser });
+                // Server confirmed the session — now mark as authenticated
+                patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
                 storage.set(STORAGE_KEYS.USER, freshUser);
+                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
               },
-              error: () => { /* Non-critical — keep cached user data */ },
+              error: () => {
+                // Access token invalid — try refresh before giving up
+                refreshAndValidate();
+              },
             });
+          } else {
+            // Access token expired — try refresh token (valid up to 7 days with rememberMe)
+            refreshAndValidate();
           }
         }
       },

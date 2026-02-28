@@ -1,22 +1,23 @@
 import { test, expect } from '@playwright/test';
-import { loginViaUI, loginAsAdmin, logoutFromAdmin, ADMIN_CREDS } from './helpers';
+import { loginViaUI, loginAsAdmin, logoutFromAdmin, dismissCookieConsent, ADMIN_CREDS } from './helpers';
 
 test.describe('Authentication Flows', () => {
 
   test('should display login page with all form elements', async ({ page }) => {
+    await dismissCookieConsent(page);
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
 
     // Verify all form elements are present
-    await expect(page.locator('.login-header h1')).toBeVisible();
+    await expect(page.locator('.auth-header h1')).toBeVisible();
     await expect(page.locator('#email')).toBeVisible();
     await expect(page.locator('#password')).toBeVisible();
     await expect(page.locator('button.submit-btn')).toBeVisible();
-    await expect(page.locator('input[name="remember"]')).toBeVisible();
+    await expect(page.locator('input[formControlName="rememberMe"]')).toBeVisible();
     await expect(page.locator('a.forgot-link')).toBeVisible();
 
     // Language toggle buttons
-    await expect(page.locator('.login-lang-btn').first()).toBeVisible();
+    await expect(page.locator('.auth-lang-btn').first()).toBeVisible();
   });
 
   test('should login successfully with valid admin credentials', async ({ page }) => {
@@ -45,8 +46,9 @@ test.describe('Authentication Flows', () => {
   });
 
   test('should toggle password visibility', async ({ page }) => {
+    await dismissCookieConsent(page);
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
 
     const passwordInput = page.locator('#password');
     const toggleBtn = page.locator('button.toggle-password');
@@ -64,10 +66,11 @@ test.describe('Authentication Flows', () => {
   });
 
   test('should check remember me checkbox', async ({ page }) => {
+    await dismissCookieConsent(page);
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
 
-    const checkbox = page.locator('input[name="remember"]');
+    const checkbox = page.locator('input[formControlName="rememberMe"]');
     await expect(checkbox).not.toBeChecked();
 
     await checkbox.check();
@@ -98,8 +101,9 @@ test.describe('Authentication Flows', () => {
   });
 
   test('should not allow submit with empty fields', async ({ page }) => {
+    await dismissCookieConsent(page);
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
 
     const submitBtn = page.locator('button.submit-btn');
 

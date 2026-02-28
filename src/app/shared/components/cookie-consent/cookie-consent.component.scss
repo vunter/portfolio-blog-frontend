@@ -2,8 +2,8 @@
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  z-index: 10000;
+  width: 100vw;
+  z-index: var(--z-toast, 1080);
   display: flex;
   justify-content: center;
   padding: 1rem;
@@ -12,12 +12,13 @@
 }
 
 .cookie-banner {
-  background: var(--card-bg, var(--bg-primary, #fff));
+  background: var(--bg-primary, #fff);
   border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
-  max-width: 520px;
+  max-width: 420px;
   width: 100%;
+  margin: 0 auto;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
   pointer-events: auto;
 }
@@ -165,6 +166,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .btn {
@@ -223,6 +225,10 @@
     color: var(--primary-color, #6366f1);
     cursor: pointer;
     text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
 
     &:hover {
       text-decoration: underline;

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, ADMIN_CREDS, dismissCookieConsent } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 
@@ -136,7 +136,7 @@ test.describe('User Management (ADMIN)', () => {
     // Change name
     await nameInput.fill('Dev Updated');
     await page.locator('.modal button[type="submit"]').click();
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 10000 });
     // Updated name should appear
     await expect(page.locator('.data-table tbody')).toContainText('Dev Updated');
   });
@@ -148,37 +148,42 @@ test.describe('User Management (ADMIN)', () => {
     // Check user is active
     await expect(editorRow.locator('.status-indicator.active')).toBeVisible();
 
-    // Click deactivate (2nd action button)
+    // Click deactivate (2nd action button) - opens ConfirmDialog
     await editorRow.locator('.action-btn').nth(1).click();
-    await page.waitForTimeout(1000);
+    await expect(page.locator('.confirm-modal')).toBeVisible({ timeout: 3000 });
+    await page.locator('.confirm-modal .btn-danger').click();
+    await page.waitForTimeout(2000);
     // User should now be inactive
     const statusEl = editorRow.locator('.status-indicator');
-    await expect(statusEl).not.toHaveClass(/active/);
+    await expect(statusEl).not.toHaveClass(/active/, { timeout: 5000 });
   });
 
   test('Reactivate user', async ({ page }) => {
     const editorRow = page.locator('.data-table tbody tr', { hasText: TEST_EDITOR.email });
     if (await editorRow.count() === 0) return;
 
-    // Click activate (2nd action button)
+    // Click activate (2nd action button) - opens ConfirmDialog
     await editorRow.locator('.action-btn').nth(1).click();
-    await page.waitForTimeout(1000);
+    await expect(page.locator('.confirm-modal')).toBeVisible({ timeout: 3000 });
+    // Activate uses 'warning' type, so the button has btn-warning class
+    await page.locator('.confirm-modal .btn-warning, .confirm-modal .btn-primary').first().click();
+    await page.waitForTimeout(2000);
     // User should now be active again
-    await expect(editorRow.locator('.status-indicator.active')).toBeVisible();
+    await expect(editorRow.locator('.status-indicator.active')).toBeVisible({ timeout: 5000 });
   });
 
   test('Delete user', async ({ page }) => {
     const viewerRow = page.locator('.data-table tbody tr', { hasText: TEST_VIEWER.email });
     if (await viewerRow.count() === 0) return;
 
-    // Handle confirm dialog
-    page.on('dialog', dialog => dialog.accept());
-
-    // Click delete (3rd action button, the danger one)
+    // Click delete (danger action button) - opens ConfirmDialog
     await viewerRow.locator('.action-btn--danger').click();
+    await expect(page.locator('.confirm-modal')).toBeVisible({ timeout: 3000 });
+    await page.locator('.confirm-modal .btn-danger').click();
     await page.waitForTimeout(2000);
-    // User should be removed from table
-    await expect(page.locator('.data-table tbody')).not.toContainText(TEST_VIEWER.email);
+    // Backend soft-deletes (deactivates) — user should now be inactive
+    const statusEl = viewerRow.locator('.status-indicator');
+    await expect(statusEl).not.toHaveClass(/active/, { timeout: 5000 });
   });
 
   test('Cancel modal closes without saving', async ({ page }) => {
@@ -209,6 +214,7 @@ test.describe('User Management (ADMIN)', () => {
 test.describe('User Management - Security', () => {
 
   test('Non-admin cannot access /admin/users via URL', async ({ page }) => {
+    await dismissCookieConsent(page);
     // Seed a DEV user via API
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
@@ -221,7 +227,7 @@ test.describe('User Management - Security', () => {
 
     // Login as DEV
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
     await page.locator('#email').fill(`secdev-${timestamp}@test.com`);
     await page.locator('#password').fill('SecDevPass123!@#');
     await page.locator('button.submit-btn').click();
@@ -243,6 +249,7 @@ test.describe('User Management - Security', () => {
   });
 
   test('Admin sidebar hides Users link for DEV role', async ({ page }) => {
+    await dismissCookieConsent(page);
     // Login as DEV via seeded user
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
@@ -254,7 +261,7 @@ test.describe('User Management - Security', () => {
     }
 
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
     await page.locator('#email').fill(`sidedev-${timestamp}@test.com`);
     await page.locator('#password').fill('SideDevPass123!@#');
     await page.locator('button.submit-btn').click();

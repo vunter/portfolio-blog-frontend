@@ -1,4 +1,5 @@
-import { Component, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AdminApiService, MediaAssetResponse, MediaPurpose } from '../../../features/admin/services/admin-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
@@ -28,6 +29,7 @@ import { I18nService } from '../../../core/services/i18n.service';
 export class MediaUploadComponent {
   private readonly adminApi = inject(AdminApiService);
   readonly i18n = inject(I18nService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** The purpose/context of the upload */
   purpose = input<MediaPurpose>('GENERAL');
@@ -101,7 +103,9 @@ export class MediaUploadComponent {
   private uploadFile(file: File): void {
     this.uploading.set(true);
 
-    this.adminApi.uploadMedia(file, this.purpose()).subscribe({
+    this.adminApi.uploadMedia(file, this.purpose())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (asset) => {
         this.uploading.set(false);
         // Update the form control if provided

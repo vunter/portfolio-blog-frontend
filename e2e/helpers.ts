@@ -11,8 +11,9 @@ export const VIEWER_CREDS = { email: 'viewer@test.com', password: 'ViewerPass123
  * Login via the UI form — simulates a real user typing credentials.
  */
 export async function loginViaUI(page: Page, email: string, password: string) {
+  await dismissCookieConsent(page);
   await page.goto('/auth/login');
-  await page.waitForSelector('.login-form', { timeout: 10000 });
+  await page.waitForSelector('.auth-form', { timeout: 10000 });
 
   const emailInput = page.locator('#email');
   const passwordInput = page.locator('#password');
@@ -98,4 +99,68 @@ export async function seedTestUsers(page: Page) {
  */
 export async function waitForApp(page: Page) {
   await page.waitForLoadState('networkidle');
+}
+
+/**
+ * Seed a minimal resume profile so the public home page renders properly.
+ * Creates a resume template with alias 'leonardo-catananti' and a basic profile.
+ * Safe to call multiple times (ignores errors if already exists).
+ */
+export async function seedProfile(page: Page) {
+  const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
+  });
+  if (!loginRes.ok()) return;
+
+  // Create a resume template with the expected alias
+  await page.request.post(`${API_BASE}/resume/templates`, {
+    data: {
+      name: 'Default Resume',
+      htmlContent: '<html><body><h1>Resume</h1></body></html>',
+      cssContent: 'body { font-family: sans-serif; }',
+    },
+  }).catch(() => {});
+
+  // Find the template and set alias + status to ACTIVE
+  const templatesRes = await page.request.get(`${API_BASE}/resume/templates`);
+  if (templatesRes.ok()) {
+    const data = await templatesRes.json();
+    const templates = data.content || data || [];
+    const template = templates[0];
+    if (template) {
+      await page.request.put(`${API_BASE}/resume/templates/${template.id}`, {
+        data: {
+          ...template,
+          alias: 'leonardo-catananti',
+          status: 'ACTIVE',
+        },
+      }).catch(() => {});
+    }
+  }
+
+  // Create resume profile
+  await page.request.put(`${API_BASE}/resume/profile?locale=en`, {
+    data: {
+      fullName: 'Leonardo Catananti',
+      title: 'Senior Software Engineer',
+      email: 'admin@catananti.dev',
+      location: 'São Paulo, Brazil',
+      professionalSummary: 'Full-stack developer with expertise in Java, Spring Boot, and Angular.',
+    },
+  }).catch(() => {});
+}
+
+/**
+ * Dismiss the cookie consent dialog by pre-setting localStorage.
+ * Call this BEFORE navigating to any page.
+ */
+export async function dismissCookieConsent(page: Page) {
+  await page.addInitScript(() => {
+    localStorage.setItem('cookie_consent', JSON.stringify({
+      necessary: true,
+      functional: true,
+      analytics: true,
+      timestamp: Date.now(),
+    }));
+  });
 }

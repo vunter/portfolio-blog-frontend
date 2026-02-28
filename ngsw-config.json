@@ -37,7 +37,7 @@
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 50,
-        "maxAge": "1h",
+        "maxAge": "10m",
         "timeout": "5s"
       }
     },
@@ -49,7 +49,7 @@
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 20,
-        "maxAge": "6h",
+        "maxAge": "10m",
         "timeout": "5s"
       }
     },
@@ -61,7 +61,7 @@
       "cacheConfig": {
         "strategy": "freshness",
         "maxSize": 5,
-        "maxAge": "12h",
+        "maxAge": "10m",
         "timeout": "5s"
       }
     },
@@ -75,6 +75,45 @@
         "strategy": "performance",
         "maxSize": 20,
         "maxAge": "365d"
+      }
+    },
+    {
+      "name": "admin-network-only",
+      "urls": [
+        "/api/v1/admin/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 0,
+        "maxAge": "0u",
+        "timeout": "0u"
+      }
+    },
+    {
+      "name": "auth-network-only",
+      "urls": [
+        "/api/v1/admin/auth/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 0,
+        "maxAge": "0u",
+        "timeout": "0u"
+      }
+    },
+    {
+      "name": "mutations-network-only",
+      "urls": [
+        "/api/v1/articles/*/like",
+        "/api/v1/articles/*/comments",
+        "/api/v1/contact",
+        "/api/v1/newsletter/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 0,
+        "maxAge": "0u",
+        "timeout": "0u"
       }
     }
   ]

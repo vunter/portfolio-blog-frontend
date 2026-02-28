@@ -1,10 +1,20 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, seedProfile, ADMIN_CREDS } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testEmail = `e2e-newsletter-${Date.now()}@test.com`;
 
 test.describe('Newsletter Subscribe Flow', () => {
+
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    await seedProfile(page);
+    await page.close();
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await dismissCookieConsent(page);
+  });
   test.afterAll(async ({ browser }) => {
     // Cleanup: remove the test subscriber via admin API
     const page = await browser.newPage();

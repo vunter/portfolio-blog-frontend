@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginViaUI, seedTestUsers, DEV_CREDS, EDITOR_CREDS, VIEWER_CREDS, ADMIN_CREDS, loginAs } from './helpers';
+import { loginViaUI, seedTestUsers, DEV_CREDS, EDITOR_CREDS, VIEWER_CREDS, ADMIN_CREDS, loginAs, dismissCookieConsent } from './helpers';
 
 test.describe('Role-Based Access Control', () => {
 
@@ -48,11 +48,11 @@ test.describe('Role-Based Access Control', () => {
       await expect(page.locator('.main-content')).toBeVisible();
     });
 
-    test('DEV can access settings', async ({ page }) => {
+    test('DEV cannot access settings (admin only)', async ({ page }) => {
       await loginAs(page, DEV_CREDS);
-      await page.locator('a.nav-item[href="/admin/settings"]').click();
-      await expect(page).toHaveURL(/\/admin\/settings/);
-      await expect(page.locator('.main-content')).toBeVisible();
+      // Settings link should NOT be visible to DEV (adminOnly)
+      const settingsLink = page.locator('a.nav-item[href="/admin/settings"]');
+      await expect(settingsLink).not.toBeVisible();
     });
 
     test('DEV cannot access users management', async ({ page }) => {

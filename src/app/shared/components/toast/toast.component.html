@@ -4,6 +4,7 @@
  <div
  class="toast toast--{{ notification.type }}"
  role="alert"
+ [attr.aria-live]="notification.type === 'error' ? 'assertive' : 'polite'"
  [attr.aria-label]="notification.message"
  >
  <div class="toast__icon">

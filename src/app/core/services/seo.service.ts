@@ -3,8 +3,6 @@ import { Meta, Title } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
-// TODO F-351: Reuse existing <link> and <script> elements instead of removing/recreating
-
 export interface SeoConfig {
   title: string;
   description: string;

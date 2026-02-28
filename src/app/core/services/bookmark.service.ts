@@ -2,6 +2,7 @@ import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { CookieConsentService } from './cookie-consent.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ export class BookmarkService {
   private readonly VISITOR_KEY = 'visitor-id';
   private readonly platformId = inject(PLATFORM_ID);
   private readonly http = inject(HttpClient);
+  private readonly consent = inject(CookieConsentService);
   private readonly baseUrl = `${environment.apiUrl}/${environment.apiVersion}/bookmarks`;
 
   /** Set of article slugs currently bookmarked */
@@ -78,6 +80,8 @@ export class BookmarkService {
    * Merges local + backend sets and pushes any local-only bookmarks to the server.
    */
   private syncFromBackend(): void {
+    const visitorId = this.getVisitorId();
+    if (!visitorId) return; // No visitor ID (consent not given) — skip backend sync
     const headers = this.visitorHeaders();
     this.http
       .get<{ content: { slug: string }[] }>(this.baseUrl, {
@@ -109,6 +113,7 @@ export class BookmarkService {
 
   private getVisitorId(): string {
     if (!isPlatformBrowser(this.platformId)) return '';
+    if (!this.consent.hasConsent('functional')) return '';
     let id = localStorage.getItem(this.VISITOR_KEY);
     if (!id) {
       // crypto.randomUUID() requires a secure context (HTTPS).
@@ -144,7 +149,7 @@ export class BookmarkService {
   }
 
   private persist(bookmarks: Set<string>): void {
-    if (isPlatformBrowser(this.platformId)) {
+    if (isPlatformBrowser(this.platformId) && this.consent.hasConsent('functional')) {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify([...bookmarks]));
     }
   }

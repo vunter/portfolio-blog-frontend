@@ -129,7 +129,7 @@
   border: 1px solid var(--border-color, #cbd5e1);
   border-radius: 0.5rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  z-index: 100;
+  z-index: var(--z-dropdown, 1000);
   padding: 4px 0;
 }
 

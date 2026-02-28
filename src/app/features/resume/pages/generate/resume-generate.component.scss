@@ -100,10 +100,17 @@
 }
 
 .btn-template {
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
   background: var(--bg-primary, #fff);
-  color: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  &:hover:not(:disabled) { background: var(--primary-tint); }
+  color: var(--primary-color, #6366f1);
+  border: 1px solid var(--primary-color, #6366f1);
+  &:hover:not(:disabled) { background: var(--primary-tint, rgba(99, 102, 241, 0.08)); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .btn-update-template {

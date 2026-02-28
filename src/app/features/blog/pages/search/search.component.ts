@@ -1,4 +1,3 @@
-// TODO F-390: Verify debounce on search input to prevent excessive API calls
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 

@@ -53,7 +53,6 @@ export class ArticleListComponent implements OnInit {
     this.loadArticles();
   }
 
-  // TODO F-349: Add server-side search/filter for scalability
   loadArticles(): void {
     this.loading.set(true);
     this.error.set(false);

@@ -80,6 +80,19 @@
  </div>
  }
  </div>
+ @if (contentDiffLines().length > 0) {
+ <div class="content-diff-view">
+  <h5>{{ i18n.t('admin.articleForm.contentLabel') }}</h5>
+  <div class="diff-lines">
+  @for (line of contentDiffLines(); track $index) {
+  <div class="diff-line" [class.diff-added]="line.type === 'added'" [class.diff-removed]="line.type === 'removed'">
+   <span class="diff-prefix">{{ line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' ' }}</span>
+   <span class="diff-text">{{ line.text || '\u00A0' }}</span>
+  </div>
+  }
+  </div>
+ </div>
+ }
  <button type="button" class="btn-close-compare" (click)="clearCompare()">{{ i18n.t('common.close') }}</button>
  </div>
  }

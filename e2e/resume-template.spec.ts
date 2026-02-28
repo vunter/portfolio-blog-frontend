@@ -195,13 +195,15 @@ test.describe('Resume Template CRUD', () => {
       });
 
       if (await templateCard.count() > 0) {
-        // Handle confirm dialog
-        page.on('dialog', (dialog) => dialog.accept());
-
         // Click delete button (danger action btn)
         const deleteBtn = templateCard.locator('.action-btn--danger').first();
         if (await deleteBtn.isVisible()) {
           await deleteBtn.click();
+
+          // Confirm in the custom Angular confirm dialog
+          const confirmBtn = page.locator('.btn-danger').last();
+          await expect(confirmBtn).toBeVisible({ timeout: 5000 });
+          await confirmBtn.click();
           await page.waitForTimeout(2000);
 
           // Template should no longer be in the list

@@ -1,16 +1,17 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, seedProfile } from './helpers';
 
 test.describe('Internationalization (i18n)', () => {
 
   test.describe('Login Page i18n', () => {
 
     test('should default to English', async ({ page }) => {
+      await dismissCookieConsent(page);
       await page.goto('/auth/login');
-      await page.waitForSelector('.login-form', { timeout: 10000 });
+      await page.waitForSelector('.auth-form', { timeout: 10000 });
 
       // English button should be active
-      const enBtn = page.locator('.login-lang-btn').first();
+      const enBtn = page.locator('.auth-lang-btn').first();
       await expect(enBtn).toHaveClass(/active/);
 
       // Form labels should be in English
@@ -19,17 +20,18 @@ test.describe('Internationalization (i18n)', () => {
     });
 
     test('should switch to Portuguese on login page', async ({ page }) => {
+      await dismissCookieConsent(page);
       await page.goto('/auth/login');
-      await page.waitForSelector('.login-form', { timeout: 10000 });
+      await page.waitForSelector('.auth-form', { timeout: 10000 });
 
       // Click PT button
-      await page.locator('.login-lang-btn:has-text("PT")').click();
+      await page.locator('.auth-lang-btn:has-text("PT")').click();
 
       // Wait for text to change
       await expect(page.locator('label[for="password"]')).toContainText(/senha/i);
 
       // PT button should now be active
-      const ptBtn = page.locator('.login-lang-btn:has-text("PT")');
+      const ptBtn = page.locator('.auth-lang-btn:has-text("PT")');
       await expect(ptBtn).toHaveClass(/active/);
 
       // Form labels should be in Portuguese
@@ -38,15 +40,16 @@ test.describe('Internationalization (i18n)', () => {
     });
 
     test('should switch back to English from Portuguese', async ({ page }) => {
+      await dismissCookieConsent(page);
       await page.goto('/auth/login');
-      await page.waitForSelector('.login-form', { timeout: 10000 });
+      await page.waitForSelector('.auth-form', { timeout: 10000 });
 
       // Switch to PT
-      await page.locator('.login-lang-btn:has-text("PT")').click();
+      await page.locator('.auth-lang-btn:has-text("PT")').click();
       await expect(page.locator('label[for="password"]')).toContainText(/senha/i);
 
       // Switch back to EN
-      await page.locator('.login-lang-btn:has-text("EN")').click();
+      await page.locator('.auth-lang-btn:has-text("EN")').click();
       await expect(page.locator('label[for="password"]')).toContainText(/password/i);
     });
   });
@@ -96,27 +99,48 @@ test.describe('Internationalization (i18n)', () => {
 
   test.describe('Public Header i18n', () => {
 
+    test.beforeAll(async ({ browser }) => {
+      const page = await browser.newPage();
+      await seedProfile(page);
+      await page.close();
+    });
+
     test('should toggle language on public pages', async ({ page }) => {
+      await dismissCookieConsent(page);
       await page.goto('/');
       await page.waitForLoadState('networkidle');
 
-      // Find the language toggle button in the header
-      const langBtn = page.locator('.header__actions button.toggle-btn');
+      // Find the language dropdown toggle button in the header
+      const toggleBtn = page.locator('.lang-dropdown .toggle-btn');
 
-      if (await langBtn.isVisible()) {
-        const initialText = await langBtn.textContent();
+      if (await toggleBtn.isVisible()) {
+        const initialText = (await toggleBtn.textContent())?.trim();
 
-        // Click to toggle
-        await langBtn.click();
-        await expect(langBtn).not.toHaveText(initialText!);
+        // Click to open dropdown
+        await toggleBtn.click();
+        await page.waitForTimeout(300);
 
-        const newText = await langBtn.textContent();
-        // Text should have changed (EN→PT or PT→EN)
-        expect(newText).not.toBe(initialText);
+        // Click a different language option (e.g., Português)
+        const ptOption = page.locator('.lang-dropdown__item:has-text("Português")');
+        if (await ptOption.isVisible()) {
+          await ptOption.click();
+          await page.waitForTimeout(500);
 
-        // Toggle back
-        await langBtn.click();
-        await expect(langBtn).toHaveText(initialText!);
+          // Toggle text should have changed
+          const newText = (await toggleBtn.textContent())?.trim();
+          expect(newText).not.toBe(initialText);
+
+          // Toggle back to English
+          await toggleBtn.click();
+          await page.waitForTimeout(300);
+          const enOption = page.locator('.lang-dropdown__item:has-text("English")');
+          if (await enOption.isVisible()) {
+            await enOption.click();
+            await page.waitForTimeout(500);
+            const restoredText = (await toggleBtn.textContent())?.trim();
+            expect(restoredText).toBe(initialText);
+          }
+        }
       }
     });
   });

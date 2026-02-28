@@ -31,7 +31,8 @@
  class="bookmark-btn"
  [class.bookmarked]="bookmarkService.isBookmarked(article().slug)"
  (click)="toggleBookmark($event)"
- [title]="bookmarkService.isBookmarked(article().slug) ? 'Remove bookmark' : 'Bookmark'"
+ [attr.aria-label]="bookmarkService.isBookmarked(article().slug) ? 'Remove bookmark' : 'Bookmark this article'"
+ [attr.aria-pressed]="bookmarkService.isBookmarked(article().slug)"
  >
  <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="bookmarkService.isBookmarked(article().slug) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>

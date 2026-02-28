@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, computed, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ResumeProfile } from '../../../models/resume-profile.model';
 
@@ -11,6 +12,7 @@ import { ResumeProfile } from '../../../models/resume-profile.model';
 })
 export class HeroSectionComponent {
   public i18n = inject(I18nService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly profile = input<ResumeProfile | null>(null);
 
@@ -36,10 +38,14 @@ export class HeroSectionComponent {
   readonly hasHighlights = computed(() => this.yearsExp() !== null || this.costReduction() !== null || this.ticketReduction() !== null);
 
   /** Hero description from homeCustomization, falling back to professionalSummary or null (i18n fallback in template) */
+  // SEC-F-02: Sanitize HTML content before binding to [innerHTML] to prevent XSS.
+  // Uses Angular's built-in DomSanitizer.sanitize(SecurityContext.HTML) which strips
+  // dangerous elements/attributes while preserving safe formatting tags.
   readonly heroDescription = computed(() => {
     const fromCustomization = this.getHomeCustomization('hero_description');
-    if (fromCustomization) return fromCustomization;
-    return this.profile()?.professionalSummary ?? null;
+    const raw = fromCustomization ?? this.profile()?.professionalSummary ?? null;
+    if (!raw) return null;
+    return this.sanitizer.sanitize(SecurityContext.HTML, raw) ?? null;
   });
 
   private getHomeCustomization(label: string): string | null {

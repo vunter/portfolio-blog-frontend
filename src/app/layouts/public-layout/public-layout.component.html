@@ -88,6 +88,11 @@
  @if (mobileMenuOpen()) {
  <div class="mobile-menu-overlay" (click)="closeMobileMenu()"></div>
  <div class="mobile-menu" id="mobile-menu" role="dialog" [attr.aria-label]="i18n.t('nav.mobileMenu')">
+ <button class="mobile-menu-close" (click)="closeMobileMenu()" [attr.aria-label]="i18n.t('common.close')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+ </svg>
+ </button>
  <nav class="mobile-nav" aria-label="Mobile navigation">
  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">{{ i18n.t('nav.home') }}</a>
  <a routerLink="/blog" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.blog') }}</a>
@@ -124,7 +129,7 @@
  </div>
  } @else {
  <div class="mobile-auth">
- <a routerLink="/auth/login" class="btn btn--primary" style="width: 100%; justify-content: center;" (click)="closeMobileMenu()">{{ i18n.t('nav.login') }}</a>
+ <a routerLink="/auth/login" class="btn btn--primary btn--full-width" (click)="closeMobileMenu()">{{ i18n.t('nav.login') }}</a>
  </div>
  }
  <div class="mobile-actions">
