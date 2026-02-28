@@ -17,6 +17,11 @@ import { AuthService } from '../auth/auth.service';
  *
  * Previously `isRefreshing` and `refreshSubject$` were closure-scoped module
  * variables shared across all SSR requests in the same Node process.
+ *
+ * SEC-F-08: Shared state risk is mitigated because this interceptor only runs
+ * in the browser (RenderMode.Client). No request state is shared across SSR requests.
+ * The RefreshTokenState service is scoped per-injector, so even if SSR processes
+ * multiple requests concurrently, each gets its own isolated state instance.
  */
 @Injectable({ providedIn: 'root' })
 export class RefreshTokenState {

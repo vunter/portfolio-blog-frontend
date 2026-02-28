@@ -102,6 +102,7 @@
     left: 0.75rem;
     width: auto;
     max-width: none;
+    z-index: calc(var(--z-toast, 1080) + 10);
   }
 
   @keyframes toast-slide-in {

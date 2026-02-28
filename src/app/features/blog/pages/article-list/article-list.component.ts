@@ -131,7 +131,7 @@ export class ArticleListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => this.popularArticles.set(response.content),
-        error: (err) => console.error('Operation failed:', err),
+        error: () => { /* Popular articles sidebar is non-critical — silent fail */ },
       });
   }
 

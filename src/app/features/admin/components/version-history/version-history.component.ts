@@ -1,5 +1,6 @@
 import { Component, inject, signal, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { AdminApiService } from '../../services/admin-api.service';
 import { ArticleVersionResponse, VersionCompareResponse } from '../../../../models';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -14,7 +15,6 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VersionHistoryComponent {
-  // TODO F-384: Integrate diff library for highlighted change visualization
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
@@ -40,6 +40,7 @@ export class VersionHistoryComponent {
   compareFrom = signal<number | null>(null);
   compareTo = signal<number | null>(null);
   compareResult = signal<VersionCompareResponse | null>(null);
+  contentDiffLines = signal<{ type: 'added' | 'removed' | 'unchanged'; text: string }[]>([]);
 
   loadVersions(): void {
     const id = this.articleId();
@@ -121,9 +122,21 @@ export class VersionHistoryComponent {
     if (from === null || to === null) return;
 
     this.comparing.set(true);
-    this.adminApi.compareVersions(this.articleId(), from, to).subscribe({
-      next: (result) => {
-        this.compareResult.set(result);
+    this.contentDiffLines.set([]);
+    const id = this.articleId();
+
+    forkJoin({
+      comparison: this.adminApi.compareVersions(id, from, to),
+      fromVersion: this.adminApi.getArticleVersion(id, from),
+      toVersion: this.adminApi.getArticleVersion(id, to),
+    }).subscribe({
+      next: ({ comparison, fromVersion, toVersion }) => {
+        this.compareResult.set(comparison);
+        if (comparison.contentChanged) {
+          this.contentDiffLines.set(
+            this.computeLineDiff(fromVersion.content || '', toVersion.content || '')
+          );
+        }
         this.comparing.set(false);
       },
       error: () => {
@@ -135,5 +148,26 @@ export class VersionHistoryComponent {
 
   clearCompare(): void {
     this.compareResult.set(null);
+    this.contentDiffLines.set([]);
+  }
+
+  private computeLineDiff(oldText: string, newText: string): { type: 'added' | 'removed' | 'unchanged'; text: string }[] {
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+    const result: { type: 'added' | 'removed' | 'unchanged'; text: string }[] = [];
+    const maxLen = Math.max(oldLines.length, newLines.length);
+
+    for (let i = 0; i < maxLen; i++) {
+      const oldLine = i < oldLines.length ? oldLines[i] : undefined;
+      const newLine = i < newLines.length ? newLines[i] : undefined;
+
+      if (oldLine === newLine) {
+        result.push({ type: 'unchanged', text: oldLine! });
+      } else {
+        if (oldLine !== undefined) result.push({ type: 'removed', text: oldLine });
+        if (newLine !== undefined) result.push({ type: 'added', text: newLine });
+      }
+    }
+    return result;
   }
 }

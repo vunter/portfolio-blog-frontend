@@ -5,7 +5,7 @@
       background: var(--color-primary, #2563eb);
       color: #fff;
       padding: 8px 16px;
-      z-index: 1000;
+      z-index: var(--z-fixed, 1030);
       transition: top 0.2s;
       text-decoration: none;
       font-weight: 500;
@@ -17,13 +17,15 @@
     }
 
     .admin-layout {
+      --sidebar-width: 260px;
+      --sidebar-width-collapsed: 72px;
       display: flex;
       min-height: 100vh;
       background: var(--bg-secondary, #f3f4f6);
     }
 
     .sidebar {
-      width: 260px;
+      width: var(--sidebar-width);
       background: var(--sidebar-bg);
       color: var(--sidebar-text-hover, white);
       display: flex;
@@ -32,11 +34,11 @@
       left: 0;
       top: 0;
       bottom: 0;
-      z-index: 100;
+      z-index: var(--z-fixed, 1030);
       transition: width 0.3s ease, background 0.3s;
 
       .sidebar-collapsed & {
-        width: 72px;
+        width: var(--sidebar-width-collapsed);
       }
     }
 
@@ -217,18 +219,18 @@
 
     .main-content {
       flex: 1;
-      margin-left: 260px;
+      margin-left: var(--sidebar-width);
       padding: 2rem;
       transition: margin-left 0.3s ease;
 
       .sidebar-collapsed & {
-        margin-left: 72px;
+        margin-left: var(--sidebar-width-collapsed);
       }
     }
 
     @media (max-width: 768px) {
       .sidebar {
-        width: 72px;
+        width: var(--sidebar-width-collapsed);
       }
 
       .sidebar__toggle {
@@ -236,7 +238,7 @@
       }
 
       .main-content {
-        margin-left: 72px;
+        margin-left: var(--sidebar-width-collapsed);
       }
 
       .logo-text,

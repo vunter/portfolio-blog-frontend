@@ -6,6 +6,17 @@ import { UserResponse } from './user.model';
 
 export type ArticleStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'ARCHIVED';
 
+/**
+ * Lightweight author info returned within article responses.
+ * Matches backend ArticleResponse.AuthorInfo (not the full UserResponse).
+ */
+export interface AuthorInfo {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  bio?: string;
+}
+
 export interface ArticleRequest {
   slug: string;
   title: string;
@@ -33,7 +44,7 @@ export interface ArticleResponse {
   status: ArticleStatus;
   publishedAt?: string;
   scheduledAt?: string;
-  author: UserResponse;
+  author: AuthorInfo;
   tags: TagResponse[];
   viewCount: number;
   likeCount: number;
@@ -57,7 +68,7 @@ export interface ArticleSummaryResponse {
   featuredImageUrl?: string; // Alias for coverImageUrl
   status: ArticleStatus;
   publishedAt?: string;
-  author: UserResponse;
+  author: AuthorInfo;
   tags: TagResponse[];
   viewCount: number;
   likeCount: number;

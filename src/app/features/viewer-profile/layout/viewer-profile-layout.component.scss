@@ -15,7 +15,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: var(--z-fixed, 1030);
   transition: width 0.3s ease;
 
   .sidebar-collapsed & {

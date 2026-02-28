@@ -194,6 +194,11 @@
           background: rgba(255, 255, 255, 0.2);
           color: #e2e8f0;
         }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color, #6366f1);
+          outline-offset: 2px;
+        }
       }
 
       :deep(pre code) {
@@ -796,7 +801,7 @@
       .toc {
         position: fixed;
         top: 100px;
-        left: calc(50% - 680px);
+        left: max(1rem, calc(50% - 706px));
         width: 240px;
         max-height: calc(100vh - 140px);
         overflow-y: auto;

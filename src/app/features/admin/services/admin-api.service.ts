@@ -12,17 +12,23 @@ import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareRespo
 
 export interface DashboardStats {
   totalArticles: number;
+  publishedArticles: number;
+  draftArticles: number;
   totalViews: number;
   totalComments: number;
-  totalSubscribers: number;
-  recentArticles: number;
   pendingComments: number;
+  totalUsers: number;
+  totalTags: number;
+  newsletterSubscribers: number;
 }
 
 export interface DashboardActivity {
+  id: number;
   type: string;
+  action: string;
+  title: string;
   description: string;
-  timestamp: string;
+  createdAt: string;
 }
 
 export interface AdminArticle {

@@ -1,5 +1,4 @@
-// TODO F-392: Add zero-data guards or use lightweight charting library
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AdminApiService, AnalyticsSummary } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -34,6 +33,13 @@ export class AnalyticsComponent implements OnInit {
   maxViews = signal(0);
   maxReferrerCount = signal(0);
 
+  readonly hasAnyData = computed(() => {
+    const d = this.data();
+    if (!d) return false;
+    return d.totalViews > 0 || d.uniqueVisitors > 0 || d.totalLikes > 0 || d.totalShares > 0 ||
+           d.dailyViews.length > 0 || d.topReferrers.length > 0 || d.topArticles.length > 0;
+  });
+
   ngOnInit(): void {
     this.loadAnalytics();
   }
@@ -60,8 +66,10 @@ export class AnalyticsComponent implements OnInit {
             topReferrers: summary.topReferrers ?? [],
           };
           this.data.set(mapped);
-          this.maxViews.set(Math.max(...(mapped.dailyViews?.map((d) => d.count) || [1])));
-          this.maxReferrerCount.set(Math.max(...(mapped.topReferrers?.map((r) => r.count) || [1])));
+          const viewCounts = mapped.dailyViews?.map((d) => d.count) ?? [];
+          this.maxViews.set(viewCounts.length > 0 ? Math.max(...viewCounts) : 0);
+          const refCounts = mapped.topReferrers?.map((r) => r.count) ?? [];
+          this.maxReferrerCount.set(refCounts.length > 0 ? Math.max(...refCounts) : 0);
           this.loading.set(false);
         },
         error: () => {

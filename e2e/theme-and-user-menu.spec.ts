@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, logoutFromAdmin } from './helpers';
+import { loginAsAdmin, logoutFromAdmin, dismissCookieConsent } from './helpers';
 
 test.describe('Theme Toggle', () => {
 
   test('should toggle theme on login page', async ({ page }) => {
+    await dismissCookieConsent(page);
     await page.goto('/auth/login');
-    await page.waitForSelector('.login-form', { timeout: 10000 });
+    await page.waitForSelector('.auth-form', { timeout: 10000 });
 
     const themeToggle = page.locator('button.theme-slide-toggle.floating');
     if (await themeToggle.isVisible()) {

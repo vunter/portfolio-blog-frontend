@@ -14,8 +14,7 @@ import { LearningSectionComponent } from './components/learning-section.componen
 import { TestimonialsSectionComponent } from './components/testimonials-section.component';
 import { ContactSectionComponent } from './components/contact-section.component';
 import { SidebarSectionComponent } from './components/sidebar-section.component';
-// F-500: Profile selector — imported but NOT rendered yet. Enable when multi-dev is ready.
-import { ProfileSelectorComponent } from './components/profile-selector.component';
+// PERF-F-05: Removed unused ProfileSelectorComponent import (F-500: re-add when multi-dev is ready)
 
 @Component({
   selector: 'app-home',
@@ -31,8 +30,7 @@ import { ProfileSelectorComponent } from './components/profile-selector.componen
     TestimonialsSectionComponent,
     ContactSectionComponent,
     SidebarSectionComponent,
-    // F-500: ProfileSelectorComponent — available but not used in template yet
-    ProfileSelectorComponent,
+    // PERF-F-05: ProfileSelectorComponent removed — re-add when F-500 multi-dev is ready
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

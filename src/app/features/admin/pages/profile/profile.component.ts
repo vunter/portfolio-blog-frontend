@@ -71,7 +71,8 @@ export class ProfileComponent implements OnInit {
         this.form.name = user.name || '';
         this.form.email = user.email || '';
         this.form.username = user.username ?? '';
-        this.form.avatarUrl = user.avatarUrl ?? '';
+        const avatar = user.avatarUrl ?? '';
+        this.form.avatarUrl = avatar.startsWith('http') ? avatar : '';
         this.form.bio = user.bio ?? '';
         this.loading.set(false);
       },
@@ -107,7 +108,17 @@ export class ProfileComponent implements OnInit {
       next: (asset) => {
         this.uploadingAvatar.set(false);
         this.form.avatarUrl = asset.url;
-        this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+        // Auto-save avatar URL to backend so it persists across refreshes
+        this.api.put<UserResponse>('/admin/users/me', { avatarUrl: asset.url }).subscribe({
+          next: (updated) => {
+            this.user.set(updated);
+            this.authStore.login(updated);
+            this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+          },
+          error: () => {
+            this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+          },
+        });
       },
       error: () => {
         this.uploadingAvatar.set(false);

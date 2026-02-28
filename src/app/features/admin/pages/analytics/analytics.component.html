@@ -50,6 +50,7 @@
  </div>
  </section>
 
+ @if (hasAnyData()) {
  <div class="charts-grid">
  <!-- Views Chart -->
  <div class="chart-card">
@@ -133,5 +134,11 @@
  </table>
  </div>
  </section>
+ } @else {
+ <div class="no-data-banner">
+  <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg>
+  <p>{{ i18n.t('admin.analytics.noData') }}</p>
+ </div>
+ }
 </div>
 }

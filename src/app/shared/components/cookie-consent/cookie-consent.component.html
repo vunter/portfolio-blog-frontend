@@ -35,10 +35,10 @@
  <div class="cookie-category">
  <div class="category-header">
  <div class="category-info">
- <span class="category-name">{{ i18n.t('cookie.category.functional') }}</span>
+ <span class="category-name" id="cookie-functional-label">{{ i18n.t('cookie.category.functional') }}</span>
  </div>
  <label class="toggle">
- <input type="checkbox" [checked]="functionalEnabled()" (change)="functionalEnabled.set(!functionalEnabled())" />
+ <input type="checkbox" [checked]="functionalEnabled()" (change)="functionalEnabled.set(!functionalEnabled())" aria-labelledby="cookie-functional-label" />
  <span class="toggle-slider"></span>
  </label>
  </div>
@@ -49,10 +49,10 @@
  <div class="cookie-category">
  <div class="category-header">
  <div class="category-info">
- <span class="category-name">{{ i18n.t('cookie.category.analytics') }}</span>
+ <span class="category-name" id="cookie-analytics-label">{{ i18n.t('cookie.category.analytics') }}</span>
  </div>
  <label class="toggle">
- <input type="checkbox" [checked]="analyticsEnabled()" (change)="analyticsEnabled.set(!analyticsEnabled())" />
+ <input type="checkbox" [checked]="analyticsEnabled()" (change)="analyticsEnabled.set(!analyticsEnabled())" aria-labelledby="cookie-analytics-label" />
  <span class="toggle-slider"></span>
  </label>
  </div>
@@ -80,9 +80,9 @@
  </div>
 
  <div class="cookie-footer">
- <a class="privacy-link" (click)="goToPrivacy()" (keydown.enter)="goToPrivacy()" tabindex="0">
+ <button class="privacy-link" (click)="goToPrivacy()" type="button">
  {{ i18n.t('cookie.privacyLink') }}
- </a>
+ </button>
  </div>
  </div>
  </div>

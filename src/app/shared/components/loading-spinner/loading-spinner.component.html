@@ -1,11 +1,12 @@
-﻿<!-- TODO F-359: Add role="status" and aria-live="polite" to spinner wrapper for screen reader announcement -->
 @if (show()) {
- <div class="spinner-overlay" [class.spinner-overlay--inline]="inline()">
- <div class="spinner" [style.width.px]="size()" [style.height.px]="size()">
+ <div class="spinner-overlay" [class.spinner-overlay--inline]="inline()" role="status" aria-live="polite">
+ <div class="spinner" [style.width.px]="size()" [style.height.px]="size()" aria-hidden="true">
  <div class="spinner__ring"></div>
  </div>
  @if (message()) {
  <p class="spinner__message">{{ message() }}</p>
+ } @else {
+ <span class="sr-only">Loading…</span>
  }
  </div>
 }

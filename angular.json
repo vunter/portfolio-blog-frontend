@@ -30,7 +30,7 @@
                 "input": "public"
               },
               {
-                "glob": "**/*",
+                "glob": "min/vs/**/*",
                 "input": "node_modules/monaco-editor",
                 "output": "/assets/monaco-editor"
               }
@@ -40,24 +40,6 @@
               "node_modules/prismjs/themes/prism-tomorrow.css"
             ],
             "scripts": [
-              "node_modules/prismjs/prism.js",
-              "node_modules/prismjs/components/prism-java.min.js",
-              "node_modules/prismjs/components/prism-javascript.min.js",
-              "node_modules/prismjs/components/prism-typescript.min.js",
-              "node_modules/prismjs/components/prism-python.min.js",
-              "node_modules/prismjs/components/prism-go.min.js",
-              "node_modules/prismjs/components/prism-bash.min.js",
-              "node_modules/prismjs/components/prism-css.min.js",
-              "node_modules/prismjs/components/prism-scss.min.js",
-              "node_modules/prismjs/components/prism-json.min.js",
-              "node_modules/prismjs/components/prism-yaml.min.js",
-              "node_modules/prismjs/components/prism-markdown.min.js",
-              "node_modules/prismjs/components/prism-docker.min.js",
-              "node_modules/prismjs/components/prism-sql.min.js",
-              "node_modules/prismjs/components/prism-markup.min.js",
-              "node_modules/prismjs/components/prism-csharp.min.js",
-              "node_modules/prismjs/components/prism-kotlin.min.js",
-              "node_modules/prismjs/components/prism-rust.min.js"
             ]
           },
           "configurations": {

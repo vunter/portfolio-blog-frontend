@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, ADMIN_CREDS } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testSlug = `e2e-comment-test-${Date.now()}`;
 
 test.describe('Comment Submission Flow', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await dismissCookieConsent(page);
+  });
   /**
    * Seed a published article via the API so we have a public page to comment on.
    */

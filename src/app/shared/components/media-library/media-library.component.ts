@@ -1,4 +1,5 @@
-import { Component, inject, input, output, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminApiService, MediaAssetResponse, MediaPurpose } from '../../../features/admin/services/admin-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { MediaUploadComponent } from '../media-upload/media-upload.component';
@@ -28,6 +29,7 @@ import { DatePipe } from '@angular/common';
 export class MediaLibraryComponent implements OnInit {
   private readonly adminApi = inject(AdminApiService);
   readonly i18n = inject(I18nService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Filter by purpose, or show all */
   purpose = input<MediaPurpose | ''>('');
@@ -54,7 +56,9 @@ export class MediaLibraryComponent implements OnInit {
     this.loading.set(true);
     const purpose = this.purpose() || undefined;
 
-    this.adminApi.getMediaAssets(this.currentPage(), this.pageSize, purpose).subscribe({
+    this.adminApi.getMediaAssets(this.currentPage(), this.pageSize, purpose)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (res) => {
         this.assets.set(res.items);
         this.totalItems.set(res.totalItems);
@@ -73,7 +77,9 @@ export class MediaLibraryComponent implements OnInit {
 
   deleteAsset(asset: MediaAssetResponse, event: Event): void {
     event.stopPropagation();
-    this.adminApi.deleteMediaAsset(String(asset.id)).subscribe({
+    this.adminApi.deleteMediaAsset(String(asset.id))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.assets.update(list => list.filter(a => a.id !== asset.id));
         this.totalItems.update(n => n - 1);

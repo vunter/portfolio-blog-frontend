@@ -1,32 +1,11 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService, DashboardStats, DashboardActivity } from '../../services/admin-api.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
-
-// TODO F-379: Import DashboardStats from AdminApiService instead of duplicating
-interface DashboardStats {
-  totalArticles: number;
-  publishedArticles: number;
-  draftArticles: number;
-  totalViews: number;
-  totalComments: number;
-  pendingComments: number;
-  totalUsers: number;
-  totalTags: number;
-  newsletterSubscribers: number;
-}
-
-interface RecentActivity {
-  id: number;
-  type: 'article' | 'comment' | 'user';
-  action: string;
-  title: string;
-  createdAt: string;
-}
 
 @Component({
   selector: 'app-dashboard',
@@ -36,14 +15,13 @@ interface RecentActivity {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
-  // TODO F-324: Use AdminApiService.getDashboardStats() instead of direct ApiService call
-  private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   readonly authStore = inject(AuthStore);
   i18n = inject(I18nService);
 
   stats = signal<DashboardStats | null>(null);
-  recentActivity = signal<RecentActivity[]>([]);
+  recentActivity = signal<DashboardActivity[]>([]);
   loading = signal(true);
   error = signal(false);
 
@@ -55,10 +33,9 @@ export class DashboardComponent implements OnInit {
     this.loading.set(true);
     this.error.set(false);
 
-    // HIGH-03: Use forkJoin to wait for both requests, set loading=false only when all complete
     forkJoin({
-      stats: this.apiService.get<DashboardStats>('/admin/dashboard/stats'),
-      activity: this.apiService.get<RecentActivity[]>('/admin/dashboard/activity'),
+      stats: this.adminApi.getDashboardStats(),
+      activity: this.adminApi.getDashboardActivity(),
     }).subscribe({
       next: ({ stats, activity }) => {
         this.stats.set(stats);

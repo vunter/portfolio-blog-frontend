@@ -1,14 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID, OnInit, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent, throttleTime } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ThemeService } from '../../core/services/theme.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { PublicProfileService } from '../../core/services/public-profile.service';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
-
-// TODO F-352: Replace manual throttle flag with fromEvent + throttleTime pipe
-// TODO F-360: Add "Skip to main content" link for keyboard navigation
 
 @Component({
   selector: 'app-public-layout',
@@ -18,16 +17,16 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onDocumentClick()',
-    '(window:scroll)': 'onWindowScroll()',
   },
 })
-export class PublicLayoutComponent {
+export class PublicLayoutComponent implements OnInit {
   authStore = inject(AuthStore);
   themeService = inject(ThemeService);
   i18n = inject(I18nService);
   private profileService = inject(PublicProfileService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
   currentYear = new Date().getFullYear();
   mobileMenuOpen = signal(false);
   showScrollTop = signal(false);
@@ -39,13 +38,21 @@ export class PublicLayoutComponent {
     return labels[this.i18n.language()] || 'EN';
   });
 
-  /** PERF-04: Throttle scroll handler */
-  private scrollThrottleTimer: ReturnType<typeof setTimeout> | null = null;
-
   readonly ownerName = computed(() => this.profileService.profile()?.fullName || '');
   readonly ownerEmail = computed(() => this.profileService.profile()?.email || '');
   readonly ownerGithub = computed(() => this.profileService.profile()?.github || '');
   readonly ownerLinkedin = computed(() => this.profileService.profile()?.linkedin || '');
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      fromEvent(window, 'scroll').pipe(
+        throttleTime(100),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => {
+        this.showScrollTop.set(window.scrollY > 400);
+      });
+    }
+  }
 
   toggleMobileMenu(): void { this.mobileMenuOpen.update(v => !v); }
   closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
@@ -73,18 +80,6 @@ export class PublicLayoutComponent {
   onDocumentClick(): void {
     this.userMenuOpen.set(false);
     this.langMenuOpen.set(false);
-  }
-
-  // ANG20-06: Moved from @HostListener to host property
-  onWindowScroll(): void {
-    // PERF-04: Throttle scroll updates to ~60ms intervals
-    if (this.scrollThrottleTimer) return;
-    this.scrollThrottleTimer = setTimeout(() => {
-      this.scrollThrottleTimer = null;
-      if (isPlatformBrowser(this.platformId)) {
-        this.showScrollTop.set(window.scrollY > 400);
-      }
-    }, 60);
   }
 
   scrollToTop(): void {

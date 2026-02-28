@@ -1,6 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { dismissCookieConsent, seedProfile } from './helpers';
 
 test.describe('Public Pages', () => {
+
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    await seedProfile(page);
+    await page.close();
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await dismissCookieConsent(page);
+  });
 
   test('should load home page', async ({ page }) => {
     await page.goto('/');

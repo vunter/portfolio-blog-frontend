@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, ADMIN_CREDS } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testSlug = `e2e-test-article-${Date.now()}`;
@@ -125,6 +125,10 @@ test.describe('Article Lifecycle - Create, Publish, View, Unpublish, Delete', ()
 
 test.describe('Article Detail Page', () => {
 
+  test.beforeEach(async ({ page }) => {
+    await dismissCookieConsent(page);
+  });
+
   test('Public article detail page renders markdown correctly', async ({ page }) => {
     // Create and publish an article via API
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
@@ -208,6 +212,10 @@ test.describe('Article Detail Page', () => {
 });
 
 test.describe('Public Blog Pages', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await dismissCookieConsent(page);
+  });
 
   test('Blog page loads articles', async ({ page }) => {
     await page.goto('/blog');

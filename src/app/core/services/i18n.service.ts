@@ -1,6 +1,7 @@
 ﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { en } from './i18n/en';
+import { CookieConsentService } from './cookie-consent.service';
 
 export type Language = 'en' | 'pt' | 'es' | 'it';
 
@@ -22,6 +23,7 @@ export class I18nService {
   private readonly cache = new Map<Language, Translations>([['en', en]]);
   private readonly loadedTranslations = signal<Translations>(en);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly consent = inject(CookieConsentService);
 
   readonly language = signal<Language>(this.getInitialLanguage());
   readonly isEnglish = computed(() => this.language() === 'en');
@@ -31,7 +33,7 @@ export class I18nService {
     // M-01: Use isBrowser check instead of raw typeof localStorage
     effect(() => {
       const currentLang = this.language();
-      if (this.isBrowser) {
+      if (this.isBrowser && this.consent.hasConsent('functional')) {
         localStorage.setItem(this.STORAGE_KEY, currentLang);
       }
       if (typeof document !== 'undefined') {

@@ -67,8 +67,13 @@ export class ResumeGenerateComponent implements OnInit {
     this.profileService.generateHtml(this.resumeLang()).subscribe({
       next: (html) => {
         this.htmlContent.set(html);
-        // SECURITY: bypassSecurityTrustHtml required for iframe [srcdoc]. HTML is server-generated from profile data.
-        this.trustedHtml.set(this.sanitizer.bypassSecurityTrustHtml(html));
+        // Strip <script> tags to avoid sandbox console warnings (iframe blocks scripts anyway)
+        const cleanHtml = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        // SEC-F-01: bypassSecurityTrustHtml is required here because Angular's built-in
+        // sanitization strips all content from iframe [srcdoc] bindings. The HTML is generated
+        // server-side from the user's own profile data — no third-party/untrusted input.
+        // The iframe in the template uses sandbox="" to prevent script execution.
+        this.trustedHtml.set(this.sanitizer.bypassSecurityTrustHtml(cleanHtml));
         this.loading.set(false);
       },
       error: (err) => {

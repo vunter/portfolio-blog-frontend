@@ -19,6 +19,7 @@ import {
   ResumeProfileLearningTopic,
 } from '../../../../models';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { getLocaleName } from '../../../../shared/utils/locale.utils';
 
 interface ExperienceFormEntry extends ResumeProfileExperience {
@@ -65,6 +66,7 @@ const EMPTY_PROFILE: ProfileForm = {
 })
 export class ResumeProfileComponent implements OnInit, OnDestroy {
   private readonly profileService = inject(ResumeProfileService);
+  private readonly notification = inject(NotificationService);
   readonly i18n = inject(I18nService);
 
   // Expose Object to template for Object.keys/entries
@@ -352,27 +354,24 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
             learningTopics: saved.learningTopics || [],
           };
           this.saving.set(false);
-          this.successMessage.set(this.i18n.t('resume.profile.saveSuccess'));
+          this.notification.success(this.i18n.t('resume.profile.saveSuccess'));
           this.loadAvailableLocales();
-          this.setMessageTimer(() => this.successMessage.set(''), 4000);
         },
         error: (err) => {
           this.saving.set(false);
           if (err.status === 400 && err.error?.validationErrors) {
             const serverErrors: Record<string, string> = err.error.validationErrors;
             this.fieldErrors.set(serverErrors);
-            this.errorMessage.set(this.i18n.t('resume.profile.saveError') + ': ' + (err.error?.message || this.i18n.t('resume.profile.fixValidationErrors')));
+            this.notification.error(this.i18n.t('resume.profile.saveError') + ': ' + (err.error?.message || this.i18n.t('resume.profile.fixValidationErrors')));
           } else {
-            this.errorMessage.set(this.i18n.t('resume.profile.saveError') + ': ' + (err.error?.message || err.message));
+            this.notification.error(this.i18n.t('resume.profile.saveError') + ': ' + (err.error?.message || err.message));
           }
-          this.setMessageTimer(() => this.errorMessage.set(''), 8000);
         },
       });
     } catch (e: unknown) {
       this.saving.set(false);
       const msg = e instanceof Error ? e.message : 'Unknown error';
-      this.errorMessage.set(this.i18n.t('resume.profile.saveError') + ': ' + msg);
-      this.setMessageTimer(() => this.errorMessage.set(''), 6000);
+      this.notification.error(this.i18n.t('resume.profile.saveError') + ': ' + msg);
     }
   }
 
