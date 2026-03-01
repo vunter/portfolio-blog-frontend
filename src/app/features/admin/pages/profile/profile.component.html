@@ -1,4 +1,4 @@
-﻿<div class="profile-page">
+<div class="profile-page">
  <header class="page-header">
  <div>
  <h1>{{ i18n.t('admin.profile.title') }}</h1>
@@ -187,14 +187,14 @@
  }
  </div>
 
- <!-- Save account button -->
+ <!-- Save all sections -->
  <div class="form-actions">
- <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
- @if (saving()) {
+ <button type="button" class="btn btn-primary" (click)="saveAll()" [disabled]="saving() || resumeProfile()?.saving() || hcRef()?.saving()">
+ @if (saving() || resumeProfile()?.saving() || hcRef()?.saving()) {
  <span class="spinner-sm"></span>
  {{ i18n.t('admin.profile.saving') }}
  } @else {
- {{ i18n.t('admin.profile.save') }}
+ {{ i18n.t('admin.profile.saveAll') }}
  }
  </button>
  </div>
@@ -206,7 +206,7 @@
  {{ i18n.t('admin.profile.homeCustomization') }}
  </h2>
  <p class="section-hint">{{ i18n.t('admin.profile.homeCustomizationHint') }}</p>
- <app-home-customization [showFabs]="false" />
+ <app-home-customization [showFabs]="false" [showActions]="false" />
  </div>
 
  <!-- Resume Profile (embedded — personal info hidden, handled above) -->

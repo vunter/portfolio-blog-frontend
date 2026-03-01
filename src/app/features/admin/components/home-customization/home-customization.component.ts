@@ -27,6 +27,8 @@ export class HomeCustomizationComponent implements OnInit {
 
   /** When false, hides floating FABs (used when parent provides its own FABs) */
   showFabs = input(true);
+  /** When false, hides inline action buttons (save, preview) */
+  showActions = input(true);
   private profileService = inject(ResumeProfileService);
   private notification = inject(NotificationService);
 

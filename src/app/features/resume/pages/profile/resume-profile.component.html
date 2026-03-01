@@ -820,6 +820,7 @@
  </section>
 
  <!-- Actions -->
+ @if (!embedded()) {
  <div class="form-actions">
  <a routerLink="/resume/generate" class="btn-generate">
  {{ i18n.t('resume.profile.generateResume') }}
@@ -828,6 +829,7 @@
  {{ saving() ? i18n.t('resume.profile.saving') : i18n.t('resume.profile.saveProfile') + ' (' + currentLocale.toUpperCase() + ')' }}
  </button>
  </div>
+ }
 
  @if (successMessage()) {
  <div class="message success">{{ successMessage() }}</div>
