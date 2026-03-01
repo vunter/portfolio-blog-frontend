@@ -223,6 +223,12 @@
       padding: 2rem;
       transition: margin-left 0.3s ease;
 
+      .main-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.5rem;
+      }
+
       .sidebar-collapsed & {
         margin-left: var(--sidebar-width-collapsed);
       }
