@@ -10,6 +10,8 @@ import { BreadcrumbsComponent, Breadcrumb } from '../../../shared/components/bre
 import { RealtimeNotificationService } from '../services/realtime-notification.service';
 import { SafeIconPipe } from '../pipes/safe-icon.pipe';
 
+import { NotificationBellComponent } from '../components/notification-bell/notification-bell.component';
+
 // Breadcrumbs are built dynamically from route data (see breadcrumbs computed signal below)
 
 /**
@@ -26,7 +28,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, BreadcrumbsComponent, SafeIconPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, BreadcrumbsComponent, SafeIconPipe, NotificationBellComponent],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
