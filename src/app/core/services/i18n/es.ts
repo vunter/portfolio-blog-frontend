@@ -540,6 +540,7 @@
     'admin.profile.currentPasswordRequired': 'La contraseña actual es necesaria para cambiar la contraseña.',
     'admin.profile.passwordRequiredForChange': 'Se requiere contraseña para cambiar email o nombre de usuario.',
     'admin.profile.enterPasswordToConfirm': 'Ingresa tu contraseña para confirmar',
+    'admin.profile.confirmChange': 'Confirmar cambio',
     'admin.profile.incorrectPassword': 'La contraseña actual es incorrecta.',
     'admin.profile.editEmail': 'Editar email',
     'admin.profile.editUsername': 'Editar nombre de usuario',

@@ -540,6 +540,7 @@
     'admin.profile.currentPasswordRequired': 'Current password is required to change password.',
     'admin.profile.passwordRequiredForChange': 'Password required to change email or username.',
     'admin.profile.enterPasswordToConfirm': 'Enter your password to confirm',
+    'admin.profile.confirmChange': 'Confirm change',
     'admin.profile.incorrectPassword': 'Current password is incorrect.',
     'admin.profile.editEmail': 'Edit email',
     'admin.profile.editUsername': 'Edit username',
