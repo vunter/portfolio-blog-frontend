@@ -1528,5 +1528,19 @@
     'bookmarks.subtitle': 'Articoli salvati per una lettura successiva',
     'bookmarks.emptyTitle': 'Nessun segnalibro ancora',
     'bookmarks.emptyMessage': 'Sfoglia gli articoli e tocca l\'icona segnalibro per salvarli qui.',
+
+    // Reading History
+    'admin.sidebar.readingHistory': 'Cronologia Letture',
+    'admin.readingHistory.title': 'Cronologia Letture',
+    'admin.readingHistory.subtitle': 'Articoli che hai letto',
+    'admin.readingHistory.emptyTitle': 'Nessuna cronologia ancora',
+    'admin.readingHistory.emptyMessage': 'Gli articoli che leggi appariranno qui automaticamente.',
+    'admin.readingHistory.clearHistory': 'Cancella Cronologia',
+    'admin.readingHistory.confirmClear': 'Sei sicuro di voler cancellare tutta la cronologia di lettura?',
+    'admin.readingHistory.cleared': 'Cronologia di lettura cancellata',
+    'admin.readingHistory.loadError': 'Impossibile caricare la cronologia di lettura',
+    'admin.readingHistory.clearError': 'Impossibile cancellare la cronologia di lettura',
+    'admin.readingHistory.readTimes': 'Letto {{count}} volta/e',
+    'admin.readingHistory.minRead': 'min di lettura',
 };
 

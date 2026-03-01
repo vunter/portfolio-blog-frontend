@@ -134,6 +134,14 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'admin.sidebar.security' },
       },
+      {
+        path: 'reading-history',
+        loadComponent: () =>
+          import('./pages/reading-history/reading-history.component').then(
+            (m) => m.ReadingHistoryComponent
+          ),
+        data: { breadcrumb: 'admin.sidebar.readingHistory' },
+      },
     ],
   },
 ];

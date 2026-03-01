@@ -145,6 +145,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       route: '/admin/security',
       icon: 'security',
     },
+    {
+      label: this.i18n.t('admin.sidebar.readingHistory'),
+      route: '/admin/reading-history',
+      icon: 'readingHistory',
+    },
   ]);
 
   readonly visibleMenuItems = computed(() => {

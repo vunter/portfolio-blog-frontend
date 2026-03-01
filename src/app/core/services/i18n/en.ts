@@ -1528,5 +1528,19 @@
     'bookmarks.subtitle': 'Articles you saved for later reading',
     'bookmarks.emptyTitle': 'No bookmarks yet',
     'bookmarks.emptyMessage': 'Browse articles and tap the bookmark icon to save them here.',
+
+    // Reading History
+    'admin.sidebar.readingHistory': 'Reading History',
+    'admin.readingHistory.title': 'Reading History',
+    'admin.readingHistory.subtitle': 'Articles you have read',
+    'admin.readingHistory.emptyTitle': 'No reading history yet',
+    'admin.readingHistory.emptyMessage': 'Articles you read will appear here automatically.',
+    'admin.readingHistory.clearHistory': 'Clear History',
+    'admin.readingHistory.confirmClear': 'Are you sure you want to clear your entire reading history?',
+    'admin.readingHistory.cleared': 'Reading history cleared',
+    'admin.readingHistory.loadError': 'Failed to load reading history',
+    'admin.readingHistory.clearError': 'Failed to clear reading history',
+    'admin.readingHistory.readTimes': 'Read {{count}} time(s)',
+    'admin.readingHistory.minRead': 'min read',
 };
 
