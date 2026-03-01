@@ -887,6 +887,9 @@
     'article.comments.submitting': 'Invio...',
     'article.comments.nameRequired': 'Il nome è obbligatorio.',
     'article.comments.contentMinLength': 'Il commento deve avere almeno 10 caratteri.',
+    'article.comments.reply': 'Rispondi',
+    'article.comments.submitReply': 'Invia Risposta',
+    'article.comments.replyPlaceholder': 'Scrivi la tua risposta...',
 
     // Blog Search
     'blog.search.results': 'risultato/i per',

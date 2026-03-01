@@ -887,6 +887,9 @@
     'article.comments.submitting': 'Submitting...',
     'article.comments.nameRequired': 'Name is required.',
     'article.comments.contentMinLength': 'Comment must be at least 10 characters.',
+    'article.comments.reply': 'Reply',
+    'article.comments.submitReply': 'Submit Reply',
+    'article.comments.replyPlaceholder': 'Write your reply...',
 
     // Blog Search
     'blog.search.results': 'result(s) for',
