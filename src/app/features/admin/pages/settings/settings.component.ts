@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { DownloadService } from '../../../../core/services/download.service';
@@ -20,6 +21,7 @@ export class SettingsComponent implements OnInit {
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private downloadService = inject(DownloadService);
+  private sanitizer = inject(DomSanitizer);
   private fb = inject(FormBuilder);
   i18n = inject(I18nService);
 
@@ -30,6 +32,10 @@ export class SettingsComponent implements OnInit {
   exportingMd = signal(false);
   importing = signal(false);
   cacheStats = signal({ entries: 0, size: '0 MB' });
+  emailTemplates = signal<{ id: string; name: string; description: string }[]>([]);
+  emailTemplatesLoading = signal(false);
+  previewingTemplate = signal<{ id: string; name: string; description: string } | null>(null);
+  previewHtml = signal<SafeHtml>('');
 
   settingsForm = this.fb.group({
     siteName: ['My Blog'],
@@ -44,6 +50,7 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     this.loadSettings();
     this.loadCacheStats();
+    this.loadEmailTemplates();
   }
 
   loadSettings(): void {
@@ -176,6 +183,39 @@ export class SettingsComponent implements OnInit {
         input.value = '';
       },
     });
+  }
+
+  // Email Template Preview
+
+  loadEmailTemplates(): void {
+    this.emailTemplatesLoading.set(true);
+    this.adminApi.getEmailTemplates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (templates) => {
+        this.emailTemplates.set(templates);
+        this.emailTemplatesLoading.set(false);
+      },
+      error: () => {
+        this.emailTemplatesLoading.set(false);
+      },
+    });
+  }
+
+  previewTemplate(template: { id: string; name: string; description: string }): void {
+    this.previewingTemplate.set(template);
+    this.adminApi.getEmailTemplatePreview(template.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (html) => {
+        this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(html));
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.settings.emailTemplatePreviewError'));
+        this.previewingTemplate.set(null);
+      },
+    });
+  }
+
+  closePreview(): void {
+    this.previewingTemplate.set(null);
+    this.previewHtml.set('');
   }
 
 }

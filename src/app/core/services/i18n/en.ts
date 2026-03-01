@@ -780,6 +780,9 @@
     'admin.settings.importError': 'Error importing data',
     'admin.settings.importConfirmTitle': 'Import Data',
     'admin.settings.importConfirmMessage': 'This will overwrite existing data. Are you sure you want to continue?',
+    'admin.settings.emailTemplates': 'Email Templates',
+    'admin.settings.emailTemplatesDesc': 'Preview and review email templates sent by the system',
+    'admin.settings.emailTemplatePreviewError': 'Failed to load template preview',
 
     // Admin Errors
     'admin.error.loadFailed': 'Failed to load data',

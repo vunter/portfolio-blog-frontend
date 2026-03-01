@@ -780,6 +780,9 @@
     'admin.settings.importError': 'Error al importar datos',
     'admin.settings.importConfirmTitle': 'Importar Datos',
     'admin.settings.importConfirmMessage': 'Esto sobrescribirá los datos existentes. ¿Estás seguro de que deseas continuar?',
+    'admin.settings.emailTemplates': 'Plantillas de Correo',
+    'admin.settings.emailTemplatesDesc': 'Previsualizar y revisar las plantillas de correo del sistema',
+    'admin.settings.emailTemplatePreviewError': 'Error al cargar la vista previa de la plantilla',
 
     // Admin Errors
     'admin.error.loadFailed': 'Error al cargar datos',

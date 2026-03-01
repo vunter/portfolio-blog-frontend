@@ -780,6 +780,9 @@
     'admin.settings.importError': 'Erro ao importar dados',
     'admin.settings.importConfirmTitle': 'Importar Dados',
     'admin.settings.importConfirmMessage': 'Isso sobrescreverá os dados existentes. Tem certeza que deseja continuar?',
+    'admin.settings.emailTemplates': 'Modelos de Email',
+    'admin.settings.emailTemplatesDesc': 'Visualizar e revisar modelos de email enviados pelo sistema',
+    'admin.settings.emailTemplatePreviewError': 'Falha ao carregar pré-visualização do modelo',
 
     // Admin Errors
     'admin.error.loadFailed': 'Falha ao carregar dados',

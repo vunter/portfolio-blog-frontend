@@ -219,6 +219,44 @@
  </div>
  </section>
 
+ <!-- Email Templates -->
+ <section class="settings-section">
+ <h2>
+   <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+     <polyline points="22,6 12,13 2,6"/>
+   </svg>
+   {{ i18n.t('admin.settings.emailTemplates') }}
+ </h2>
+ <p class="section-desc">{{ i18n.t('admin.settings.emailTemplatesDesc') }}</p>
+ <div class="settings-card">
+   @if (emailTemplatesLoading()) {
+     <div class="setting-item"><span class="loading-text">{{ i18n.t('admin.common.loading') }}</span></div>
+   } @else {
+     <div class="template-grid">
+       @for (template of emailTemplates(); track template.id) {
+         <button class="template-card" (click)="previewTemplate(template)">
+           <span class="template-card__name">{{ template.name }}</span>
+           <span class="template-card__desc">{{ template.description }}</span>
+         </button>
+       }
+     </div>
+   }
+ </div>
+ </section>
+
+ @if (previewingTemplate()) {
+   <div class="template-preview-overlay" (click)="closePreview()">
+     <div class="template-preview-modal" (click)="$event.stopPropagation()">
+       <div class="template-preview-header">
+         <h3>{{ previewingTemplate()!.name }}</h3>
+         <button class="close-btn" (click)="closePreview()">✕</button>
+       </div>
+       <iframe class="template-preview-iframe" [srcdoc]="previewHtml()"></iframe>
+     </div>
+   </div>
+ }
+
  <div class="actions">
  <button class="btn btn-primary" (click)="saveSettings()" [disabled]="saving()">
  {{ saving() ? i18n.t('common.saving') : i18n.t('admin.settings.saveSettings') }}
