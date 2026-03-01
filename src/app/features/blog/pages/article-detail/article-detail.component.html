@@ -1,4 +1,4 @@
-﻿ <!-- Reading Progress Bar -->
+ <!-- Reading Progress Bar -->
  <div class="reading-progress-bar" aria-hidden="true">
  <div class="reading-progress-bar__fill" [style.width.%]="readingProgress()"></div>
  </div>
@@ -177,7 +177,7 @@
  <div class="comment__avatar">
  {{ getInitials(comment.authorName || i18n.t('blog.anonymous')) }}
  </div>
- <div class="comment__content">
+ <div class="comment__body">
  <div class="comment__header">
  <span class="comment__author">
  {{ comment.authorName || i18n.t('blog.anonymous') }}
@@ -187,6 +187,89 @@
  </span>
  </div>
  <p class="comment__text">{{ comment.content }}</p>
+ <button class="comment__reply-btn" (click)="startReply(comment)">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+ </svg>
+ {{ i18n.t('article.comments.reply') }}
+ </button>
+
+ <!-- Inline reply form -->
+ @if (replyingTo()?.id === comment.id) {
+ <div class="reply-form">
+ <div class="reply-form__row">
+ <input type="text" [(ngModel)]="replyName" name="replyName" [placeholder]="i18n.t('article.comments.name')" required />
+ </div>
+ <textarea [(ngModel)]="replyContent" name="replyContent" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
+ <div class="reply-form__actions">
+ <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
+ <button class="reply-form__submit" (click)="submitReply()" [disabled]="!replyName() || replyContent().length < 10 || submittingReply()">
+ {{ submittingReply() ? i18n.t('article.comments.submitting') : i18n.t('article.comments.submitReply') }}
+ </button>
+ </div>
+ </div>
+ }
+
+ <!-- Nested replies (max 3 levels) -->
+ @if (comment.replies?.length) {
+ <div class="comment__replies">
+ @for (reply of comment.replies; track reply.id) {
+ <div class="comment comment--reply">
+ <div class="comment__avatar comment__avatar--small">
+ {{ getInitials(reply.authorName || i18n.t('blog.anonymous')) }}
+ </div>
+ <div class="comment__body">
+ <div class="comment__header">
+ <span class="comment__author">{{ reply.authorName || i18n.t('blog.anonymous') }}</span>
+ <span class="comment__date">{{ reply.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}</span>
+ </div>
+ <p class="comment__text">{{ reply.content }}</p>
+ <button class="comment__reply-btn" (click)="startReply(reply, comment.id)">
+ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+ </svg>
+ {{ i18n.t('article.comments.reply') }}
+ </button>
+
+ @if (replyingTo()?.id === reply.id) {
+ <div class="reply-form">
+ <div class="reply-form__row">
+ <input type="text" [(ngModel)]="replyName" name="replyName2" [placeholder]="i18n.t('article.comments.name')" required />
+ </div>
+ <textarea [(ngModel)]="replyContent" name="replyContent2" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
+ <div class="reply-form__actions">
+ <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
+ <button class="reply-form__submit" (click)="submitReply()" [disabled]="!replyName() || replyContent().length < 10 || submittingReply()">
+ {{ submittingReply() ? i18n.t('article.comments.submitting') : i18n.t('article.comments.submitReply') }}
+ </button>
+ </div>
+ </div>
+ }
+
+ <!-- 2nd-level nested replies -->
+ @if (reply.replies?.length) {
+ <div class="comment__replies">
+ @for (subReply of reply.replies; track subReply.id) {
+ <div class="comment comment--reply comment--reply-deep">
+ <div class="comment__avatar comment__avatar--small">
+ {{ getInitials(subReply.authorName || i18n.t('blog.anonymous')) }}
+ </div>
+ <div class="comment__body">
+ <div class="comment__header">
+ <span class="comment__author">{{ subReply.authorName || i18n.t('blog.anonymous') }}</span>
+ <span class="comment__date">{{ subReply.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}</span>
+ </div>
+ <p class="comment__text">{{ subReply.content }}</p>
+ </div>
+ </div>
+ }
+ </div>
+ }
+ </div>
+ </div>
+ }
+ </div>
+ }
  </div>
  </div>
  } @empty {

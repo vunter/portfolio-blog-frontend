@@ -99,6 +99,13 @@ export class ArticleDetailComponent implements OnInit {
   submittingComment = signal(false);
   commentSubmitted = signal(false);
 
+  // Reply form signals
+  replyingTo = signal<CommentResponse | null>(null);
+  replyParentId = signal<string | null>(null);
+  replyName = signal('');
+  replyContent = signal('');
+  submittingReply = signal(false);
+
   // Reading progress & ToC
   readingProgress = signal(0);
   activeHeadingId = signal<string>('');
@@ -449,6 +456,55 @@ export class ArticleDetailComponent implements OnInit {
         });
     }).catch(() => {
       this.submittingComment.set(false);
+      this.notification.error(this.i18n.t('blog.failedToComment'));
+    });
+  }
+
+  startReply(comment: CommentResponse, rootParentId?: string): void {
+    this.replyingTo.set(comment);
+    this.replyParentId.set(rootParentId || comment.id);
+    this.replyName.set(this.commentName());
+    this.replyContent.set('');
+  }
+
+  cancelReply(): void {
+    this.replyingTo.set(null);
+    this.replyParentId.set(null);
+    this.replyContent.set('');
+  }
+
+  submitReply(): void {
+    const article = this.article();
+    const parentId = this.replyParentId();
+    if (!article || !parentId) return;
+
+    const name = this.replyName().trim();
+    const content = this.replyContent().trim();
+    if (!name || content.length < 10) return;
+
+    this.submittingReply.set(true);
+
+    this.recaptcha.execute('comment').then(recaptchaToken => {
+      this.commentService
+        .createComment(article.slug, {
+          authorName: name,
+          content,
+          parentId,
+          recaptchaToken: recaptchaToken ?? undefined,
+        })
+        .subscribe({
+          next: () => {
+            this.submittingReply.set(false);
+            this.cancelReply();
+            this.notification.success(this.i18n.t('article.comments.pending'));
+          },
+          error: () => {
+            this.submittingReply.set(false);
+            this.notification.error(this.i18n.t('blog.failedToComment'));
+          },
+        });
+    }).catch(() => {
+      this.submittingReply.set(false);
       this.notification.error(this.i18n.t('blog.failedToComment'));
     });
   }
