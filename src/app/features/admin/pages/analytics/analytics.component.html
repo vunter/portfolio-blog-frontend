@@ -140,5 +140,50 @@
   <p>{{ i18n.t('admin.analytics.noData') }}</p>
  </div>
  }
+
+ <!-- Search Analytics -->
+ @if (searchData()) {
+ <section class="search-analytics">
+ <h3>{{ i18n.t('admin.analytics.searchTitle') }}</h3>
+ <div class="search-stats-grid">
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(searchData()?.totalSearches || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.totalSearches') }}</span>
+ </div>
+ <div class="stat-card">
+ <span class="stat-card__value">{{ formatNumber(searchData()?.uniqueSearches || 0) }}</span>
+ <span class="stat-card__label">{{ i18n.t('admin.analytics.uniqueQueries') }}</span>
+ </div>
+ </div>
+ <div class="search-lists-grid">
+ <div class="search-list-card">
+ <h4>{{ i18n.t('admin.analytics.topSearches') }}</h4>
+ <div class="search-list">
+ @for (item of searchData()?.topSearches || []; track item.queryText) {
+ <div class="search-list__item">
+ <span class="search-list__query">{{ item.queryText }}</span>
+ <span class="search-list__count">{{ item.count }}</span>
+ </div>
+ } @empty {
+ <p class="search-list__empty">{{ i18n.t('admin.analytics.noData') }}</p>
+ }
+ </div>
+ </div>
+ <div class="search-list-card">
+ <h4>{{ i18n.t('admin.analytics.zeroResultSearches') }}</h4>
+ <div class="search-list">
+ @for (item of searchData()?.zeroResultSearches || []; track item.queryText) {
+ <div class="search-list__item search-list__item--zero">
+ <span class="search-list__query">{{ item.queryText }}</span>
+ <span class="search-list__count">{{ item.count }}</span>
+ </div>
+ } @empty {
+ <p class="search-list__empty">{{ i18n.t('admin.analytics.noZeroResults') }}</p>
+ }
+ </div>
+ </div>
+ </div>
+ </section>
+ }
 </div>
 }
