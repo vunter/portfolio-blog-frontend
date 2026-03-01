@@ -1271,6 +1271,14 @@
     'auth.verifyEmailChange.noToken': 'Nessun token di verifica fornito.',
     'auth.verifyEmailChange.goToLogin': 'Vai al Login',
 
+    'auth.revertEmailChange.reverting': 'Ripristino della modifica email...',
+    'auth.revertEmailChange.successTitle': 'Email Ripristinata!',
+    'auth.revertEmailChange.successMessage': 'Il tuo indirizzo email è stato ripristinato. Accedi con la tua email originale.',
+    'auth.revertEmailChange.errorTitle': 'Ripristino Fallito',
+    'auth.revertEmailChange.errorMessage': 'Il link di ripristino non è valido o è scaduto.',
+    'auth.revertEmailChange.noToken': 'Nessun token di ripristino fornito.',
+    'auth.revertEmailChange.goToLogin': 'Vai al Login',
+
     // Home - Hero
     'home.hero.description': 'Benvenuto nel mio portfolio. Caricamento del riepilogo professionale...',
     'home.hero.yearsExp': 'Anni di Esperienza',

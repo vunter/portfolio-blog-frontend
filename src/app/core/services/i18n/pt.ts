@@ -1271,6 +1271,14 @@
     'auth.verifyEmailChange.noToken': 'Nenhum token de verificação fornecido.',
     'auth.verifyEmailChange.goToLogin': 'Ir para Login',
 
+    'auth.revertEmailChange.reverting': 'Revertendo a alteração de email...',
+    'auth.revertEmailChange.successTitle': 'Email Revertido!',
+    'auth.revertEmailChange.successMessage': 'Seu endereço de email foi restaurado. Faça login com seu email original.',
+    'auth.revertEmailChange.errorTitle': 'Reversão Falhou',
+    'auth.revertEmailChange.errorMessage': 'O link de reversão é inválido ou expirou.',
+    'auth.revertEmailChange.noToken': 'Nenhum token de reversão fornecido.',
+    'auth.revertEmailChange.goToLogin': 'Ir para Login',
+
     // Home - Hero
     'home.hero.description': 'Bem-vindo ao meu portfólio. Carregando resumo profissional...',
     'home.hero.yearsExp': 'Anos de Experiência',

@@ -1271,6 +1271,14 @@
     'auth.verifyEmailChange.noToken': 'No verification token provided.',
     'auth.verifyEmailChange.goToLogin': 'Go to Login',
 
+    'auth.revertEmailChange.reverting': 'Reverting your email change...',
+    'auth.revertEmailChange.successTitle': 'Email Reverted!',
+    'auth.revertEmailChange.successMessage': 'Your email address has been restored. Please log in with your original email.',
+    'auth.revertEmailChange.errorTitle': 'Revert Failed',
+    'auth.revertEmailChange.errorMessage': 'The revert link is invalid or has expired.',
+    'auth.revertEmailChange.noToken': 'No revert token provided.',
+    'auth.revertEmailChange.goToLogin': 'Go to Login',
+
     // Home - Hero
     'home.hero.description': 'Welcome to my portfolio. Loading professional summary...',
     'home.hero.yearsExp': 'Years Experience',
