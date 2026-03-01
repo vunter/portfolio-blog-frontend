@@ -210,6 +210,7 @@ export class ArticleListComponent implements OnInit {
       PUBLISHED: this.i18n.t('admin.articles.published'),
       DRAFT: this.i18n.t('admin.articles.draft'),
       SCHEDULED: this.i18n.t('admin.articles.scheduled'),
+      REVIEW: this.i18n.t('admin.articles.statusReview'),
       ARCHIVED: this.i18n.t('admin.articles.archived'),
     };
     return labels[status] || status;

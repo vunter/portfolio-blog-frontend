@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy, ElementRef, AfterViewInit
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { VersionHistoryComponent } from '../../components/version-history/version-history.component';
 import { ArticleMetadataComponent } from './components/article-metadata/article-metadata.component';
@@ -14,7 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
-import { ArticleResponse, ArticleRequest, TagResponse, ArticleStatus } from '../../../../models';
+import { ArticleResponse, ArticleRequest, ArticleReview, TagResponse, ArticleStatus } from '../../../../models';
 
 // Monaco type declarations provided by shared/types/monaco.d.ts
 
@@ -30,7 +31,7 @@ interface ArticleForm {
 
 @Component({
   selector: 'app-article-form',
-  imports: [ReactiveFormsModule, RouterLink, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent],
   host: {
     '(window:keydown)': 'onKeyDown($event)',
   },
@@ -65,6 +66,9 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   uploadingContentImage = signal(false);
   showScheduleInput = signal(false);
   scheduledAtControl = new FormControl('');
+  reviewHistory = signal<ArticleReview[]>([]);
+  showReviewPanel = signal(false);
+  reviewFeedbackText = signal('');
 
   // Split pane ratio (flex values)
   splitLeft = signal('1');
@@ -82,7 +86,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private autoSave$ = new Subject<void>();
   hasUnsavedChanges = false;
   private lastSavedContent = '';
-  private originalStatus = 'DRAFT';
+  originalStatus = 'DRAFT';
 
   form = this.fb.group<ArticleForm>({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -476,6 +480,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedTagIds.set(article.tags?.map((t) => t.id) || []);
         this.originalStatus = article.status || 'DRAFT';
         this.lastSavedContent = JSON.stringify(this.form.getRawValue());
+        // Load review history for articles in REVIEW status
+        if (article.status === 'REVIEW') {
+          this.showReviewPanel.set(true);
+          this.loadReviewHistory();
+        }
         // Sync content to Monaco editor
         if (this.monacoEditor) {
           this.monacoEditor.setValue(article.content || '');
@@ -609,6 +618,58 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 5);
     return now.toISOString().slice(0, 16);
+  }
+
+  submitForReview(): void {
+    if (!this.articleId) return;
+    this.saving.set(true);
+    this.apiService.post(`/admin/articles/${this.articleId}/submit-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('admin.articles.submitReviewSuccess'));
+        this.router.navigate(['/admin/articles']);
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.articles.submitReviewError'));
+        this.saving.set(false);
+      },
+    });
+  }
+
+  approveReview(): void {
+    if (!this.articleId) return;
+    this.saving.set(true);
+    this.apiService.post(`/admin/articles/${this.articleId}/approve-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('admin.articles.approveReviewSuccess'));
+        this.router.navigate(['/admin/articles']);
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.articles.approveReviewError'));
+        this.saving.set(false);
+      },
+    });
+  }
+
+  requestChanges(): void {
+    if (!this.articleId) return;
+    this.saving.set(true);
+    this.apiService.post(`/admin/articles/${this.articleId}/request-changes`, { feedback: this.reviewFeedbackText() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('admin.articles.requestChangesSuccess'));
+        this.router.navigate(['/admin/articles']);
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.articles.requestChangesError'));
+        this.saving.set(false);
+      },
+    });
+  }
+
+  loadReviewHistory(): void {
+    if (!this.articleId) return;
+    this.apiService.get<ArticleReview[]>(`/admin/articles/${this.articleId}/reviews`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (reviews) => this.reviewHistory.set(reviews),
+    });
   }
 
   private save(status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED'): void {

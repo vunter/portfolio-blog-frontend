@@ -158,6 +158,11 @@ select {
     background: var(--badge-info-bg, #dbeafe);
     color: var(--badge-info-text, #1e40af);
   }
+
+  &--review {
+    background: var(--badge-review-bg, #fef3c7);
+    color: var(--badge-review-text, #92400e);
+  }
 }
 
 .col-check {

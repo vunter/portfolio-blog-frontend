@@ -30,6 +30,19 @@
  <button type="button" class="btn btn-secondary" (click)="saveDraft()" [disabled]="saving()">
  {{ i18n.t('admin.articleForm.saveDraft') }}
  </button>
+ @if (isEditMode() && originalStatus === 'DRAFT') {
+ <button type="button" class="btn btn-outline btn-review" (click)="submitForReview()" [disabled]="saving()">
+ {{ i18n.t('admin.articles.submitReview') }}
+ </button>
+ }
+ @if (isEditMode() && originalStatus === 'REVIEW') {
+ <button type="button" class="btn btn-primary" (click)="approveReview()" [disabled]="saving()">
+ {{ i18n.t('admin.articles.approveReview') }}
+ </button>
+ <button type="button" class="btn btn-outline btn-changes" (click)="showReviewPanel.set(true)" [disabled]="saving()">
+ {{ i18n.t('admin.articles.requestChanges') }}
+ </button>
+ }
  @if (showScheduleInput()) {
  <div class="schedule-group">
  <input type="datetime-local" class="form-control schedule-input" [formControl]="scheduledAtControl" [min]="minScheduleDate()">
@@ -166,6 +179,36 @@
  (restored)="onVersionRestored()"
  #versionHistory
  />
+ </div>
+ }
+
+ @if (showReviewPanel()) {
+ <div class="form-card review-panel">
+ <h3>{{ i18n.t('admin.articles.reviewHistory') }}</h3>
+ @if (originalStatus === 'REVIEW') {
+ <div class="review-feedback-form">
+ <label>{{ i18n.t('admin.articles.reviewFeedback') }}</label>
+ <textarea class="form-control" rows="3" [value]="reviewFeedbackText()" (input)="reviewFeedbackText.set($any($event.target).value)"></textarea>
+ <button type="button" class="btn btn-outline btn-changes btn-sm" (click)="requestChanges()" [disabled]="saving()">
+ {{ i18n.t('admin.articles.requestChanges') }}
+ </button>
+ </div>
+ }
+ @for (review of reviewHistory(); track review.id) {
+ <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'">
+ <div class="review-entry-header">
+ <span class="review-status-badge" [class]="'review-status--' + review.status.toLowerCase().replace('_', '-')">
+ {{ review.status === 'APPROVED' ? i18n.t('admin.articles.reviewApproved') : i18n.t('admin.articles.reviewChangesRequested') }}
+ </span>
+ <span class="review-date">{{ review.createdAt | date:'short' }}</span>
+ </div>
+ @if (review.feedback) {
+ <p class="review-feedback">{{ review.feedback }}</p>
+ }
+ </div>
+ } @empty {
+ <p class="review-empty">{{ i18n.t('admin.articles.noArticles') }}</p>
+ }
  </div>
  }
  </aside>
