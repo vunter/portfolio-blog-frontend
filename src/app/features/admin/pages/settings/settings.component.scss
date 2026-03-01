@@ -162,3 +162,115 @@ textarea.setting-input {
   align-items: center;
   gap: 0.5rem;
 }
+
+.section-icon {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.section-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #666);
+  margin: -0.5rem 0 1rem;
+}
+
+.loading-text {
+  padding: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--bg-secondary, #f9fafb);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--primary-color, #6366f1);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  }
+
+  &__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+  }
+
+  &__desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #666);
+  }
+}
+
+.template-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.template-preview-modal {
+  background: var(--card-bg, white);
+  border-radius: 12px;
+  width: 90vw;
+  max-width: 700px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.template-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-secondary, #666);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--bg-secondary, #f3f4f6);
+    color: var(--text-primary, #1a1a1a);
+  }
+}
+
+.template-preview-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}

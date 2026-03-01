@@ -423,6 +423,16 @@ export class AdminApiService {
     return this.api.get<UserStats>('/admin/users/stats');
   }
 
+  // ==================== EMAIL TEMPLATE PREVIEW ====================
+
+  getEmailTemplates(): Observable<{ id: string; name: string; description: string }[]> {
+    return this.api.get<{ id: string; name: string; description: string }[]>('/admin/settings/email-templates');
+  }
+
+  getEmailTemplatePreview(templateId: string): Observable<string> {
+    return this.api.getText(`/admin/settings/email-templates/${templateId}/preview`);
+  }
+
   // ==================== INT-12: Auth Token Verification ====================
 
   verifyToken(): Observable<{ valid: boolean; email?: string }> {
