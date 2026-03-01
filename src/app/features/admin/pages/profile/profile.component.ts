@@ -49,9 +49,22 @@ export class ProfileComponent implements OnInit {
   fieldErrors = signal<Record<string, string>>({});
   formSubmitted = signal(false);
 
+  editingEmail = signal(false);
+  editingUsername = signal(false);
+  sensitivePassword = signal('');
+  private originalEmail = '';
+  private originalUsername = '';
+
   /** Computed signal that reactively reads the resume profile component's field errors */
   rpFieldErrors = computed(() => this.resumeProfile()?.fieldErrors() ?? {});
   rpFormSubmitted = computed(() => this.resumeProfile()?.formSubmitted() ?? false);
+
+  sensitiveFieldChanged = computed(() => {
+    const user = this.user();
+    if (!user) return false;
+    return this.form.email.toLowerCase().trim() !== this.originalEmail.toLowerCase().trim()
+      || this.form.username.trim() !== this.originalUsername.trim();
+  });
 
   form: ProfileForm = {
     name: '',
@@ -71,6 +84,8 @@ export class ProfileComponent implements OnInit {
         this.form.name = user.name || '';
         this.form.email = user.email || '';
         this.form.username = user.username ?? '';
+        this.originalEmail = user.email || '';
+        this.originalUsername = user.username ?? '';
         const avatar = user.avatarUrl ?? '';
         this.form.avatarUrl = avatar.startsWith('http') ? avatar : '';
         this.form.bio = user.bio ?? '';
@@ -81,6 +96,26 @@ export class ProfileComponent implements OnInit {
         this.notification.error(this.i18n.t('admin.profile.loadError'));
       }
     });
+  }
+
+  enableEditEmail(): void {
+    this.editingEmail.set(true);
+  }
+
+  cancelEditEmail(): void {
+    this.form.email = this.originalEmail;
+    this.editingEmail.set(false);
+    this.sensitivePassword.set('');
+  }
+
+  enableEditUsername(): void {
+    this.editingUsername.set(true);
+  }
+
+  cancelEditUsername(): void {
+    this.form.username = this.originalUsername;
+    this.editingUsername.set(false);
+    this.sensitivePassword.set('');
   }
 
   triggerAvatarUpload(): void {
@@ -148,6 +183,17 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+    // Detect sensitive field changes
+    const emailChanged = this.form.email.toLowerCase().trim() !== this.originalEmail.toLowerCase().trim();
+    const usernameChanged = this.form.username.trim() !== this.originalUsername.trim();
+    const sensitiveChanged = emailChanged || usernameChanged;
+
+    // Validate password for sensitive changes
+    if (sensitiveChanged && !this.sensitivePassword()) {
+      this.notification.error(this.i18n.t('admin.profile.passwordRequiredForChange'));
+      return;
+    }
+
     // Validate password change
     if (this.form.newPassword) {
       if (!this.form.currentPassword) {
@@ -174,31 +220,54 @@ export class ProfileComponent implements OnInit {
       bio: this.form.bio || undefined,
     };
 
+    // Include password for sensitive changes
+    if (sensitiveChanged) {
+      payload['currentPassword'] = this.sensitivePassword();
+    }
+
     if (this.form.newPassword) {
       payload['currentPassword'] = this.form.currentPassword;
       payload['newPassword'] = this.form.newPassword;
     }
 
-    this.api.put<UserResponse>('/admin/users/me', payload).subscribe({
-      next: (updated) => {
+    this.api.putResponse<UserResponse>('/admin/users/me', payload).subscribe({
+      next: (response) => {
         this.saving.set(false);
+        const updated = response.body!;
         this.user.set(updated);
+        this.originalEmail = updated.email || '';
+        this.originalUsername = updated.username ?? '';
+        this.form.email = updated.email || '';
+        this.form.username = updated.username ?? '';
         this.form.currentPassword = '';
         this.form.newPassword = '';
         this.form.confirmPassword = '';
-        // Update the auth store with the new user info
+        this.sensitivePassword.set('');
+        this.editingEmail.set(false);
+        this.editingUsername.set(false);
         this.authStore.login(updated);
-        this.notification.success(this.i18n.t('admin.profile.saveSuccess'));
+
+        if (response.status === 202) {
+          this.notification.info(this.i18n.t('admin.profile.emailVerificationSent'));
+        } else {
+          this.notification.success(this.i18n.t('admin.profile.saveSuccess'));
+        }
       },
       error: (err) => {
         this.saving.set(false);
         if (err.status === 409) {
-          this.notification.error(this.i18n.t('admin.profile.emailInUse'));
+          const msg = err.error?.message || '';
+          if (msg.includes('username')) {
+            this.notification.error(this.i18n.t('admin.profile.usernameInUse'));
+          } else {
+            this.notification.error(this.i18n.t('admin.profile.emailInUse'));
+          }
+        } else if (err.status === 429) {
+          this.notification.error(this.i18n.t('admin.profile.rateLimitExceeded'));
         } else if (err.status === 400) {
           if (err.error?.validationErrors) {
             this.fieldErrors.set(err.error.validationErrors);
           }
-          // Map known backend error keys to frontend i18n keys
           const msg = err.error?.message || '';
           if (msg.includes('password') && msg.includes('incorrect')) {
             this.notification.error(this.i18n.t('admin.profile.incorrectPassword'));

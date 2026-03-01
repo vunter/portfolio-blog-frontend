@@ -536,7 +536,16 @@
     'admin.profile.saveError': 'Error updating profile',
     'admin.profile.loadError': 'Error loading profile',
     'admin.profile.emailInUse': 'This email is already in use.',
+    'admin.profile.usernameInUse': 'This username is already taken.',
     'admin.profile.currentPasswordRequired': 'Current password is required to change password.',
+    'admin.profile.passwordRequiredForChange': 'Password required to change email or username.',
+    'admin.profile.enterPasswordToConfirm': 'Enter your password to confirm',
+    'admin.profile.incorrectPassword': 'Current password is incorrect.',
+    'admin.profile.editEmail': 'Edit email',
+    'admin.profile.editUsername': 'Edit username',
+    'admin.profile.emailChangeRequiresVerification': 'A verification link will be sent to your new email address.',
+    'admin.profile.emailVerificationSent': 'A verification link has been sent to your new email. Click it to confirm the change.',
+    'admin.profile.rateLimitExceeded': 'Too many requests. Please try again later.',
     'admin.profile.passwordMismatch': 'New passwords do not match.',
     'admin.profile.passwordTooShort': 'New password must be at least 12 characters.',
     'admin.profile.unnamed': 'Unnamed',
@@ -1251,6 +1260,15 @@
     'auth.resetPassword.invalidToken': 'Invalid token.',
     'auth.resetPassword.expiredToken': 'Invalid or expired token.',
     'auth.resetPassword.genericError': 'An error occurred. Please try again.',
+
+    // Verify Email Change
+    'auth.verifyEmailChange.verifying': 'Verifying your email change...',
+    'auth.verifyEmailChange.successTitle': 'Email Changed!',
+    'auth.verifyEmailChange.successMessage': 'Your email address has been updated successfully. Please log in with your new email.',
+    'auth.verifyEmailChange.errorTitle': 'Verification Failed',
+    'auth.verifyEmailChange.errorMessage': 'The verification link is invalid or has expired.',
+    'auth.verifyEmailChange.noToken': 'No verification token provided.',
+    'auth.verifyEmailChange.goToLogin': 'Go to Login',
 
     // Home - Hero
     'home.hero.description': 'Welcome to my portfolio. Loading professional summary...',
