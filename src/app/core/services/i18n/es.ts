@@ -1458,5 +1458,11 @@
     'cookie.category.analyticsDesc': 'Estas cookies nos ayudan a entender cómo los visitantes interactúan con el sitio para mejorarlo.',
     'cookie.category.always': 'Siempre activa',
     'cookie.privacyLink': 'Política de Privacidad',
+
+    // Bookmarks
+    'bookmarks.title': 'Mis Marcadores',
+    'bookmarks.subtitle': 'Artículos que guardaste para leer después',
+    'bookmarks.emptyTitle': 'Sin marcadores aún',
+    'bookmarks.emptyMessage': 'Navega por los artículos y toca el icono de marcador para guardarlos aquí.',
 };
 

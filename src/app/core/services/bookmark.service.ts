@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CookieConsentService } from './cookie-consent.service';
 
@@ -32,6 +33,20 @@ export class BookmarkService {
 
   isBookmarked(slug: string): boolean {
     return this.bookmarks().has(slug);
+  }
+
+  /** Fetch full article data for bookmarked articles from backend */
+  fetchBookmarkedArticles(page = 0, size = 50) {
+    const visitorId = this.getVisitorId();
+    if (!visitorId) {
+      return new Observable<{ content: never[]; totalElements: number; totalPages: number }>(
+        (sub) => { sub.next({ content: [], totalElements: 0, totalPages: 0 }); sub.complete(); }
+      );
+    }
+    return this.http.get<{ content: never[]; totalElements: number; totalPages: number }>(
+      this.baseUrl,
+      { headers: this.visitorHeaders(), params: { page: page.toString(), size: size.toString() } }
+    );
   }
 
   toggle(slug: string): boolean {

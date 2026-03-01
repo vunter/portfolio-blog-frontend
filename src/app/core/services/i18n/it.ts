@@ -1458,5 +1458,11 @@
     'cookie.category.analyticsDesc': 'Questi cookie ci aiutano a capire come i visitatori interagiscono con il sito per migliorarlo.',
     'cookie.category.always': 'Sempre attivo',
     'cookie.privacyLink': 'Informativa sulla Privacy',
+
+    // Bookmarks
+    'bookmarks.title': 'I Miei Segnalibri',
+    'bookmarks.subtitle': 'Articoli salvati per una lettura successiva',
+    'bookmarks.emptyTitle': 'Nessun segnalibro ancora',
+    'bookmarks.emptyMessage': 'Sfoglia gli articoli e tocca l\'icona segnalibro per salvarli qui.',
 };
 

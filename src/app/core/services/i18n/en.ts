@@ -1458,5 +1458,11 @@
     'cookie.category.analyticsDesc': 'These cookies help us understand how visitors interact with the site to improve it.',
     'cookie.category.always': 'Always active',
     'cookie.privacyLink': 'Privacy Policy',
+
+    // Bookmarks
+    'bookmarks.title': 'My Bookmarks',
+    'bookmarks.subtitle': 'Articles you saved for later reading',
+    'bookmarks.emptyTitle': 'No bookmarks yet',
+    'bookmarks.emptyMessage': 'Browse articles and tap the bookmark icon to save them here.',
 };
 

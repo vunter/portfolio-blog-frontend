@@ -37,6 +37,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'bookmarks',
+        loadComponent: () =>
+          import('./features/blog/pages/bookmarks/bookmarks.component').then(
+            (m) => m.BookmarksComponent
+          ),
+      },
+      {
         path: 'newsletter/confirm',
         loadComponent: () =>
           import(
