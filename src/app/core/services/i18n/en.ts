@@ -341,6 +341,11 @@
     'auth.mfa.genericError': 'An error occurred. Please try again.',
     'auth.mfa.otpSent': 'Verification code sent to your email.',
     'auth.mfa.sendFailed': 'Failed to send verification code.',
+    'auth.mfa.useBackupCode': 'Use a backup code',
+    'auth.mfa.useRegularCode': 'Use regular verification',
+    'auth.mfa.backupSubtitle': 'Enter one of your backup codes',
+    'auth.mfa.backupCodeLabel': 'Backup Code',
+    'auth.mfa.backupCodePlaceholder': 'xxxx-xxxx',
 
     // Admin Security
     'admin.security.title': 'Security Settings',
@@ -380,6 +385,14 @@
     'admin.security.revokeAllMessage': 'This will log you out of all other devices. Only your current session will remain active.',
     'admin.security.revokeAllConfirm': 'Log Out All Others',
     'admin.security.allSessionsRevoked': 'All other sessions have been revoked.',
+    'admin.security.backupCodes': 'Backup Codes',
+    'admin.security.backupCodesDesc': 'Backup codes can be used to access your account if you lose your authenticator device.',
+    'admin.security.backupCodesRemaining': 'Remaining codes',
+    'admin.security.backupCodesWarning': 'Save these codes in a safe place. They will only be shown once.',
+    'admin.security.backupCodesDismiss': 'I\'ve saved these codes',
+    'admin.security.generateBackupCodes': 'Generate Backup Codes',
+    'admin.security.regenerateBackupCodes': 'Regenerate Backup Codes',
+    'admin.security.backupCodesFailed': 'Failed to generate backup codes.',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Welcome to the admin panel',

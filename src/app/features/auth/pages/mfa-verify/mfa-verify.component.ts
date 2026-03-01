@@ -32,7 +32,8 @@ export class MfaVerifyComponent implements OnInit {
   loading = signal(false);
   sendingOtp = signal(false);
   error = signal<string | null>(null);
-  method = signal<'TOTP' | 'EMAIL'>('TOTP');
+  method = signal<'TOTP' | 'EMAIL' | 'BACKUP'>('TOTP');
+  usingBackup = signal(false);
 
   private mfaToken = '';
   private email = '';
@@ -109,8 +110,18 @@ export class MfaVerifyComponent implements OnInit {
 
   switchMethod(): void {
     this.method.update(m => m === 'TOTP' ? 'EMAIL' : 'TOTP');
+    this.usingBackup.set(false);
+    this.mfaForm.get('code')?.setValidators([Validators.required, Validators.minLength(6), Validators.maxLength(6)]);
+    this.mfaForm.get('code')?.updateValueAndValidity();
     if (this.method() === 'EMAIL') {
       this.resendEmailOtp();
     }
+  }
+
+  useBackupCode(): void {
+    this.usingBackup.set(true);
+    this.method.set('BACKUP');
+    this.mfaForm.get('code')?.setValidators([Validators.required, Validators.minLength(9), Validators.maxLength(9)]);
+    this.mfaForm.get('code')?.updateValueAndValidity();
   }
 }

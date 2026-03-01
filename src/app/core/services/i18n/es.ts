@@ -341,6 +341,11 @@
     'auth.mfa.genericError': 'Ocurrió un error. Inténtalo de nuevo.',
     'auth.mfa.otpSent': 'Código de verificación enviado a tu correo.',
     'auth.mfa.sendFailed': 'Error al enviar el código de verificación.',
+    'auth.mfa.useBackupCode': 'Usar código de respaldo',
+    'auth.mfa.useRegularCode': 'Usar verificación regular',
+    'auth.mfa.backupSubtitle': 'Ingrese uno de sus códigos de respaldo',
+    'auth.mfa.backupCodeLabel': 'Código de Respaldo',
+    'auth.mfa.backupCodePlaceholder': 'xxxx-xxxx',
 
     // Admin Security
     'admin.security.title': 'Configuración de Seguridad',
@@ -380,6 +385,14 @@
     'admin.security.revokeAllMessage': 'Esto cerrará sesión en todos los demás dispositivos. Solo su sesión actual permanecerá activa.',
     'admin.security.revokeAllConfirm': 'Cerrar Todas las Demás',
     'admin.security.allSessionsRevoked': 'Todas las demás sesiones han sido revocadas.',
+    'admin.security.backupCodes': 'Códigos de Respaldo',
+    'admin.security.backupCodesDesc': 'Los códigos de respaldo se pueden usar para acceder a su cuenta si pierde su dispositivo autenticador.',
+    'admin.security.backupCodesRemaining': 'Códigos restantes',
+    'admin.security.backupCodesWarning': 'Guarde estos códigos en un lugar seguro. Solo se mostrarán una vez.',
+    'admin.security.backupCodesDismiss': 'Ya guardé estos códigos',
+    'admin.security.generateBackupCodes': 'Generar Códigos de Respaldo',
+    'admin.security.regenerateBackupCodes': 'Regenerar Códigos de Respaldo',
+    'admin.security.backupCodesFailed': 'Error al generar códigos de respaldo.',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Bienvenido al panel administrativo',
