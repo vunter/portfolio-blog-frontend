@@ -127,6 +127,13 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  /** Saves account info + resume profile + HC together (used by FABs) */
+  saveAll(): void {
+    this.save();
+    this.resumeProfile()?.save();
+    this.hcRef()?.save();
+  }
+
   save(): void {
     this.fieldErrors.set({});
     this.formSubmitted.set(true);
