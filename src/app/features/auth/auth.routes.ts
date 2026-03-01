@@ -36,6 +36,13 @@ export const authRoutes: Routes = [
       ),
   },
   {
+    path: 'verify-email-change',
+    loadComponent: () =>
+      import('./pages/verify-email-change/verify-email-change.component').then(
+        (m) => m.VerifyEmailChangeComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',

@@ -536,7 +536,16 @@
     'admin.profile.saveError': 'Error al actualizar perfil',
     'admin.profile.loadError': 'Error al cargar perfil',
     'admin.profile.emailInUse': 'Este email ya está en uso.',
+    'admin.profile.usernameInUse': 'Este nombre de usuario ya está en uso.',
     'admin.profile.currentPasswordRequired': 'La contraseña actual es necesaria para cambiar la contraseña.',
+    'admin.profile.passwordRequiredForChange': 'Se requiere contraseña para cambiar email o nombre de usuario.',
+    'admin.profile.enterPasswordToConfirm': 'Ingresa tu contraseña para confirmar',
+    'admin.profile.incorrectPassword': 'La contraseña actual es incorrecta.',
+    'admin.profile.editEmail': 'Editar email',
+    'admin.profile.editUsername': 'Editar nombre de usuario',
+    'admin.profile.emailChangeRequiresVerification': 'Se enviará un enlace de verificación a tu nuevo email.',
+    'admin.profile.emailVerificationSent': 'Se envió un enlace de verificación al nuevo email. Haz clic para confirmar el cambio.',
+    'admin.profile.rateLimitExceeded': 'Demasiadas solicitudes. Inténtalo de nuevo más tarde.',
     'admin.profile.passwordMismatch': 'Las nuevas contraseñas no coinciden.',
     'admin.profile.passwordTooShort': 'La nueva contraseña debe tener al menos 12 caracteres.',
     'admin.profile.unnamed': 'Sin nombre',
@@ -1251,6 +1260,15 @@
     'auth.resetPassword.invalidToken': 'Token inválido.',
     'auth.resetPassword.expiredToken': 'Token inválido o expirado.',
     'auth.resetPassword.genericError': 'Ocurrió un error. Intenta de nuevo.',
+
+    // Verify Email Change
+    'auth.verifyEmailChange.verifying': 'Verificando el cambio de email...',
+    'auth.verifyEmailChange.successTitle': '¡Email Cambiado!',
+    'auth.verifyEmailChange.successMessage': 'Tu dirección de email ha sido actualizada. Inicia sesión con tu nuevo email.',
+    'auth.verifyEmailChange.errorTitle': 'Verificación Fallida',
+    'auth.verifyEmailChange.errorMessage': 'El enlace de verificación es inválido o ha expirado.',
+    'auth.verifyEmailChange.noToken': 'No se proporcionó un token de verificación.',
+    'auth.verifyEmailChange.goToLogin': 'Ir a Login',
 
     // Home - Hero
     'home.hero.description': 'Bienvenido a mi portafolio. Cargando resumen profesional...',

@@ -536,7 +536,16 @@
     'admin.profile.saveError': 'Errore nell\'aggiornamento del profilo',
     'admin.profile.loadError': 'Errore nel caricamento del profilo',
     'admin.profile.emailInUse': 'Questa email è già in uso.',
+    'admin.profile.usernameInUse': 'Questo nome utente è già in uso.',
     'admin.profile.currentPasswordRequired': 'La password attuale è necessaria per cambiare la password.',
+    'admin.profile.passwordRequiredForChange': 'Password necessaria per cambiare email o nome utente.',
+    'admin.profile.enterPasswordToConfirm': 'Inserisci la tua password per confermare',
+    'admin.profile.incorrectPassword': 'La password attuale non è corretta.',
+    'admin.profile.editEmail': 'Modifica email',
+    'admin.profile.editUsername': 'Modifica nome utente',
+    'admin.profile.emailChangeRequiresVerification': 'Un link di verifica verrà inviato al nuovo indirizzo email.',
+    'admin.profile.emailVerificationSent': 'Un link di verifica è stato inviato alla nuova email. Clicca per confermare la modifica.',
+    'admin.profile.rateLimitExceeded': 'Troppe richieste. Riprova più tardi.',
     'admin.profile.passwordMismatch': 'Le nuove password non coincidono.',
     'admin.profile.passwordTooShort': 'La nuova password deve avere almeno 12 caratteri.',
     'admin.profile.unnamed': 'Senza nome',
@@ -1251,6 +1260,15 @@
     'auth.resetPassword.invalidToken': 'Token non valido.',
     'auth.resetPassword.expiredToken': 'Token non valido o scaduto.',
     'auth.resetPassword.genericError': 'Si è verificato un errore. Riprova.',
+
+    // Verify Email Change
+    'auth.verifyEmailChange.verifying': 'Verifica del cambio email in corso...',
+    'auth.verifyEmailChange.successTitle': 'Email Cambiata!',
+    'auth.verifyEmailChange.successMessage': 'Il tuo indirizzo email è stato aggiornato. Accedi con la nuova email.',
+    'auth.verifyEmailChange.errorTitle': 'Verifica Fallita',
+    'auth.verifyEmailChange.errorMessage': 'Il link di verifica non è valido o è scaduto.',
+    'auth.verifyEmailChange.noToken': 'Nessun token di verifica fornito.',
+    'auth.verifyEmailChange.goToLogin': 'Vai al Login',
 
     // Home - Hero
     'home.hero.description': 'Benvenuto nel mio portfolio. Caricamento del riepilogo professionale...',
