@@ -39,6 +39,8 @@ export class SecuritySettingsComponent implements OnInit {
   sessions = signal<SessionInfo[]>([]);
   sessionsLoading = signal(false);
   revokingId = signal<number | null>(null);
+  backupCodes = signal<string[]>([]);
+  generatingCodes = signal(false);
 
   ngOnInit(): void {
     this.loadStatus();
@@ -144,6 +146,25 @@ export class SecuritySettingsComponent implements OnInit {
     this.showSetup.set(false);
     this.setupData.set(null);
     this.verifyForm.reset();
+  }
+
+  generateBackupCodes(): void {
+    this.generatingCodes.set(true);
+    this.mfaService.generateBackupCodes().subscribe({
+      next: (res) => {
+        this.backupCodes.set(res.codes);
+        this.generatingCodes.set(false);
+        this.loadStatus();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.security.backupCodesFailed'));
+        this.generatingCodes.set(false);
+      },
+    });
+  }
+
+  dismissBackupCodes(): void {
+    this.backupCodes.set([]);
   }
 
   loadSessions(): void {

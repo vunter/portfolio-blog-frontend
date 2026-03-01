@@ -319,3 +319,59 @@
   color: var(--text-secondary, #6b7280);
   padding: 1rem;
 }
+
+.backup-codes-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+
+  h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .backup-desc {
+    color: var(--text-secondary, #6b7280);
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .backup-remaining {
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.backup-codes-display {
+  background: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+
+  .backup-warning {
+    color: var(--warning-color, #d97706);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.codes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.backup-code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.9375rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.375rem;
+  text-align: center;
+  user-select: all;
+  color: var(--text-primary, inherit);
+}

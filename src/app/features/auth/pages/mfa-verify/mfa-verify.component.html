@@ -3,7 +3,11 @@
   <div class="auth-card">
     <div class="auth-header">
       <h1>{{ i18n.t('auth.mfa.title') }}</h1>
-      <p>{{ i18n.t(method() === 'TOTP' ? 'auth.mfa.totpSubtitle' : 'auth.mfa.emailSubtitle') }}</p>
+      @if (usingBackup()) {
+        <p>{{ i18n.t('auth.mfa.backupSubtitle') }}</p>
+      } @else {
+        <p>{{ i18n.t(method() === 'TOTP' ? 'auth.mfa.totpSubtitle' : 'auth.mfa.emailSubtitle') }}</p>
+      }
     </div>
 
     <form class="auth-form" [formGroup]="mfaForm" (ngSubmit)="onSubmit()">
@@ -12,17 +16,20 @@
       }
 
       <div class="form-group">
-        <label for="code">{{ i18n.t('auth.mfa.codeLabel') }} <span class="required">*</span></label>
+        <label for="code">
+          {{ i18n.t(usingBackup() ? 'auth.mfa.backupCodeLabel' : 'auth.mfa.codeLabel') }}
+          <span class="required">*</span>
+        </label>
         <input
           type="text"
           id="code"
           formControlName="code"
-          [placeholder]="i18n.t('auth.mfa.codePlaceholder')"
+          [placeholder]="i18n.t(usingBackup() ? 'auth.mfa.backupCodePlaceholder' : 'auth.mfa.codePlaceholder')"
           [disabled]="loading()"
-          maxlength="6"
+          [maxlength]="usingBackup() ? 9 : 6"
           autocomplete="one-time-code"
-          inputmode="numeric"
-          pattern="[0-9]*"
+          [attr.inputmode]="usingBackup() ? 'text' : 'numeric'"
+          [attr.pattern]="usingBackup() ? null : '[0-9]*'"
         />
       </div>
 
@@ -37,13 +44,18 @@
     </form>
 
     <div class="mfa-actions">
-      @if (method() === 'EMAIL') {
-        <button class="mfa-link-btn" (click)="resendEmailOtp()" [disabled]="sendingOtp()">
-          {{ sendingOtp() ? i18n.t('auth.mfa.sending') : i18n.t('auth.mfa.resendCode') }}
+      @if (!usingBackup()) {
+        @if (method() === 'EMAIL') {
+          <button class="mfa-link-btn" (click)="resendEmailOtp()" [disabled]="sendingOtp()">
+            {{ sendingOtp() ? i18n.t('auth.mfa.sending') : i18n.t('auth.mfa.resendCode') }}
+          </button>
+        }
+        <button class="mfa-link-btn" (click)="switchMethod()">
+          {{ i18n.t(method() === 'TOTP' ? 'auth.mfa.useEmail' : 'auth.mfa.useTotp') }}
         </button>
       }
-      <button class="mfa-link-btn" (click)="switchMethod()">
-        {{ i18n.t(method() === 'TOTP' ? 'auth.mfa.useEmail' : 'auth.mfa.useTotp') }}
+      <button class="mfa-link-btn" (click)="usingBackup() ? switchMethod() : useBackupCode()">
+        {{ i18n.t(usingBackup() ? 'auth.mfa.useRegularCode' : 'auth.mfa.useBackupCode') }}
       </button>
     </div>
 

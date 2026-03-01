@@ -69,6 +69,7 @@ export interface MfaStatusResponse {
   mfaEnabled: boolean;
   methods: string[];
   preferredMethod?: string;
+  backupCodesRemaining: number;
 }
 
 export interface MfaVerifyRequest {
@@ -79,7 +80,7 @@ export interface MfaVerifyRequest {
 export interface MfaLoginVerifyRequest {
   mfaToken: string;
   code: string;
-  method: 'TOTP' | 'EMAIL';
+  method: 'TOTP' | 'EMAIL' | 'BACKUP';
 }
 
 // ============================================

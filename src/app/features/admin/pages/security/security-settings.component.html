@@ -52,6 +52,36 @@
           }
           {{ i18n.t('admin.security.disableMfa') }}
         </button>
+
+        <!-- Backup Codes Section -->
+        <div class="backup-codes-section">
+          <h4>{{ i18n.t('admin.security.backupCodes') }}</h4>
+          <p class="backup-desc">{{ i18n.t('admin.security.backupCodesDesc') }}</p>
+          <p class="backup-remaining">
+            {{ i18n.t('admin.security.backupCodesRemaining') }}: <strong>{{ mfaStatus()?.backupCodesRemaining ?? 0 }}</strong>
+          </p>
+
+          @if (backupCodes().length > 0) {
+            <div class="backup-codes-display">
+              <p class="backup-warning">{{ i18n.t('admin.security.backupCodesWarning') }}</p>
+              <div class="codes-grid">
+                @for (code of backupCodes(); track code) {
+                  <code class="backup-code">{{ code }}</code>
+                }
+              </div>
+              <button class="btn btn-secondary" (click)="dismissBackupCodes()">
+                {{ i18n.t('admin.security.backupCodesDismiss') }}
+              </button>
+            </div>
+          }
+
+          <button class="btn btn-secondary" (click)="generateBackupCodes()" [disabled]="generatingCodes()">
+            @if (generatingCodes()) {
+              <span class="spinner"></span>
+            }
+            {{ i18n.t(mfaStatus()?.backupCodesRemaining ? 'admin.security.regenerateBackupCodes' : 'admin.security.generateBackupCodes') }}
+          </button>
+        </div>
       } @else {
         <!-- Setup options -->
         @if (!showSetup()) {

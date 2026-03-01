@@ -56,4 +56,11 @@ export class MfaService {
       withCredentials: true,
     });
   }
+
+  /** Generate new backup codes (replaces existing). */
+  generateBackupCodes(): Observable<{ codes: string[] }> {
+    return this.http.post<{ codes: string[] }>(`${this.baseUrl}/backup-codes`, {}, {
+      withCredentials: true,
+    });
+  }
 }
