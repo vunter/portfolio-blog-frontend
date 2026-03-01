@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AdminApiService, AnalyticsSummary, SearchAnalytics } from '../../services/admin-api.service';
+import { AdminApiService, AnalyticsSummary, SearchAnalytics, AnalyticsComparison } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -28,11 +28,28 @@ export class AnalyticsComponent implements OnInit {
 
   data = signal<AnalyticsData | null>(null);
   searchData = signal<SearchAnalytics | null>(null);
+  comparison = signal<AnalyticsComparison | null>(null);
   loading = signal(true);
   error = signal(false);
   period = signal('30d');
   maxViews = signal(0);
   maxReferrerCount = signal(0);
+
+  readonly viewsChange = computed(() => this.calcChange(this.comparison()?.currentViews, this.comparison()?.previousViews));
+  readonly likesChange = computed(() => this.calcChange(this.comparison()?.currentLikes, this.comparison()?.previousLikes));
+  readonly sharesChange = computed(() => this.calcChange(this.comparison()?.currentShares, this.comparison()?.previousShares));
+
+  readonly svgPolyline = computed(() => {
+    const d = this.data();
+    if (!d || d.dailyViews.length < 2) return '';
+    const max = this.maxViews() || 1;
+    const points = d.dailyViews.map((day, i) => {
+      const x = (i / (d.dailyViews.length - 1)) * 100;
+      const y = 100 - (day.count / max) * 100;
+      return `${x},${y}`;
+    });
+    return points.join(' ');
+  });
 
   readonly hasAnyData = computed(() => {
     const d = this.data();
@@ -83,6 +100,10 @@ export class AnalyticsComponent implements OnInit {
       next: (searchAnalytics) => this.searchData.set(searchAnalytics),
       error: () => this.searchData.set(null),
     });
+    this.adminApi.getAnalyticsComparison(this.period()).subscribe({
+      next: (comp) => this.comparison.set(comp),
+      error: () => this.comparison.set(null),
+    });
   }
 
   getBarHeight(count: number): number {
@@ -101,5 +122,42 @@ export class AnalyticsComponent implements OnInit {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
+  }
+
+  calcChange(current?: number, previous?: number): { percent: number; direction: 'positive' | 'negative' | 'neutral' } {
+    if (current == null || previous == null || previous === 0) {
+      return { percent: current && current > 0 ? 100 : 0, direction: current && current > 0 ? 'positive' : 'neutral' };
+    }
+    const percent = ((current - previous) / previous) * 100;
+    const rounded = Math.round(percent * 10) / 10;
+    if (rounded > 0) return { percent: rounded, direction: 'positive' };
+    if (rounded < 0) return { percent: Math.abs(rounded), direction: 'negative' };
+    return { percent: 0, direction: 'neutral' };
+  }
+
+  exportToCsv(): void {
+    const data = this.data();
+    if (!data) return;
+
+    let csv = 'Date,Views,Likes,Shares\n';
+    for (const day of data.dailyViews) {
+      csv += `${day.date},${day.count},0,0\n`;
+    }
+    csv += '\nTop Articles\nTitle,Views\n';
+    for (const article of data.topArticles) {
+      csv += `"${article.title.replace(/"/g, '""')}",${article.views}\n`;
+    }
+    csv += '\nTop Referrers\nReferrer,Count\n';
+    for (const ref of data.topReferrers) {
+      csv += `"${ref.referrer.replace(/"/g, '""')}",${ref.count}\n`;
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

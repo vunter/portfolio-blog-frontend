@@ -114,6 +114,15 @@ export interface SearchAnalytics {
   zeroResultSearches: { queryText: string; count: number }[];
 }
 
+export interface AnalyticsComparison {
+  currentViews: number;
+  currentLikes: number;
+  currentShares: number;
+  previousViews: number;
+  previousLikes: number;
+  previousShares: number;
+}
+
 // INT-12: User stats
 export interface UserStats {
   totalUsers: number;
@@ -398,6 +407,10 @@ export class AdminApiService {
 
   getSearchAnalytics(): Observable<SearchAnalytics> {
     return this.api.get<SearchAnalytics>('/admin/analytics/search');
+  }
+
+  getAnalyticsComparison(period = '30d'): Observable<AnalyticsComparison> {
+    return this.api.get<AnalyticsComparison>('/admin/analytics/compare', { period });
   }
 
   // ==================== INC-05: Tag CRUD (update + delete) ====================

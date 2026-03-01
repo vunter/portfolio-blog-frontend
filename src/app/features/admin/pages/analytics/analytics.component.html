@@ -14,6 +14,11 @@
  <h1>{{ i18n.t('admin.analytics.title') }}</h1>
  <p>{{ i18n.t('admin.analytics.subtitle') }}</p>
  </div>
+ <div class="header-actions">
+ <button class="export-btn" (click)="exportToCsv()" [disabled]="!data()">
+ <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+ {{ i18n.t('admin.analytics.exportCsv') }}
+ </button>
  <div class="period-selector">
  <button
  [class.active]="period() === '7d'"
@@ -28,6 +33,7 @@
  (click)="setPeriod('90d')"
  >{{ i18n.t('admin.analytics.90days') }}</button>
  </div>
+ </div>
  </header>
 
  <!-- Stats Overview -->
@@ -35,6 +41,14 @@
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalViews || 0) }}</span>
  <span class="stat-card__label">{{ i18n.t('admin.analytics.pageViews') }}</span>
+ @if (comparison()) {
+ <span class="metric-change" [class]="viewsChange().direction">
+ @if (viewsChange().direction === 'positive') { ↑ }
+ @else if (viewsChange().direction === 'negative') { ↓ }
+ @else { — }
+ {{ viewsChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ </span>
+ }
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.uniqueVisitors || 0) }}</span>
@@ -43,10 +57,26 @@
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalLikes || 0) }}</span>
  <span class="stat-card__label">{{ i18n.t('admin.analytics.totalLikes') }}</span>
+ @if (comparison()) {
+ <span class="metric-change" [class]="likesChange().direction">
+ @if (likesChange().direction === 'positive') { ↑ }
+ @else if (likesChange().direction === 'negative') { ↓ }
+ @else { — }
+ {{ likesChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ </span>
+ }
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalShares || 0) }}</span>
  <span class="stat-card__label">{{ i18n.t('admin.analytics.totalShares') }}</span>
+ @if (comparison()) {
+ <span class="metric-change" [class]="sharesChange().direction">
+ @if (sharesChange().direction === 'positive') { ↑ }
+ @else if (sharesChange().direction === 'negative') { ↓ }
+ @else { — }
+ {{ sharesChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ </span>
+ }
  </div>
  </section>
 
@@ -62,6 +92,7 @@
  <p>{{ i18n.t('admin.analytics.noData') }}</p>
  </div>
  } @else {
+ <div class="chart-with-line">
  <div class="bar-chart">
  @for (day of data()?.dailyViews || []; track day.date) {
  <div
@@ -69,6 +100,12 @@
  [style.height.%]="getBarHeight(day.count)"
  [title]="day.date + ': ' + day.count + ' views'"
  ></div>
+ }
+ </div>
+ @if (svgPolyline()) {
+ <svg class="trend-line" viewBox="0 0 100 100" preserveAspectRatio="none">
+ <polyline [attr.points]="svgPolyline()" fill="none" stroke="var(--primary-hover, #4f46e5)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+ </svg>
  }
  </div>
  }
