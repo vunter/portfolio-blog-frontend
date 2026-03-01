@@ -369,6 +369,17 @@
     'admin.security.disableConfirm': 'Sim, Desativar',
     'admin.security.mfaDisabled': 'Autenticação em dois fatores desativada.',
     'admin.security.disableFailed': 'Falha ao desativar autenticação em dois fatores.',
+    'admin.security.activeSessions': 'Sessões Ativas',
+    'admin.security.revokeAllOther': 'Desconectar Outros Dispositivos',
+    'admin.security.noSessions': 'Nenhuma sessão ativa encontrada.',
+    'admin.security.unknownDevice': 'Dispositivo Desconhecido',
+    'admin.security.revoke': 'Revogar',
+    'admin.security.sessionRevoked': 'Sessão revogada com sucesso.',
+    'admin.security.sessionRevokeFailed': 'Falha ao revogar sessão.',
+    'admin.security.revokeAllTitle': 'Desconectar Outros Dispositivos',
+    'admin.security.revokeAllMessage': 'Isso irá desconectar todos os outros dispositivos. Apenas sua sessão atual permanecerá ativa.',
+    'admin.security.revokeAllConfirm': 'Desconectar Todos',
+    'admin.security.allSessionsRevoked': 'Todas as outras sessões foram revogadas.',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Bem-vindo ao painel administrativo',

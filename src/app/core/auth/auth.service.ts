@@ -59,4 +59,31 @@ export class AuthService {
       withCredentials: true,
     });
   }
+
+  getActiveSessions(): Observable<SessionInfo[]> {
+    return this.http.get<SessionInfo[]>(`${this.baseUrl}/admin/auth/sessions`, {
+      withCredentials: true,
+    });
+  }
+
+  revokeSession(sessionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/admin/auth/sessions/${sessionId}`, {
+      withCredentials: true,
+    });
+  }
+
+  revokeAllOtherSessions(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/admin/auth/sessions`, {
+      withCredentials: true,
+    });
+  }
+}
+
+export interface SessionInfo {
+  id: number;
+  deviceName: string;
+  ipAddress: string;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
 }
