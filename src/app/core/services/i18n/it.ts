@@ -408,6 +408,7 @@
     'admin.articles.published': 'Pubblicato',
     'admin.articles.draft': 'Bozza',
     'admin.articles.archived': 'Archiviato',
+    'admin.articles.scheduled': 'Programmato',
     'admin.articles.titleColumn': 'Titolo',
     'admin.articles.statusColumn': 'Stato',
     'admin.articles.viewsColumn': 'Visualizzazioni',
@@ -425,6 +426,10 @@
     'admin.articles.publishError': 'Errore nella pubblicazione dell\'articolo',
     'admin.articles.unpublishSuccess': 'Pubblicazione dell\'articolo annullata con successo',
     'admin.articles.unpublishError': 'Errore nell\'annullamento della pubblicazione',
+    'admin.articles.selected': 'selezionati',
+    'admin.articles.bulkConfirm': 'Cambiare {{count}} articoli in {{status}}?',
+    'admin.articles.bulkSuccess': 'Articoli aggiornati con successo',
+    'admin.articles.bulkError': 'Errore nell\'aggiornamento degli articoli',
 
     // Admin Article Form
     'admin.articleForm.editTitle': 'Modifica Articolo',
@@ -462,6 +467,8 @@
     'admin.articleForm.uploadImage': 'Carica immagine',
     'admin.articleForm.imageUploaded': 'Immagine caricata con successo',
     'admin.articleForm.imageUploadError': 'Errore nel caricamento dell\'immagine',
+    'admin.articleForm.schedule': 'Programma',
+    'admin.articleForm.confirmSchedule': 'Conferma Programmazione',
 
     // Admin Media Library
     'admin.media.library': 'Libreria Media',

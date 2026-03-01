@@ -408,6 +408,7 @@
     'admin.articles.published': 'Publicado',
     'admin.articles.draft': 'Borrador',
     'admin.articles.archived': 'Archivado',
+    'admin.articles.scheduled': 'Programado',
     'admin.articles.titleColumn': 'Título',
     'admin.articles.statusColumn': 'Estado',
     'admin.articles.viewsColumn': 'Vistas',
@@ -425,6 +426,10 @@
     'admin.articles.publishError': 'Error al publicar artículo',
     'admin.articles.unpublishSuccess': 'Artículo despublicado exitosamente',
     'admin.articles.unpublishError': 'Error al despublicar artículo',
+    'admin.articles.selected': 'seleccionados',
+    'admin.articles.bulkConfirm': '¿Cambiar {{count}} artículos a {{status}}?',
+    'admin.articles.bulkSuccess': 'Artículos actualizados con éxito',
+    'admin.articles.bulkError': 'Error al actualizar artículos',
 
     // Admin Article Form
     'admin.articleForm.editTitle': 'Editar Artículo',
@@ -462,6 +467,8 @@
     'admin.articleForm.uploadImage': 'Subir imagen',
     'admin.articleForm.imageUploaded': 'Imagen subida exitosamente',
     'admin.articleForm.imageUploadError': 'Error al subir imagen',
+    'admin.articleForm.schedule': 'Programar',
+    'admin.articleForm.confirmSchedule': 'Confirmar Programación',
 
     // Admin Media Library
     'admin.media.library': 'Biblioteca de Medios',

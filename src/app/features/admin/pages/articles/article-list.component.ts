@@ -33,6 +33,7 @@ export class ArticleListComponent implements OnInit {
   loading = signal(true);
   error = signal(false);
   previewingArticle = signal<ArticleResponse | null>(null);
+  selectedIds = signal<Set<string>>(new Set());
   searchTerm = '';
   statusFilter = '';
 
@@ -146,10 +147,69 @@ export class ArticleListComponent implements OnInit {
     });
   }
 
+  toggleSelect(id: string): void {
+    const current = new Set(this.selectedIds());
+    if (current.has(id)) {
+      current.delete(id);
+    } else {
+      current.add(id);
+    }
+    this.selectedIds.set(current);
+  }
+
+  toggleSelectAll(): void {
+    if (this.isAllSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(this.articles().map(a => a.id)));
+    }
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  isAllSelected(): boolean {
+    const articles = this.articles();
+    return articles.length > 0 && this.selectedIds().size === articles.length;
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  async bulkAction(status: string): Promise<void> {
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.t('common.confirm'),
+      message: this.i18n.t('admin.articles.bulkConfirm')
+        .replace('{{count}}', ids.length.toString())
+        .replace('{{status}}', this.getStatusLabel(status)),
+      confirmText: this.i18n.t('common.confirm'),
+      cancelText: this.i18n.t('common.cancel'),
+      type: status === 'ARCHIVED' ? 'danger' : 'warning',
+    });
+    if (!confirmed) return;
+
+    this.apiService.put('/admin/articles/bulk-status', { ids, status }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('admin.articles.bulkSuccess'));
+        this.selectedIds.set(new Set());
+        this.loadArticles();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.articles.bulkError'));
+      },
+    });
+  }
+
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       PUBLISHED: this.i18n.t('admin.articles.published'),
       DRAFT: this.i18n.t('admin.articles.draft'),
+      SCHEDULED: this.i18n.t('admin.articles.scheduled'),
       ARCHIVED: this.i18n.t('admin.articles.archived'),
     };
     return labels[status] || status;

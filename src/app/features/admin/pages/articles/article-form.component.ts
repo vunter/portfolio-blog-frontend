@@ -63,6 +63,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedTagIds = signal<string[]>([]);
   uploadingCoverImage = signal(false);
   uploadingContentImage = signal(false);
+  showScheduleInput = signal(false);
+  scheduledAtControl = new FormControl('');
 
   // Split pane ratio (flex values)
   splitLeft = signal('1');
@@ -595,7 +597,21 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.save('PUBLISHED');
   }
 
-  private save(status: 'DRAFT' | 'PUBLISHED'): void {
+  schedulePublish(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.save('SCHEDULED');
+  }
+
+  minScheduleDate(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 5);
+    return now.toISOString().slice(0, 16);
+  }
+
+  private save(status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED'): void {
     this.saving.set(true);
     const formValue = this.form.getRawValue();
     const selectedSlugs = this.selectedTagIds()
@@ -608,6 +624,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       excerpt: formValue.excerpt || undefined,
       coverImageUrl: formValue.featuredImageUrl || undefined,
       status: status as ArticleStatus,
+      scheduledAt: status === 'SCHEDULED' && this.scheduledAtControl.value
+        ? new Date(this.scheduledAtControl.value).toISOString() : undefined,
       tagSlugs: selectedSlugs,
       seoTitle: formValue.metaTitle || undefined,
       seoDescription: formValue.metaDescription || undefined,

@@ -153,6 +153,31 @@ select {
     background: var(--badge-secondary-bg);
     color: var(--badge-secondary-text);
   }
+
+  &--scheduled {
+    background: var(--badge-info-bg, #dbeafe);
+    color: var(--badge-info-text, #1e40af);
+  }
+}
+
+.col-check {
+  width: 40px;
+  text-align: center;
+}
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary, #f3f4f6);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+
+  .bulk-count {
+    font-weight: 500;
+    margin-right: auto;
+  }
 }
 
 .actions {

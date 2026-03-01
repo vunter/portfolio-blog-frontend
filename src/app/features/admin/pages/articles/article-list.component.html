@@ -41,15 +41,28 @@
  <option value="">{{ i18n.t('admin.articles.allStatus') }}</option>
  <option value="PUBLISHED">{{ i18n.t('admin.articles.published') }}</option>
  <option value="DRAFT">{{ i18n.t('admin.articles.draft') }}</option>
+ <option value="SCHEDULED">{{ i18n.t('admin.articles.scheduled') }}</option>
  <option value="ARCHIVED">{{ i18n.t('admin.articles.archived') }}</option>
  </select>
  </div>
+
+ <!-- Bulk Action Bar -->
+ @if (selectedIds().size > 0) {
+ <div class="bulk-bar">
+ <span class="bulk-count">{{ selectedIds().size }} {{ i18n.t('admin.articles.selected') }}</span>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('PUBLISHED')">{{ i18n.t('admin.articles.publish') }}</button>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('DRAFT')">{{ i18n.t('admin.articles.draft') }}</button>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('ARCHIVED')">{{ i18n.t('admin.articles.archived') }}</button>
+ <button class="btn btn-sm btn-ghost" (click)="clearSelection()">{{ i18n.t('common.cancel') }}</button>
+ </div>
+ }
 
  <!-- Table -->
  <div class="table-container">
  <table class="data-table" aria-label="Articles">
  <thead>
  <tr>
+ <th class="col-check"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" /></th>
  <th>{{ i18n.t('admin.articles.titleColumn') }}</th>
  <th>{{ i18n.t('common.status') }}</th>
  <th>{{ i18n.t('admin.articles.viewsColumn') }}</th>
@@ -61,6 +74,7 @@
  <tbody>
  @for (article of articles(); track article.id) {
  <tr>
+ <td class="col-check"><input type="checkbox" [checked]="isSelected(article.id)" (change)="toggleSelect(article.id)" /></td>
  <td>
  <div class="article-info">
  @if (article.coverImageUrl) {
@@ -141,7 +155,7 @@
  </tr>
  } @empty {
  <tr>
- <td colspan="6" class="empty-message">
+ <td colspan="7" class="empty-message">
  {{ i18n.t('admin.articles.noArticles') }}
  </td>
  </tr>
