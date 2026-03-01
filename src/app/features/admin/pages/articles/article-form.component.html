@@ -30,6 +30,19 @@
  <button type="button" class="btn btn-secondary" (click)="saveDraft()" [disabled]="saving()">
  {{ i18n.t('admin.articleForm.saveDraft') }}
  </button>
+ @if (showScheduleInput()) {
+ <div class="schedule-group">
+ <input type="datetime-local" class="form-control schedule-input" [formControl]="scheduledAtControl" [min]="minScheduleDate()">
+ <button type="button" class="btn btn-accent" (click)="schedulePublish()" [disabled]="saving() || !scheduledAtControl.value">
+ {{ i18n.t('admin.articleForm.confirmSchedule') }}
+ </button>
+ <button type="button" class="btn btn-ghost btn-sm" (click)="showScheduleInput.set(false)">✕</button>
+ </div>
+ } @else {
+ <button type="button" class="btn btn-outline" (click)="showScheduleInput.set(true)" [disabled]="saving()">
+ {{ i18n.t('admin.articleForm.schedule') }}
+ </button>
+ }
  <button type="button" class="btn btn-primary" (click)="publish()" [disabled]="saving()">
  {{ isEditMode() ? i18n.t('common.update') : i18n.t('admin.articleForm.publish') }}
  </button>

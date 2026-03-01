@@ -408,6 +408,7 @@
     'admin.articles.published': 'Published',
     'admin.articles.draft': 'Draft',
     'admin.articles.archived': 'Archived',
+    'admin.articles.scheduled': 'Scheduled',
     'admin.articles.titleColumn': 'Title',
     'admin.articles.statusColumn': 'Status',
     'admin.articles.viewsColumn': 'Views',
@@ -425,6 +426,10 @@
     'admin.articles.publishError': 'Error publishing article',
     'admin.articles.unpublishSuccess': 'Article unpublished successfully',
     'admin.articles.unpublishError': 'Error unpublishing article',
+    'admin.articles.selected': 'selected',
+    'admin.articles.bulkConfirm': 'Change {{count}} articles to {{status}}?',
+    'admin.articles.bulkSuccess': 'Articles updated successfully',
+    'admin.articles.bulkError': 'Error updating articles',
 
     // Admin Article Form
     'admin.articleForm.editTitle': 'Edit Article',
@@ -462,6 +467,8 @@
     'admin.articleForm.uploadImage': 'Upload image',
     'admin.articleForm.imageUploaded': 'Image uploaded successfully',
     'admin.articleForm.imageUploadError': 'Failed to upload image',
+    'admin.articleForm.schedule': 'Schedule',
+    'admin.articleForm.confirmSchedule': 'Confirm Schedule',
 
     // Admin Media Library
     'admin.media.library': 'Media Library',
