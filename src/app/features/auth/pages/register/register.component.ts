@@ -41,6 +41,14 @@ export class RegisterComponent {
   error = signal<string | null>(null);
   fieldErrors = signal<Record<string, string>>({});
 
+  loginWithGoogle(): void {
+    window.location.href = '/api/v1/admin/auth/oauth2/authorize/google';
+  }
+
+  loginWithGithub(): void {
+    window.location.href = '/api/v1/admin/auth/oauth2/authorize/github';
+  }
+
   onSubmit(): void {
     this.fieldErrors.set({});
 

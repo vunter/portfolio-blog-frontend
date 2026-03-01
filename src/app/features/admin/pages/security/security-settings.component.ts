@@ -1,4 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MfaService } from '../../../../core/services/mfa.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -17,6 +18,7 @@ import { DatePipe } from '@angular/common';
 })
 export class SecuritySettingsComponent implements OnInit {
   private mfaService = inject(MfaService);
+  private http = inject(HttpClient);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
@@ -41,10 +43,14 @@ export class SecuritySettingsComponent implements OnInit {
   revokingId = signal<number | null>(null);
   backupCodes = signal<string[]>([]);
   generatingCodes = signal(false);
+  socialAccounts = signal<any[]>([]);
+  socialLoading = signal(false);
+  unlinking = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadStatus();
     this.loadSessions();
+    this.loadSocialAccounts();
   }
 
   loadStatus(): void {
@@ -210,6 +216,42 @@ export class SecuritySettingsComponent implements OnInit {
       },
       error: () => {
         this.notification.error(this.i18n.t('admin.security.sessionRevokeFailed'));
+      },
+    });
+  }
+
+  loadSocialAccounts(): void {
+    this.socialLoading.set(true);
+    this.http.get<any[]>('/api/v1/admin/auth/oauth2/accounts').subscribe({
+      next: (accounts) => {
+        this.socialAccounts.set(accounts);
+        this.socialLoading.set(false);
+      },
+      error: () => {
+        this.socialLoading.set(false);
+      },
+    });
+  }
+
+  hasProvider(provider: string): boolean {
+    return this.socialAccounts().some(a => a.provider === provider);
+  }
+
+  linkSocialAccount(provider: string): void {
+    window.location.href = `/api/v1/admin/auth/oauth2/authorize/${provider}?link=true`;
+  }
+
+  unlinkSocialAccount(provider: string): void {
+    this.unlinking.set(provider);
+    this.http.delete(`/api/v1/admin/auth/oauth2/accounts/${provider}`).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('admin.security.accountUnlinked'));
+        this.unlinking.set(null);
+        this.loadSocialAccounts();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('admin.security.unlinkFailed'));
+        this.unlinking.set(null);
       },
     });
   }

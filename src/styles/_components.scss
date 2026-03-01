@@ -402,6 +402,69 @@
   }
 }
 
+.social-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color, #e2e8f0);
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: var(--text-muted, #64748b);
+    white-space: nowrap;
+  }
+}
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  background: var(--card-bg, #fff);
+  color: var(--text-primary, #1e293b);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--hover-bg, #f8fafc);
+    border-color: var(--border-hover, #cbd5e1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.github-btn {
+  &:hover {
+    background: #24292e;
+    color: #fff;
+    border-color: #24292e;
+  }
+}
+
 .auth-lang-toggle {
   position: fixed;
   top: 1rem;
