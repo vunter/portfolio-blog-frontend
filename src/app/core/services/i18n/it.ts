@@ -548,7 +548,7 @@
     'admin.profile.hcSave': 'Salva Impostazioni Home',
     'admin.profile.hcSaveSuccess': 'Impostazioni della pagina home salvate con successo!',
     'admin.profile.hcSaveError': 'Errore nel salvataggio delle impostazioni della pagina home',
-    'admin.profile.saveAll': 'Salva Tutto',
+    'admin.profile.saveAll': 'Salva',
 
     // Admin Tags
     'admin.tags.title': 'Tag',
