@@ -281,15 +281,8 @@
  </div>
  </div>
 
- <!-- Consolidated Floating Action Buttons (top→bottom: Preview, Save Profile, Save HC, Generate Resume) -->
+ <!-- Consolidated Floating Action Buttons (top→bottom: Save, Preview, Generate Resume) -->
  <div class="fab-group">
- <button type="button" class="fab-btn fab-preview" (click)="hcRef()?.openPreview()" [title]="i18n.t('admin.profile.hcPreview')">
- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
- <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
- <circle cx="12" cy="12" r="3"></circle>
- </svg>
- <span class="fab-label">{{ i18n.t('admin.profile.hcPreview') }}</span>
- </button>
  <button type="button" class="fab-btn fab-save" (click)="saveAll()" [disabled]="saving() || resumeProfile()?.saving() || hcRef()?.saving()" [title]="i18n.t('admin.profile.saveAll')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -297,6 +290,13 @@
  <polyline points="7 3 7 8 15 8"></polyline>
  </svg>
  <span class="fab-label">{{ i18n.t('admin.profile.saveAll') }}</span>
+ </button>
+ <button type="button" class="fab-btn fab-preview" (click)="hcRef()?.openPreview()" [title]="i18n.t('admin.profile.hcPreview')">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+ <circle cx="12" cy="12" r="3"></circle>
+ </svg>
+ <span class="fab-label">{{ i18n.t('admin.profile.hcPreview') }}</span>
  </button>
  <a routerLink="/resume/generate" class="fab-btn fab-generate" [title]="i18n.t('resume.profile.generateResume')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
