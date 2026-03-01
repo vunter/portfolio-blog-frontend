@@ -294,6 +294,9 @@
     'auth.login.emailPlaceholder': 'tua@email.com',
     'auth.login.showPassword': 'Mostra password',
     'auth.login.hidePassword': 'Nascondi password',
+    'auth.login.orContinueWith': 'o continua con',
+    'auth.login.continueGoogle': 'Continua con Google',
+    'auth.login.continueGithub': 'Continua con GitHub',
 
     // Auth Register
     'auth.register.title': 'Crea Account',
@@ -309,6 +312,7 @@
     'auth.register.loading': 'Creazione account...',
     'auth.register.hasAccount': 'Hai già un account?',
     'auth.register.loginLink': 'Accedi',
+    'auth.register.orContinueWith': 'o continua con',
     'auth.register.fillAllFields': 'Per favore, compila tutti i campi.',
     'auth.register.passwordMismatch': 'Le password non coincidono.',
     'auth.register.confirmPasswordRequired': 'Per favore, conferma la tua password.',
@@ -393,6 +397,15 @@
     'admin.security.generateBackupCodes': 'Genera Codici di Backup',
     'admin.security.regenerateBackupCodes': 'Rigenera Codici di Backup',
     'admin.security.backupCodesFailed': 'Generazione dei codici di backup fallita.',
+    'admin.security.linkedAccounts': 'Account Collegati',
+    'admin.security.linkedAccountsDesc': 'Collega account social per un accesso più rapido',
+    'admin.security.linkGoogle': 'Collega Account Google',
+    'admin.security.linkGithub': 'Collega Account GitHub',
+    'admin.security.unlinkAccount': 'Scollega',
+    'admin.security.accountLinked': 'Account collegato con successo',
+    'admin.security.accountUnlinked': 'Account scollegato con successo',
+    'admin.security.unlinkFailed': 'Impossibile scollegare l\'account',
+    'admin.security.linkedOn': 'Collegato il',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Benvenuto nel pannello amministrativo',

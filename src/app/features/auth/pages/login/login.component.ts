@@ -36,6 +36,14 @@ export class LoginComponent {
   loading = signal(false);
   error = signal<string | null>(null);
 
+  loginWithGoogle(): void {
+    window.location.href = '/api/v1/admin/auth/oauth2/authorize/google';
+  }
+
+  loginWithGithub(): void {
+    window.location.href = '/api/v1/admin/auth/oauth2/authorize/github';
+  }
+
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();

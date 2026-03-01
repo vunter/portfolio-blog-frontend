@@ -294,6 +294,9 @@
     'auth.login.emailPlaceholder': 'your@email.com',
     'auth.login.showPassword': 'Show password',
     'auth.login.hidePassword': 'Hide password',
+    'auth.login.orContinueWith': 'or continue with',
+    'auth.login.continueGoogle': 'Continue with Google',
+    'auth.login.continueGithub': 'Continue with GitHub',
 
     // Auth Register
     'auth.register.title': 'Create Account',
@@ -309,6 +312,7 @@
     'auth.register.loading': 'Creating account...',
     'auth.register.hasAccount': 'Already have an account?',
     'auth.register.loginLink': 'Sign in',
+    'auth.register.orContinueWith': 'or continue with',
     'auth.register.fillAllFields': 'Please fill in all fields.',
     'auth.register.passwordMismatch': 'Passwords do not match.',
     'auth.register.confirmPasswordRequired': 'Please confirm your password.',
@@ -393,6 +397,15 @@
     'admin.security.generateBackupCodes': 'Generate Backup Codes',
     'admin.security.regenerateBackupCodes': 'Regenerate Backup Codes',
     'admin.security.backupCodesFailed': 'Failed to generate backup codes.',
+    'admin.security.linkedAccounts': 'Linked Accounts',
+    'admin.security.linkedAccountsDesc': 'Connect social accounts for faster login',
+    'admin.security.linkGoogle': 'Link Google Account',
+    'admin.security.linkGithub': 'Link GitHub Account',
+    'admin.security.unlinkAccount': 'Unlink',
+    'admin.security.accountLinked': 'Account linked successfully',
+    'admin.security.accountUnlinked': 'Account unlinked successfully',
+    'admin.security.unlinkFailed': 'Failed to unlink account',
+    'admin.security.linkedOn': 'Linked on',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Welcome to the admin panel',

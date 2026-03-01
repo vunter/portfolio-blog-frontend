@@ -294,6 +294,9 @@
     'auth.login.emailPlaceholder': 'tu@email.com',
     'auth.login.showPassword': 'Mostrar contraseña',
     'auth.login.hidePassword': 'Ocultar contraseña',
+    'auth.login.orContinueWith': 'o continuar con',
+    'auth.login.continueGoogle': 'Continuar con Google',
+    'auth.login.continueGithub': 'Continuar con GitHub',
 
     // Auth Register
     'auth.register.title': 'Crear Cuenta',
@@ -309,6 +312,7 @@
     'auth.register.loading': 'Creando cuenta...',
     'auth.register.hasAccount': '¿Ya tienes una cuenta?',
     'auth.register.loginLink': 'Iniciar sesión',
+    'auth.register.orContinueWith': 'o continuar con',
     'auth.register.fillAllFields': 'Por favor, completa todos los campos.',
     'auth.register.passwordMismatch': 'Las contraseñas no coinciden.',
     'auth.register.confirmPasswordRequired': 'Por favor, confirma tu contraseña.',
@@ -393,6 +397,15 @@
     'admin.security.generateBackupCodes': 'Generar Códigos de Respaldo',
     'admin.security.regenerateBackupCodes': 'Regenerar Códigos de Respaldo',
     'admin.security.backupCodesFailed': 'Error al generar códigos de respaldo.',
+    'admin.security.linkedAccounts': 'Cuentas Vinculadas',
+    'admin.security.linkedAccountsDesc': 'Conecta cuentas sociales para un inicio de sesión más rápido',
+    'admin.security.linkGoogle': 'Vincular Cuenta de Google',
+    'admin.security.linkGithub': 'Vincular Cuenta de GitHub',
+    'admin.security.unlinkAccount': 'Desvincular',
+    'admin.security.accountLinked': 'Cuenta vinculada exitosamente',
+    'admin.security.accountUnlinked': 'Cuenta desvinculada exitosamente',
+    'admin.security.unlinkFailed': 'Error al desvincular cuenta',
+    'admin.security.linkedOn': 'Vinculada el',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Bienvenido al panel administrativo',
