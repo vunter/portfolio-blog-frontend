@@ -548,7 +548,7 @@
     'admin.profile.hcSave': 'Guardar Configuración de Inicio',
     'admin.profile.hcSaveSuccess': '¡Configuración de la página de inicio guardada exitosamente!',
     'admin.profile.hcSaveError': 'Error al guardar la configuración de la página de inicio',
-    'admin.profile.saveAll': 'Guardar Todo',
+    'admin.profile.saveAll': 'Guardar',
 
     // Admin Tags
     'admin.tags.title': 'Tags',
