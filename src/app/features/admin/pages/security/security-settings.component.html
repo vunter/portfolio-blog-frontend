@@ -113,5 +113,56 @@
         </div>
       }
     </div>
+
+    <!-- Active Sessions -->
+    <div class="sessions-card">
+      <div class="sessions-header">
+        <h3>{{ i18n.t('admin.security.activeSessions') }}</h3>
+        @if (sessions().length > 1) {
+          <button class="btn btn-danger btn-sm" (click)="revokeAllOther()">
+            {{ i18n.t('admin.security.revokeAllOther') }}
+          </button>
+        }
+      </div>
+
+      @if (sessionsLoading()) {
+        <div class="loading-spinner">
+          <span class="spinner"></span>
+        </div>
+      } @else if (sessions().length === 0) {
+        <p class="empty-state">{{ i18n.t('admin.security.noSessions') }}</p>
+      } @else {
+        <div class="sessions-list">
+          @for (session of sessions(); track session.id) {
+            <div class="session-item">
+              <div class="session-info">
+                <div class="session-device">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  <span class="device-name">{{ session.deviceName || i18n.t('admin.security.unknownDevice') }}</span>
+                </div>
+                <div class="session-meta">
+                  <span class="session-ip">{{ session.ipAddress }}</span>
+                  <span class="session-separator">·</span>
+                  <span class="session-date">{{ session.lastUsedAt | date:'medium' }}</span>
+                </div>
+              </div>
+              <button class="btn btn-outline btn-sm"
+                      (click)="revokeSession(session.id)"
+                      [disabled]="revokingId() === session.id">
+                @if (revokingId() === session.id) {
+                  <span class="spinner"></span>
+                } @else {
+                  {{ i18n.t('admin.security.revoke') }}
+                }
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
   }
 </div>

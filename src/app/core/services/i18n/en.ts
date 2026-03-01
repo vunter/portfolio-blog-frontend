@@ -369,6 +369,17 @@
     'admin.security.disableConfirm': 'Yes, Disable',
     'admin.security.mfaDisabled': 'Two-factor authentication disabled.',
     'admin.security.disableFailed': 'Failed to disable two-factor authentication.',
+    'admin.security.activeSessions': 'Active Sessions',
+    'admin.security.revokeAllOther': 'Log Out All Other Devices',
+    'admin.security.noSessions': 'No active sessions found.',
+    'admin.security.unknownDevice': 'Unknown Device',
+    'admin.security.revoke': 'Revoke',
+    'admin.security.sessionRevoked': 'Session revoked successfully.',
+    'admin.security.sessionRevokeFailed': 'Failed to revoke session.',
+    'admin.security.revokeAllTitle': 'Log Out All Other Devices',
+    'admin.security.revokeAllMessage': 'This will log you out of all other devices. Only your current session will remain active.',
+    'admin.security.revokeAllConfirm': 'Log Out All Others',
+    'admin.security.allSessionsRevoked': 'All other sessions have been revoked.',
 
     // Admin Dashboard
     'admin.dashboard.welcome': 'Welcome to the admin panel',
