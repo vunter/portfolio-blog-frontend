@@ -1528,5 +1528,19 @@
     'bookmarks.subtitle': 'Artículos que guardaste para leer después',
     'bookmarks.emptyTitle': 'Sin marcadores aún',
     'bookmarks.emptyMessage': 'Navega por los artículos y toca el icono de marcador para guardarlos aquí.',
+
+    // Reading History
+    'admin.sidebar.readingHistory': 'Historial de Lectura',
+    'admin.readingHistory.title': 'Historial de Lectura',
+    'admin.readingHistory.subtitle': 'Artículos que has leído',
+    'admin.readingHistory.emptyTitle': 'Sin historial aún',
+    'admin.readingHistory.emptyMessage': 'Los artículos que leas aparecerán aquí automáticamente.',
+    'admin.readingHistory.clearHistory': 'Borrar Historial',
+    'admin.readingHistory.confirmClear': '¿Estás seguro de que quieres borrar todo tu historial de lectura?',
+    'admin.readingHistory.cleared': 'Historial de lectura borrado',
+    'admin.readingHistory.loadError': 'Error al cargar el historial de lectura',
+    'admin.readingHistory.clearError': 'Error al borrar el historial de lectura',
+    'admin.readingHistory.readTimes': 'Leído {{count}} vez/veces',
+    'admin.readingHistory.minRead': 'min de lectura',
 };
 
