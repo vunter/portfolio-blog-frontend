@@ -4,7 +4,7 @@ import { UserResponse } from './user.model';
 // ARTICLE
 // ============================================
 
-export type ArticleStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'ARCHIVED';
+export type ArticleStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'REVIEW' | 'ARCHIVED';
 
 /**
  * Lightweight author info returned within article responses.
@@ -189,4 +189,17 @@ export interface SearchSuggestion {
   value?: string; // Alias for text
   type: 'article' | 'tag';
   slug: string;
+}
+
+// ============================================
+// ARTICLE REVIEW
+// ============================================
+
+export interface ArticleReview {
+  id: number;
+  articleId: number;
+  reviewerId: number;
+  status: string; // APPROVED, CHANGES_REQUESTED
+  feedback?: string;
+  createdAt: string;
 }
