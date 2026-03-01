@@ -43,6 +43,13 @@ export const authRoutes: Routes = [
       ),
   },
   {
+    path: 'revert-email-change',
+    loadComponent: () =>
+      import('./pages/revert-email-change/revert-email-change.component').then(
+        (m) => m.RevertEmailChangeComponent
+      ),
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
