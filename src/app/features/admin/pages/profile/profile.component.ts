@@ -118,6 +118,14 @@ export class ProfileComponent implements OnInit {
     this.sensitivePassword.set('');
   }
 
+  confirmSensitiveChange(): void {
+    if (!this.sensitivePassword()) {
+      this.notification.error(this.i18n.t('admin.profile.passwordRequiredForChange'));
+      return;
+    }
+    this.save();
+  }
+
   triggerAvatarUpload(): void {
     this.avatarInput()?.nativeElement.click();
   }

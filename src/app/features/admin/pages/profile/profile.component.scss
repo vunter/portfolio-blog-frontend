@@ -335,6 +335,31 @@
   }
 }
 
+.btn-confirm-field {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--success-color, #22c55e);
+  border-radius: 6px;
+  background: var(--success-color, #22c55e);
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--success-hover, #16a34a);
+    border-color: var(--success-hover, #16a34a);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
 .field-readonly {
   background: var(--bg-secondary, #f9fafb) !important;
   cursor: default;
