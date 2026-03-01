@@ -107,6 +107,13 @@ export interface AnalyticsTrend {
   visitors: number;
 }
 
+export interface SearchAnalytics {
+  totalSearches: number;
+  uniqueSearches: number;
+  topSearches: { queryText: string; count: number }[];
+  zeroResultSearches: { queryText: string; count: number }[];
+}
+
 // INT-12: User stats
 export interface UserStats {
   totalUsers: number;
@@ -387,6 +394,10 @@ export class AdminApiService {
 
   getAnalytics(period = '30d'): Observable<AnalyticsSummary> {
     return this.api.get<AnalyticsSummary>('/admin/analytics', { period });
+  }
+
+  getSearchAnalytics(): Observable<SearchAnalytics> {
+    return this.api.get<SearchAnalytics>('/admin/analytics/search');
   }
 
   // ==================== INC-05: Tag CRUD (update + delete) ====================

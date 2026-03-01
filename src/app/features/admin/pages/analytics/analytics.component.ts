@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AdminApiService, AnalyticsSummary } from '../../services/admin-api.service';
+import { AdminApiService, AnalyticsSummary, SearchAnalytics } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -27,6 +27,7 @@ export class AnalyticsComponent implements OnInit {
   i18n = inject(I18nService);
 
   data = signal<AnalyticsData | null>(null);
+  searchData = signal<SearchAnalytics | null>(null);
   loading = signal(true);
   error = signal(false);
   period = signal('30d');
@@ -78,6 +79,10 @@ export class AnalyticsComponent implements OnInit {
           this.error.set(true);
         },
       });
+    this.adminApi.getSearchAnalytics().subscribe({
+      next: (searchAnalytics) => this.searchData.set(searchAnalytics),
+      error: () => this.searchData.set(null),
+    });
   }
 
   getBarHeight(count: number): number {
