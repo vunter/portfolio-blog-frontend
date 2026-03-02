@@ -51,6 +51,7 @@ export interface UserResponse {
   bio?: string;
   role: Role;
   active: boolean;
+  hasPassword?: boolean;
   createdAt: string;
   updatedAt: string;
 }

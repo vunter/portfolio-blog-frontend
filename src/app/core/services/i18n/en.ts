@@ -561,6 +561,8 @@
     // Admin Profile
     'admin.profile.title': 'My Profile',
     'admin.profile.subtitle': 'Manage your account information',
+    'admin.profile.setupTitle': 'Complete your profile',
+    'admin.profile.setupMessage': 'Choose a username and set a password to secure your account. Your username is pre-filled but you can change it.',
     'admin.profile.personalInfo': 'Personal Information',
     'admin.profile.accountInfo': 'Account',
     'admin.profile.resumeContact': 'Resume Contact',

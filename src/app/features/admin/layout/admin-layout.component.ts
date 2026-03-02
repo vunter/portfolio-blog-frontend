@@ -24,6 +24,7 @@ interface MenuItem {
   icon: string;
   route: string;
   adminOnly?: boolean;
+  editorOnly?: boolean;
 }
 
 @Component({
@@ -81,29 +82,39 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   // MED-01: computed() signal instead of getter for menu items
   readonly menuItems = computed<MenuItem[]>(() => [
     {
+      label: this.i18n.t('admin.profile.title'),
+      route: '/admin/profile',
+      icon: 'profile',
+    },
+    {
       label: this.i18n.t('admin.sidebar.dashboard'),
       route: '/admin/dashboard',
       icon: 'dashboard',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.articles'),
       route: '/admin/articles',
       icon: 'articles',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.resumes'),
       route: '/resume/templates',
       icon: 'resumes',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.tags'),
       route: '/admin/tags',
       icon: 'tags',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.comments'),
       route: '/admin/comments',
       icon: 'comments',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.users'),
@@ -121,6 +132,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       label: this.i18n.t('admin.sidebar.analytics'),
       route: '/admin/analytics',
       icon: 'analytics',
+      editorOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.newsletter'),
@@ -154,7 +166,12 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   readonly visibleMenuItems = computed(() => {
     const isAdmin = this.authStore.isAdmin();
-    return this.menuItems().filter(item => !item.adminOnly || isAdmin);
+    const isEditor = this.authStore.isEditor();
+    return this.menuItems().filter(item => {
+      if (item.adminOnly && !isAdmin) return false;
+      if (item.editorOnly && !isEditor) return false;
+      return true;
+    });
   });
 
   toggleSidebar(): void {
