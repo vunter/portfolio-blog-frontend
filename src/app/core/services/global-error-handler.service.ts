@@ -11,12 +11,17 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     console.error('[GlobalErrorHandler]', message, stack);
 
-    // Reload on chunk loading errors (lazy route failures) — browser only
+    // Reload on chunk loading errors (lazy route failures) — browser only, with guard against infinite loops
     if (
       isPlatformBrowser(this.platformId) &&
       (message.includes('ChunkLoadError') || message.includes('Loading chunk'))
     ) {
-      window.location.reload();
+      const lastReload = sessionStorage.getItem('chunk-reload-ts');
+      const now = Date.now();
+      if (!lastReload || (now - parseInt(lastReload, 10)) > 30000) {
+        sessionStorage.setItem('chunk-reload-ts', now.toString());
+        window.location.reload();
+      }
       return;
     }
   }
