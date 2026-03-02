@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminApiService, DashboardStats, DashboardActivity } from '../../services/admin-api.service';
@@ -15,6 +16,7 @@ import { getDateLocale } from '../../../../core/utils/date-format.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   readonly authStore = inject(AuthStore);
@@ -36,7 +38,7 @@ export class DashboardComponent implements OnInit {
     forkJoin({
       stats: this.adminApi.getDashboardStats(),
       activity: this.adminApi.getDashboardActivity(),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ stats, activity }) => {
         this.stats.set(stats);
         this.recentActivity.set(activity);

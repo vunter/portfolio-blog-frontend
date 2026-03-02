@@ -1,4 +1,5 @@
-import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ResumeProfileService } from '../../../resume/services/resume-profile.service';
 import { ResumeProfile, ResumeProfileHomeCustomization } from '../../../../models';
@@ -23,6 +24,7 @@ import {
   styleUrl: './home-customization.component.scss',
 })
 export class HomeCustomizationComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   readonly i18n = inject(I18nService);
 
   /** When false, hides floating FABs (used when parent provides its own FABs) */
@@ -125,7 +127,7 @@ export class HomeCustomizationComponent implements OnInit {
       homeCustomization: merged.homeCustomization,
     };
 
-    this.profileService.saveProfile(request, this.currentLocale).subscribe({
+    this.profileService.saveProfile(request, this.currentLocale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {
         this.fullProfile = saved;
         this.syncFormFromProfile();
@@ -145,7 +147,7 @@ export class HomeCustomizationComponent implements OnInit {
   // ── Private helpers ──────────────────────────────
 
   private loadLocales(): void {
-    this.profileService.listLocales().subscribe({
+    this.profileService.listLocales().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (locales) => this.availableLocales.set(locales),
       error: () => this.availableLocales.set([]),
     });
@@ -153,7 +155,7 @@ export class HomeCustomizationComponent implements OnInit {
 
   private loadProfile(): void {
     this.loading.set(true);
-    this.profileService.getProfile(this.currentLocale).subscribe({
+    this.profileService.getProfile(this.currentLocale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.fullProfile = data;
         this.syncFormFromProfile();

@@ -277,7 +277,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       seoDescription: formValue.metaDescription || undefined,
     };
 
-    this.apiService.put(`/admin/articles/${this.articleId}`, data).subscribe({
+    this.apiService.put(`/admin/articles/${this.articleId}`, data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.hasUnsavedChanges = false;
         this.lastSavedContent = currentContent;
@@ -457,7 +457,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadTags(): void {
-    this.apiService.get<TagResponse[]>('/tags').subscribe({
+    this.apiService.get<TagResponse[]>('/tags').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (tags) => this.availableTags.set(tags),
       error: () => {
         this.notification.error(this.i18n.t('admin.error.loadTags'));
@@ -466,7 +466,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadArticle(id: string): void {
-    this.apiService.get<ArticleResponse>(`/admin/articles/${id}`).subscribe({
+    this.apiService.get<ArticleResponse>(`/admin/articles/${id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (article) => {
         this.form.patchValue({
           title: article.title,
@@ -503,7 +503,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   onVersionRestored(): void {
     // Reload the article from backend to get restored content
     if (this.articleId) {
-      this.apiService.get<ArticleResponse>(`/admin/articles/${this.articleId}`).subscribe({
+      this.apiService.get<ArticleResponse>(`/admin/articles/${this.articleId}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (article) => {
           this.form.patchValue({
             title: article.title || '',
@@ -546,7 +546,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     input.value = '';
 
     this.uploadingCoverImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).subscribe({
+    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.form.controls.featuredImageUrl.setValue(res.url);
         this.uploadingCoverImage.set(false);
@@ -566,7 +566,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     input.value = '';
 
     this.uploadingContentImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).subscribe({
+    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.uploadingContentImage.set(false);
         const altText = file.name.replace(/\.[^.]+$/, '');
@@ -696,7 +696,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       ? this.apiService.put(`/admin/articles/${this.articleId}`, data)
       : this.apiService.post('/admin/articles', data);
 
-    request.subscribe({
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.hasUnsavedChanges = false;
         this.lastSavedContent = JSON.stringify(formValue);

@@ -311,7 +311,7 @@ export class ArticleDetailComponent implements OnInit {
     this.headingsProcessed = false;
     this.codeBlocksProcessed = false;
 
-    this.articleService.getArticleBySlug(slug).subscribe({
+    this.articleService.getArticleBySlug(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (article) => {
         this.article.set(article);
         this.loading.set(false);
@@ -347,14 +347,14 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   trackView(slug: string): void {
-    this.articleService.trackView(slug).subscribe({
+    this.articleService.trackView(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => { /* view tracking is non-critical */ }
     });
   }
 
   loadComments(slug: string): void {
     this.commentPage.set(0);
-    this.commentService.getCommentsPaged(slug, 0, 20).subscribe({
+    this.commentService.getCommentsPaged(slug, 0, 20).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.comments.set(response.content ?? []);
         this.commentTotalElements.set(response.totalElements);
@@ -374,7 +374,7 @@ export class ArticleDetailComponent implements OnInit {
     if (!slug || this.loadingMoreComments()) return;
     this.loadingMoreComments.set(true);
     const nextPage = this.commentPage() + 1;
-    this.commentService.getCommentsPaged(slug, nextPage, 20).subscribe({
+    this.commentService.getCommentsPaged(slug, nextPage, 20).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.comments.update(prev => [...prev, ...(response.content ?? [])]);
         this.commentPage.set(response.page);
@@ -388,7 +388,7 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   loadRelatedArticles(slug: string): void {
-    this.articleService.getRelatedArticles(slug).subscribe({
+    this.articleService.getRelatedArticles(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (articles) => this.relatedArticles.set(articles),
       error: () => this.relatedArticles.set([]),
     });
@@ -398,7 +398,7 @@ export class ArticleDetailComponent implements OnInit {
     const article = this.article();
     if (!article) return;
 
-    this.articleService.likeArticle(article.slug).subscribe({
+    this.articleService.likeArticle(article.slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.article.set({ ...article, likeCount: response.likeCount });
         this.liked.set(true);
@@ -441,6 +441,7 @@ export class ArticleDetailComponent implements OnInit {
           authorEmail: email || undefined,
           recaptchaToken: recaptchaToken ?? undefined,
         })
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
             this.commentName.set('');
@@ -492,6 +493,7 @@ export class ArticleDetailComponent implements OnInit {
           parentId,
           recaptchaToken: recaptchaToken ?? undefined,
         })
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
             this.submittingReply.set(false);
