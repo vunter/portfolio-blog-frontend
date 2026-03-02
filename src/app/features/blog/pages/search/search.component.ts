@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SearchService } from '../../services/search.service';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -62,8 +62,12 @@ export class SearchComponent implements OnInit {
       });
 
     // Get initial query from URL
-    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const query = params['q'] || '';
+    this.route.queryParams.pipe(
+      map(params => params['q'] || ''),
+      distinctUntilChanged(),
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((query) => {
       if (query) {
         this.searchQuery.set(query);
         this.search(query);
@@ -74,13 +78,12 @@ export class SearchComponent implements OnInit {
   onSearchChange(query: string): void {
     this.searchSubject.next(query);
     if (query.length >= 3) {
-      // Update URL and trigger search
+      // Update URL — search is triggered via queryParams subscription
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: { q: query },
         queryParamsHandling: 'merge',
       });
-      this.search(query);
     }
   }
 
@@ -90,7 +93,7 @@ export class SearchComponent implements OnInit {
     this.currentQuery.set(query);
     this.showSuggestions.set(false);
 
-    this.searchService.search(query, this.currentPage(), this.pageSize()).subscribe({
+    this.searchService.search(query, this.currentPage(), this.pageSize()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.results.set(response.content);
         this.totalPages.set(response.totalPages);
@@ -104,7 +107,7 @@ export class SearchComponent implements OnInit {
   }
 
   loadSuggestions(query: string): void {
-    this.searchService.getSuggestions(query).subscribe({
+    this.searchService.getSuggestions(query).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (suggestions: string[]) => {
         const mapped: SearchSuggestion[] = suggestions.map(text => ({
           text,

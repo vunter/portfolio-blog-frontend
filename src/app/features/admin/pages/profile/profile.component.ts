@@ -162,7 +162,8 @@ export class ProfileComponent implements OnInit {
             this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
           },
           error: () => {
-            this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+            this.form.avatarUrl = this.user()?.avatarUrl ?? '';
+            this.notification.error(this.i18n.t('admin.profile.saveError'));
           },
         });
       },

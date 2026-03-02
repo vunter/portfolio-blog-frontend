@@ -1,7 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnInit, DestroyRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MfaService } from '../../../../core/services/mfa.service';
+import { ApiService } from '../../../../core/services/api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -19,7 +19,7 @@ import { DatePipe } from '@angular/common';
 })
 export class SecuritySettingsComponent implements OnInit {
   private mfaService = inject(MfaService);
-  private http = inject(HttpClient);
+  private api = inject(ApiService);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
@@ -224,7 +224,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   loadSocialAccounts(): void {
     this.socialLoading.set(true);
-    this.http.get<any[]>('/api/v1/admin/auth/oauth2/accounts').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.api.get<any[]>('/admin/auth/oauth2/accounts').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (accounts) => {
         this.socialAccounts.set(accounts);
         this.socialLoading.set(false);
@@ -245,7 +245,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   unlinkSocialAccount(provider: string): void {
     this.unlinking.set(provider);
-    this.http.delete(`/api/v1/admin/auth/oauth2/accounts/${provider}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.api.delete(`/admin/auth/oauth2/accounts/${provider}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.accountUnlinked'));
         this.unlinking.set(null);
