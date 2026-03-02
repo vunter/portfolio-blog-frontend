@@ -1,5 +1,6 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, OnInit, DestroyRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MfaService } from '../../../../core/services/mfa.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -23,6 +24,7 @@ export class SecuritySettingsComponent implements OnInit {
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   loading = signal(true);
@@ -54,7 +56,7 @@ export class SecuritySettingsComponent implements OnInit {
   }
 
   loadStatus(): void {
-    this.mfaService.getStatus().subscribe({
+    this.mfaService.getStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (status) => {
         this.mfaStatus.set(status);
         this.loading.set(false);
@@ -67,7 +69,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   setupTotp(): void {
     this.enabling.set(true);
-    this.mfaService.setup('TOTP').subscribe({
+    this.mfaService.setup('TOTP').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.setupData.set(data);
         this.showSetup.set(true);
@@ -82,7 +84,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   enableEmail(): void {
     this.enabling.set(true);
-    this.mfaService.setup('EMAIL').subscribe({
+    this.mfaService.setup('EMAIL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.emailOtpEnabled'));
         this.enabling.set(false);
@@ -104,7 +106,7 @@ export class SecuritySettingsComponent implements OnInit {
     this.verifying.set(true);
     const code = this.verifyForm.getRawValue().code!;
 
-    this.mfaService.verifySetup({ code, method: 'TOTP' }).subscribe({
+    this.mfaService.verifySetup({ code, method: 'TOTP' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         this.verifying.set(false);
         if (result.verified) {
@@ -133,7 +135,7 @@ export class SecuritySettingsComponent implements OnInit {
     });
     if (!confirmed) return;
     this.disabling.set(true);
-    this.mfaService.disable().subscribe({
+    this.mfaService.disable().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.mfaDisabled'));
         this.disabling.set(false);
@@ -156,7 +158,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   generateBackupCodes(): void {
     this.generatingCodes.set(true);
-    this.mfaService.generateBackupCodes().subscribe({
+    this.mfaService.generateBackupCodes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.backupCodes.set(res.codes);
         this.generatingCodes.set(false);
@@ -175,7 +177,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   loadSessions(): void {
     this.sessionsLoading.set(true);
-    this.authService.getActiveSessions().subscribe({
+    this.authService.getActiveSessions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (sessions) => {
         this.sessions.set(sessions);
         this.sessionsLoading.set(false);
@@ -188,7 +190,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   revokeSession(sessionId: number): void {
     this.revokingId.set(sessionId);
-    this.authService.revokeSession(sessionId).subscribe({
+    this.authService.revokeSession(sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.sessionRevoked'));
         this.revokingId.set(null);
@@ -209,7 +211,7 @@ export class SecuritySettingsComponent implements OnInit {
       type: 'danger',
     });
     if (!confirmed) return;
-    this.authService.revokeAllOtherSessions().subscribe({
+    this.authService.revokeAllOtherSessions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.allSessionsRevoked'));
         this.loadSessions();
@@ -222,7 +224,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   loadSocialAccounts(): void {
     this.socialLoading.set(true);
-    this.http.get<any[]>('/api/v1/admin/auth/oauth2/accounts').subscribe({
+    this.http.get<any[]>('/api/v1/admin/auth/oauth2/accounts').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (accounts) => {
         this.socialAccounts.set(accounts);
         this.socialLoading.set(false);
@@ -243,7 +245,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   unlinkSocialAccount(provider: string): void {
     this.unlinking.set(provider);
-    this.http.delete(`/api/v1/admin/auth/oauth2/accounts/${provider}`).subscribe({
+    this.http.delete(`/api/v1/admin/auth/oauth2/accounts/${provider}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.security.accountUnlinked'));
         this.unlinking.set(null);
