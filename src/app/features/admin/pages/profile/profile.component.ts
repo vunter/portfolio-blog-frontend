@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
@@ -38,6 +38,7 @@ export class ProfileComponent implements OnInit {
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
   i18n = inject(I18nService);
 
   resumeProfile = viewChild(ResumeProfileComponent);
@@ -50,6 +51,7 @@ export class ProfileComponent implements OnInit {
   user = signal<UserResponse | null>(null);
   fieldErrors = signal<Record<string, string>>({});
   formSubmitted = signal(false);
+  isSetupMode = signal(false);
 
   editingEmail = signal(false);
   editingUsername = signal(false);
@@ -80,6 +82,7 @@ export class ProfileComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.isSetupMode.set(this.route.snapshot.queryParams['setup'] === 'true');
     this.authService.getCurrentUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (user) => {
         this.user.set(user);

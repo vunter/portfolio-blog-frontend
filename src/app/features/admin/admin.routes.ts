@@ -1,22 +1,23 @@
 import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
-import { adminGuard, editorGuard } from '../../core/auth/auth.guard';
+import { authGuard, adminGuard, editorGuard } from '../../core/auth/auth.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const adminRoutes: Routes = [
   {
     path: '',
     component: AdminLayoutComponent,
-    canActivate: [editorGuard],
+    canActivate: [authGuard],
     data: { breadcrumb: 'Admin' },
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'profile',
         pathMatch: 'full',
       },
       {
         path: 'dashboard',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
@@ -33,6 +34,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'articles',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/articles/article-list.component').then(
             (m) => m.ArticleListComponent
@@ -41,6 +43,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'articles/new',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/articles/article-form.component').then(
             (m) => m.ArticleFormComponent
@@ -50,6 +53,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'articles/:id/edit',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/articles/article-form.component').then(
             (m) => m.ArticleFormComponent
@@ -59,6 +63,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'tags',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/tags/tag-list.component').then(
             (m) => m.TagListComponent
@@ -67,6 +72,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'comments',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/comments/comment-list.component').then(
             (m) => m.CommentListComponent
@@ -93,6 +99,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'analytics',
+        canActivate: [editorGuard],
         loadComponent: () =>
           import('./pages/analytics/analytics.component').then(
             (m) => m.AnalyticsComponent

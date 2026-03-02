@@ -9,6 +9,13 @@ export const authRoutes: Routes = [
       import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'oauth-callback',
+    loadComponent: () =>
+      import('./pages/oauth-callback/oauth-callback.component').then(
+        (m) => m.OAuthCallbackComponent
+      ),
+  },
+  {
     path: 'mfa-verify',
     loadComponent: () =>
       import('./pages/mfa-verify/mfa-verify.component').then((m) => m.MfaVerifyComponent),

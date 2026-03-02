@@ -1,4 +1,17 @@
 <div class="profile-page">
+ @if (isSetupMode()) {
+ <div class="setup-banner">
+ <div class="setup-banner__icon">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-2h2v2h-2zm0-4V7h2v6h-2z"/>
+ </svg>
+ </div>
+ <div class="setup-banner__content">
+ <h3>{{ i18n.t('admin.profile.setupTitle') }}</h3>
+ <p>{{ i18n.t('admin.profile.setupMessage') }}</p>
+ </div>
+ </div>
+ }
  <header class="page-header">
  <div>
  <h1>{{ i18n.t('admin.profile.title') }}</h1>
