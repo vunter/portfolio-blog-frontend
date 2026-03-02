@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { ApiService } from '../../../../core/services/api.service';
@@ -36,6 +37,7 @@ export class ProfileComponent implements OnInit {
   private api = inject(ApiService);
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   resumeProfile = viewChild(ResumeProfileComponent);
@@ -78,7 +80,7 @@ export class ProfileComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe({
+    this.authService.getCurrentUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (user) => {
         this.user.set(user);
         this.form.name = user.name || '';
@@ -147,12 +149,13 @@ export class ProfileComponent implements OnInit {
     }
 
     this.uploadingAvatar.set(true);
-    this.adminApi.uploadMedia(file, 'AVATAR').subscribe({
+    this.adminApi.uploadMedia(file, 'AVATAR').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (asset) => {
         this.uploadingAvatar.set(false);
         this.form.avatarUrl = asset.url;
         // Auto-save avatar URL to backend so it persists across refreshes
-        this.api.put<UserResponse>('/admin/users/me', { avatarUrl: asset.url }).subscribe({
+        this.api.put<UserResponse>('/admin/users/me', { avatarUrl: asset.url })
+          .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (updated) => {
             this.user.set(updated);
             this.authStore.login(updated);
@@ -238,7 +241,7 @@ export class ProfileComponent implements OnInit {
       payload['newPassword'] = this.form.newPassword;
     }
 
-    this.api.putResponse<UserResponse>('/admin/users/me', payload).subscribe({
+    this.api.putResponse<UserResponse>('/admin/users/me', payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.saving.set(false);
         const updated = response.body!;

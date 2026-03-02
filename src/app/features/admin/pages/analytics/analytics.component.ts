@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminApiService, AnalyticsSummary, SearchAnalytics, AnalyticsComparison } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -24,6 +25,7 @@ interface AnalyticsData {
 export class AnalyticsComponent implements OnInit {
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   data = signal<AnalyticsData | null>(null);
@@ -71,6 +73,7 @@ export class AnalyticsComponent implements OnInit {
     this.error.set(false);
     this.adminApi
       .getAnalytics(this.period())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (summary) => {
           // INC-04: Map backend AnalyticsSummary to frontend AnalyticsData
@@ -96,11 +99,11 @@ export class AnalyticsComponent implements OnInit {
           this.error.set(true);
         },
       });
-    this.adminApi.getSearchAnalytics().subscribe({
+    this.adminApi.getSearchAnalytics().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (searchAnalytics) => this.searchData.set(searchAnalytics),
       error: () => this.searchData.set(null),
     });
-    this.adminApi.getAnalyticsComparison(this.period()).subscribe({
+    this.adminApi.getAnalyticsComparison(this.period()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (comp) => this.comparison.set(comp),
       error: () => this.comparison.set(null),
     });

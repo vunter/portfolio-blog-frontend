@@ -1,7 +1,8 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -24,6 +25,7 @@ export class LoginComponent {
   private notification = inject(NotificationService);
   private recaptcha = inject(RecaptchaService);
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   loginForm = this.fb.group({
@@ -89,6 +91,7 @@ export class LoginComponent {
         }
         return this.authService.getCurrentUser();
       }),
+      takeUntilDestroyed(this.destroyRef),
     )
       .subscribe({
         next: (user) => {
