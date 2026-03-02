@@ -853,6 +853,10 @@
     'blog.dateFilter.from': 'From',
     'blog.dateFilter.to': 'To',
     'blog.dateFilter.clear': 'Clear dates',
+    'blog.filters.searchPlaceholder': 'Search articles...',
+    'blog.filters.clearSearch': 'Clear search',
+    'blog.filters.dateRange': 'Date range',
+    'blog.filters.clearAll': 'Clear all',
 
     // Comments Pagination
     'blog.comments.loadMore': 'Load more comments',
@@ -908,6 +912,8 @@
     'article.comments.reply': 'Reply',
     'article.comments.submitReply': 'Submit Reply',
     'article.comments.replyPlaceholder': 'Write your reply...',
+    'article.comments.loginRequired': 'You must be logged in to leave a comment.',
+    'article.comments.loginToComment': 'Log in to comment',
 
     // Blog Search
     'blog.search.results': 'result(s) for',
