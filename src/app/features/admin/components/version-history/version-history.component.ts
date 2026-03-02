@@ -1,4 +1,5 @@
-import { Component, inject, signal, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, input, output, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { AdminApiService } from '../../services/admin-api.service';
@@ -15,6 +16,7 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VersionHistoryComponent {
+  private destroyRef = inject(DestroyRef);
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
@@ -47,7 +49,7 @@ export class VersionHistoryComponent {
     if (!id) return;
 
     this.loading.set(true);
-    this.adminApi.getArticleVersions(id).subscribe({
+    this.adminApi.getArticleVersions(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.versions.set(response.versions || []);
         this.totalVersions.set(response.totalVersions || 0);
@@ -66,7 +68,7 @@ export class VersionHistoryComponent {
 
   previewVersion(version: ArticleVersionResponse): void {
     const id = this.articleId();
-    this.adminApi.getArticleVersion(id, version.versionNumber).subscribe({
+    this.adminApi.getArticleVersion(id, version.versionNumber).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (full) => this.previewingVersion.set(full),
       error: () => this.notification.error(this.i18n.t('admin.versions.loadError'))
     });
@@ -87,7 +89,7 @@ export class VersionHistoryComponent {
     if (!confirmed) return;
 
     this.restoring.set(true);
-    this.adminApi.restoreVersion(this.articleId(), version.versionNumber).subscribe({
+    this.adminApi.restoreVersion(this.articleId(), version.versionNumber).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.restoring.set(false);
         this.notification.success(this.i18n.t('admin.versions.restoreSuccess'));
@@ -129,7 +131,7 @@ export class VersionHistoryComponent {
       comparison: this.adminApi.compareVersions(id, from, to),
       fromVersion: this.adminApi.getArticleVersion(id, from),
       toVersion: this.adminApi.getArticleVersion(id, to),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ comparison, fromVersion, toVersion }) => {
         this.compareResult.set(comparison);
         if (comparison.contentChanged) {
