@@ -58,6 +58,9 @@ export class ArticleListComponent implements OnInit {
   popularArticles = signal<ArticleSummaryResponse[]>([]);
   dateFrom = signal('');
   dateTo = signal('');
+  searchQuery = signal('');
+  showDateFilter = signal(false);
+  private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.route.paramMap
@@ -94,7 +97,7 @@ export class ArticleListComponent implements OnInit {
     const to = this.dateTo() || undefined;
     const source$ = tagSlug
       ? this.articleService.getArticlesByTag(tagSlug, page, 9)
-      : this.articleService.getArticles(page, 9, from, to);
+      : this.articleService.getArticles(page, 9, from, to, this.searchQuery() || undefined);
 
     source$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response: PageResponse<ArticleSummaryResponse>) => {
@@ -156,6 +159,34 @@ export class ArticleListComponent implements OnInit {
     this.dateFrom.set('');
     this.dateTo.set('');
     this.loadArticles(0);
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(value);
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => this.loadArticles(0), 400);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.loadArticles(0);
+  }
+
+  toggleDateFilter(): void {
+    this.showDateFilter.update(v => !v);
+  }
+
+  clearAllFilters(): void {
+    this.searchQuery.set('');
+    this.dateFrom.set('');
+    this.dateTo.set('');
+    this.showDateFilter.set(false);
+    this.loadArticles(0);
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.searchQuery() || this.dateFrom() || this.dateTo());
   }
 
   subscribeNewsletter(event: Event): void {

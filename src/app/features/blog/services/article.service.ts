@@ -17,12 +17,14 @@ export class ArticleService {
     page = 0,
     size = 10,
     dateFrom?: string,
-    dateTo?: string
+    dateTo?: string,
+    search?: string
   ): Observable<PageResponse<ArticleSummaryResponse>> {
     const locale = this.getLocale();
     const params: Record<string, string | number> = { page, size, locale };
     if (dateFrom) params['dateFrom'] = dateFrom;
     if (dateTo) params['dateTo'] = dateTo;
+    if (search) params['search'] = search;
     return this.api.get<PageResponse<ArticleSummaryResponse>>('/articles', params);
   }
 
