@@ -29,6 +29,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { SeoService } from '../../../../core/services/seo.service';
+import { AuthStore } from '../../../../core/auth/auth.store';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { BreadcrumbsComponent, Breadcrumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
@@ -75,6 +76,7 @@ export class ArticleDetailComponent implements OnInit {
   private readonly zone = inject(NgZone);
   private readonly seo = inject(SeoService);
   readonly i18n = inject(I18nService);
+  readonly authStore = inject(AuthStore);
 
   readonly dateLocale = computed(() => {
     const lang = this.i18n.language();
@@ -424,11 +426,13 @@ export class ArticleDetailComponent implements OnInit {
 
   submitComment(): void {
     const article = this.article();
-    const name = this.commentName().trim();
     const content = this.commentContent().trim();
-    const email = this.commentEmail().trim();
+    const user = this.authStore.user();
 
-    if (!article || !name || content.length < 10) return;
+    if (!article || !user || content.length < 10) return;
+
+    const name = user.name || user.username || 'User';
+    const email = user.email || '';
 
     this.submittingComment.set(true);
     this.commentSubmitted.set(false);
@@ -438,14 +442,12 @@ export class ArticleDetailComponent implements OnInit {
         .createComment(article.slug, {
           content,
           authorName: name,
-          authorEmail: email || undefined,
+          authorEmail: email,
           recaptchaToken: recaptchaToken ?? undefined,
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            this.commentName.set('');
-            this.commentEmail.set('');
             this.commentContent.set('');
             this.submittingComment.set(false);
             this.commentSubmitted.set(true);
@@ -477,11 +479,12 @@ export class ArticleDetailComponent implements OnInit {
   submitReply(): void {
     const article = this.article();
     const parentId = this.replyParentId();
-    if (!article || !parentId) return;
+    const user = this.authStore.user();
+    if (!article || !parentId || !user) return;
 
-    const name = this.replyName().trim();
+    const name = user.name || user.username || 'User';
     const content = this.replyContent().trim();
-    if (!name || content.length < 10) return;
+    if (content.length < 10) return;
 
     this.submittingReply.set(true);
 
@@ -489,6 +492,7 @@ export class ArticleDetailComponent implements OnInit {
       this.commentService
         .createComment(article.slug, {
           authorName: name,
+          authorEmail: user.email || '',
           content,
           parentId,
           recaptchaToken: recaptchaToken ?? undefined,
