@@ -37,6 +37,15 @@ export class LoginComponent {
   showPassword = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
+  googleEnabled = signal(false);
+  githubEnabled = signal(false);
+
+  constructor() {
+    this.authService.getOAuthProviders().subscribe(providers => {
+      this.googleEnabled.set(!!providers['google']);
+      this.githubEnabled.set(!!providers['github']);
+    });
+  }
 
   loginWithGoogle(): void {
     window.location.href = '/api/v1/admin/auth/oauth2/authorize/google';
