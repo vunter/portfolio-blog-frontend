@@ -187,23 +187,22 @@
  </span>
  </div>
  <p class="comment__text">{{ comment.content }}</p>
+ @if (authStore.isAuthenticated()) {
  <button class="comment__reply-btn" (click)="startReply(comment)">
  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
  </svg>
  {{ i18n.t('article.comments.reply') }}
  </button>
+ }
 
  <!-- Inline reply form -->
- @if (replyingTo()?.id === comment.id) {
+ @if (replyingTo()?.id === comment.id && authStore.isAuthenticated()) {
  <div class="reply-form">
- <div class="reply-form__row">
- <input type="text" [(ngModel)]="replyName" name="replyName" [placeholder]="i18n.t('article.comments.name')" required />
- </div>
  <textarea [(ngModel)]="replyContent" name="replyContent" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
  <div class="reply-form__actions">
  <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
- <button class="reply-form__submit" (click)="submitReply()" [disabled]="!replyName() || replyContent().length < 10 || submittingReply()">
+ <button class="reply-form__submit" (click)="submitReply()" [disabled]="replyContent().length < 10 || submittingReply()">
  {{ submittingReply() ? i18n.t('article.comments.submitting') : i18n.t('article.comments.submitReply') }}
  </button>
  </div>
@@ -224,22 +223,21 @@
  <span class="comment__date">{{ reply.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}</span>
  </div>
  <p class="comment__text">{{ reply.content }}</p>
+ @if (authStore.isAuthenticated()) {
  <button class="comment__reply-btn" (click)="startReply(reply, comment.id)">
  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
  </svg>
  {{ i18n.t('article.comments.reply') }}
  </button>
+ }
 
- @if (replyingTo()?.id === reply.id) {
+ @if (replyingTo()?.id === reply.id && authStore.isAuthenticated()) {
  <div class="reply-form">
- <div class="reply-form__row">
- <input type="text" [(ngModel)]="replyName" name="replyName2" [placeholder]="i18n.t('article.comments.name')" required />
- </div>
  <textarea [(ngModel)]="replyContent" name="replyContent2" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
  <div class="reply-form__actions">
  <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
- <button class="reply-form__submit" (click)="submitReply()" [disabled]="!replyName() || replyContent().length < 10 || submittingReply()">
+ <button class="reply-form__submit" (click)="submitReply()" [disabled]="replyContent().length < 10 || submittingReply()">
  {{ submittingReply() ? i18n.t('article.comments.submitting') : i18n.t('article.comments.submitReply') }}
  </button>
  </div>
@@ -296,6 +294,16 @@
  <div class="comment-form-wrapper">
  <h3 class="comment-form__title">{{ i18n.t('article.comments.leaveComment') }}</h3>
 
+ @if (!authStore.isAuthenticated()) {
+ <div class="comment-login-prompt">
+ <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+ <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+ </svg>
+ <p>{{ i18n.t('article.comments.loginRequired') }}</p>
+ <a routerLink="/auth/login" class="comment-login-btn">{{ i18n.t('article.comments.loginToComment') }}</a>
+ </div>
+ } @else {
+
  @if (commentSubmitted()) {
  <div class="comment-success">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -306,37 +314,12 @@
  </div>
  }
 
- <form class="comment-form" (ngSubmit)="submitComment()">
- <div class="comment-form__row">
- <div class="comment-form__field">
- <label for="comment-name">{{ i18n.t('article.comments.name') }} *</label>
- <input
- id="comment-name"
- type="text"
- [placeholder]="i18n.t('article.comments.name')"
- [(ngModel)]="commentName"
- name="authorName"
- required
- #nameField="ngModel"
- [attr.aria-describedby]="nameField.touched && nameField.invalid ? 'comment-name-error' : null"
- [attr.aria-invalid]="nameField.touched && nameField.invalid"
- />
- @if (nameField.touched && nameField.invalid) {
- <span class="field-error" id="comment-name-error" role="alert">{{ i18n.t('article.comments.nameRequired') }}</span>
- }
- </div>
- <div class="comment-form__field">
- <label for="comment-email">{{ i18n.t('article.comments.email') }}</label>
- <input
- id="comment-email"
- type="email"
- [placeholder]="i18n.t('article.comments.email')"
- [(ngModel)]="commentEmail"
- name="authorEmail"
- />
- </div>
+ <div class="comment-form__user-info">
+ <div class="comment-form__avatar">{{ getInitials(authStore.userDisplayName()) }}</div>
+ <span class="comment-form__username">{{ authStore.userDisplayName() }}</span>
  </div>
 
+ <form class="comment-form" (ngSubmit)="submitComment()">
  <div class="comment-form__field">
  <label for="comment-content">{{ i18n.t('article.comments.content') }} *</label>
  <textarea
@@ -358,11 +341,12 @@
 
  <button
  type="submit"
- [disabled]="!commentName() || commentContent().length < 10 || submittingComment()"
+ [disabled]="commentContent().length < 10 || submittingComment()"
  >
  {{ submittingComment() ? i18n.t('article.comments.submitting') : i18n.t('article.comments.submit') }}
  </button>
  </form>
+ }
  </div>
  </section>
 
