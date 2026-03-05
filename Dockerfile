@@ -1,28 +1,34 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Use npm registry (defaults to npmjs.org for CI; override for local Nexus)
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 RUN npm config set registry $NPM_REGISTRY
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --prefer-offline
 COPY . .
 RUN npx ng build --configuration=production
 
-FROM nginx:alpine
+# Runtime: nginx:alpine (~40MB)
+FROM nginx:1.27-alpine AS runtime
+
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
-# F-405: Add HEALTHCHECK (use full GET — spider/HEAD may fail with SPA try_files)
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -q -O /dev/null http://localhost:4000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD wget -q -O /dev/null http://localhost:4000/ || exit 1
 
-# SPA routing: serve index.html for all routes
+# SPA routing + gzip + security headers
 RUN printf 'server {\n\
   listen 4000;\n\
   root /usr/share/nginx/html;\n\
   index index.html;\n\
+  gzip on;\n\
+  gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;\n\
+  gzip_min_length 256;\n\
   location / {\n\
     try_files $uri $uri/ /index.html;\n\
+    add_header X-Content-Type-Options "nosniff" always;\n\
+    add_header X-Frame-Options "SAMEORIGIN" always;\n\
   }\n\
   location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot)$ {\n\
     expires 1y;\n\
@@ -30,12 +36,9 @@ RUN printf 'server {\n\
   }\n\
 }\n' > /etc/nginx/conf.d/default.conf
 
-# F-404: Run nginx as non-root user
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
+# Run as non-root
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx && \
+    touch /var/run/nginx.pid && chown nginx:nginx /var/run/nginx.pid
 USER nginx
 
 EXPOSE 4000
