@@ -1,6 +1,6 @@
 ﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpBackend } from '@angular/common/http';
 import { en } from './i18n/en';
 import { CookieConsentService } from './cookie-consent.service';
 
@@ -41,6 +41,8 @@ export class I18nService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly consent = inject(CookieConsentService);
   private readonly http = inject(HttpClient);
+  // Bypasses interceptor chain to avoid circular dependency during construction
+  private readonly directHttp = new HttpClient(inject(HttpBackend));
 
   private readonly loadedTranslations = signal<Translations>(en);
   private currentTier = 'public';
@@ -120,7 +122,7 @@ export class I18nService {
       this.supportedLanguages.set(cached.data);
     }
 
-    this.http.get<LanguageOption[]>('/api/v1/languages').subscribe({
+    this.directHttp.get<LanguageOption[]>('/api/v1/languages').subscribe({
       next: (langs) => {
         if (langs?.length) {
           this.supportedLanguages.set(langs);
