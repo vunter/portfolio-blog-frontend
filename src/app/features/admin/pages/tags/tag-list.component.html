@@ -1,25 +1,25 @@
 ﻿@if (loading()) {
- <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+ <app-skeleton variant="table" />
 } @else if (error()) {
  <div class="admin-error">
  <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
- <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
- <p>{{ i18n.t('admin.common.errorMessage') }}</p>
- <button class="retry-btn" (click)="loadTags()">{{ i18n.t('admin.common.retry') }}</button>
+ <h3>{{ i18n.t('dev.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('dev.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadTags()">{{ i18n.t('dev.common.retry') }}</button>
  </div>
 } @else {
 <div class="tag-list">
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('admin.tags.title') }}</h1>
- <p>{{ i18n.t('admin.tags.subtitle') }}</p>
+ <h1>{{ i18n.t('dev.tags.title') }}</h1>
+ <p>{{ i18n.t('dev.tags.subtitle') }}</p>
  </div>
  <button class="btn btn-primary" (click)="openModal()">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <line x1="12" y1="5" x2="12" y2="19"/>
  <line x1="5" y1="12" x2="19" y2="12"/>
  </svg>
- {{ i18n.t('admin.tags.newTag') }}
+ {{ i18n.t('dev.tags.newTag') }}
  </button>
  </header>
 
@@ -27,7 +27,7 @@
  <input
  type="search"
  class="search-input"
- [placeholder]="i18n.t('admin.common.search')"
+ [placeholder]="i18n.t('dev.common.search')"
  [ngModel]="searchQuery()"
  (ngModelChange)="searchQuery.set($event)"
  />
@@ -67,7 +67,7 @@
  </div>
  </div>
  } @empty {
- <p class="no-tags">{{ i18n.t('admin.tags.noTags') }}</p>
+ <p class="no-tags">{{ i18n.t('dev.tags.noTags') }}</p>
  }
  </div>
 
@@ -75,10 +75,10 @@
  @if (showModal()) {
  <div class="modal-overlay" (click)="closeModal()">
  <div class="modal" (click)="$event.stopPropagation()">
- <h2>{{ editingTag() ? i18n.t('admin.tags.editTag') : i18n.t('admin.tags.newTag') }}</h2>
+ <h2>{{ editingTag() ? i18n.t('dev.tags.editTag') : i18n.t('dev.tags.newTag') }}</h2>
  <form (ngSubmit)="saveTag()">
  <div class="form-group">
- <label for="name">{{ i18n.t('admin.tags.nameLabel') }} <span class="required">*</span></label>
+ <label for="name">{{ i18n.t('dev.tags.nameLabel') }} <span class="required">*</span></label>
  <input id="name" type="text" [(ngModel)]="formData.name" (ngModelChange)="onNameChange($event)" name="name" required />
  </div>
  <div class="form-group">

@@ -61,8 +61,13 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
               catchError((refreshError) => {
                 state.isRefreshing = false;
                 state.refreshSubject$.next(false);
-                authStore.logout();
-                router.navigate(['/auth/login']);
+                // Only log out if the refresh was explicitly rejected (401/403).
+                // Network errors mean backend is down — preserve session.
+                if (refreshError instanceof HttpErrorResponse &&
+                    (refreshError.status === 401 || refreshError.status === 403)) {
+                  authStore.logout();
+                  router.navigate(['/auth/login']);
+                }
                 return throwError(() => refreshError);
               })
             );

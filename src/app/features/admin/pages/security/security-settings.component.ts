@@ -76,7 +76,7 @@ export class SecuritySettingsComponent implements OnInit {
         this.enabling.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.setupFailed'));
+        this.notification.error(this.i18n.t('account.security.setupFailed'));
         this.enabling.set(false);
       },
     });
@@ -86,12 +86,12 @@ export class SecuritySettingsComponent implements OnInit {
     this.enabling.set(true);
     this.mfaService.setup('EMAIL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.security.emailOtpEnabled'));
+        this.notification.success(this.i18n.t('account.security.emailOtpEnabled'));
         this.enabling.set(false);
         this.loadStatus();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.setupFailed'));
+        this.notification.error(this.i18n.t('account.security.setupFailed'));
         this.enabling.set(false);
       },
     });
@@ -110,41 +110,41 @@ export class SecuritySettingsComponent implements OnInit {
       next: (result) => {
         this.verifying.set(false);
         if (result.verified) {
-          this.notification.success(this.i18n.t('admin.security.totpVerified'));
+          this.notification.success(this.i18n.t('account.security.totpVerified'));
           this.showSetup.set(false);
           this.setupData.set(null);
           this.verifyForm.reset();
           this.loadStatus();
         } else {
-          this.notification.error(result.message || this.i18n.t('admin.security.invalidCode'));
+          this.notification.error(result.message || this.i18n.t('account.security.invalidCode'));
         }
       },
       error: () => {
         this.verifying.set(false);
-        this.notification.error(this.i18n.t('admin.security.invalidCode'));
+        this.notification.error(this.i18n.t('account.security.invalidCode'));
       },
     });
   }
 
   async disableMfa(): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('admin.security.disableTitle'),
-      message: this.i18n.t('admin.security.disableMessage'),
-      confirmText: this.i18n.t('admin.security.disableConfirm'),
+      title: this.i18n.t('account.security.disableTitle'),
+      message: this.i18n.t('account.security.disableMessage'),
+      confirmText: this.i18n.t('account.security.disableConfirm'),
       type: 'danger',
     });
     if (!confirmed) return;
     this.disabling.set(true);
     this.mfaService.disable().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.security.mfaDisabled'));
+        this.notification.success(this.i18n.t('account.security.mfaDisabled'));
         this.disabling.set(false);
         this.showSetup.set(false);
         this.setupData.set(null);
         this.loadStatus();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.disableFailed'));
+        this.notification.error(this.i18n.t('account.security.disableFailed'));
         this.disabling.set(false);
       },
     });
@@ -165,7 +165,7 @@ export class SecuritySettingsComponent implements OnInit {
         this.loadStatus();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.backupCodesFailed'));
+        this.notification.error(this.i18n.t('account.security.backupCodesFailed'));
         this.generatingCodes.set(false);
       },
     });
@@ -192,12 +192,12 @@ export class SecuritySettingsComponent implements OnInit {
     this.revokingId.set(sessionId);
     this.authService.revokeSession(sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.security.sessionRevoked'));
+        this.notification.success(this.i18n.t('account.security.sessionRevoked'));
         this.revokingId.set(null);
         this.loadSessions();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.sessionRevokeFailed'));
+        this.notification.error(this.i18n.t('account.security.sessionRevokeFailed'));
         this.revokingId.set(null);
       },
     });
@@ -205,19 +205,19 @@ export class SecuritySettingsComponent implements OnInit {
 
   async revokeAllOther(): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('admin.security.revokeAllTitle'),
-      message: this.i18n.t('admin.security.revokeAllMessage'),
-      confirmText: this.i18n.t('admin.security.revokeAllConfirm'),
+      title: this.i18n.t('account.security.revokeAllTitle'),
+      message: this.i18n.t('account.security.revokeAllMessage'),
+      confirmText: this.i18n.t('account.security.revokeAllConfirm'),
       type: 'danger',
     });
     if (!confirmed) return;
     this.authService.revokeAllOtherSessions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.security.allSessionsRevoked'));
+        this.notification.success(this.i18n.t('account.security.allSessionsRevoked'));
         this.loadSessions();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.sessionRevokeFailed'));
+        this.notification.error(this.i18n.t('account.security.sessionRevokeFailed'));
       },
     });
   }
@@ -247,12 +247,12 @@ export class SecuritySettingsComponent implements OnInit {
     this.unlinking.set(provider);
     this.api.delete(`/admin/auth/oauth2/accounts/${provider}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.security.accountUnlinked'));
+        this.notification.success(this.i18n.t('account.security.accountUnlinked'));
         this.unlinking.set(null);
         this.loadSocialAccounts();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.security.unlinkFailed'));
+        this.notification.error(this.i18n.t('account.security.unlinkFailed'));
         this.unlinking.set(null);
       },
     });

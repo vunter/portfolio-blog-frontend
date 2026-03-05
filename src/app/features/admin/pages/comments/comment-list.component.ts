@@ -7,11 +7,12 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { CommentResponse, PageResponse } from '../../../../models';
 
 @Component({
   selector: 'app-comment-list',
-  imports: [FormsModule, PaginationComponent],
+  imports: [FormsModule, PaginationComponent, SkeletonComponent],
   templateUrl: './comment-list.component.html',
   styleUrl: './comment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,7 +63,7 @@ export class CommentListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadComments'));
+        this.notification.error(this.i18n.t('dev.error.loadComments'));
         this.loading.set(false);
         this.error.set(true);
       },
@@ -70,34 +71,40 @@ export class CommentListComponent implements OnInit {
   }
 
   approve(comment: CommentResponse): void {
+    const snapshot = this.comments();
+    this.comments.update(list => list.filter(c => c.id !== comment.id));
+
     this.apiService.put(`/admin/comments/${comment.id}/approve`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.comments.approveSuccess'));
-        this.loadComments();
+        this.notification.success(this.i18n.t('dev.comments.approveSuccess'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.comments.approveError'));
+        this.comments.set(snapshot);
+        this.notification.error(this.i18n.t('dev.comments.approveError'));
       },
     });
   }
 
   async reject(comment: CommentResponse): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('admin.comments.rejectTitle'),
-      message: this.i18n.t('admin.comments.rejectConfirmMessage'),
-      confirmText: this.i18n.t('admin.comments.reject'),
+      title: this.i18n.t('dev.comments.rejectTitle'),
+      message: this.i18n.t('dev.comments.rejectConfirmMessage'),
+      confirmText: this.i18n.t('dev.comments.reject'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'danger',
     });
     if (!confirmed) return;
 
+    const snapshot = this.comments();
+    this.comments.update(list => list.filter(c => c.id !== comment.id));
+
     this.apiService.put(`/admin/comments/${comment.id}/reject`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.comments.rejectSuccess'));
-        this.loadComments();
+        this.notification.success(this.i18n.t('dev.comments.rejectSuccess'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.comments.rejectError'));
+        this.comments.set(snapshot);
+        this.notification.error(this.i18n.t('dev.comments.rejectError'));
       },
     });
   }
@@ -105,20 +112,23 @@ export class CommentListComponent implements OnInit {
   async deleteComment(comment: CommentResponse): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('common.delete'),
-      message: this.i18n.t('admin.comments.confirmDelete'),
+      message: this.i18n.t('dev.comments.confirmDelete'),
       confirmText: this.i18n.t('common.delete'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'danger',
     });
     if (!confirmed) return;
 
+    const snapshot = this.comments();
+    this.comments.update(list => list.filter(c => c.id !== comment.id));
+
     this.apiService.delete(`/admin/comments/${comment.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.comments.deleteSuccess'));
-        this.loadComments();
+        this.notification.success(this.i18n.t('dev.comments.deleteSuccess'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.comments.deleteError'));
+        this.comments.set(snapshot);
+        this.notification.error(this.i18n.t('dev.comments.deleteError'));
       },
     });
   }
@@ -130,9 +140,9 @@ export class CommentListComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      PENDING: this.i18n.t('admin.comments.pending'),
-      APPROVED: this.i18n.t('admin.comments.approved'),
-      REJECTED: this.i18n.t('admin.comments.rejected'),
+      PENDING: this.i18n.t('dev.comments.pending'),
+      APPROVED: this.i18n.t('dev.comments.approved'),
+      REJECTED: this.i18n.t('dev.comments.rejected'),
     };
     return labels[status] || status;
   }

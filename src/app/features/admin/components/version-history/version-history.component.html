@@ -5,9 +5,9 @@
  <circle cx="12" cy="12" r="10"/>
  <polyline points="12 6 12 12 16 14"/>
  </svg>
- {{ i18n.t('admin.versions.title') }}
+ {{ i18n.t('dev.versions.title') }}
  </h3>
- <button type="button" class="btn-refresh" (click)="loadVersions()" [disabled]="loading()" [title]="i18n.t('admin.versions.refresh')">
+ <button type="button" class="btn-refresh" (click)="loadVersions()" [disabled]="loading()" [title]="i18n.t('dev.versions.refresh')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [class.spin]="loading()">
  <polyline points="23 4 23 10 17 10"/>
  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -18,7 +18,7 @@
  @if (loading()) {
  <div class="version-loading">
  <div class="spinner"></div>
- <span>{{ i18n.t('admin.versions.loading') }}</span>
+ <span>{{ i18n.t('dev.versions.loading') }}</span>
  </div>
  } @else if (versions().length === 0) {
  <div class="version-empty">
@@ -26,7 +26,7 @@
  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
  <polyline points="14 2 14 8 20 8"/>
  </svg>
- <p>{{ i18n.t('admin.versions.empty') }}</p>
+ <p>{{ i18n.t('dev.versions.empty') }}</p>
  </div>
  } @else {
  <!-- Compare mode toggle -->
@@ -34,7 +34,7 @@
  <div class="compare-toggle">
  <label class="toggle-label">
  <input type="checkbox" [checked]="compareMode()" (change)="toggleCompareMode()" />
- <span>{{ i18n.t('admin.versions.compareMode') }}</span>
+ <span>{{ i18n.t('dev.versions.compareMode') }}</span>
  </label>
  </div>
  }
@@ -45,7 +45,7 @@
  @if (comparing()) {
  <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
  }
- {{ i18n.t('admin.versions.compare') }} v{{ compareFrom() }} ↔ v{{ compareTo() }}
+ {{ i18n.t('dev.versions.compare') }} v{{ compareFrom() }} ↔ v{{ compareTo() }}
  </button>
  </div>
  }
@@ -53,36 +53,36 @@
  <!-- Compare result -->
  @if (compareResult()) {
  <div class="compare-result">
- <h4>{{ i18n.t('admin.versions.compareResult') }}</h4>
+ <h4>{{ i18n.t('dev.versions.compareResult') }}</h4>
  <div class="diff-list">
  <div class="diff-item" [class.changed]="compareResult()!.titleChanged">
- <span class="diff-label">{{ i18n.t('admin.articleForm.titleLabel') }}</span>
- <span class="diff-status">{{ compareResult()!.titleChanged ? ' ' + i18n.t('admin.versions.changed') : ' ' + i18n.t('admin.versions.unchanged') }}</span>
+ <span class="diff-label">{{ i18n.t('dev.articleForm.titleLabel') }}</span>
+ <span class="diff-status">{{ compareResult()!.titleChanged ? ' ' + i18n.t('dev.versions.changed') : ' ' + i18n.t('dev.versions.unchanged') }}</span>
  </div>
  <div class="diff-item" [class.changed]="compareResult()!.subtitleChanged">
- <span class="diff-label">{{ i18n.t('admin.versions.subtitle') }}</span>
- <span class="diff-status">{{ compareResult()!.subtitleChanged ? ' ' + i18n.t('admin.versions.changed') : ' ' + i18n.t('admin.versions.unchanged') }}</span>
+ <span class="diff-label">{{ i18n.t('dev.versions.subtitle') }}</span>
+ <span class="diff-status">{{ compareResult()!.subtitleChanged ? ' ' + i18n.t('dev.versions.changed') : ' ' + i18n.t('dev.versions.unchanged') }}</span>
  </div>
  <div class="diff-item" [class.changed]="compareResult()!.contentChanged">
- <span class="diff-label">{{ i18n.t('admin.articleForm.contentLabel') }}</span>
- <span class="diff-status">{{ compareResult()!.contentChanged ? ' ' + i18n.t('admin.versions.changed') : ' ' + i18n.t('admin.versions.unchanged') }}</span>
+ <span class="diff-label">{{ i18n.t('dev.articleForm.contentLabel') }}</span>
+ <span class="diff-status">{{ compareResult()!.contentChanged ? ' ' + i18n.t('dev.versions.changed') : ' ' + i18n.t('dev.versions.unchanged') }}</span>
  </div>
  <div class="diff-item" [class.changed]="compareResult()!.excerptChanged">
- <span class="diff-label">{{ i18n.t('admin.articleForm.summaryLabel') }}</span>
- <span class="diff-status">{{ compareResult()!.excerptChanged ? ' ' + i18n.t('admin.versions.changed') : ' ' + i18n.t('admin.versions.unchanged') }}</span>
+ <span class="diff-label">{{ i18n.t('dev.articleForm.summaryLabel') }}</span>
+ <span class="diff-status">{{ compareResult()!.excerptChanged ? ' ' + i18n.t('dev.versions.changed') : ' ' + i18n.t('dev.versions.unchanged') }}</span>
  </div>
  @if (compareResult()!.contentLengthDiff !== 0) {
  <div class="diff-item content-diff">
- <span class="diff-label">{{ i18n.t('admin.versions.contentDiff') }}</span>
+ <span class="diff-label">{{ i18n.t('dev.versions.contentDiff') }}</span>
  <span class="diff-chars" [class.positive]="compareResult()!.contentLengthDiff > 0" [class.negative]="compareResult()!.contentLengthDiff < 0">
- {{ compareResult()!.contentLengthDiff > 0 ? '+' : '' }}{{ compareResult()!.contentLengthDiff }} {{ i18n.t('admin.versions.chars') }}
+ {{ compareResult()!.contentLengthDiff > 0 ? '+' : '' }}{{ compareResult()!.contentLengthDiff }} {{ i18n.t('dev.versions.chars') }}
  </span>
  </div>
  }
  </div>
  @if (contentDiffLines().length > 0) {
  <div class="content-diff-view">
-  <h5>{{ i18n.t('admin.articleForm.contentLabel') }}</h5>
+  <h5>{{ i18n.t('dev.articleForm.contentLabel') }}</h5>
   <div class="diff-lines">
   @for (line of contentDiffLines(); track $index) {
   <div class="diff-line" [class.diff-added]="line.type === 'added'" [class.diff-removed]="line.type === 'removed'">
@@ -134,12 +134,12 @@
 
  @if (selectedVersion()?.versionNumber === version.versionNumber && !compareMode()) {
  <div class="version-actions">
- <button type="button" class="btn btn-sm btn-ghost" (click)="previewVersion(version)" [title]="i18n.t('admin.versions.preview')">
+ <button type="button" class="btn btn-sm btn-ghost" (click)="previewVersion(version)" [title]="i18n.t('dev.versions.preview')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
  </svg>
  </button>
- <button type="button" class="btn btn-sm btn-warning" (click)="restore(version)" [disabled]="restoring()" [title]="i18n.t('admin.versions.restore')">
+ <button type="button" class="btn btn-sm btn-warning" (click)="restore(version)" [disabled]="restoring()" [title]="i18n.t('dev.versions.restore')">
  @if (restoring()) {
  <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
  } @else {
@@ -167,7 +167,7 @@
  <div class="version-preview-overlay" (click)="closePreview()">
  <div class="version-preview-modal" (click)="$event.stopPropagation()">
  <div class="preview-header">
- <h3>{{ i18n.t('admin.versions.previewTitle') }} v{{ previewingVersion()!.versionNumber }}</h3>
+ <h3>{{ i18n.t('dev.versions.previewTitle') }} v{{ previewingVersion()!.versionNumber }}</h3>
  <button type="button" class="btn-close" (click)="closePreview()">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -176,23 +176,23 @@
  </div>
  <div class="preview-body">
  <div class="preview-field">
- <label>{{ i18n.t('admin.articleForm.titleLabel') }}</label>
+ <label>{{ i18n.t('dev.articleForm.titleLabel') }}</label>
  <p>{{ previewingVersion()!.title }}</p>
  </div>
  @if (previewingVersion()!.subtitle) {
  <div class="preview-field">
- <label>{{ i18n.t('admin.versions.subtitle') }}</label>
+ <label>{{ i18n.t('dev.versions.subtitle') }}</label>
  <p>{{ previewingVersion()!.subtitle }}</p>
  </div>
  }
  @if (previewingVersion()!.excerpt) {
  <div class="preview-field">
- <label>{{ i18n.t('admin.articleForm.summaryLabel') }}</label>
+ <label>{{ i18n.t('dev.articleForm.summaryLabel') }}</label>
  <p>{{ previewingVersion()!.excerpt }}</p>
  </div>
  }
  <div class="preview-field content-preview">
- <label>{{ i18n.t('admin.articleForm.contentLabel') }}</label>
+ <label>{{ i18n.t('dev.articleForm.contentLabel') }}</label>
  <div class="content-scroll">
  <pre>{{ previewingVersion()!.content }}</pre>
  </div>

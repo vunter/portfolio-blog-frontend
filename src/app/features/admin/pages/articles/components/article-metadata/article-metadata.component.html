@@ -1,14 +1,14 @@
 ﻿<div class="form-card">
  <div class="form-group">
- <label for="title">{{ i18n.t('admin.articleForm.titleLabel') }} <span class="required">*</span></label>
+ <label for="title">{{ i18n.t('dev.articleForm.titleLabel') }} <span class="required">*</span></label>
  <input
  id="title"
  type="text"
  [formControl]="titleControl()"
- [placeholder]="i18n.t('admin.articleForm.titlePlaceholder')"
+ [placeholder]="i18n.t('dev.articleForm.titlePlaceholder')"
  />
  @if (titleControl().touched && titleControl().errors) {
- <span class="error">{{ i18n.t('admin.articleForm.titleRequired') }}</span>
+ <span class="error">{{ i18n.t('dev.articleForm.titleRequired') }}</span>
  }
  </div>
 
@@ -20,18 +20,18 @@
  id="slug"
  type="text"
  [formControl]="slugControl()"
- [placeholder]="i18n.t('admin.articleForm.slugPlaceholder')"
+ [placeholder]="i18n.t('dev.articleForm.slugPlaceholder')"
  />
  </div>
  </div>
 
  <div class="form-group">
- <label for="excerpt">{{ i18n.t('admin.articleForm.summaryLabel') }}</label>
+ <label for="excerpt">{{ i18n.t('dev.articleForm.summaryLabel') }}</label>
  <textarea
  id="excerpt"
  [formControl]="excerptControl()"
  rows="3"
- [placeholder]="i18n.t('admin.articleForm.summaryPlaceholder')"
+ [placeholder]="i18n.t('dev.articleForm.summaryPlaceholder')"
  ></textarea>
  </div>
 </div>

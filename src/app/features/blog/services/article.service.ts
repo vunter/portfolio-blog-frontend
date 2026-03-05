@@ -65,8 +65,34 @@ export class ArticleService {
     return this.api.post<void>(`/articles/${slug}/view`);
   }
 
-  likeArticle(slug: string): Observable<{ likeCount: number }> {
-    return this.api.post<{ likeCount: number }>(`/articles/${slug}/like`);
+  trackShare(articleId: number | undefined, platform: string): void {
+    this.api.post<void>('/analytics/event', {
+      articleId,
+      eventType: 'SHARE',
+      metadata: { platform },
+    }).subscribe({ error: () => {} });
+  }
+
+  trackUtmView(articleId: number | undefined, metadata: Record<string, string>): void {
+    this.api.post<void>('/analytics/event', {
+      articleId,
+      eventType: 'VIEW',
+      referrer: metadata['utm_source'],
+      metadata,
+    }).subscribe({ error: () => {} });
+  }
+
+  buildShareUrl(baseUrl: string, platform: string): string {
+    const sep = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${sep}utm_source=${platform}&utm_medium=social&utm_campaign=blog_share`;
+  }
+
+  likeArticle(slug: string): Observable<{ likeCount: number; liked: boolean }> {
+    return this.api.post<{ likeCount: number; liked: boolean }>(`/articles/${slug}/like`);
+  }
+
+  getLikeStatus(slug: string): Observable<{ likeCount: number; liked: boolean }> {
+    return this.api.get<{ likeCount: number; liked: boolean }>(`/articles/${slug}/like/status`);
   }
 
   private getLocale(): string {

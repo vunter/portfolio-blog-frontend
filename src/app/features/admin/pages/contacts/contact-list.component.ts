@@ -74,7 +74,7 @@ export class ContactListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadMessages'));
+        this.notification.error(this.i18n.t('dev.error.loadMessages'));
         this.loading.set(false);
         this.error.set(true);
       },
@@ -115,7 +115,7 @@ export class ContactListComponent implements OnInit {
         this.notification.success(this.i18n.t('admin.contacts.markedAsRead'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.markAsRead'));
+        this.notification.error(this.i18n.t('dev.error.markAsRead'));
       },
     });
   }
@@ -140,7 +140,7 @@ export class ContactListComponent implements OnInit {
         this.notification.success(this.i18n.t('admin.contacts.deleted'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.deleteMessage'));
+        this.notification.error(this.i18n.t('dev.error.deleteMessage'));
       },
     });
   }

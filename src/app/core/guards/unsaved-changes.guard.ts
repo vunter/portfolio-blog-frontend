@@ -19,7 +19,7 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = async (co
     const confirmDialog = inject(ConfirmDialogService);
     return confirmDialog.confirm({
       title: i18n.t('common.confirm'),
-      message: i18n.t('admin.articles.unsavedChanges'),
+      message: i18n.t('dev.articles.unsavedChanges'),
       confirmText: i18n.t('common.confirm'),
       cancelText: i18n.t('common.cancel'),
       type: 'warning',

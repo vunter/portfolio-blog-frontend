@@ -5,7 +5,7 @@
  </header>
 
  @if (loading()) {
- <app-loading-spinner [inline]="true" [message]="i18n.t('blog.tags.loading')" />
+ <div class="tags-grid">@for (i of [1,2,3,4,5,6]; track i) { <app-skeleton variant="card" /> }</div>
  } @else {
  <div class="tags-grid">
  @for (tag of tags(); track tag.id) {

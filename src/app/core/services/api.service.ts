@@ -80,6 +80,10 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'text' });
   }
 
+  postText(endpoint: string, body: unknown): Observable<string> {
+    return this.http.post(`${this.baseUrl}${endpoint}`, body, { responseType: 'text' });
+  }
+
   getBlob(endpoint: string, queryParams?: Record<string, string | number | boolean>): Observable<Blob> {
     let params = new HttpParams();
     if (queryParams) {

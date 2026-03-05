@@ -34,8 +34,7 @@ export class PublicLayoutComponent implements OnInit {
   langMenuOpen = signal(false);
 
   readonly currentLangLabel = computed(() => {
-    const labels: Record<string, string> = { en: 'EN', pt: 'PT', es: 'ES', it: 'IT' };
-    return labels[this.i18n.language()] || 'EN';
+    return this.i18n.language().toUpperCase();
   });
 
   readonly ownerName = computed(() => this.profileService.profile()?.fullName || '');
@@ -71,7 +70,7 @@ export class PublicLayoutComponent implements OnInit {
     this.langMenuOpen.update(v => !v);
   }
 
-  selectLanguage(lang: 'en' | 'pt' | 'es' | 'it'): void {
+  selectLanguage(lang: string): void {
     this.i18n.setLanguage(lang);
     this.langMenuOpen.set(false);
   }

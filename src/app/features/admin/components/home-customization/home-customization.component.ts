@@ -133,12 +133,12 @@ export class HomeCustomizationComponent implements OnInit {
         this.syncFormFromProfile();
         this.saving.set(false);
         this.isDirty.set(false);
-        this.notification.success(this.i18n.t('admin.profile.hcSaveSuccess'));
+        this.notification.success(this.i18n.t('account.profile.hcSaveSuccess'));
       },
       error: (err) => {
         this.saving.set(false);
         this.notification.error(
-          this.i18n.t('admin.profile.hcSaveError') + ': ' + (err.error?.message || err.message)
+          this.i18n.t('account.profile.hcSaveError') + ': ' + (err.error?.message || err.message)
         );
       },
     });

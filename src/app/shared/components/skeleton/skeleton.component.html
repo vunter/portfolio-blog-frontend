@@ -24,4 +24,96 @@
  @case ('circle') {
  <div class="skeleton-circle shimmer"></div>
  }
+ @case ('article-detail') {
+ <div class="skeleton-article-detail">
+ <div class="skeleton-hero shimmer"></div>
+ <div class="skeleton-article-body">
+ <div class="skeleton-breadcrumb shimmer"></div>
+ <div class="skeleton-h1 shimmer"></div>
+ <div class="skeleton-h1 skeleton-h1--short shimmer"></div>
+ <div class="skeleton-meta">
+ <div class="skeleton-avatar shimmer"></div>
+ <div class="skeleton-name shimmer"></div>
+ <div class="skeleton-date shimmer"></div>
+ </div>
+ <div class="skeleton-paragraph">
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line skeleton-line--short shimmer"></div>
+ </div>
+ <div class="skeleton-paragraph">
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line skeleton-line--medium shimmer"></div>
+ </div>
+ <div class="skeleton-paragraph">
+ <div class="skeleton-line shimmer"></div>
+ <div class="skeleton-line skeleton-line--short shimmer"></div>
+ </div>
+ </div>
+ </div>
+ }
+ @case ('table') {
+ <div class="skeleton-table">
+ <div class="skeleton-table__header">
+ <div class="skeleton-table__cell skeleton-table__cell--check shimmer"></div>
+ <div class="skeleton-table__cell skeleton-table__cell--wide shimmer"></div>
+ <div class="skeleton-table__cell shimmer"></div>
+ <div class="skeleton-table__cell shimmer"></div>
+ <div class="skeleton-table__cell skeleton-table__cell--narrow shimmer"></div>
+ </div>
+ @for (i of [1,2,3,4,5]; track i) {
+ <div class="skeleton-table__row">
+ <div class="skeleton-table__cell skeleton-table__cell--check shimmer"></div>
+ <div class="skeleton-table__cell skeleton-table__cell--wide shimmer"></div>
+ <div class="skeleton-table__cell shimmer"></div>
+ <div class="skeleton-table__cell shimmer"></div>
+ <div class="skeleton-table__cell skeleton-table__cell--narrow shimmer"></div>
+ </div>
+ }
+ </div>
+ }
+ @case ('profile') {
+ <div class="skeleton-profile">
+ <div class="skeleton-profile__avatar shimmer"></div>
+ <div class="skeleton-profile__fields">
+ @for (i of [1,2,3,4]; track i) {
+ <div class="skeleton-profile__field">
+ <div class="skeleton-profile__label shimmer"></div>
+ <div class="skeleton-profile__input shimmer"></div>
+ </div>
+ }
+ </div>
+ <div class="skeleton-profile__button shimmer"></div>
+ </div>
+ }
+ @case ('stats') {
+ <div class="skeleton-stats">
+ @for (i of [1,2,3,4]; track i) {
+ <div class="skeleton-stat-card">
+ <div class="skeleton-stat-card__icon shimmer"></div>
+ <div class="skeleton-stat-card__value shimmer"></div>
+ <div class="skeleton-stat-card__label shimmer"></div>
+ </div>
+ }
+ </div>
+ }
+ @case ('comments') {
+ <div class="skeleton-comments">
+ @for (i of [1,2,3]; track i) {
+ <div class="skeleton-comment">
+ <div class="skeleton-comment__avatar shimmer"></div>
+ <div class="skeleton-comment__body">
+ <div class="skeleton-comment__meta">
+ <div class="skeleton-comment__name shimmer"></div>
+ <div class="skeleton-comment__date shimmer"></div>
+ </div>
+ <div class="skeleton-comment__text shimmer"></div>
+ <div class="skeleton-comment__text skeleton-comment__text--short shimmer"></div>
+ </div>
+ </div>
+ }
+ </div>
+ }
 }

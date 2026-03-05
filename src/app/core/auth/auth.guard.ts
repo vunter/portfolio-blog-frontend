@@ -75,7 +75,7 @@ export const guestGuard: CanActivateFn = () => {
 
 /**
  * LOW-06: Generic role guard factory — eliminates duplication between
- * adminGuard, devGuard, and editorGuard.
+ * adminGuard and devGuard.
  */
 function roleGuard(checkFn: (store: InstanceType<typeof AuthStore>) => boolean): CanActivateFn {
   return (_route, state) => {
@@ -110,8 +110,3 @@ export const adminGuard: CanActivateFn = roleGuard((store) => store.isAdmin());
  * Dev Guard - Requer role ADMIN ou DEV
  */
 export const devGuard: CanActivateFn = roleGuard((store) => store.isDev());
-
-/**
- * Editor Guard - Requer role ADMIN, DEV ou EDITOR
- */
-export const editorGuard: CanActivateFn = roleGuard((store) => store.isEditor());

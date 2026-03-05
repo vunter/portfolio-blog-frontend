@@ -57,7 +57,7 @@ export class VersionHistoryComponent {
       },
       error: () => {
         this.loading.set(false);
-        this.notification.error(this.i18n.t('admin.versions.loadError'));
+        this.notification.error(this.i18n.t('dev.versions.loadError'));
       }
     });
   }
@@ -70,7 +70,7 @@ export class VersionHistoryComponent {
     const id = this.articleId();
     this.adminApi.getArticleVersion(id, version.versionNumber).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (full) => this.previewingVersion.set(full),
-      error: () => this.notification.error(this.i18n.t('admin.versions.loadError'))
+      error: () => this.notification.error(this.i18n.t('dev.versions.loadError'))
     });
   }
 
@@ -80,8 +80,8 @@ export class VersionHistoryComponent {
 
   async restore(version: ArticleVersionResponse): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('admin.versions.restoreConfirm').replace('{version}', String(version.versionNumber)),
-      message: this.i18n.t('admin.versions.restoreConfirm').replace('{version}', String(version.versionNumber)),
+      title: this.i18n.t('dev.versions.restoreConfirm').replace('{version}', String(version.versionNumber)),
+      message: this.i18n.t('dev.versions.restoreConfirm').replace('{version}', String(version.versionNumber)),
       confirmText: this.i18n.t('common.confirm'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'warning',
@@ -92,13 +92,13 @@ export class VersionHistoryComponent {
     this.adminApi.restoreVersion(this.articleId(), version.versionNumber).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.restoring.set(false);
-        this.notification.success(this.i18n.t('admin.versions.restoreSuccess'));
+        this.notification.success(this.i18n.t('dev.versions.restoreSuccess'));
         this.restored.emit();
         this.loadVersions();
       },
       error: () => {
         this.restoring.set(false);
-        this.notification.error(this.i18n.t('admin.versions.restoreError'));
+        this.notification.error(this.i18n.t('dev.versions.restoreError'));
       }
     });
   }
@@ -143,7 +143,7 @@ export class VersionHistoryComponent {
       },
       error: () => {
         this.comparing.set(false);
-        this.notification.error(this.i18n.t('admin.versions.compareError'));
+        this.notification.error(this.i18n.t('dev.versions.compareError'));
       }
     });
   }

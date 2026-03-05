@@ -3,5 +3,12 @@
     "target": "http://localhost:8080",
     "secure": false,
     "changeOrigin": true
+  },
+  "/cdn": {
+    "target": "https://cdn.catananti.dev",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": { "^/cdn": "" },
+    "headers": { "Referer": "" }
   }
 }

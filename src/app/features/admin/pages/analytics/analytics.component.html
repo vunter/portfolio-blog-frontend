@@ -1,37 +1,37 @@
 ﻿@if (loading()) {
- <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+ <app-skeleton variant="stats" />
 } @else if (error()) {
  <div class="admin-error">
  <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
- <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
- <p>{{ i18n.t('admin.common.errorMessage') }}</p>
- <button class="retry-btn" (click)="loadAnalytics()">{{ i18n.t('admin.common.retry') }}</button>
+ <h3>{{ i18n.t('dev.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('dev.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadAnalytics()">{{ i18n.t('dev.common.retry') }}</button>
  </div>
 } @else {
 <div class="analytics">
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('admin.analytics.title') }}</h1>
- <p>{{ i18n.t('admin.analytics.subtitle') }}</p>
+ <h1>{{ i18n.t('dev.analytics.title') }}</h1>
+ <p>{{ i18n.t('dev.analytics.subtitle') }}</p>
  </div>
  <div class="header-actions">
  <button class="export-btn" (click)="exportToCsv()" [disabled]="!data()">
  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
- {{ i18n.t('admin.analytics.exportCsv') }}
+ {{ i18n.t('dev.analytics.exportCsv') }}
  </button>
  <div class="period-selector">
  <button
  [class.active]="period() === '7d'"
  (click)="setPeriod('7d')"
- >{{ i18n.t('admin.analytics.7days') }}</button>
+ >{{ i18n.t('dev.analytics.7days') }}</button>
  <button
  [class.active]="period() === '30d'"
  (click)="setPeriod('30d')"
- >{{ i18n.t('admin.analytics.30days') }}</button>
+ >{{ i18n.t('dev.analytics.30days') }}</button>
  <button
  [class.active]="period() === '90d'"
  (click)="setPeriod('90d')"
- >{{ i18n.t('admin.analytics.90days') }}</button>
+ >{{ i18n.t('dev.analytics.90days') }}</button>
  </div>
  </div>
  </header>
@@ -40,41 +40,41 @@
  <section class="stats-grid">
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalViews || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.pageViews') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.pageViews') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="viewsChange().direction">
  @if (viewsChange().direction === 'positive') { ↑ }
  @else if (viewsChange().direction === 'negative') { ↓ }
  @else { — }
- {{ viewsChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ {{ viewsChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
  </span>
  }
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.uniqueVisitors || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.uniqueVisitors') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.uniqueVisitors') }}</span>
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalLikes || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.totalLikes') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.totalLikes') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="likesChange().direction">
  @if (likesChange().direction === 'positive') { ↑ }
  @else if (likesChange().direction === 'negative') { ↓ }
  @else { — }
- {{ likesChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ {{ likesChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
  </span>
  }
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(data()?.totalShares || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.totalShares') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.totalShares') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="sharesChange().direction">
  @if (sharesChange().direction === 'positive') { ↑ }
  @else if (sharesChange().direction === 'negative') { ↓ }
  @else { — }
- {{ sharesChange().percent }}% {{ i18n.t('admin.analytics.vsLastPeriod') }}
+ {{ sharesChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
  </span>
  }
  </div>
@@ -84,12 +84,12 @@
  <div class="charts-grid">
  <!-- Views Chart -->
  <div class="chart-card">
- <h3>{{ i18n.t('admin.analytics.viewsPerDay') }}</h3>
+ <h3>{{ i18n.t('dev.analytics.viewsPerDay') }}</h3>
  <div class="chart-placeholder">
  @if ((data()?.dailyViews || []).length === 0) {
  <div class="chart-empty">
  <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg>
- <p>{{ i18n.t('admin.analytics.noData') }}</p>
+ <p>{{ i18n.t('dev.analytics.noData') }}</p>
  </div>
  } @else {
  <div class="chart-with-line">
@@ -114,12 +114,12 @@
 
  <!-- Top Referrers -->
  <div class="chart-card">
- <h3>{{ i18n.t('admin.analytics.topReferrers') }}</h3>
+ <h3>{{ i18n.t('dev.analytics.topReferrers') }}</h3>
  <div class="sources-list">
  @if ((data()?.topReferrers || []).length === 0) {
  <div class="chart-empty">
  <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
- <p>{{ i18n.t('admin.analytics.noData') }}</p>
+ <p>{{ i18n.t('dev.analytics.noData') }}</p>
  </div>
  } @else {
  @for (ref of data()?.topReferrers || []; track ref.referrer) {
@@ -139,18 +139,50 @@
  }
  </div>
  </div>
+
+ <!-- Traffic Sources (UTM) -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('dev.analytics.trafficSources') }}</h3>
+ <div class="sources-list">
+ @if ((data()?.topSources || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+ <p>{{ i18n.t('dev.analytics.noShareData') }}</p>
+ </div>
+ } @else {
+ @for (src of data()?.topSources || []; track src.source) {
+ <div class="source-item">
+ <div class="source-info">
+ <span class="source-name source-name--utm">
+ <span class="utm-icon">{{ getSourceIcon(src.source) }}</span>
+ {{ src.source }}
+ </span>
+ <span class="source-badge">{{ src.medium }}</span>
+ <span class="source-percentage">{{ src.count }}</span>
+ </div>
+ <div class="source-bar">
+ <div
+ class="source-bar__fill source-bar__fill--utm"
+ [style.width.%]="getSourceWidth(src.count)"
+ ></div>
+ </div>
+ </div>
+ }
+ }
+ </div>
+ </div>
  </div>
 
  <!-- Top Articles -->
  <section class="top-articles">
- <h3>{{ i18n.t('admin.analytics.topArticles') }}</h3>
+ <h3>{{ i18n.t('dev.analytics.topArticles') }}</h3>
  <div class="articles-table">
  <table>
  <thead>
  <tr>
  <th>#</th>
- <th>{{ i18n.t('admin.analytics.articleColumn') }}</th>
- <th>{{ i18n.t('admin.articles.viewsColumn') }}</th>
+ <th>{{ i18n.t('dev.analytics.articleColumn') }}</th>
+ <th>{{ i18n.t('dev.articles.viewsColumn') }}</th>
  </tr>
  </thead>
  <tbody>
@@ -164,7 +196,7 @@
  </tr>
  } @empty {
  <tr>
- <td colspan="3" class="empty">{{ i18n.t('admin.analytics.noData') }}</td>
+ <td colspan="3" class="empty">{{ i18n.t('dev.analytics.noData') }}</td>
  </tr>
  }
  </tbody>
@@ -174,27 +206,27 @@
  } @else {
  <div class="no-data-banner">
   <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-6"/></svg>
-  <p>{{ i18n.t('admin.analytics.noData') }}</p>
+  <p>{{ i18n.t('dev.analytics.noData') }}</p>
  </div>
  }
 
  <!-- Search Analytics -->
  @if (searchData()) {
  <section class="search-analytics">
- <h3>{{ i18n.t('admin.analytics.searchTitle') }}</h3>
+ <h3>{{ i18n.t('dev.analytics.searchTitle') }}</h3>
  <div class="search-stats-grid">
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(searchData()?.totalSearches || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.totalSearches') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.totalSearches') }}</span>
  </div>
  <div class="stat-card">
  <span class="stat-card__value">{{ formatNumber(searchData()?.uniqueSearches || 0) }}</span>
- <span class="stat-card__label">{{ i18n.t('admin.analytics.uniqueQueries') }}</span>
+ <span class="stat-card__label">{{ i18n.t('dev.analytics.uniqueQueries') }}</span>
  </div>
  </div>
  <div class="search-lists-grid">
  <div class="search-list-card">
- <h4>{{ i18n.t('admin.analytics.topSearches') }}</h4>
+ <h4>{{ i18n.t('dev.analytics.topSearches') }}</h4>
  <div class="search-list">
  @for (item of searchData()?.topSearches || []; track item.queryText) {
  <div class="search-list__item">
@@ -202,12 +234,12 @@
  <span class="search-list__count">{{ item.count }}</span>
  </div>
  } @empty {
- <p class="search-list__empty">{{ i18n.t('admin.analytics.noData') }}</p>
+ <p class="search-list__empty">{{ i18n.t('dev.analytics.noData') }}</p>
  }
  </div>
  </div>
  <div class="search-list-card">
- <h4>{{ i18n.t('admin.analytics.zeroResultSearches') }}</h4>
+ <h4>{{ i18n.t('dev.analytics.zeroResultSearches') }}</h4>
  <div class="search-list">
  @for (item of searchData()?.zeroResultSearches || []; track item.queryText) {
  <div class="search-list__item search-list__item--zero">
@@ -215,7 +247,7 @@
  <span class="search-list__count">{{ item.count }}</span>
  </div>
  } @empty {
- <p class="search-list__empty">{{ i18n.t('admin.analytics.noZeroResults') }}</p>
+ <p class="search-list__empty">{{ i18n.t('dev.analytics.noZeroResults') }}</p>
  }
  </div>
  </div>

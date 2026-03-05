@@ -24,6 +24,7 @@ import { routes } from './app.routes';
 import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { refreshTokenInterceptor } from './core/interceptors/refresh-token.interceptor';
+import { progressInterceptor } from './core/interceptors/progress.interceptor';
 import { AuthStore } from './core/auth/auth.store';
 import { BookmarkService } from './core/services/bookmark.service';
 
@@ -49,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptors([
+        progressInterceptor,
         tokenInterceptor,
         refreshTokenInterceptor,
         errorInterceptor,

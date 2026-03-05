@@ -1,11 +1,11 @@
 ﻿@if (loading()) {
- <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+ <app-skeleton variant="table" />
 } @else if (error()) {
  <div class="admin-error">
  <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
- <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
- <p>{{ i18n.t('admin.common.errorMessage') }}</p>
- <button class="retry-btn" (click)="loadSubscribers()">{{ i18n.t('admin.common.retry') }}</button>
+ <h3>{{ i18n.t('dev.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('dev.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadSubscribers()">{{ i18n.t('dev.common.retry') }}</button>
  </div>
 } @else {
 <div class="newsletter">

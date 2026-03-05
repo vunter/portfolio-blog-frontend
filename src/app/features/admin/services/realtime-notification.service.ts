@@ -135,7 +135,7 @@ export class RealtimeNotificationService {
       // INC-11: Notify user that real-time connection was lost
       this._connectionLost.set(true);
       this.notifications.error(
-        this.i18n.t('admin.notifications.connectionLost')
+        this.i18n.t('account.notifications.connectionLost')
       );
       return;
     }

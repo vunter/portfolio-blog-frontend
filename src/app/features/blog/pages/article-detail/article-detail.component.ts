@@ -31,6 +31,7 @@ import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { BreadcrumbsComponent, Breadcrumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
 import { getInitials } from '../../../../shared/utils/string.utils';
@@ -54,6 +55,7 @@ interface TocItem {
     FormsModule,
     MarkdownModule,
     LoadingSpinnerComponent,
+    SkeletonComponent,
     ArticleCardComponent,
     BreadcrumbsComponent,
   ],
@@ -90,6 +92,8 @@ export class ArticleDetailComponent implements OnInit {
   commentTotalElements = signal(0);
   hasMoreComments = signal(false);
   loadingMoreComments = signal(false);
+  commentSort = signal<string>('liked');
+  commentLiked = signal<Record<string, boolean>>({});
   relatedArticles = signal<ArticleSummaryResponse[]>([]);
   loading = signal(true);
   liked = signal(false);
@@ -246,12 +250,27 @@ export class ArticleDetailComponent implements OnInit {
           if (pre.querySelector('.code-copy-btn')) return;
           const wrapper = this.renderer.createElement('div');
           this.renderer.addClass(wrapper, 'code-block-wrapper');
+          this.renderer.setStyle(wrapper, 'position', 'relative');
+          this.renderer.setStyle(wrapper, 'margin', '1.5rem 0');
           this.renderer.insertBefore(pre.parentNode, wrapper, pre);
           this.renderer.appendChild(wrapper, pre);
+          this.renderer.setStyle(pre, 'margin', '0');
 
           const btn = this.renderer.createElement('button');
           this.renderer.addClass(btn, 'code-copy-btn');
           this.renderer.setAttribute(btn, 'title', this.i18n.t('blog.copyCode'));
+          this.renderer.setStyle(btn, 'position', 'absolute');
+          this.renderer.setStyle(btn, 'top', '0.5rem');
+          this.renderer.setStyle(btn, 'right', '0.5rem');
+          this.renderer.setStyle(btn, 'background', 'rgba(255, 255, 255, 0.12)');
+          this.renderer.setStyle(btn, 'border', '1px solid rgba(255, 255, 255, 0.15)');
+          this.renderer.setStyle(btn, 'border-radius', '6px');
+          this.renderer.setStyle(btn, 'color', '#94a3b8');
+          this.renderer.setStyle(btn, 'cursor', 'pointer');
+          this.renderer.setStyle(btn, 'padding', '0.375rem');
+          this.renderer.setStyle(btn, 'line-height', '0');
+          this.renderer.setStyle(btn, 'z-index', '1');
+          this.renderer.setStyle(btn, 'transition', 'background 0.2s, color 0.2s');
           // F-337: Use Renderer2 instead of innerHTML to avoid bypassing Angular sanitization
           this.setCopyIcon(btn);
           // PERF-F-06: Store unlisten function for cleanup in ngOnDestroy
@@ -334,6 +353,7 @@ export class ArticleDetailComponent implements OnInit {
         this.isLanguageReload = false;
         this.loadComments(slug);
         this.loadRelatedArticles(slug);
+        this.loadLikeStatus(slug);
       },
       error: () => {
         this.article.set(null);
@@ -352,16 +372,32 @@ export class ArticleDetailComponent implements OnInit {
     this.articleService.trackView(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => { /* view tracking is non-critical */ }
     });
+    // Send UTM attribution if present
+    if (isPlatformBrowser(this.platformId)) {
+      const params = new URLSearchParams(window.location.search);
+      const utmSource = params.get('utm_source');
+      if (utmSource) {
+        const article = this.article();
+        const metadata: Record<string, string> = { utm_source: utmSource };
+        const utmMedium = params.get('utm_medium');
+        const utmCampaign = params.get('utm_campaign');
+        if (utmMedium) metadata['utm_medium'] = utmMedium;
+        if (utmCampaign) metadata['utm_campaign'] = utmCampaign;
+        this.articleService.trackUtmView(article?.id ? +article.id : undefined, metadata);
+      }
+    }
   }
 
   loadComments(slug: string): void {
     this.commentPage.set(0);
-    this.commentService.getCommentsPaged(slug, 0, 20).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const sort = this.commentSort();
+    this.commentService.getCommentsPaged(slug, 0, 20, sort).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.comments.set(response.content ?? []);
         this.commentTotalElements.set(response.totalElements);
         this.hasMoreComments.set(response.page < response.totalPages - 1);
         this.commentPage.set(response.page);
+        this.loadCommentLikeStatuses(slug, response.content ?? []);
       },
       error: () => {
         this.comments.set([]);
@@ -376,17 +412,84 @@ export class ArticleDetailComponent implements OnInit {
     if (!slug || this.loadingMoreComments()) return;
     this.loadingMoreComments.set(true);
     const nextPage = this.commentPage() + 1;
-    this.commentService.getCommentsPaged(slug, nextPage, 20).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const sort = this.commentSort();
+    this.commentService.getCommentsPaged(slug, nextPage, 20, sort).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.comments.update(prev => [...prev, ...(response.content ?? [])]);
         this.commentPage.set(response.page);
         this.hasMoreComments.set(response.page < response.totalPages - 1);
         this.loadingMoreComments.set(false);
+        this.loadCommentLikeStatuses(slug, response.content ?? []);
       },
       error: () => {
         this.loadingMoreComments.set(false);
       },
     });
+  }
+
+  onCommentSortChange(sort: string): void {
+    this.commentSort.set(sort);
+    if (this.currentSlug) {
+      this.loadComments(this.currentSlug);
+    }
+  }
+
+  toggleCommentLike(comment: CommentResponse): void {
+    const slug = this.currentSlug;
+    if (!slug) return;
+    if (!this.authStore.isAuthenticated()) {
+      this.notification.warning(this.i18n.t('blog.loginToLike'));
+      return;
+    }
+    const wasLiked = this.commentLiked()[comment.id] || false;
+    this.commentLiked.update(map => ({ ...map, [comment.id]: !wasLiked }));
+    this.updateCommentLikeCount(comment.id, wasLiked ? -1 : 1);
+
+    this.commentService.toggleCommentLike(slug, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.commentLiked.update(map => ({ ...map, [comment.id]: res.liked }));
+        this.updateCommentLikeCount(comment.id, 0, res.likesCount);
+      },
+      error: () => {
+        this.commentLiked.update(map => ({ ...map, [comment.id]: wasLiked }));
+        this.updateCommentLikeCount(comment.id, wasLiked ? 0 : -1);
+      },
+    });
+  }
+
+  private updateCommentLikeCount(commentId: string, delta: number, absolute?: number): void {
+    const updateInList = (list: CommentResponse[]): CommentResponse[] =>
+      list.map(c => {
+        if (c.id === commentId) {
+          return { ...c, likesCount: absolute !== undefined ? absolute : (c.likesCount || 0) + delta };
+        }
+        if (c.replies?.length) {
+          return { ...c, replies: updateInList(c.replies) };
+        }
+        return c;
+      });
+    this.comments.update(prev => updateInList(prev));
+  }
+
+  private loadCommentLikeStatuses(slug: string, comments: CommentResponse[]): void {
+    const allComments = this.flattenComments(comments);
+    allComments.forEach(c => {
+      this.commentService.getCommentLikeStatus(slug, c.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (res) => this.commentLiked.update(map => ({ ...map, [c.id]: res.liked })),
+        error: () => {},
+      });
+    });
+  }
+
+  private flattenComments(comments: CommentResponse[]): CommentResponse[] {
+    const result: CommentResponse[] = [];
+    for (const c of comments) {
+      result.push(c);
+      if (c.replies?.length) {
+        result.push(...this.flattenComments(c.replies));
+      }
+    }
+    return result;
   }
 
   loadRelatedArticles(slug: string): void {
@@ -396,16 +499,34 @@ export class ArticleDetailComponent implements OnInit {
     });
   }
 
+  loadLikeStatus(slug: string): void {
+    this.articleService.getLikeStatus(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (status) => this.liked.set(status.liked),
+      error: () => { /* non-critical */ },
+    });
+  }
+
   likeArticle(): void {
     const article = this.article();
     if (!article) return;
+    if (!this.authStore.isAuthenticated()) {
+      this.notification.warning(this.i18n.t('blog.loginToLike'));
+      return;
+    }
+
+    const prev = this.liked();
+    const prevCount = article.likeCount;
+    this.liked.set(!prev);
+    this.article.set({ ...article, likeCount: prev ? prevCount - 1 : prevCount + 1 });
 
     this.articleService.likeArticle(article.slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
-        this.article.set({ ...article, likeCount: response.likeCount });
-        this.liked.set(true);
+        this.liked.set(response.liked);
+        this.article.set({ ...this.article()!, likeCount: response.likeCount });
       },
       error: () => {
+        this.liked.set(prev);
+        this.article.set({ ...this.article()!, likeCount: prevCount });
         this.notification.error(this.i18n.t('blog.failedToLike'));
       },
     });
@@ -413,14 +534,18 @@ export class ArticleDetailComponent implements OnInit {
 
   shareArticle(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    const article = this.article();
+    const shareUrl = this.articleService.buildShareUrl(window.location.href, 'native');
     if (navigator.share) {
       navigator.share({
-        title: this.article()?.title,
-        url: window.location.href,
-      }).catch(() => { /* user cancelled or not supported */ });
+        title: article?.title,
+        url: shareUrl,
+      }).then(() => this.articleService.trackShare(article?.id ? +article.id : undefined, 'native'))
+        .catch(() => { /* user cancelled */ });
     } else {
-      navigator.clipboard.writeText(window.location.href).catch(() => { /* clipboard not available */ });
+      navigator.clipboard.writeText(shareUrl).catch(() => { /* clipboard not available */ });
       this.notification.success(this.i18n.t('blog.linkCopied'));
+      this.articleService.trackShare(article?.id ? +article.id : undefined, 'native');
     }
   }
 
@@ -447,10 +572,24 @@ export class ArticleDetailComponent implements OnInit {
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => {
+          next: (created) => {
+            const optimistic: CommentResponse = {
+              id: created?.id || crypto.randomUUID(),
+              articleId: article.id,
+              articleSlug: article.slug,
+              articleTitle: article.title,
+              authorName: name,
+              authorEmail: email,
+              content,
+              status: 'APPROVED',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            this.comments.update(list => [optimistic, ...list]);
+            this.commentTotalElements.update(n => n + 1);
             this.commentContent.set('');
             this.submittingComment.set(false);
-            this.commentSubmitted.set(true);
+            this.notification.success(this.i18n.t('article.comments.submitted'));
           },
           error: () => {
             this.submittingComment.set(false);
@@ -486,7 +625,30 @@ export class ArticleDetailComponent implements OnInit {
     const content = this.replyContent().trim();
     if (content.length < 10) return;
 
-    this.submittingReply.set(true);
+    const optimisticId = crypto.randomUUID();
+    const optimisticReply: CommentResponse = {
+      id: optimisticId,
+      articleId: article.id,
+      articleSlug: article.slug,
+      articleTitle: article.title,
+      authorName: name,
+      authorEmail: user.email || '',
+      content,
+      status: 'APPROVED',
+      parentId,
+      replies: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.comments.update(list =>
+      list.map(c =>
+        c.id === parentId
+          ? { ...c, replies: [...(c.replies || []), optimisticReply] }
+          : c
+      )
+    );
+    this.cancelReply();
 
     this.recaptcha.execute('comment').then(recaptchaToken => {
       this.commentService
@@ -499,18 +661,25 @@ export class ArticleDetailComponent implements OnInit {
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => {
-            this.submittingReply.set(false);
-            this.cancelReply();
-            this.notification.success(this.i18n.t('article.comments.pending'));
-          },
           error: () => {
-            this.submittingReply.set(false);
+            this.comments.update(list =>
+              list.map(c =>
+                c.id === parentId
+                  ? { ...c, replies: (c.replies || []).filter(r => r.id !== optimisticId) }
+                  : c
+              )
+            );
             this.notification.error(this.i18n.t('blog.failedToComment'));
           },
         });
     }).catch(() => {
-      this.submittingReply.set(false);
+      this.comments.update(list =>
+        list.map(c =>
+          c.id === parentId
+            ? { ...c, replies: (c.replies || []).filter(r => r.id !== optimisticId) }
+            : c
+        )
+      );
       this.notification.error(this.i18n.t('blog.failedToComment'));
     });
   }
@@ -528,40 +697,49 @@ export class ArticleDetailComponent implements OnInit {
 
   shareTwitter(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const title = this.article()?.title || '';
-    const url = window.location.href;
+    const article = this.article();
+    const title = article?.title || '';
+    const url = this.articleService.buildShareUrl(window.location.href, 'twitter');
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
       '_blank',
       'noopener,noreferrer,width=600,height=400'
     );
+    this.articleService.trackShare(article?.id ? +article.id : undefined, 'twitter');
   }
 
   shareLinkedIn(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const url = window.location.href;
+    const article = this.article();
+    const url = this.articleService.buildShareUrl(window.location.href, 'linkedin');
     window.open(
       `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
       '_blank',
       'noopener,noreferrer,width=600,height=400'
     );
+    this.articleService.trackShare(article?.id ? +article.id : undefined, 'linkedin');
   }
 
   shareFacebook(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const url = window.location.href;
+    const article = this.article();
+    const url = this.articleService.buildShareUrl(window.location.href, 'facebook');
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       '_blank',
       'noopener,noreferrer,width=600,height=400'
     );
+    this.articleService.trackShare(article?.id ? +article.id : undefined, 'facebook');
   }
 
   copyLink(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    navigator.clipboard.writeText(window.location.href)
+    const article = this.article();
+    const url = this.articleService.buildShareUrl(window.location.href, 'clipboard');
+    navigator.clipboard.writeText(url)
       .then(() => this.notification.success(this.i18n.t('blog.linkCopied')))
       .catch(() => this.notification.error(this.i18n.t('common.error')));
+    this.articleService.trackShare(article?.id ? +article.id : undefined, 'clipboard');
   }
 
   // F-337: SVG icon helpers using Renderer2 instead of innerHTML

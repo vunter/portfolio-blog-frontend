@@ -3,11 +3,11 @@
  <div class="tabs">
  <button class="tab" [class.active]="activeTab() === 'library'"
  (click)="setTab('library')">
- {{ i18n.t('admin.media.library') }}
+ {{ i18n.t('account.media.library') }}
  </button>
  <button class="tab" [class.active]="activeTab() === 'upload'"
  (click)="setTab('upload')">
- {{ i18n.t('admin.media.uploadNew') }}
+ {{ i18n.t('account.media.uploadNew') }}
  </button>
  </div>
 
@@ -30,7 +30,7 @@
  <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
  </svg>
- <span>{{ i18n.t('admin.media.loading') }}</span>
+ <span>{{ i18n.t('account.media.loading') }}</span>
  </div>
  }
 
@@ -41,9 +41,9 @@
  <circle cx="8.5" cy="8.5" r="1.5"/>
  <polyline points="21 15 16 10 5 21"/>
  </svg>
- <p>{{ i18n.t('admin.media.noAssets') }}</p>
+ <p>{{ i18n.t('account.media.noAssets') }}</p>
  <button class="btn-primary" (click)="setTab('upload')">
- {{ i18n.t('admin.media.uploadFirst') }}
+ {{ i18n.t('account.media.uploadFirst') }}
  </button>
  </div>
  }

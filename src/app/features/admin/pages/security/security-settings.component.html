@@ -1,6 +1,6 @@
 <div class="security-settings">
-  <h2>{{ i18n.t('admin.security.title') }}</h2>
-  <p class="section-desc">{{ i18n.t('admin.security.description') }}</p>
+  <h2>{{ i18n.t('account.security.title') }}</h2>
+  <p class="section-desc">{{ i18n.t('account.security.description') }}</p>
 
   @if (loading()) {
     <div class="loading-spinner">
@@ -17,29 +17,29 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               <path d="M9 12l2 2 4-4"/>
             </svg>
-            {{ i18n.t('admin.security.enabled') }}
+            {{ i18n.t('account.security.enabled') }}
           } @else {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            {{ i18n.t('admin.security.disabled') }}
+            {{ i18n.t('account.security.disabled') }}
           }
         </div>
       </div>
 
       @if (mfaStatus()?.mfaEnabled) {
         <div class="mfa-methods">
-          <h4>{{ i18n.t('admin.security.activeMethods') }}</h4>
+          <h4>{{ i18n.t('account.security.activeMethods') }}</h4>
           <ul>
             @for (method of mfaStatus()?.methods ?? []; track method) {
               <li>
                 @if (method === 'TOTP') {
-                  🔐 {{ i18n.t('admin.security.authenticatorApp') }}
+                  🔐 {{ i18n.t('account.security.authenticatorApp') }}
                 } @else {
-                  📧 {{ i18n.t('admin.security.emailOtp') }}
+                  📧 {{ i18n.t('account.security.emailOtp') }}
                 }
                 @if (method === mfaStatus()?.preferredMethod) {
-                  <span class="preferred-badge">{{ i18n.t('admin.security.preferred') }}</span>
+                  <span class="preferred-badge">{{ i18n.t('account.security.preferred') }}</span>
                 }
               </li>
             }
@@ -50,27 +50,27 @@
           @if (disabling()) {
             <span class="spinner"></span>
           }
-          {{ i18n.t('admin.security.disableMfa') }}
+          {{ i18n.t('account.security.disableMfa') }}
         </button>
 
         <!-- Backup Codes Section -->
         <div class="backup-codes-section">
-          <h4>{{ i18n.t('admin.security.backupCodes') }}</h4>
-          <p class="backup-desc">{{ i18n.t('admin.security.backupCodesDesc') }}</p>
+          <h4>{{ i18n.t('account.security.backupCodes') }}</h4>
+          <p class="backup-desc">{{ i18n.t('account.security.backupCodesDesc') }}</p>
           <p class="backup-remaining">
-            {{ i18n.t('admin.security.backupCodesRemaining') }}: <strong>{{ mfaStatus()?.backupCodesRemaining ?? 0 }}</strong>
+            {{ i18n.t('account.security.backupCodesRemaining') }}: <strong>{{ mfaStatus()?.backupCodesRemaining ?? 0 }}</strong>
           </p>
 
           @if (backupCodes().length > 0) {
             <div class="backup-codes-display">
-              <p class="backup-warning">{{ i18n.t('admin.security.backupCodesWarning') }}</p>
+              <p class="backup-warning">{{ i18n.t('account.security.backupCodesWarning') }}</p>
               <div class="codes-grid">
                 @for (code of backupCodes(); track code) {
                   <code class="backup-code">{{ code }}</code>
                 }
               </div>
               <button class="btn btn-secondary" (click)="dismissBackupCodes()">
-                {{ i18n.t('admin.security.backupCodesDismiss') }}
+                {{ i18n.t('account.security.backupCodesDismiss') }}
               </button>
             </div>
           }
@@ -79,20 +79,20 @@
             @if (generatingCodes()) {
               <span class="spinner"></span>
             }
-            {{ i18n.t(mfaStatus()?.backupCodesRemaining ? 'admin.security.regenerateBackupCodes' : 'admin.security.generateBackupCodes') }}
+            {{ i18n.t(mfaStatus()?.backupCodesRemaining ? 'account.security.regenerateBackupCodes' : 'account.security.generateBackupCodes') }}
           </button>
         </div>
       } @else {
         <!-- Setup options -->
         @if (!showSetup()) {
           <div class="setup-options">
-            <h4>{{ i18n.t('admin.security.chooseMethod') }}</h4>
+            <h4>{{ i18n.t('account.security.chooseMethod') }}</h4>
             <div class="setup-btns">
               <button class="btn btn-primary" (click)="setupTotp()" [disabled]="enabling()">
-                🔐 {{ i18n.t('admin.security.setupTotp') }}
+                🔐 {{ i18n.t('account.security.setupTotp') }}
               </button>
               <button class="btn btn-secondary" (click)="enableEmail()" [disabled]="enabling()">
-                📧 {{ i18n.t('admin.security.setupEmail') }}
+                📧 {{ i18n.t('account.security.setupEmail') }}
               </button>
             </div>
           </div>
@@ -102,21 +102,21 @@
       <!-- TOTP Setup Flow -->
       @if (showSetup() && setupData()) {
         <div class="totp-setup">
-          <h4>{{ i18n.t('admin.security.scanQr') }}</h4>
-          <p>{{ i18n.t('admin.security.scanQrDesc') }}</p>
+          <h4>{{ i18n.t('account.security.scanQr') }}</h4>
+          <p>{{ i18n.t('account.security.scanQrDesc') }}</p>
 
           <div class="qr-container">
             <img [src]="setupData()!.qrCodeDataUri" alt="QR Code" width="250" height="250" />
           </div>
 
           <div class="secret-key">
-            <label>{{ i18n.t('admin.security.manualKey') }}</label>
+            <label>{{ i18n.t('account.security.manualKey') }}</label>
             <code>{{ setupData()!.secretKey }}</code>
           </div>
 
           <form class="verify-form" [formGroup]="verifyForm" (ngSubmit)="verifySetup()">
             <div class="form-group">
-              <label for="verify-code">{{ i18n.t('admin.security.enterCode') }}</label>
+              <label for="verify-code">{{ i18n.t('account.security.enterCode') }}</label>
               <input
                 type="text"
                 id="verify-code"
@@ -133,7 +133,7 @@
                 @if (verifying()) {
                   <span class="spinner"></span>
                 }
-                {{ i18n.t('admin.security.verifyAndEnable') }}
+                {{ i18n.t('account.security.verifyAndEnable') }}
               </button>
               <button type="button" class="btn btn-secondary" (click)="cancelSetup()">
                 {{ i18n.t('common.cancel') }}
@@ -147,8 +147,8 @@
     <!-- Linked Accounts -->
     <div class="linked-accounts-card">
       <div class="linked-accounts-header">
-        <h3>{{ i18n.t('admin.security.linkedAccounts') }}</h3>
-        <p class="linked-accounts-desc">{{ i18n.t('admin.security.linkedAccountsDesc') }}</p>
+        <h3>{{ i18n.t('account.security.linkedAccounts') }}</h3>
+        <p class="linked-accounts-desc">{{ i18n.t('account.security.linkedAccountsDesc') }}</p>
       </div>
 
       @if (socialLoading()) {
@@ -162,7 +162,7 @@
               <div class="linked-account-info">
                 <span class="linked-account-provider">{{ account.provider }}</span>
                 <span class="linked-account-email">{{ account.email }}</span>
-                <span class="linked-account-date">{{ i18n.t('admin.security.linkedOn') }} {{ account.linkedAt | date:'mediumDate' }}</span>
+                <span class="linked-account-date">{{ i18n.t('account.security.linkedOn') }} {{ account.linkedAt | date:'mediumDate' }}</span>
               </div>
               <button class="btn btn-outline btn-sm"
                       (click)="unlinkSocialAccount(account.provider)"
@@ -170,7 +170,7 @@
                 @if (unlinking() === account.provider) {
                   <span class="spinner"></span>
                 } @else {
-                  {{ i18n.t('admin.security.unlinkAccount') }}
+                  {{ i18n.t('account.security.unlinkAccount') }}
                 }
               </button>
             </div>
@@ -186,7 +186,7 @@
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              {{ i18n.t('admin.security.linkGoogle') }}
+              {{ i18n.t('account.security.linkGoogle') }}
             </button>
           }
           @if (!hasProvider('github')) {
@@ -194,7 +194,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
-              {{ i18n.t('admin.security.linkGithub') }}
+              {{ i18n.t('account.security.linkGithub') }}
             </button>
           }
         </div>
@@ -204,10 +204,10 @@
     <!-- Active Sessions -->
     <div class="sessions-card">
       <div class="sessions-header">
-        <h3>{{ i18n.t('admin.security.activeSessions') }}</h3>
+        <h3>{{ i18n.t('account.security.activeSessions') }}</h3>
         @if (sessions().length > 1) {
           <button class="btn btn-danger btn-sm" (click)="revokeAllOther()">
-            {{ i18n.t('admin.security.revokeAllOther') }}
+            {{ i18n.t('account.security.revokeAllOther') }}
           </button>
         }
       </div>
@@ -217,7 +217,7 @@
           <span class="spinner"></span>
         </div>
       } @else if (sessions().length === 0) {
-        <p class="empty-state">{{ i18n.t('admin.security.noSessions') }}</p>
+        <p class="empty-state">{{ i18n.t('account.security.noSessions') }}</p>
       } @else {
         <div class="sessions-list">
           @for (session of sessions(); track session.id) {
@@ -229,7 +229,7 @@
                     <line x1="8" y1="21" x2="16" y2="21"/>
                     <line x1="12" y1="17" x2="12" y2="21"/>
                   </svg>
-                  <span class="device-name">{{ session.deviceName || i18n.t('admin.security.unknownDevice') }}</span>
+                  <span class="device-name">{{ session.deviceName || i18n.t('account.security.unknownDevice') }}</span>
                 </div>
                 <div class="session-meta">
                   <span class="session-ip">{{ session.ipAddress }}</span>
@@ -243,7 +243,7 @@
                 @if (revokingId() === session.id) {
                   <span class="spinner"></span>
                 } @else {
-                  {{ i18n.t('admin.security.revoke') }}
+                  {{ i18n.t('account.security.revoke') }}
                 }
               </button>
             </div>

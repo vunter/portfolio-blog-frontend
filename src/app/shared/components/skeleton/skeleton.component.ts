@@ -7,5 +7,5 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkeletonComponent {
-  variant = input<'card' | 'text' | 'circle'>('card');
+  variant = input<'card' | 'text' | 'circle' | 'article-detail' | 'table' | 'profile' | 'stats' | 'comments'>('card');
 }

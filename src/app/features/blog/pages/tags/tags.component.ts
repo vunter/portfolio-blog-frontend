@@ -3,12 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TagService } from '../../services/tag.service';
 import { I18nService } from '../../../../core/services/i18n.service';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { TagResponse } from '../../../../models';
 
 @Component({
   selector: 'app-tags',
-  imports: [RouterLink, LoadingSpinnerComponent],
+  imports: [RouterLink, SkeletonComponent],
   templateUrl: './tags.component.html',
   styleUrl: './tags.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

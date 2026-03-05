@@ -143,7 +143,7 @@ describe('I18nService', () => {
     });
 
     it('should translate with parameter substitution', () => {
-      expect(service.t('admin.articles.confirmDelete', { title: 'Meu Artigo' })).toBe(
+      expect(service.t('dev.articles.confirmDelete', { title: 'Meu Artigo' })).toBe(
         'Are you sure you want to delete "Meu Artigo"?'
       );
     });
@@ -152,7 +152,7 @@ describe('I18nService', () => {
       (service as any).cache.set('pt', ptTranslations);
       service.setLanguage('pt');
       TestBed.flushEffects();
-      expect(service.t('admin.articles.confirmDelete', { title: 'Java 21' })).toBe(
+      expect(service.t('dev.articles.confirmDelete', { title: 'Java 21' })).toBe(
         'Tem certeza que deseja excluir "Java 21"?'
       );
     });
@@ -167,8 +167,8 @@ describe('I18nService', () => {
 
     // Test admin sidebar translations
     it('should translate admin sidebar items', () => {
-      expect(service.t('admin.sidebar.dashboard')).toBe('Dashboard');
-      expect(service.t('admin.sidebar.articles')).toBe('Articles');
+      expect(service.t('dev.sidebar.dashboard')).toBe('Dashboard');
+      expect(service.t('dev.sidebar.articles')).toBe('Articles');
       expect(service.t('admin.sidebar.users')).toBe('Users');
       expect(service.t('admin.sidebar.settings')).toBe('Settings');
     });
@@ -177,7 +177,7 @@ describe('I18nService', () => {
       (service as any).cache.set('pt', ptTranslations);
       service.setLanguage('pt');
       TestBed.flushEffects();
-      expect(service.t('admin.sidebar.articles')).toBe('Artigos');
+      expect(service.t('dev.sidebar.articles')).toBe('Artigos');
       expect(service.t('admin.sidebar.users')).toBe('Usuários');
       expect(service.t('admin.sidebar.settings')).toBe('Configurações');
     });

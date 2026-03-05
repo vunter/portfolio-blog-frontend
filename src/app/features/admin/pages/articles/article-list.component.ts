@@ -10,12 +10,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ArticleResponse, PageResponse } from '../../../../models';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-admin-article-list',
-  imports: [RouterLink, FormsModule, PaginationComponent, MarkdownModule],
+  imports: [RouterLink, FormsModule, PaginationComponent, MarkdownModule, SkeletonComponent],
   templateUrl: './article-list.component.html',
   styleUrl: './article-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,7 +75,7 @@ export class ArticleListComponent implements OnInit {
       error: () => {
         this.loading.set(false);
         this.error.set(true);
-        this.notification.error(this.i18n.t('admin.error.loadArticles'));
+        this.notification.error(this.i18n.t('dev.error.loadArticles'));
       },
     });
   }
@@ -91,8 +92,8 @@ export class ArticleListComponent implements OnInit {
   async togglePublish(article: ArticleResponse): Promise<void> {
     const isPublished = article.status === 'PUBLISHED';
     const confirmMsg = isPublished
-      ? this.i18n.t('admin.articles.confirmUnpublish').replace('{{title}}', article.title)
-      : this.i18n.t('admin.articles.confirmPublish').replace('{{title}}', article.title);
+      ? this.i18n.t('dev.articles.confirmUnpublish').replace('{{title}}', article.title)
+      : this.i18n.t('dev.articles.confirmPublish').replace('{{title}}', article.title);
 
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('common.confirm'),
@@ -107,20 +108,26 @@ export class ArticleListComponent implements OnInit {
       ? `/admin/articles/${article.id}/unpublish`
       : `/admin/articles/${article.id}/publish`;
 
+    const snapshot = this.articles();
+    const newStatus = isPublished ? 'DRAFT' : 'PUBLISHED';
+    this.articles.update(list =>
+      list.map(a => a.id === article.id ? { ...a, status: newStatus } : a)
+    );
+
     this.apiService.patch(endpoint, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(
           isPublished
-            ? this.i18n.t('admin.articles.unpublishSuccess')
-            : this.i18n.t('admin.articles.publishSuccess')
+            ? this.i18n.t('dev.articles.unpublishSuccess')
+            : this.i18n.t('dev.articles.publishSuccess')
         );
-        this.loadArticles();
       },
       error: () => {
+        this.articles.set(snapshot);
         this.notification.error(
           isPublished
-            ? this.i18n.t('admin.articles.unpublishError')
-            : this.i18n.t('admin.articles.publishError')
+            ? this.i18n.t('dev.articles.unpublishError')
+            : this.i18n.t('dev.articles.publishError')
         );
       },
     });
@@ -129,20 +136,23 @@ export class ArticleListComponent implements OnInit {
   async deleteArticle(article: ArticleResponse): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('common.delete'),
-      message: this.i18n.t('admin.articles.confirmDelete').replace('{{title}}', article.title),
+      message: this.i18n.t('dev.articles.confirmDelete').replace('{{title}}', article.title),
       confirmText: this.i18n.t('common.delete'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'danger',
     });
     if (!confirmed) return;
 
+    const snapshot = this.articles();
+    this.articles.update(list => list.filter(a => a.id !== article.id));
+
     this.apiService.delete(`/admin/articles/${article.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.articles.deleteSuccess'));
-        this.loadArticles();
+        this.notification.success(this.i18n.t('dev.articles.deleteSuccess'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articles.deleteError'));
+        this.articles.set(snapshot);
+        this.notification.error(this.i18n.t('dev.articles.deleteError'));
       },
     });
   }
@@ -184,7 +194,7 @@ export class ArticleListComponent implements OnInit {
 
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('common.confirm'),
-      message: this.i18n.t('admin.articles.bulkConfirm')
+      message: this.i18n.t('dev.articles.bulkConfirm')
         .replace('{{count}}', ids.length.toString())
         .replace('{{status}}', this.getStatusLabel(status)),
       confirmText: this.i18n.t('common.confirm'),
@@ -195,23 +205,23 @@ export class ArticleListComponent implements OnInit {
 
     this.apiService.put('/admin/articles/bulk-status', { ids, status }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.articles.bulkSuccess'));
+        this.notification.success(this.i18n.t('dev.articles.bulkSuccess'));
         this.selectedIds.set(new Set());
         this.loadArticles();
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articles.bulkError'));
+        this.notification.error(this.i18n.t('dev.articles.bulkError'));
       },
     });
   }
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      PUBLISHED: this.i18n.t('admin.articles.published'),
-      DRAFT: this.i18n.t('admin.articles.draft'),
-      SCHEDULED: this.i18n.t('admin.articles.scheduled'),
-      REVIEW: this.i18n.t('admin.articles.statusReview'),
-      ARCHIVED: this.i18n.t('admin.articles.archived'),
+      PUBLISHED: this.i18n.t('dev.articles.published'),
+      DRAFT: this.i18n.t('dev.articles.draft'),
+      SCHEDULED: this.i18n.t('dev.articles.scheduled'),
+      REVIEW: this.i18n.t('dev.articles.statusReview'),
+      ARCHIVED: this.i18n.t('dev.articles.archived'),
     };
     return labels[status] || status;
   }

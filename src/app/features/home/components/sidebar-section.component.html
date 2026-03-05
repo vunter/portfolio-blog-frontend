@@ -1,6 +1,12 @@
 ﻿<aside class="blog-sidebar">
  <div class="sidebar-section author-card">
- <div class="author-avatar">{{ initials() }}</div>
+  <div class="author-avatar">
+    @if (avatarUrl()) {
+      <img [src]="avatarUrl()" [alt]="displayName()" class="author-avatar-img" />
+    } @else {
+      {{ initials() }}
+    }
+  </div>
  <h3>{{ displayName() }}</h3>
  <p>{{ sidebarBio() ?? i18n.t('home.sidebar.bio') }}</p>
  </div>

@@ -10,6 +10,32 @@ import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareRespo
 // ADMIN-SPECIFIC RESPONSE TYPES
 // ============================================
 
+export interface CustomVariable {
+  id: number;
+  key: string;
+  value: string;
+  description: string;
+  templateId: string;
+}
+
+export interface TranslationItem {
+  id: number;
+  translationKey: string;
+  locale: string;
+  value: string;
+  namespace: string;
+  visibility: string;
+  updatedAt: string;
+}
+
+export interface TranslationPage {
+  items: TranslationItem[];
+  total: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
 export interface DashboardStats {
   totalArticles: number;
   publishedArticles: number;
@@ -98,6 +124,7 @@ export interface AnalyticsSummary {
   topArticles: { articleId: string; title: string; slug: string; views: number }[];
   dailyViews: { date: string; count: number }[];
   topReferrers: { referrer: string; count: number }[];
+  topSources: { source: string; medium: string; count: number }[];
   period: string;
 }
 
@@ -447,14 +474,52 @@ export class AdminApiService {
     return this.api.get<UserStats>('/admin/users/stats');
   }
 
-  // ==================== EMAIL TEMPLATE PREVIEW ====================
+  // ==================== EMAIL TEMPLATE MANAGEMENT ====================
 
-  getEmailTemplates(): Observable<{ id: string; name: string; description: string }[]> {
-    return this.api.get<{ id: string; name: string; description: string }[]>('/admin/settings/email-templates');
+  getEmailTemplates(): Observable<{ id: string; name: string; description: string; customized?: boolean }[]> {
+    return this.api.get<{ id: string; name: string; description: string; customized?: boolean }[]>('/admin/settings/email-templates');
   }
 
   getEmailTemplatePreview(templateId: string): Observable<string> {
     return this.api.getText(`/admin/settings/email-templates/${templateId}/preview`);
+  }
+
+  getEmailTemplateSource(templateId: string): Observable<{
+    templateId: string; html: string; isOverride: boolean;
+    placeholders: Record<string, unknown>;
+    customVariables: { global: CustomVariable[]; template: CustomVariable[] };
+  }> {
+    return this.api.get(`/admin/settings/email-templates/${templateId}/source`);
+  }
+
+  updateEmailTemplate(templateId: string, html: string): Observable<{ message: string }> {
+    return this.api.put<{ message: string }>(`/admin/settings/email-templates/${templateId}`, { html });
+  }
+
+  deleteEmailTemplate(templateId: string): Observable<{ message: string }> {
+    return this.api.delete<{ message: string }>(`/admin/settings/email-templates/${templateId}`);
+  }
+
+  previewCustomEmailTemplate(templateId: string, html: string): Observable<string> {
+    return this.api.postText(`/admin/settings/email-templates/${templateId}/preview`, { html });
+  }
+
+  // Custom Variables
+  getCustomVariables(templateId?: string): Observable<{ variables: CustomVariable[] }> {
+    const params = templateId ? `?templateId=${templateId}` : '';
+    return this.api.get(`/admin/settings/email-templates/custom-variables${params}`);
+  }
+
+  createCustomVariable(data: { key: string; value: string; description?: string; templateId?: string }): Observable<CustomVariable> {
+    return this.api.post(`/admin/settings/email-templates/custom-variables`, data);
+  }
+
+  updateCustomVariable(id: number, data: { value: string; description?: string }): Observable<CustomVariable> {
+    return this.api.put(`/admin/settings/email-templates/custom-variables/${id}`, data);
+  }
+
+  deleteCustomVariable(id: number): Observable<{ message: string }> {
+    return this.api.delete(`/admin/settings/email-templates/custom-variables/${id}`);
   }
 
   // ==================== INT-12: Auth Token Verification ====================
@@ -473,5 +538,29 @@ export class AdminApiService {
 
   deleteSubscribersBatch(ids: string[]): Observable<void> {
     return this.api.post<void>('/admin/newsletter/subscribers/delete-batch', { ids });
+  }
+
+  // ==================== I18N: Translation Management ====================
+
+  getTranslations(locale: string, namespace: string, search?: string, page = 0, size = 50): Observable<TranslationPage> {
+    const params: Record<string, string | number> = { locale, namespace, page, size };
+    if (search) params['search'] = search;
+    return this.api.get<TranslationPage>('/admin/settings/translations', params);
+  }
+
+  updateTranslation(id: number, value: string): Observable<{ status: string }> {
+    return this.api.put<{ status: string }>(`/admin/settings/translations/${id}`, { value });
+  }
+
+  createTranslation(body: { translationKey: string; locale: string; value: string; namespace?: string; visibility?: string }): Observable<{ id: number; status: string }> {
+    return this.api.post<{ id: number; status: string }>('/admin/settings/translations', body);
+  }
+
+  deleteTranslation(id: number): Observable<{ status: string }> {
+    return this.api.delete<{ status: string }>(`/admin/settings/translations/${id}`);
+  }
+
+  invalidateI18nCache(): Observable<{ status: string }> {
+    return this.api.post<{ status: string }>('/admin/settings/translations/cache/invalidate');
   }
 }

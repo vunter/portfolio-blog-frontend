@@ -1,8 +1,8 @@
 ﻿<div class="profile-page">
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('admin.profile.title') }}</h1>
- <p class="subtitle">{{ i18n.t('admin.profile.subtitle') }}</p>
+ <h1>{{ i18n.t('account.profile.title') }}</h1>
+ <p class="subtitle">{{ i18n.t('account.profile.subtitle') }}</p>
  </div>
  </header>
 
@@ -36,7 +36,7 @@
  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
  <circle cx="12" cy="13" r="4"/>
  </svg>
- <span>{{ i18n.t('admin.profile.changeAvatar') }}</span>
+ <span>{{ i18n.t('account.profile.changeAvatar') }}</span>
  </div>
  </div>
  <input
@@ -48,9 +48,9 @@
  (change)="onAvatarFileSelected($event)"
  />
  <div class="avatar-info">
- <h3>{{ form.name || i18n.t('admin.profile.unnamed') }}</h3>
+ <h3>{{ form.name || i18n.t('account.profile.unnamed') }}</h3>
  <span class="role-badge">{{ user()?.role }}</span>
- <p class="member-since">{{ i18n.t('admin.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
+ <p class="member-since">{{ i18n.t('account.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
  </div>
  </div>
  </div>
@@ -59,18 +59,18 @@
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>
- {{ i18n.t('admin.profile.personalInfo') }}
+ {{ i18n.t('account.profile.personalInfo') }}
  </h2>
 
  <div class="form-group">
- <label for="name">{{ i18n.t('admin.profile.nameLabel') }} <span class="required">*</span></label>
+ <label for="name">{{ i18n.t('account.profile.nameLabel') }} <span class="required">*</span></label>
  <input
  type="text"
  id="name"
  name="name"
  [(ngModel)]="form.name"
  [class.input-error]="fieldErrors()['name'] || (formSubmitted() && !form.name)"
- [placeholder]="i18n.t('admin.profile.namePlaceholder')"
+ [placeholder]="i18n.t('account.profile.namePlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['name']) {
@@ -81,14 +81,14 @@
  </div>
 
  <div class="form-group">
- <label for="email">{{ i18n.t('admin.profile.emailLabel') }} <span class="required">*</span></label>
+ <label for="email">{{ i18n.t('account.profile.emailLabel') }} <span class="required">*</span></label>
  <input
  type="email"
  id="email"
  name="email"
  [(ngModel)]="form.email"
  [class.input-error]="fieldErrors()['email']"
- [placeholder]="i18n.t('admin.profile.emailPlaceholder')"
+ [placeholder]="i18n.t('account.profile.emailPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['email']) {
@@ -97,38 +97,38 @@
  </div>
 
  <div class="form-group">
- <label for="username">{{ i18n.t('admin.profile.usernameLabel') }}</label>
+ <label for="username">{{ i18n.t('account.profile.usernameLabel') }}</label>
  <input
  type="text"
  id="username"
  name="username"
  [(ngModel)]="form.username"
- [placeholder]="i18n.t('admin.profile.usernamePlaceholder')"
+ [placeholder]="i18n.t('account.profile.usernamePlaceholder')"
  [disabled]="saving()"
  />
  </div>
 
  <div class="form-group">
- <label for="avatarUrl">{{ i18n.t('admin.profile.avatarLabel') }}</label>
+ <label for="avatarUrl">{{ i18n.t('account.profile.avatarLabel') }}</label>
  <input
  type="url"
  id="avatarUrl"
  name="avatarUrl"
  [(ngModel)]="form.avatarUrl"
- [placeholder]="i18n.t('admin.profile.avatarPlaceholder')"
+ [placeholder]="i18n.t('account.profile.avatarPlaceholder')"
  [disabled]="saving()"
  />
- <span class="form-hint">{{ i18n.t('admin.profile.avatarHint') }}</span>
+ <span class="form-hint">{{ i18n.t('account.profile.avatarHint') }}</span>
  </div>
 
  <div class="form-group">
- <label for="bio">{{ i18n.t('admin.profile.bioLabel') }}</label>
+ <label for="bio">{{ i18n.t('account.profile.bioLabel') }}</label>
  <textarea
  id="bio"
  name="bio"
  [(ngModel)]="form.bio"
  rows="4"
- [placeholder]="i18n.t('admin.profile.bioPlaceholder')"
+ [placeholder]="i18n.t('account.profile.bioPlaceholder')"
  [disabled]="saving()"
  ></textarea>
  </div>
@@ -139,9 +139,9 @@
  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
  @if (saving()) {
  <span class="spinner-sm"></span>
- {{ i18n.t('admin.profile.saving') }}
+ {{ i18n.t('account.profile.saving') }}
  } @else {
- {{ i18n.t('admin.profile.save') }}
+ {{ i18n.t('account.profile.save') }}
  }
  </button>
  </div>
@@ -150,31 +150,31 @@
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>
- {{ i18n.t('admin.profile.changePassword') }}
+ {{ i18n.t('account.profile.changePassword') }}
  </h2>
- <p class="section-hint">{{ i18n.t('admin.profile.passwordHint') }}</p>
+ <p class="section-hint">{{ i18n.t('account.profile.passwordHint') }}</p>
 
  <div class="form-group">
- <label for="currentPassword">{{ i18n.t('admin.profile.currentPassword') }}</label>
+ <label for="currentPassword">{{ i18n.t('account.profile.currentPassword') }}</label>
  <input
  type="password"
  id="currentPassword"
  name="currentPassword"
  [(ngModel)]="form.currentPassword"
- [placeholder]="i18n.t('admin.profile.currentPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.currentPasswordPlaceholder')"
  [disabled]="saving()"
  />
  </div>
 
  <div class="form-group">
- <label for="newPassword">{{ i18n.t('admin.profile.newPassword') }}</label>
+ <label for="newPassword">{{ i18n.t('account.profile.newPassword') }}</label>
  <input
  type="password"
  id="newPassword"
  name="newPassword"
  [(ngModel)]="form.newPassword"
  [class.input-error]="fieldErrors()['newPassword']"
- [placeholder]="i18n.t('admin.profile.newPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.newPasswordPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['newPassword']) {
@@ -183,14 +183,14 @@
  </div>
 
  <div class="form-group">
- <label for="confirmPassword">{{ i18n.t('admin.profile.confirmNewPassword') }}</label>
+ <label for="confirmPassword">{{ i18n.t('account.profile.confirmNewPassword') }}</label>
  <input
  type="password"
  id="confirmPassword"
  name="confirmPassword"
  [(ngModel)]="form.confirmPassword"
  [class.input-error]="fieldErrors()['confirmPassword']"
- [placeholder]="i18n.t('admin.profile.confirmPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.confirmPasswordPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['confirmPassword']) {
@@ -202,16 +202,16 @@
  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
  @if (saving()) {
  <span class="spinner-sm"></span>
- {{ i18n.t('admin.profile.saving') }}
+ {{ i18n.t('account.profile.saving') }}
  } @else {
- {{ i18n.t('admin.profile.save') }}
+ {{ i18n.t('account.profile.save') }}
  }
  </button>
  </div>
  </div>
 
  <!-- Request Dev Role -->
- @if (user()?.role === 'VIEWER' || user()?.role === 'EDITOR') {
+ @if (user()?.role === 'VIEWER') {
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>

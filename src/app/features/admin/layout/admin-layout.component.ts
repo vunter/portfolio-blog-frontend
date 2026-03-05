@@ -24,7 +24,7 @@ interface MenuItem {
   icon: string;
   route: string;
   adminOnly?: boolean;
-  editorOnly?: boolean;
+  devOnly?: boolean;
 }
 
 @Component({
@@ -82,39 +82,39 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   // MED-01: computed() signal instead of getter for menu items
   readonly menuItems = computed<MenuItem[]>(() => [
     {
-      label: this.i18n.t('admin.profile.title'),
+      label: this.i18n.t('account.profile.title'),
       route: '/admin/profile',
       icon: 'profile',
     },
     {
-      label: this.i18n.t('admin.sidebar.dashboard'),
+      label: this.i18n.t('dev.sidebar.dashboard'),
       route: '/admin/dashboard',
       icon: 'dashboard',
-      editorOnly: true,
+      devOnly: true,
     },
     {
-      label: this.i18n.t('admin.sidebar.articles'),
+      label: this.i18n.t('dev.sidebar.articles'),
       route: '/admin/articles',
       icon: 'articles',
-      editorOnly: true,
+      devOnly: true,
     },
     {
-      label: this.i18n.t('admin.sidebar.resumes'),
+      label: this.i18n.t('dev.sidebar.resumes'),
       route: '/resume/templates',
       icon: 'resumes',
-      editorOnly: true,
+      devOnly: true,
     },
     {
-      label: this.i18n.t('admin.sidebar.tags'),
+      label: this.i18n.t('dev.sidebar.tags'),
       route: '/admin/tags',
       icon: 'tags',
-      editorOnly: true,
+      devOnly: true,
     },
     {
-      label: this.i18n.t('admin.sidebar.comments'),
+      label: this.i18n.t('dev.sidebar.comments'),
       route: '/admin/comments',
       icon: 'comments',
-      editorOnly: true,
+      devOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.users'),
@@ -129,10 +129,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'roleRequests',
     },
     {
-      label: this.i18n.t('admin.sidebar.analytics'),
+      label: this.i18n.t('dev.sidebar.analytics'),
       route: '/admin/analytics',
       icon: 'analytics',
-      editorOnly: true,
+      devOnly: true,
     },
     {
       label: this.i18n.t('admin.sidebar.newsletter'),
@@ -153,12 +153,12 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'settings',
     },
     {
-      label: this.i18n.t('admin.sidebar.security'),
+      label: this.i18n.t('account.sidebar.security'),
       route: '/admin/security',
       icon: 'security',
     },
     {
-      label: this.i18n.t('admin.sidebar.readingHistory'),
+      label: this.i18n.t('account.sidebar.readingHistory'),
       route: '/admin/reading-history',
       icon: 'readingHistory',
     },
@@ -166,10 +166,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   readonly visibleMenuItems = computed(() => {
     const isAdmin = this.authStore.isAdmin();
-    const isEditor = this.authStore.isEditor();
+    const isDev = this.authStore.isDev();
     return this.menuItems().filter(item => {
       if (item.adminOnly && !isAdmin) return false;
-      if (item.editorOnly && !isEditor) return false;
+      if (item.devOnly && !isDev) return false;
       return true;
     });
   });

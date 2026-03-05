@@ -9,13 +9,14 @@ import { DownloadService } from '../../../../core/services/download.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { NewsletterSubscriber, PageResponse } from '../../../../models';
 import { environment } from '../../../../../environments/environment';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-newsletter',
-  imports: [FormsModule, PaginationComponent],
+  imports: [FormsModule, PaginationComponent, SkeletonComponent],
   templateUrl: './newsletter.component.html',
   styleUrl: './newsletter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,7 +70,7 @@ export class NewsletterComponent implements OnInit {
         this.newThisMonth.set(stats.newThisMonth ?? 0);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadNewsletter'));
+        this.notification.error(this.i18n.t('dev.error.loadNewsletter'));
       },
     });
   }
@@ -94,7 +95,7 @@ export class NewsletterComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadNewsletter'));
+        this.notification.error(this.i18n.t('dev.error.loadNewsletter'));
         this.loading.set(false);
         this.error.set(true);
       },

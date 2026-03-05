@@ -6,11 +6,12 @@ import { ApiService } from '../../../../core/services/api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { TagResponse } from '../../../../models';
 
 @Component({
   selector: 'app-tag-list',
-  imports: [FormsModule],
+  imports: [FormsModule, SkeletonComponent],
   templateUrl: './tag-list.component.html',
   styleUrl: './tag-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,7 +59,7 @@ export class TagListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadTags'));
+        this.notification.error(this.i18n.t('dev.error.loadTags'));
         this.loading.set(false);
         this.error.set(true);
       },
@@ -117,13 +118,13 @@ export class TagListComponent implements OnInit {
 
     request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.editingTag() ? this.i18n.t('admin.tags.updateSuccess') : this.i18n.t('admin.tags.createSuccess'));
+        this.notification.success(this.editingTag() ? this.i18n.t('dev.tags.updateSuccess') : this.i18n.t('dev.tags.createSuccess'));
         this.closeModal();
         this.loadTags();
         this.saving.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.tags.saveError'));
+        this.notification.error(this.i18n.t('dev.tags.saveError'));
         this.saving.set(false);
       },
     });
@@ -132,20 +133,23 @@ export class TagListComponent implements OnInit {
   async deleteTag(tag: TagResponse): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('common.delete'),
-      message: this.i18n.t('admin.tags.confirmDelete').replace('{{name}}', tag.name),
+      message: this.i18n.t('dev.tags.confirmDelete').replace('{{name}}', tag.name),
       confirmText: this.i18n.t('common.delete'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'danger',
     });
     if (!confirmed) return;
 
+    const snapshot = this.tags();
+    this.tags.update(list => list.filter(t => t.id !== tag.id));
+
     this.apiService.delete(`/admin/tags/${tag.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.tags.deleteSuccess'));
-        this.loadTags();
+        this.notification.success(this.i18n.t('dev.tags.deleteSuccess'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.tags.deleteError'));
+        this.tags.set(snapshot);
+        this.notification.error(this.i18n.t('dev.tags.deleteError'));
       },
     });
   }

@@ -1,25 +1,25 @@
 ﻿@if (loading()) {
- <div class="admin-loading"><div class="admin-loading__spinner"></div><p>{{ i18n.t('admin.common.loading') }}</p></div>
+ <app-skeleton variant="table" />
 } @else if (error()) {
  <div class="admin-error">
  <svg width="48" height="48" fill="none" stroke="var(--icon-error, #ef4444)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
- <h3>{{ i18n.t('admin.common.errorTitle') }}</h3>
- <p>{{ i18n.t('admin.common.errorMessage') }}</p>
- <button class="retry-btn" (click)="loadArticles()">{{ i18n.t('admin.common.retry') }}</button>
+ <h3>{{ i18n.t('dev.common.errorTitle') }}</h3>
+ <p>{{ i18n.t('dev.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadArticles()">{{ i18n.t('dev.common.retry') }}</button>
  </div>
 } @else {
 <div class="article-list">
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('admin.articles.title') }}</h1>
- <p>{{ i18n.t('admin.articles.subtitle') }}</p>
+ <h1>{{ i18n.t('dev.articles.title') }}</h1>
+ <p>{{ i18n.t('dev.articles.subtitle') }}</p>
  </div>
  <a routerLink="/admin/articles/new" class="btn btn-primary">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <line x1="12" y1="5" x2="12" y2="19"/>
  <line x1="5" y1="12" x2="19" y2="12"/>
  </svg>
- {{ i18n.t('admin.articles.newArticle') }}
+ {{ i18n.t('dev.articles.newArticle') }}
  </a>
  </header>
 
@@ -34,26 +34,26 @@
  type="text"
  [(ngModel)]="searchTerm"
  (ngModelChange)="onSearch()"
- [placeholder]="i18n.t('admin.articles.searchPlaceholder')"
+ [placeholder]="i18n.t('dev.articles.searchPlaceholder')"
  />
  </div>
  <select [(ngModel)]="statusFilter" (ngModelChange)="loadArticles()">
- <option value="">{{ i18n.t('admin.articles.allStatus') }}</option>
- <option value="PUBLISHED">{{ i18n.t('admin.articles.published') }}</option>
- <option value="DRAFT">{{ i18n.t('admin.articles.draft') }}</option>
- <option value="SCHEDULED">{{ i18n.t('admin.articles.scheduled') }}</option>
- <option value="REVIEW">{{ i18n.t('admin.articles.statusReview') }}</option>
- <option value="ARCHIVED">{{ i18n.t('admin.articles.archived') }}</option>
+ <option value="">{{ i18n.t('dev.articles.allStatus') }}</option>
+ <option value="PUBLISHED">{{ i18n.t('dev.articles.published') }}</option>
+ <option value="DRAFT">{{ i18n.t('dev.articles.draft') }}</option>
+ <option value="SCHEDULED">{{ i18n.t('dev.articles.scheduled') }}</option>
+ <option value="REVIEW">{{ i18n.t('dev.articles.statusReview') }}</option>
+ <option value="ARCHIVED">{{ i18n.t('dev.articles.archived') }}</option>
  </select>
  </div>
 
  <!-- Bulk Action Bar -->
  @if (selectedIds().size > 0) {
  <div class="bulk-bar">
- <span class="bulk-count">{{ selectedIds().size }} {{ i18n.t('admin.articles.selected') }}</span>
- <button class="btn btn-sm btn-outline" (click)="bulkAction('PUBLISHED')">{{ i18n.t('admin.articles.publish') }}</button>
- <button class="btn btn-sm btn-outline" (click)="bulkAction('DRAFT')">{{ i18n.t('admin.articles.draft') }}</button>
- <button class="btn btn-sm btn-outline" (click)="bulkAction('ARCHIVED')">{{ i18n.t('admin.articles.archived') }}</button>
+ <span class="bulk-count">{{ selectedIds().size }} {{ i18n.t('dev.articles.selected') }}</span>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('PUBLISHED')">{{ i18n.t('dev.articles.publish') }}</button>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('DRAFT')">{{ i18n.t('dev.articles.draft') }}</button>
+ <button class="btn btn-sm btn-outline" (click)="bulkAction('ARCHIVED')">{{ i18n.t('dev.articles.archived') }}</button>
  <button class="btn btn-sm btn-ghost" (click)="clearSelection()">{{ i18n.t('common.cancel') }}</button>
  </div>
  }
@@ -64,11 +64,11 @@
  <thead>
  <tr>
  <th class="col-check"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" /></th>
- <th>{{ i18n.t('admin.articles.titleColumn') }}</th>
+ <th>{{ i18n.t('dev.articles.titleColumn') }}</th>
  <th>{{ i18n.t('common.status') }}</th>
- <th>{{ i18n.t('admin.articles.viewsColumn') }}</th>
- <th>{{ i18n.t('admin.articles.commentsColumn') }}</th>
- <th>{{ i18n.t('admin.articles.publishedAt') }}</th>
+ <th>{{ i18n.t('dev.articles.viewsColumn') }}</th>
+ <th>{{ i18n.t('dev.articles.commentsColumn') }}</th>
+ <th>{{ i18n.t('dev.articles.publishedAt') }}</th>
  <th>{{ i18n.t('common.actions') }}</th>
  </tr>
  </thead>
@@ -118,7 +118,7 @@
  [class.action-btn--publish]="article.status === 'DRAFT'"
  [class.action-btn--unpublish]="article.status === 'PUBLISHED'"
  (click)="togglePublish(article)"
- [title]="article.status === 'PUBLISHED' ? i18n.t('admin.articles.unpublish') : i18n.t('admin.articles.publish')"
+ [title]="article.status === 'PUBLISHED' ? i18n.t('dev.articles.unpublish') : i18n.t('dev.articles.publish')"
  >
  @if (article.status === 'PUBLISHED') {
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -132,7 +132,7 @@
  </svg>
  }
  </button>
- <button class="action-btn" (click)="previewArticle(article)" [title]="i18n.t('admin.articleForm.preview')">
+ <button class="action-btn" (click)="previewArticle(article)" [title]="i18n.t('dev.articleForm.preview')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
  <circle cx="12" cy="12" r="3"/>
@@ -157,7 +157,7 @@
  } @empty {
  <tr>
  <td colspan="7" class="empty-message">
- {{ i18n.t('admin.articles.noArticles') }}
+ {{ i18n.t('dev.articles.noArticles') }}
  </td>
  </tr>
  }
