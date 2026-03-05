@@ -7,6 +7,7 @@ export class ProgressBarService {
   private pendingRequests = 0;
   private animationId: number | null = null;
   private completeTimeout: ReturnType<typeof setTimeout> | null = null;
+  private safetyTimeout: ReturnType<typeof setTimeout> | null = null;
 
   start(): void {
     this.pendingRequests++;
@@ -18,12 +19,15 @@ export class ProgressBarService {
       this.progress.set(0);
       this.visible.set(true);
       this.animateToTarget(70, 300);
+      // Safety: force-complete if stuck for more than 10s
+      this.resetSafetyTimeout();
     }
   }
 
   complete(): void {
     this.pendingRequests = Math.max(0, this.pendingRequests - 1);
     if (this.pendingRequests === 0) {
+      this.clearSafetyTimeout();
       this.cancelAnimation();
       this.progress.set(100);
       this.completeTimeout = setTimeout(() => {
@@ -31,6 +35,8 @@ export class ProgressBarService {
         this.progress.set(0);
         this.completeTimeout = null;
       }, 300);
+    } else {
+      this.resetSafetyTimeout();
     }
   }
 
@@ -73,6 +79,29 @@ export class ProgressBarService {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
+    }
+  }
+
+  private resetSafetyTimeout(): void {
+    this.clearSafetyTimeout();
+    this.safetyTimeout = setTimeout(() => {
+      if (this.pendingRequests > 0) {
+        this.pendingRequests = 0;
+        this.cancelAnimation();
+        this.progress.set(100);
+        this.completeTimeout = setTimeout(() => {
+          this.visible.set(false);
+          this.progress.set(0);
+          this.completeTimeout = null;
+        }, 300);
+      }
+    }, 10_000);
+  }
+
+  private clearSafetyTimeout(): void {
+    if (this.safetyTimeout) {
+      clearTimeout(this.safetyTimeout);
+      this.safetyTimeout = null;
     }
   }
 }
