@@ -1,0 +1,14 @@
+node_modules
+.git
+.github
+.angular
+dist
+coverage
+.env*
+*.md
+.vscode
+.idea
+.editorconfig
+*.log
+e2e
+.browserslistrc
