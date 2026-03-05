@@ -60,7 +60,7 @@ describe('unsavedChangesGuard', () => {
       unsavedChangesGuard(component, {} as any, mockState, mockState)
     );
 
-    expect(i18nSpy.t).toHaveBeenCalledWith('admin.articles.unsavedChanges');
+    expect(i18nSpy.t).toHaveBeenCalledWith('dev.articles.unsavedChanges');
     expect(confirmDialogService.confirm).toHaveBeenCalledWith(
       jasmine.objectContaining({ type: 'warning' })
     );

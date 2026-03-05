@@ -13,12 +13,20 @@ export class CommentService {
     );
   }
 
-  getCommentsPaged(articleSlug: string, page = 0, size = 20): Observable<PageResponse<CommentResponse>> {
-    return this.api.get<PageResponse<CommentResponse>>(`/articles/${articleSlug}/comments`, { page, size });
+  getCommentsPaged(articleSlug: string, page = 0, size = 20, sort = 'recent'): Observable<PageResponse<CommentResponse>> {
+    return this.api.get<PageResponse<CommentResponse>>(`/articles/${articleSlug}/comments`, { page, size, sort });
   }
 
   getCommentCount(articleSlug: string): Observable<number> {
     return this.api.get<number>(`/articles/${articleSlug}/comments/count`);
+  }
+
+  toggleCommentLike(articleSlug: string, commentId: string): Observable<{ liked: boolean; likesCount: number }> {
+    return this.api.post<{ liked: boolean; likesCount: number }>(`/articles/${articleSlug}/comments/${commentId}/like`);
+  }
+
+  getCommentLikeStatus(articleSlug: string, commentId: string): Observable<{ liked: boolean; likesCount: number }> {
+    return this.api.get<{ liked: boolean; likesCount: number }>(`/articles/${articleSlug}/comments/${commentId}/like/status`);
   }
 
   createComment(

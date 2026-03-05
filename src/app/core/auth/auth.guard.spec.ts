@@ -3,7 +3,7 @@ import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/ro
 import { AuthStore } from './auth.store';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
-import { authGuard, guestGuard, adminGuard, devGuard, editorGuard } from './auth.guard';
+import { authGuard, guestGuard, adminGuard, devGuard } from './auth.guard';
 import { UserResponse } from '../../models';
 import { of } from 'rxjs';
 
@@ -15,7 +15,7 @@ describe('Auth Guards', () => {
   const mockState = { url: '/admin/dashboard' } as RouterStateSnapshot;
   const mockRootState = { url: '/' } as RouterStateSnapshot;
 
-  const createUser = (role: 'ADMIN' | 'DEV' | 'EDITOR' | 'VIEWER'): UserResponse => ({
+  const createUser = (role: 'ADMIN' | 'DEV' | 'VIEWER'): UserResponse => ({
     id: '1840234567890123456',
     username: `${role.toLowerCase()}user`,
     email: `${role.toLowerCase()}@catananti.dev`,
@@ -48,7 +48,7 @@ describe('Auth Guards', () => {
   });
 
   /** Login and set a future token expiry so isTokenExpired() returns false */
-  function loginUser(role: 'ADMIN' | 'DEV' | 'EDITOR' | 'VIEWER') {
+  function loginUser(role: 'ADMIN' | 'DEV' | 'VIEWER') {
     store.login(createUser(role));
     store.setTokenExpiry(3600);
   }
@@ -143,17 +143,6 @@ describe('Auth Guards', () => {
       expect(router.navigate).toHaveBeenCalledWith(['/']);
     });
 
-    it('should block EDITOR role', () => {
-      loginUser('EDITOR');
-
-      const result = TestBed.runInInjectionContext(() =>
-        adminGuard(mockRoute, mockState)
-      );
-
-      expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/']);
-    });
-
     it('should block VIEWER role', () => {
       loginUser('VIEWER');
 
@@ -198,17 +187,6 @@ describe('Auth Guards', () => {
       expect(result).toBeTrue();
     });
 
-    it('should block EDITOR role', () => {
-      loginUser('EDITOR');
-
-      const result = TestBed.runInInjectionContext(() =>
-        devGuard(mockRoute, mockState)
-      );
-
-      expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/']);
-    });
-
     it('should block VIEWER role', () => {
       loginUser('VIEWER');
 
@@ -222,60 +200,6 @@ describe('Auth Guards', () => {
     it('should redirect unauthenticated to login', () => {
       const result = TestBed.runInInjectionContext(() =>
         devGuard(mockRoute, mockState)
-      );
-
-      expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/auth/login'], {
-        queryParams: { returnUrl: '/admin/dashboard' },
-      });
-    });
-  });
-
-  // ==========================================
-  // editorGuard
-  // ==========================================
-  describe('editorGuard', () => {
-    it('should allow ADMIN role', () => {
-      loginUser('ADMIN');
-
-      const result = TestBed.runInInjectionContext(() =>
-        editorGuard(mockRoute, mockState)
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should allow DEV role', () => {
-      loginUser('DEV');
-
-      const result = TestBed.runInInjectionContext(() =>
-        editorGuard(mockRoute, mockState)
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should allow EDITOR role', () => {
-      loginUser('EDITOR');
-
-      const result = TestBed.runInInjectionContext(() =>
-        editorGuard(mockRoute, mockState)
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should block VIEWER role', () => {
-      loginUser('VIEWER');
-
-      const result = TestBed.runInInjectionContext(() =>
-        editorGuard(mockRoute, mockState)
-      );
-
-      expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/']);
-    });
-
-    it('should redirect unauthenticated to login', () => {
-      const result = TestBed.runInInjectionContext(() =>
-        editorGuard(mockRoute, mockState)
       );
 
       expect(result).toBeFalse();

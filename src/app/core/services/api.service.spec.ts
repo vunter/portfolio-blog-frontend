@@ -117,7 +117,7 @@ describe('ApiService', () => {
 
   describe('patch', () => {
     it('should send PATCH with body', () => {
-      const body = { role: 'EDITOR' };
+      const body = { role: 'DEV' };
 
       service.patch('/admin/users/123/role', body).subscribe();
 

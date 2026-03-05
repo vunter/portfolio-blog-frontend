@@ -8,11 +8,12 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { UserResponse, PageResponse } from '../../../../models';
 
 @Component({
   selector: 'app-user-list',
-  imports: [FormsModule, PaginationComponent],
+  imports: [FormsModule, PaginationComponent, SkeletonComponent],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -85,7 +86,7 @@ export class UserListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.notification.error(this.i18n.t('admin.error.loadUsers'));
+          this.notification.error(this.i18n.t('dev.error.loadUsers'));
           this.loading.set(false);
           this.error.set(true);
         },
@@ -148,12 +149,17 @@ export class UserListComponent implements OnInit {
       type: user.active ? 'danger' : 'warning',
     });
     if (!confirmed) return;
+    const snapshot = this.users();
+    this.users.update(list =>
+      list.map(u => u.id === user.id ? { ...u, active: !user.active } : u)
+    );
+
     this.apiService.put(`/admin/users/${user.id}/${action}`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(user.active ? this.i18n.t('admin.users.deactivated') : this.i18n.t('admin.users.activated'));
-        this.loadUsers();
       },
       error: () => {
+        this.users.set(snapshot);
         this.notification.error(this.i18n.t('admin.users.toggleError'));
       },
     });
@@ -174,12 +180,15 @@ export class UserListComponent implements OnInit {
     });
     if (!confirmed) return;
 
+    const snapshot = this.users();
+    this.users.update(list => list.filter(u => u.id !== user.id));
+
     this.apiService.delete(`/admin/users/${user.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.users.deleteSuccess'));
-        this.loadUsers();
       },
-      error: (err) => {
+      error: () => {
+        this.users.set(snapshot);
         this.notification.error(this.i18n.t('admin.users.deleteError'));
       },
     });
@@ -189,7 +198,6 @@ export class UserListComponent implements OnInit {
     const labels: Record<string, string> = {
       ADMIN: this.i18n.t('admin.users.admin'),
       DEV: this.i18n.t('admin.users.dev'),
-      EDITOR: this.i18n.t('admin.users.editor'),
       VIEWER: this.i18n.t('admin.users.viewer'),
     };
     return labels[role] || role;

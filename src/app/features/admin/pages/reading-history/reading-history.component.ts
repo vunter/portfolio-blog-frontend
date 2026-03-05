@@ -58,7 +58,7 @@ export class ReadingHistoryComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.readingHistory.loadError'));
+        this.notification.error(this.i18n.t('account.readingHistory.loadError'));
         this.loading.set(false);
         this.error.set(true);
       },
@@ -72,9 +72,9 @@ export class ReadingHistoryComponent implements OnInit {
 
   async clearHistory(): Promise<void> {
     const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('admin.readingHistory.clearHistory'),
-      message: this.i18n.t('admin.readingHistory.confirmClear'),
-      confirmText: this.i18n.t('admin.readingHistory.clearHistory'),
+      title: this.i18n.t('account.readingHistory.clearHistory'),
+      message: this.i18n.t('account.readingHistory.confirmClear'),
+      confirmText: this.i18n.t('account.readingHistory.clearHistory'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'danger',
     });
@@ -86,10 +86,10 @@ export class ReadingHistoryComponent implements OnInit {
         this.totalElements.set(0);
         this.totalPages.set(0);
         this.currentPage.set(0);
-        this.notification.success(this.i18n.t('admin.readingHistory.cleared'));
+        this.notification.success(this.i18n.t('account.readingHistory.cleared'));
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.readingHistory.clearError'));
+        this.notification.error(this.i18n.t('account.readingHistory.clearError'));
       },
     });
   }

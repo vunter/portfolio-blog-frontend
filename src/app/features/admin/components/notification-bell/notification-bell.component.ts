@@ -18,10 +18,10 @@ import { I18nService } from '../../../../core/services/i18n.service';
     @if (open()) {
       <div class="dropdown" (click)="$event.stopPropagation()">
         <div class="dropdown__header">
-          <span class="dropdown__title">{{ i18n.t('admin.notifications.title') }}</span>
+          <span class="dropdown__title">{{ i18n.t('account.notifications.title') }}</span>
           @if (notifications.hasUnread()) {
             <button class="dropdown__mark-read" (click)="notifications.markAllRead()">
-              {{ i18n.t('admin.notifications.markAllRead') }}
+              {{ i18n.t('account.notifications.markAllRead') }}
             </button>
           }
         </div>
@@ -35,13 +35,13 @@ import { I18nService } from '../../../../core/services/i18n.service';
               </div>
             </div>
           } @empty {
-            <div class="dropdown__empty">{{ i18n.t('admin.notifications.empty') }}</div>
+            <div class="dropdown__empty">{{ i18n.t('account.notifications.empty') }}</div>
           }
         </div>
         @if (notifications.events().length > 0) {
           <div class="dropdown__footer">
             <button class="dropdown__clear" (click)="notifications.clearEvents(); open.set(false)">
-              {{ i18n.t('admin.notifications.clearAll') }}
+              {{ i18n.t('account.notifications.clearAll') }}
             </button>
           </div>
         }
@@ -236,7 +236,7 @@ export class NotificationBellComponent {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return this.i18n.t('admin.notifications.justNow');
+    if (minutes < 1) return this.i18n.t('account.notifications.justNow');
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h`;

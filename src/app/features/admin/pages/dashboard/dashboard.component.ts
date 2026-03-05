@@ -6,11 +6,12 @@ import { AdminApiService, DashboardStats, DashboardActivity } from '../../servic
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, SkeletonComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,7 +46,7 @@ export class DashboardComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadDashboard'));
+        this.notification.error(this.i18n.t('dev.error.loadDashboard'));
         this.loading.set(false);
         this.error.set(true);
       },
@@ -70,10 +71,10 @@ export class DashboardComponent implements OnInit {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return this.i18n.t('admin.dashboard.justNow');
-    if (diffMins < 60) return `${diffMins}${this.i18n.t('admin.dashboard.minAgo')}`;
-    if (diffHours < 24) return `${diffHours}${this.i18n.t('admin.dashboard.hAgo')}`;
-    if (diffDays < 7) return `${diffDays}${this.i18n.t('admin.dashboard.dAgo')}`;
+    if (diffMins < 1) return this.i18n.t('dev.dashboard.justNow');
+    if (diffMins < 60) return `${diffMins}${this.i18n.t('dev.dashboard.minAgo')}`;
+    if (diffHours < 24) return `${diffHours}${this.i18n.t('dev.dashboard.hAgo')}`;
+    if (diffDays < 7) return `${diffDays}${this.i18n.t('dev.dashboard.dAgo')}`;
     return date.toLocaleDateString(getDateLocale(this.i18n.language()));
   }
 }

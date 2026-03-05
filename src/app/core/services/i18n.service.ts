@@ -1,36 +1,64 @@
 ﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { en } from './i18n/en';
 import { CookieConsentService } from './cookie-consent.service';
 
-export type Language = 'en' | 'pt' | 'es' | 'it';
+export type Language = string;
+
+export interface LanguageOption {
+  code: string;
+  name: string;
+  nativeName: string;
+  sortOrder: number;
+}
 
 type Translations = Record<string, string>;
 
+const DEFAULT_LANGUAGES: LanguageOption[] = [
+  { code: 'en', name: 'English', nativeName: 'English', sortOrder: 0 },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português', sortOrder: 1 },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', sortOrder: 2 },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano', sortOrder: 3 },
+];
+
+const LANG_CACHE_KEY = 'supported-languages';
+const LANG_CACHE_TTL = 3600_000; // 1h
+const I18N_CACHE_PREFIX = 'i18n-';
+const I18N_CACHE_TTL = 86400_000; // 24h
+
 /**
- * Lazy-loaded i18n service.
- * English is bundled inline (default); other locales are loaded on demand
- * via dynamic import(), reducing initial bundle by ~50%.
- *
- * M-01: Uses platform checks instead of direct localStorage access
- * for SSR safety (StorageService uses JSON.parse which would mangle plain strings).
+ * DB-driven i18n service.
+ * English is bundled inline (always available fallback).
+ * Other locales fetched from GET /api/v1/i18n/{locale} — response adapts by user role.
+ * Cached in localStorage with 24h TTL. Re-fetches on auth state change.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class I18nService {
   private readonly STORAGE_KEY = 'app-language';
-  private readonly cache = new Map<Language, Translations>([['en', en]]);
-  private readonly loadedTranslations = signal<Translations>(en);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly consent = inject(CookieConsentService);
+  private readonly http = inject(HttpClient);
+
+  private readonly loadedTranslations = signal<Translations>(en);
+  private currentTier = 'public';
+
+  /** Dynamic supported languages from backend */
+  readonly supportedLanguages = signal<LanguageOption[]>(DEFAULT_LANGUAGES);
+  readonly supportedCodes = computed(() => this.supportedLanguages().map(l => l.code));
 
   readonly language = signal<Language>(this.getInitialLanguage());
   readonly isEnglish = computed(() => this.language() === 'en');
+  readonly translationsLoading = signal(false);
+  readonly translationsReady = signal(true);
 
   constructor() {
-    // Persist language preference and load translations
-    // M-01: Use isBrowser check instead of raw typeof localStorage
+    if (this.isBrowser) {
+      this.fetchSupportedLanguages();
+    }
+
     effect(() => {
       const currentLang = this.language();
       if (this.isBrowser && this.consent.hasConsent('functional')) {
@@ -43,43 +71,24 @@ export class I18nService {
     });
   }
 
-  private getInitialLanguage(): Language {
-    // M-01: Use isBrowser property for SSR safety
-    if (!this.isBrowser) return 'en';
-    const stored = localStorage.getItem(this.STORAGE_KEY) as Language | null;
-    const supported: Language[] = ['en', 'pt', 'es', 'it'];
-    if (stored && supported.includes(stored)) {
-      return stored;
+  /** Call after login/logout/role change to re-fetch translations with new tier */
+  refreshTranslations(tier?: string): void {
+    if (tier) {
+      this.currentTier = tier;
     }
-    // BUG-07: Always default to 'en' when no explicit preference is stored.
-    // Browser locale detection caused unexpected language changes for users
-    // who never explicitly chose a language.
-    return 'en';
-  }
-
-  private loadTranslations(lang: Language): void {
-    if (this.cache.has(lang)) {
-      this.loadedTranslations.set(this.cache.get(lang)!);
-      return;
-    }
-
-    // Dynamic import creates a separate chunk per locale
-    const loader = this.getLoader(lang);
-    if (loader) {
-      loader.then((mod) => {
-        const translations = mod[lang] as Translations;
-        this.cache.set(lang, translations);
-        this.loadedTranslations.set(translations);
-      });
+    const lang = this.language();
+    if (lang !== 'en') {
+      // Clear cached translations for this locale to force re-fetch
+      this.clearI18nCache(lang);
+      this.loadTranslations(lang);
     }
   }
 
-  private getLoader(lang: Language): Promise<Record<string, Translations>> | null {
-    switch (lang) {
-      case 'pt': return import('./i18n/pt');
-      case 'es': return import('./i18n/es');
-      case 'it': return import('./i18n/it');
-      default: return null;
+  /** Set current auth tier for caching */
+  setAuthTier(tier: string): void {
+    if (tier !== this.currentTier) {
+      this.currentTier = tier;
+      this.refreshTranslations();
     }
   }
 
@@ -95,12 +104,116 @@ export class I18nService {
   }
 
   toggleLanguage(): void {
-    const langs: Language[] = ['en', 'pt', 'es', 'it'];
-    const idx = langs.indexOf(this.language());
-    this.language.set(langs[(idx + 1) % langs.length]);
+    const codes = this.supportedCodes();
+    const idx = codes.indexOf(this.language());
+    this.language.set(codes[(idx + 1) % codes.length]);
   }
 
   setLanguage(lang: Language): void {
     this.language.set(lang);
+  }
+
+  fetchSupportedLanguages(): void {
+    // Check localStorage cache
+    const cached = this.getCachedJson<{ data: LanguageOption[]; ts: number }>(LANG_CACHE_KEY);
+    if (cached && Date.now() - cached.ts < LANG_CACHE_TTL) {
+      this.supportedLanguages.set(cached.data);
+    }
+
+    this.http.get<LanguageOption[]>('/api/v1/languages').subscribe({
+      next: (langs) => {
+        if (langs?.length) {
+          this.supportedLanguages.set(langs);
+          this.setCachedJson(LANG_CACHE_KEY, { data: langs, ts: Date.now() });
+        }
+      },
+      error: () => { /* keep defaults/cached */ },
+    });
+  }
+
+  private getInitialLanguage(): Language {
+    if (!this.isBrowser) return 'en';
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    if (stored) return stored;
+    return this.detectBrowserLanguage();
+  }
+
+  private detectBrowserLanguage(): Language {
+    const supported = this.supportedCodes();
+    const browserLangs = navigator.languages ?? [navigator.language];
+    for (const lang of browserLangs) {
+      const short = lang.split('-')[0].toLowerCase();
+      if (supported.includes(short)) return short;
+    }
+    return 'en';
+  }
+
+  private loadTranslations(lang: Language): void {
+    if (lang === 'en') {
+      this.loadedTranslations.set(en);
+      this.translationsReady.set(true);
+      this.translationsLoading.set(false);
+      return;
+    }
+
+    // Check localStorage cache
+    const cacheKey = `${I18N_CACHE_PREFIX}${lang}-${this.currentTier}`;
+    const cached = this.getCachedJson<{ data: Translations; ts: number }>(cacheKey);
+    if (cached && Date.now() - cached.ts < I18N_CACHE_TTL) {
+      // Merge with en fallback
+      this.loadedTranslations.set({ ...en, ...cached.data });
+      this.translationsReady.set(true);
+      this.translationsLoading.set(false);
+      // Background refresh
+      this.fetchFromApi(lang, cacheKey, true);
+      return;
+    }
+
+    // No cache — show loading state
+    this.translationsLoading.set(true);
+    this.translationsReady.set(false);
+    this.fetchFromApi(lang, cacheKey, false);
+  }
+
+  private fetchFromApi(lang: string, cacheKey: string, isBackground: boolean): void {
+    this.http.get<Translations>(`/api/v1/i18n/${lang}`).subscribe({
+      next: (translations) => {
+        if (translations && Object.keys(translations).length > 0) {
+          this.setCachedJson(cacheKey, { data: translations, ts: Date.now() });
+          this.loadedTranslations.set({ ...en, ...translations });
+        }
+        this.translationsReady.set(true);
+        this.translationsLoading.set(false);
+      },
+      error: () => {
+        // Fallback to English if API is down
+        if (!isBackground) {
+          this.loadedTranslations.set(en);
+          this.translationsReady.set(true);
+          this.translationsLoading.set(false);
+        }
+      },
+    });
+  }
+
+  private clearI18nCache(lang: string): void {
+    if (!this.isBrowser) return;
+    // Remove all cached tiers for this locale
+    for (const tier of ['public', 'viewer', 'dev', 'admin']) {
+      try { localStorage.removeItem(`${I18N_CACHE_PREFIX}${lang}-${tier}`); } catch {}
+    }
+  }
+
+  private getCachedJson<T>(key: string): T | null {
+    if (!this.isBrowser) return null;
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  private setCachedJson(key: string, value: unknown): void {
+    if (!this.isBrowser) return;
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
   }
 }

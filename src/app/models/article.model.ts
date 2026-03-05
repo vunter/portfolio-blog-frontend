@@ -165,6 +165,7 @@ export interface CommentResponse {
   content: string;
   status: CommentStatus;
   parentId?: string;
+  likesCount?: number;
   replies?: CommentResponse[];
   createdAt: string;
   updatedAt: string;

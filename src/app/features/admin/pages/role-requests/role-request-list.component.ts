@@ -6,9 +6,11 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { RoleUpgradeRequestResponse } from '../../../../models';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-role-request-list',
+  imports: [SkeletonComponent],
   templateUrl: './role-request-list.component.html',
   styleUrl: './role-request-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,15 +62,18 @@ export class RoleRequestListComponent implements OnInit {
     });
     if (!confirmed) return;
 
+    const snapshot = this.requests();
+    this.requests.update(list => list.filter(r => r.id !== req.id));
+
     this.apiService
       .put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${req.id}/approve`, {})
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.notification.success(this.i18n.t('admin.roleRequests.approved'));
-          this.loadRequests();
         },
         error: () => {
+          this.requests.set(snapshot);
           this.notification.error(this.i18n.t('admin.roleRequests.approveError'));
         },
       });
@@ -86,15 +91,18 @@ export class RoleRequestListComponent implements OnInit {
     });
     if (!confirmed) return;
 
+    const snapshot = this.requests();
+    this.requests.update(list => list.filter(r => r.id !== req.id));
+
     this.apiService
       .put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${req.id}/reject`, {})
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.notification.success(this.i18n.t('admin.roleRequests.rejected'));
-          this.loadRequests();
         },
         error: () => {
+          this.requests.set(snapshot);
           this.notification.error(this.i18n.t('admin.roleRequests.rejectError'));
         },
       });

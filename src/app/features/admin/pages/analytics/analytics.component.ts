@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminApiService, AnalyticsSummary, SearchAnalytics, AnalyticsComparison } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 
 // INC-04: Mapped analytics data matching backend AnalyticsSummary DTO
 interface AnalyticsData {
@@ -13,11 +14,12 @@ interface AnalyticsData {
   topArticles: { articleId: string; title: string; slug: string; views: number }[];
   dailyViews: { date: string; count: number }[];
   topReferrers: { referrer: string; count: number }[];
+  topSources: { source: string; medium: string; count: number }[];
 }
 
 @Component({
   selector: 'app-analytics',
-  imports: [],
+  imports: [SkeletonComponent],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +38,7 @@ export class AnalyticsComponent implements OnInit {
   period = signal('30d');
   maxViews = signal(0);
   maxReferrerCount = signal(0);
+  maxSourceCount = signal(0);
 
   readonly viewsChange = computed(() => this.calcChange(this.comparison()?.currentViews, this.comparison()?.previousViews));
   readonly likesChange = computed(() => this.calcChange(this.comparison()?.currentLikes, this.comparison()?.previousLikes));
@@ -85,16 +88,19 @@ export class AnalyticsComponent implements OnInit {
             topArticles: summary.topArticles ?? [],
             dailyViews: summary.dailyViews ?? [],
             topReferrers: summary.topReferrers ?? [],
+            topSources: summary.topSources ?? [],
           };
           this.data.set(mapped);
           const viewCounts = mapped.dailyViews?.map((d) => d.count) ?? [];
           this.maxViews.set(viewCounts.length > 0 ? Math.max(...viewCounts) : 0);
           const refCounts = mapped.topReferrers?.map((r) => r.count) ?? [];
           this.maxReferrerCount.set(refCounts.length > 0 ? Math.max(...refCounts) : 0);
+          const srcCounts = mapped.topSources?.map((s) => s.count) ?? [];
+          this.maxSourceCount.set(srcCounts.length > 0 ? Math.max(...srcCounts) : 0);
           this.loading.set(false);
         },
         error: () => {
-          this.notification.error(this.i18n.t('admin.error.loadAnalytics'));
+          this.notification.error(this.i18n.t('dev.error.loadAnalytics'));
           this.loading.set(false);
           this.error.set(true);
         },
@@ -119,6 +125,21 @@ export class AnalyticsComponent implements OnInit {
     const max = this.maxReferrerCount();
     if (max === 0) return 5;
     return Math.max((count / max) * 100, 5);
+  }
+
+  getSourceWidth(count: number): number {
+    const max = this.maxSourceCount();
+    if (max === 0) return 5;
+    return Math.max((count / max) * 100, 5);
+  }
+
+  getSourceIcon(source: string): string {
+    const icons: Record<string, string> = {
+      twitter: '𝕏', facebook: '📘', linkedin: '💼',
+      clipboard: '📋', native: '📤', email: '📧',
+      google: '🔍', reddit: '🔗', whatsapp: '💬',
+    };
+    return icons[source?.toLowerCase()] ?? '🌐';
   }
 
   formatNumber(num: number): string {

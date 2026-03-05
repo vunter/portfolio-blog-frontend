@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
-import { authGuard, adminGuard, editorGuard } from '../../core/auth/auth.guard';
+import { authGuard, adminGuard, devGuard } from '../../core/auth/auth.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const adminRoutes: Routes = [
@@ -17,12 +17,12 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'dashboard',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.dashboard' },
+        data: { breadcrumb: 'dev.sidebar.dashboard' },
       },
       {
         path: 'profile',
@@ -30,54 +30,54 @@ export const adminRoutes: Routes = [
           import('./pages/profile/profile.component').then(
             (m) => m.ProfileComponent
           ),
-        data: { breadcrumb: 'admin.profile.title' },
+        data: { breadcrumb: 'account.profile.title' },
       },
       {
         path: 'articles',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/articles/article-list.component').then(
             (m) => m.ArticleListComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.articles' },
+        data: { breadcrumb: 'dev.sidebar.articles' },
       },
       {
         path: 'articles/new',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/articles/article-form.component').then(
             (m) => m.ArticleFormComponent
           ),
         canDeactivate: [unsavedChangesGuard],
-        data: { breadcrumb: 'admin.articleForm.newArticle' },
+        data: { breadcrumb: 'dev.articleForm.newArticle' },
       },
       {
         path: 'articles/:id/edit',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/articles/article-form.component').then(
             (m) => m.ArticleFormComponent
           ),
         canDeactivate: [unsavedChangesGuard],
-        data: { breadcrumb: 'admin.articleForm.editTitle' },
+        data: { breadcrumb: 'dev.articleForm.editTitle' },
       },
       {
         path: 'tags',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/tags/tag-list.component').then(
             (m) => m.TagListComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.tags' },
+        data: { breadcrumb: 'dev.sidebar.tags' },
       },
       {
         path: 'comments',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/comments/comment-list.component').then(
             (m) => m.CommentListComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.comments' },
+        data: { breadcrumb: 'dev.sidebar.comments' },
       },
       {
         path: 'users',
@@ -99,12 +99,12 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'analytics',
-        canActivate: [editorGuard],
+        canActivate: [devGuard],
         loadComponent: () =>
           import('./pages/analytics/analytics.component').then(
             (m) => m.AnalyticsComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.analytics' },
+        data: { breadcrumb: 'dev.sidebar.analytics' },
       },
       {
         path: 'newsletter',
@@ -139,7 +139,7 @@ export const adminRoutes: Routes = [
           import('./pages/security/security-settings.component').then(
             (m) => m.SecuritySettingsComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.security' },
+        data: { breadcrumb: 'account.sidebar.security' },
       },
       {
         path: 'reading-history',
@@ -147,7 +147,7 @@ export const adminRoutes: Routes = [
           import('./pages/reading-history/reading-history.component').then(
             (m) => m.ReadingHistoryComponent
           ),
-        data: { breadcrumb: 'admin.sidebar.readingHistory' },
+        data: { breadcrumb: 'account.sidebar.readingHistory' },
       },
     ],
   },

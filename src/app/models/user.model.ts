@@ -35,8 +35,8 @@ export interface RegisterRequest {
   recaptchaToken?: string;
 }
 
-export type Role = 'ADMIN' | 'DEV' | 'EDITOR' | 'VIEWER';
-export const ROLES: readonly Role[] = ['ADMIN', 'DEV', 'EDITOR', 'VIEWER'] as const;
+export type Role = 'ADMIN' | 'DEV' | 'VIEWER';
+export const ROLES: readonly Role[] = ['ADMIN', 'DEV', 'VIEWER'] as const;
 
 // ============================================
 // USER

@@ -7,15 +7,15 @@
  </svg>
  </div>
  <div class="setup-banner__content">
- <h3>{{ i18n.t('admin.profile.setupTitle') }}</h3>
- <p>{{ i18n.t('admin.profile.setupMessage') }}</p>
+ <h3>{{ i18n.t('account.profile.setupTitle') }}</h3>
+ <p>{{ i18n.t('account.profile.setupMessage') }}</p>
  </div>
  </div>
  }
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('admin.profile.title') }}</h1>
- <p class="subtitle">{{ i18n.t('admin.profile.subtitle') }}</p>
+ <h1>{{ i18n.t('account.profile.title') }}</h1>
+ <p class="subtitle">{{ i18n.t('account.profile.subtitle') }}</p>
  </div>
  </header>
 
@@ -49,7 +49,7 @@
  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
  <circle cx="12" cy="13" r="4"/>
  </svg>
- <span>{{ i18n.t('admin.profile.changeAvatar') }}</span>
+ <span>{{ i18n.t('account.profile.changeAvatar') }}</span>
  </div>
  </div>
  <input
@@ -61,9 +61,9 @@
  (change)="onAvatarFileSelected($event)"
  />
  <div class="avatar-info">
- <h3>{{ form.name || i18n.t('admin.profile.unnamed') }}</h3>
+ <h3>{{ form.name || i18n.t('account.profile.unnamed') }}</h3>
  <span class="role-badge">{{ user()?.role }}</span>
- <p class="member-since">{{ i18n.t('admin.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
+ <p class="member-since">{{ i18n.t('account.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
  </div>
  </div>
  </div>
@@ -72,21 +72,21 @@
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>
- {{ i18n.t('admin.profile.personalInfo') }}
+ {{ i18n.t('account.profile.personalInfo') }}
  </h2>
 
  <!-- Account fields -->
- <h3 class="subsection-title">{{ i18n.t('admin.profile.accountInfo') }}</h3>
+ <h3 class="subsection-title">{{ i18n.t('account.profile.accountInfo') }}</h3>
 
  <div class="form-group">
- <label for="name">{{ i18n.t('admin.profile.nameLabel') }} <span class="required">*</span></label>
+ <label for="name">{{ i18n.t('account.profile.nameLabel') }} <span class="required">*</span></label>
  <input
  type="text"
  id="name"
  name="name"
  [(ngModel)]="form.name"
  [class.input-error]="fieldErrors()['name'] || (formSubmitted() && !form.name)"
- [placeholder]="i18n.t('admin.profile.namePlaceholder')"
+ [placeholder]="i18n.t('account.profile.namePlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['name']) {
@@ -97,7 +97,7 @@
  </div>
 
   <div class="form-group">
-  <label for="email">{{ i18n.t('admin.profile.emailLabel') }} <span class="required">*</span></label>
+  <label for="email">{{ i18n.t('account.profile.emailLabel') }} <span class="required">*</span></label>
   <div class="field-with-action">
   <input
   type="email"
@@ -105,13 +105,13 @@
   name="email"
   [(ngModel)]="form.email"
   [class.input-error]="fieldErrors()['email']"
-  [placeholder]="i18n.t('admin.profile.emailPlaceholder')"
+  [placeholder]="i18n.t('account.profile.emailPlaceholder')"
   [disabled]="saving()"
   [readonly]="!editingEmail()"
   [class.field-readonly]="!editingEmail()"
   />
   @if (!editingEmail()) {
-  <button type="button" class="btn-edit-field" (click)="enableEditEmail()" [title]="i18n.t('admin.profile.editEmail')">
+  <button type="button" class="btn-edit-field" (click)="enableEditEmail()" [title]="i18n.t('account.profile.editEmail')">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
   </button>
   } @else {
@@ -122,12 +122,12 @@
   <span class="field-error">{{ fieldErrors()['email'] }}</span>
   }
   @if (editingEmail()) {
-  <span class="field-hint-secure">{{ i18n.t('admin.profile.emailChangeRequiresVerification') }}</span>
+  <span class="field-hint-secure">{{ i18n.t('account.profile.emailChangeRequiresVerification') }}</span>
   }
   </div>
 
   <div class="form-group">
-  <label for="username">{{ i18n.t('admin.profile.usernameLabel') }}</label>
+  <label for="username">{{ i18n.t('account.profile.usernameLabel') }}</label>
   <div class="field-with-action">
   <input
   type="text"
@@ -135,13 +135,13 @@
   name="username"
   [(ngModel)]="form.username"
   [class.input-error]="fieldErrors()['username']"
-  [placeholder]="i18n.t('admin.profile.usernamePlaceholder')"
+  [placeholder]="i18n.t('account.profile.usernamePlaceholder')"
   [disabled]="saving()"
   [readonly]="!editingUsername()"
   [class.field-readonly]="!editingUsername()"
   />
   @if (!editingUsername()) {
-  <button type="button" class="btn-edit-field" (click)="enableEditUsername()" [title]="i18n.t('admin.profile.editUsername')">
+  <button type="button" class="btn-edit-field" (click)="enableEditUsername()" [title]="i18n.t('account.profile.editUsername')">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
   </button>
   } @else {
@@ -157,7 +157,7 @@
   <div class="form-group sensitive-password-group">
   <label for="sensitivePassword">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-  {{ i18n.t('admin.profile.passwordRequiredForChange') }}
+  {{ i18n.t('account.profile.passwordRequiredForChange') }}
   </label>
   <div class="field-with-action">
   <input
@@ -166,11 +166,11 @@
   name="sensitivePassword"
   [ngModel]="sensitivePassword()"
   (ngModelChange)="sensitivePassword.set($event)"
-  [placeholder]="i18n.t('admin.profile.enterPasswordToConfirm')"
+  [placeholder]="i18n.t('account.profile.enterPasswordToConfirm')"
   [disabled]="saving()"
   (keydown.enter)="confirmSensitiveChange()"
   />
-  <button type="button" class="btn-confirm-field" (click)="confirmSensitiveChange()" [disabled]="saving() || !sensitivePassword()" [title]="i18n.t('admin.profile.confirmChange')">
+  <button type="button" class="btn-confirm-field" (click)="confirmSensitiveChange()" [disabled]="saving() || !sensitivePassword()" [title]="i18n.t('account.profile.confirmChange')">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
   </button>
   </div>
@@ -178,26 +178,26 @@
   }
 
  <div class="form-group">
- <label for="avatarUrl">{{ i18n.t('admin.profile.avatarLabel') }}</label>
+ <label for="avatarUrl">{{ i18n.t('account.profile.avatarLabel') }}</label>
  <input
  type="url"
  id="avatarUrl"
  name="avatarUrl"
  [(ngModel)]="form.avatarUrl"
- [placeholder]="i18n.t('admin.profile.avatarPlaceholder')"
+ [placeholder]="i18n.t('account.profile.avatarPlaceholder')"
  [disabled]="saving()"
  />
- <span class="form-hint">{{ i18n.t('admin.profile.avatarHint') }}</span>
+ <span class="form-hint">{{ i18n.t('account.profile.avatarHint') }}</span>
  </div>
 
  <div class="form-group">
- <label for="bio">{{ i18n.t('admin.profile.bioLabel') }}</label>
+ <label for="bio">{{ i18n.t('account.profile.bioLabel') }}</label>
  <textarea
  id="bio"
  name="bio"
  [(ngModel)]="form.bio"
  rows="4"
- [placeholder]="i18n.t('admin.profile.bioPlaceholder')"
+ [placeholder]="i18n.t('account.profile.bioPlaceholder')"
  [disabled]="saving()"
  ></textarea>
  </div>
@@ -206,8 +206,8 @@
  @if (resumeProfile(); as rp) {
  @if (!rp.loading()) {
  <div class="section-divider"></div>
- <h3 class="subsection-title">{{ i18n.t('admin.profile.resumeContact') }}</h3>
- <p class="section-hint">{{ i18n.t('admin.profile.resumeContactHint') }}</p>
+ <h3 class="subsection-title">{{ i18n.t('account.profile.resumeContact') }}</h3>
+ <p class="section-hint">{{ i18n.t('account.profile.resumeContactHint') }}</p>
 
  <div class="form-grid-2col">
  <div class="form-group">
@@ -254,9 +254,9 @@
  <button type="button" class="btn btn-primary" (click)="saveAll()" [disabled]="saving() || resumeProfile()?.saving() || hcRef()?.saving()">
  @if (saving() || resumeProfile()?.saving() || hcRef()?.saving()) {
  <span class="spinner-sm"></span>
- {{ i18n.t('admin.profile.saving') }}
+ {{ i18n.t('account.profile.saving') }}
  } @else {
- {{ i18n.t('admin.profile.saveAll') }}
+ {{ i18n.t('account.profile.saveAll') }}
  }
  </button>
  </div>
@@ -265,9 +265,9 @@
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>
- {{ i18n.t('admin.profile.homeCustomization') }}
+ {{ i18n.t('account.profile.homeCustomization') }}
  </h2>
- <p class="section-hint">{{ i18n.t('admin.profile.homeCustomizationHint') }}</p>
+ <p class="section-hint">{{ i18n.t('account.profile.homeCustomizationHint') }}</p>
  <app-home-customization [showFabs]="false" [showActions]="false" />
  </div>
 
@@ -278,19 +278,19 @@
  <div class="form-card">
  <h2>
  <span class="section-icon"></span>
- {{ i18n.t('admin.profile.changePassword') }}
+ {{ i18n.t('account.profile.changePassword') }}
  </h2>
- <p class="section-hint">{{ i18n.t('admin.profile.passwordHint') }}</p>
+ <p class="section-hint">{{ i18n.t('account.profile.passwordHint') }}</p>
 
  <div class="form-group">
- <label for="currentPassword">{{ i18n.t('admin.profile.currentPassword') }}</label>
+ <label for="currentPassword">{{ i18n.t('account.profile.currentPassword') }}</label>
  <input
  type="password"
  id="currentPassword"
  name="currentPassword"
  [(ngModel)]="form.currentPassword"
  [class.input-error]="fieldErrors()['currentPassword']"
- [placeholder]="i18n.t('admin.profile.currentPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.currentPasswordPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['currentPassword']) {
@@ -299,14 +299,14 @@
  </div>
 
  <div class="form-group">
- <label for="newPassword">{{ i18n.t('admin.profile.newPassword') }}</label>
+ <label for="newPassword">{{ i18n.t('account.profile.newPassword') }}</label>
  <input
  type="password"
  id="newPassword"
  name="newPassword"
  [(ngModel)]="form.newPassword"
  [class.input-error]="fieldErrors()['newPassword'] || fieldErrors()['password']"
- [placeholder]="i18n.t('admin.profile.newPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.newPasswordPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['newPassword'] || fieldErrors()['password']) {
@@ -315,14 +315,14 @@
  </div>
 
  <div class="form-group">
- <label for="confirmPassword">{{ i18n.t('admin.profile.confirmNewPassword') }}</label>
+ <label for="confirmPassword">{{ i18n.t('account.profile.confirmNewPassword') }}</label>
  <input
  type="password"
  id="confirmPassword"
  name="confirmPassword"
  [(ngModel)]="form.confirmPassword"
  [class.input-error]="fieldErrors()['confirmPassword']"
- [placeholder]="i18n.t('admin.profile.confirmPasswordPlaceholder')"
+ [placeholder]="i18n.t('account.profile.confirmPasswordPlaceholder')"
  [disabled]="saving()"
  />
  @if (fieldErrors()['confirmPassword']) {
@@ -334,9 +334,9 @@
  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
  @if (saving()) {
  <span class="spinner-sm"></span>
- {{ i18n.t('admin.profile.saving') }}
+ {{ i18n.t('account.profile.saving') }}
  } @else {
- {{ i18n.t('admin.profile.save') }}
+ {{ i18n.t('account.profile.save') }}
  }
  </button>
  </div>
@@ -345,20 +345,20 @@
 
  <!-- Consolidated Floating Action Buttons (top→bottom: Save, Preview, Generate Resume) -->
  <div class="fab-group">
- <button type="button" class="fab-btn fab-save" (click)="saveAll()" [disabled]="saving() || resumeProfile()?.saving() || hcRef()?.saving()" [title]="i18n.t('admin.profile.saveAll')">
+ <button type="button" class="fab-btn fab-save" (click)="saveAll()" [disabled]="saving() || resumeProfile()?.saving() || hcRef()?.saving()" [title]="i18n.t('account.profile.saveAll')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
  <polyline points="17 21 17 13 7 13 7 21"></polyline>
  <polyline points="7 3 7 8 15 8"></polyline>
  </svg>
- <span class="fab-label">{{ i18n.t('admin.profile.saveAll') }}</span>
+ <span class="fab-label">{{ i18n.t('account.profile.saveAll') }}</span>
  </button>
- <button type="button" class="fab-btn fab-preview" (click)="hcRef()?.openPreview()" [title]="i18n.t('admin.profile.hcPreview')">
+ <button type="button" class="fab-btn fab-preview" (click)="hcRef()?.openPreview()" [title]="i18n.t('account.profile.hcPreview')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
  <circle cx="12" cy="12" r="3"></circle>
  </svg>
- <span class="fab-label">{{ i18n.t('admin.profile.hcPreview') }}</span>
+ <span class="fab-label">{{ i18n.t('account.profile.hcPreview') }}</span>
  </button>
  <a routerLink="/resume/generate" class="fab-btn fab-generate" [title]="i18n.t('resume.profile.generateResume')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

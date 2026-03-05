@@ -9,7 +9,7 @@
  {{ i18n.t('common.back') }}
  </a>
  }
- <h1>{{ isEditMode() ? i18n.t('admin.articleForm.editTitle') : i18n.t('admin.articleForm.newTitle') }}</h1>
+ <h1>{{ isEditMode() ? i18n.t('dev.articleForm.editTitle') : i18n.t('dev.articleForm.newTitle') }}</h1>
  </div>
  <div class="actions">
  <!-- Auto-save status -->
@@ -17,47 +17,47 @@
  <span class="auto-save-status" [class.saved]="autoSaveStatus() === 'saved'" [class.saving]="autoSaveStatus() === 'saving'">
  @if (autoSaveStatus() === 'saving') {
  <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
- {{ i18n.t('admin.articleForm.autoSaving') }}
+ {{ i18n.t('dev.articleForm.autoSaving') }}
  } @else if (autoSaveStatus() === 'saved') {
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
- {{ i18n.t('admin.articleForm.autoSaved') }}
+ {{ i18n.t('dev.articleForm.autoSaved') }}
  } @else if (autoSaveStatus() === 'unsaved') {
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
- {{ i18n.t('admin.articleForm.unsavedChanges') }}
+ {{ i18n.t('dev.articleForm.unsavedChanges') }}
  }
  </span>
  }
  <button type="button" class="btn btn-secondary" (click)="saveDraft()" [disabled]="saving()">
- {{ i18n.t('admin.articleForm.saveDraft') }}
+ {{ i18n.t('dev.articleForm.saveDraft') }}
  </button>
  @if (isEditMode() && originalStatus === 'DRAFT') {
  <button type="button" class="btn btn-outline btn-review" (click)="submitForReview()" [disabled]="saving()">
- {{ i18n.t('admin.articles.submitReview') }}
+ {{ i18n.t('dev.articles.submitReview') }}
  </button>
  }
  @if (isEditMode() && originalStatus === 'REVIEW') {
  <button type="button" class="btn btn-primary" (click)="approveReview()" [disabled]="saving()">
- {{ i18n.t('admin.articles.approveReview') }}
+ {{ i18n.t('dev.articles.approveReview') }}
  </button>
  <button type="button" class="btn btn-outline btn-changes" (click)="showReviewPanel.set(true)" [disabled]="saving()">
- {{ i18n.t('admin.articles.requestChanges') }}
+ {{ i18n.t('dev.articles.requestChanges') }}
  </button>
  }
  @if (showScheduleInput()) {
  <div class="schedule-group">
  <input type="datetime-local" class="form-control schedule-input" [formControl]="scheduledAtControl" [min]="minScheduleDate()">
  <button type="button" class="btn btn-accent" (click)="schedulePublish()" [disabled]="saving() || !scheduledAtControl.value">
- {{ i18n.t('admin.articleForm.confirmSchedule') }}
+ {{ i18n.t('dev.articleForm.confirmSchedule') }}
  </button>
  <button type="button" class="btn btn-ghost btn-sm" (click)="showScheduleInput.set(false)">✕</button>
  </div>
  } @else {
  <button type="button" class="btn btn-outline" (click)="showScheduleInput.set(true)" [disabled]="saving()">
- {{ i18n.t('admin.articleForm.schedule') }}
+ {{ i18n.t('dev.articleForm.schedule') }}
  </button>
  }
  <button type="button" class="btn btn-primary" (click)="publish()" [disabled]="saving()">
- {{ isEditMode() ? i18n.t('common.update') : i18n.t('admin.articleForm.publish') }}
+ {{ isEditMode() ? i18n.t('common.update') : i18n.t('dev.articleForm.publish') }}
  </button>
  </div>
  </header>
@@ -75,23 +75,23 @@
  <div class="form-card editor-card" [class.fullscreen-card]="isFullscreen()">
  <div class="form-group content-editor-group">
  <div class="content-header">
- <label for="content">{{ i18n.t('admin.articleForm.contentLabel') }} <span class="required">*</span></label>
+ <label for="content">{{ i18n.t('dev.articleForm.contentLabel') }} <span class="required">*</span></label>
  <div class="header-actions">
  <div class="editor-tabs" [title]="keyboardShortcutsTitle">
  <button type="button" class="editor-tab" [class.active]="editorMode() === 'write'" (click)="setEditorMode('write')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
- {{ i18n.t('admin.articleForm.write') }}
+ {{ i18n.t('dev.articleForm.write') }}
  </button>
  <button type="button" class="editor-tab" [class.active]="editorMode() === 'preview'" (click)="setEditorMode('preview')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
- {{ i18n.t('admin.articleForm.preview') }}
+ {{ i18n.t('dev.articleForm.preview') }}
  </button>
  <button type="button" class="editor-tab" [class.active]="editorMode() === 'split'" (click)="setEditorMode('split')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
- {{ i18n.t('admin.articleForm.split') }}
+ {{ i18n.t('dev.articleForm.split') }}
  </button>
  </div>
- <button type="button" class="fullscreen-btn" (click)="toggleFullscreen()" [title]="isFullscreen() ? i18n.t('admin.articleForm.exitFullscreen') : i18n.t('admin.articleForm.fullscreen')">
+ <button type="button" class="fullscreen-btn" (click)="toggleFullscreen()" [title]="isFullscreen() ? i18n.t('dev.articleForm.exitFullscreen') : i18n.t('dev.articleForm.fullscreen')">
  @if (isFullscreen()) {
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
  } @else {
@@ -124,13 +124,13 @@
  @if (form.controls.content.value) {
  <markdown [data]="form.controls.content.value"></markdown>
  } @else {
- <p class="preview-empty">{{ i18n.t('admin.articleForm.previewEmpty') }}</p>
+ <p class="preview-empty">{{ i18n.t('dev.articleForm.previewEmpty') }}</p>
  }
  </div>
  }
  </div>
  @if (form.controls.content.touched && form.controls.content.errors) {
- <span class="error">{{ i18n.t('admin.articleForm.contentRequired') }}</span>
+ <span class="error">{{ i18n.t('dev.articleForm.contentRequired') }}</span>
  }
  </div>
  </div>
@@ -151,23 +151,23 @@
  />
 
  <div class="form-card">
- <h3>{{ i18n.t('admin.articleForm.seoSection') }}</h3>
+ <h3>{{ i18n.t('dev.articleForm.seoSection') }}</h3>
  <div class="form-group">
- <label for="metaTitle">{{ i18n.t('admin.articleForm.metaTitle') }}</label>
+ <label for="metaTitle">{{ i18n.t('dev.articleForm.metaTitle') }}</label>
  <input
  id="metaTitle"
  type="text"
  [formControl]="form.controls.metaTitle"
- [placeholder]="i18n.t('admin.articleForm.seoTitle')"
+ [placeholder]="i18n.t('dev.articleForm.seoTitle')"
  />
  </div>
  <div class="form-group">
- <label for="metaDescription">{{ i18n.t('admin.articleForm.metaDescription') }}</label>
+ <label for="metaDescription">{{ i18n.t('dev.articleForm.metaDescription') }}</label>
  <textarea
  id="metaDescription"
  [formControl]="form.controls.metaDescription"
  rows="3"
- [placeholder]="i18n.t('admin.articleForm.seoDescription')"
+ [placeholder]="i18n.t('dev.articleForm.seoDescription')"
  ></textarea>
  </div>
  </div>
@@ -184,13 +184,13 @@
 
  @if (showReviewPanel()) {
  <div class="form-card review-panel">
- <h3>{{ i18n.t('admin.articles.reviewHistory') }}</h3>
+ <h3>{{ i18n.t('dev.articles.reviewHistory') }}</h3>
  @if (originalStatus === 'REVIEW') {
  <div class="review-feedback-form">
- <label>{{ i18n.t('admin.articles.reviewFeedback') }}</label>
+ <label>{{ i18n.t('dev.articles.reviewFeedback') }}</label>
  <textarea class="form-control" rows="3" [value]="reviewFeedbackText()" (input)="reviewFeedbackText.set($any($event.target).value)"></textarea>
  <button type="button" class="btn btn-outline btn-changes btn-sm" (click)="requestChanges()" [disabled]="saving()">
- {{ i18n.t('admin.articles.requestChanges') }}
+ {{ i18n.t('dev.articles.requestChanges') }}
  </button>
  </div>
  }
@@ -198,7 +198,7 @@
  <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'">
  <div class="review-entry-header">
  <span class="review-status-badge" [class]="'review-status--' + review.status.toLowerCase().replace('_', '-')">
- {{ review.status === 'APPROVED' ? i18n.t('admin.articles.reviewApproved') : i18n.t('admin.articles.reviewChangesRequested') }}
+ {{ review.status === 'APPROVED' ? i18n.t('dev.articles.reviewApproved') : i18n.t('dev.articles.reviewChangesRequested') }}
  </span>
  <span class="review-date">{{ review.createdAt | date:'short' }}</span>
  </div>
@@ -207,7 +207,7 @@
  }
  </div>
  } @empty {
- <p class="review-empty">{{ i18n.t('admin.articles.noArticles') }}</p>
+ <p class="review-empty">{{ i18n.t('dev.articles.noArticles') }}</p>
  }
  </div>
  }

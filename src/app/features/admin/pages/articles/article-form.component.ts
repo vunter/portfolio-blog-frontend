@@ -460,7 +460,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.apiService.get<TagResponse[]>('/tags').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (tags) => this.availableTags.set(tags),
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadTags'));
+        this.notification.error(this.i18n.t('dev.error.loadTags'));
       },
     });
   }
@@ -495,7 +495,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         setTimeout(() => this.versionHistory()?.loadVersions(), 0);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.error.loadArticle'));
+        this.notification.error(this.i18n.t('dev.error.loadArticle'));
       },
     });
   }
@@ -518,10 +518,10 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.monacoEditor) {
             this.monacoEditor.setValue(article.content || '');
           }
-          this.notification.success(this.i18n.t('admin.versions.articleReloaded'));
+          this.notification.success(this.i18n.t('dev.versions.articleReloaded'));
         },
         error: () => {
-          this.notification.error(this.i18n.t('admin.error.loadArticle'));
+          this.notification.error(this.i18n.t('dev.error.loadArticle'));
         },
       });
     }
@@ -550,11 +550,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (res) => {
         this.form.controls.featuredImageUrl.setValue(res.url);
         this.uploadingCoverImage.set(false);
-        this.notification.success(this.i18n.t('admin.articleForm.imageUploaded'));
+        this.notification.success(this.i18n.t('dev.articleForm.imageUploaded'));
       },
       error: () => {
         this.uploadingCoverImage.set(false);
-        this.notification.error(this.i18n.t('admin.articleForm.imageUploadError'));
+        this.notification.error(this.i18n.t('dev.articleForm.imageUploadError'));
       },
     });
   }
@@ -585,11 +585,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
           const current = this.form.controls.content.value;
           this.form.controls.content.setValue(current + '\n' + markdown);
         }
-        this.notification.success(this.i18n.t('admin.articleForm.imageUploaded'));
+        this.notification.success(this.i18n.t('dev.articleForm.imageUploaded'));
       },
       error: () => {
         this.uploadingContentImage.set(false);
-        this.notification.error(this.i18n.t('admin.articleForm.imageUploadError'));
+        this.notification.error(this.i18n.t('dev.articleForm.imageUploadError'));
       },
     });
   }
@@ -625,11 +625,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saving.set(true);
     this.apiService.post(`/admin/articles/${this.articleId}/submit-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.articles.submitReviewSuccess'));
+        this.notification.success(this.i18n.t('dev.articles.submitReviewSuccess'));
         this.router.navigate(['/admin/articles']);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articles.submitReviewError'));
+        this.notification.error(this.i18n.t('dev.articles.submitReviewError'));
         this.saving.set(false);
       },
     });
@@ -640,11 +640,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saving.set(true);
     this.apiService.post(`/admin/articles/${this.articleId}/approve-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.articles.approveReviewSuccess'));
+        this.notification.success(this.i18n.t('dev.articles.approveReviewSuccess'));
         this.router.navigate(['/admin/articles']);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articles.approveReviewError'));
+        this.notification.error(this.i18n.t('dev.articles.approveReviewError'));
         this.saving.set(false);
       },
     });
@@ -655,11 +655,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saving.set(true);
     this.apiService.post(`/admin/articles/${this.articleId}/request-changes`, { feedback: this.reviewFeedbackText() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('admin.articles.requestChangesSuccess'));
+        this.notification.success(this.i18n.t('dev.articles.requestChangesSuccess'));
         this.router.navigate(['/admin/articles']);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articles.requestChangesError'));
+        this.notification.error(this.i18n.t('dev.articles.requestChangesError'));
         this.saving.set(false);
       },
     });
@@ -704,12 +704,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoSave$.complete();
         this.autoSaveStatus.set(null);
         this.notification.success(
-          this.isEditMode() ? this.i18n.t('admin.articleForm.updateSuccess') : this.i18n.t('admin.articleForm.createSuccess')
+          this.isEditMode() ? this.i18n.t('dev.articleForm.updateSuccess') : this.i18n.t('dev.articleForm.createSuccess')
         );
         this.router.navigate(['/admin/articles']);
       },
       error: () => {
-        this.notification.error(this.i18n.t('admin.articleForm.saveError'));
+        this.notification.error(this.i18n.t('dev.articleForm.saveError'));
         this.saving.set(false);
       },
     });

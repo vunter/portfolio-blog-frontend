@@ -92,13 +92,13 @@ export class ProfileComponent implements OnInit {
         this.originalEmail = user.email || '';
         this.originalUsername = user.username ?? '';
         const avatar = user.avatarUrl ?? '';
-        this.form.avatarUrl = avatar.startsWith('http') ? avatar : '';
+        this.form.avatarUrl = (avatar.startsWith('http') || avatar.startsWith('/')) ? avatar : '';
         this.form.bio = user.bio ?? '';
         this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);
-        this.notification.error(this.i18n.t('admin.profile.loadError'));
+        this.notification.error(this.i18n.t('account.profile.loadError'));
       }
     });
   }
@@ -125,7 +125,7 @@ export class ProfileComponent implements OnInit {
 
   confirmSensitiveChange(): void {
     if (!this.sensitivePassword()) {
-      this.notification.error(this.i18n.t('admin.profile.passwordRequiredForChange'));
+      this.notification.error(this.i18n.t('account.profile.passwordRequiredForChange'));
       return;
     }
     this.save();
@@ -143,11 +143,11 @@ export class ProfileComponent implements OnInit {
 
     // Validate client-side
     if (!file.type.startsWith('image/')) {
-      this.notification.error(this.i18n.t('admin.profile.avatarInvalidType'));
+      this.notification.error(this.i18n.t('account.profile.avatarInvalidType'));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      this.notification.error(this.i18n.t('admin.profile.avatarTooLarge'));
+      this.notification.error(this.i18n.t('account.profile.avatarTooLarge'));
       return;
     }
 
@@ -162,17 +162,17 @@ export class ProfileComponent implements OnInit {
           next: (updated) => {
             this.user.set(updated);
             this.authStore.login(updated);
-            this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+            this.notification.success(this.i18n.t('account.profile.avatarUploaded'));
           },
           error: () => {
             this.form.avatarUrl = this.user()?.avatarUrl ?? '';
-            this.notification.error(this.i18n.t('admin.profile.saveError'));
+            this.notification.error(this.i18n.t('account.profile.saveError'));
           },
         });
       },
       error: () => {
         this.uploadingAvatar.set(false);
-        this.notification.error(this.i18n.t('admin.profile.avatarUploadError'));
+        this.notification.error(this.i18n.t('account.profile.avatarUploadError'));
       },
     });
   }
@@ -205,22 +205,22 @@ export class ProfileComponent implements OnInit {
 
     // Validate password for sensitive changes
     if (sensitiveChanged && !this.sensitivePassword()) {
-      this.notification.error(this.i18n.t('admin.profile.passwordRequiredForChange'));
+      this.notification.error(this.i18n.t('account.profile.passwordRequiredForChange'));
       return;
     }
 
     // Validate password change
     if (this.form.newPassword) {
       if (!this.form.currentPassword) {
-        this.notification.error(this.i18n.t('admin.profile.currentPasswordRequired'));
+        this.notification.error(this.i18n.t('account.profile.currentPasswordRequired'));
         return;
       }
       if (this.form.newPassword !== this.form.confirmPassword) {
-        this.notification.error(this.i18n.t('admin.profile.passwordMismatch'));
+        this.notification.error(this.i18n.t('account.profile.passwordMismatch'));
         return;
       }
       if (this.form.newPassword.length < 12) {
-        this.notification.error(this.i18n.t('admin.profile.passwordTooShort'));
+        this.notification.error(this.i18n.t('account.profile.passwordTooShort'));
         return;
       }
     }
@@ -263,9 +263,9 @@ export class ProfileComponent implements OnInit {
         this.authStore.login(updated);
 
         if (response.status === 202) {
-          this.notification.info(this.i18n.t('admin.profile.emailVerificationSent'));
+          this.notification.info(this.i18n.t('account.profile.emailVerificationSent'));
         } else {
-          this.notification.success(this.i18n.t('admin.profile.saveSuccess'));
+          this.notification.success(this.i18n.t('account.profile.saveSuccess'));
         }
       },
       error: (err) => {
@@ -273,26 +273,26 @@ export class ProfileComponent implements OnInit {
         if (err.status === 409) {
           const msg = err.error?.message || '';
           if (msg.includes('username')) {
-            this.notification.error(this.i18n.t('admin.profile.usernameInUse'));
+            this.notification.error(this.i18n.t('account.profile.usernameInUse'));
           } else {
-            this.notification.error(this.i18n.t('admin.profile.emailInUse'));
+            this.notification.error(this.i18n.t('account.profile.emailInUse'));
           }
         } else if (err.status === 429) {
-          this.notification.error(this.i18n.t('admin.profile.rateLimitExceeded'));
+          this.notification.error(this.i18n.t('account.profile.rateLimitExceeded'));
         } else if (err.status === 400) {
           if (err.error?.validationErrors) {
             this.fieldErrors.set(err.error.validationErrors);
           }
           const msg = err.error?.message || '';
           if (msg.includes('password') && msg.includes('incorrect')) {
-            this.notification.error(this.i18n.t('admin.profile.incorrectPassword'));
+            this.notification.error(this.i18n.t('account.profile.incorrectPassword'));
           } else if (msg.includes('password') && msg.includes('required')) {
-            this.notification.error(this.i18n.t('admin.profile.currentPasswordRequired'));
+            this.notification.error(this.i18n.t('account.profile.currentPasswordRequired'));
           } else if (!err.error?.validationErrors) {
-            this.notification.error(this.i18n.t('admin.profile.saveError'));
+            this.notification.error(this.i18n.t('account.profile.saveError'));
           }
         } else {
-          this.notification.error(this.i18n.t('admin.profile.saveError'));
+          this.notification.error(this.i18n.t('account.profile.saveError'));
         }
       }
     });

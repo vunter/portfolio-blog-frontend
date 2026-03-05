@@ -60,7 +60,7 @@ export class ViewerProfileComponent implements OnInit {
     confirmPassword: '',
   };
 
-  /** Whether the user can request a role upgrade (only VIEWER/EDITOR without pending request) */
+  /** Whether the user can request a role upgrade (only VIEWER without pending request) */
   get canRequestUpgrade(): boolean {
     const user = this.user();
     const req = this.roleRequest();
@@ -83,7 +83,7 @@ export class ViewerProfileComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.notification.error(this.i18n.t('admin.profile.loadError'));
+        this.notification.error(this.i18n.t('account.profile.loadError'));
       },
     });
 
@@ -105,11 +105,11 @@ export class ViewerProfileComponent implements OnInit {
     input.value = '';
 
     if (!file.type.startsWith('image/')) {
-      this.notification.error(this.i18n.t('admin.profile.avatarInvalidType'));
+      this.notification.error(this.i18n.t('account.profile.avatarInvalidType'));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      this.notification.error(this.i18n.t('admin.profile.avatarTooLarge'));
+      this.notification.error(this.i18n.t('account.profile.avatarTooLarge'));
       return;
     }
 
@@ -118,11 +118,11 @@ export class ViewerProfileComponent implements OnInit {
       next: (asset) => {
         this.uploadingAvatar.set(false);
         this.form.avatarUrl = asset.url;
-        this.notification.success(this.i18n.t('admin.profile.avatarUploaded'));
+        this.notification.success(this.i18n.t('account.profile.avatarUploaded'));
       },
       error: () => {
         this.uploadingAvatar.set(false);
-        this.notification.error(this.i18n.t('admin.profile.avatarUploadError'));
+        this.notification.error(this.i18n.t('account.profile.avatarUploadError'));
       },
     });
   }
@@ -143,15 +143,15 @@ export class ViewerProfileComponent implements OnInit {
 
     if (this.form.newPassword) {
       if (!this.form.currentPassword) {
-        this.notification.error(this.i18n.t('admin.profile.currentPasswordRequired'));
+        this.notification.error(this.i18n.t('account.profile.currentPasswordRequired'));
         return;
       }
       if (this.form.newPassword !== this.form.confirmPassword) {
-        this.notification.error(this.i18n.t('admin.profile.passwordMismatch'));
+        this.notification.error(this.i18n.t('account.profile.passwordMismatch'));
         return;
       }
       if (this.form.newPassword.length < 12) {
-        this.notification.error(this.i18n.t('admin.profile.passwordTooShort'));
+        this.notification.error(this.i18n.t('account.profile.passwordTooShort'));
         return;
       }
     }
@@ -179,26 +179,26 @@ export class ViewerProfileComponent implements OnInit {
         this.form.newPassword = '';
         this.form.confirmPassword = '';
         this.authStore.login(updated);
-        this.notification.success(this.i18n.t('admin.profile.saveSuccess'));
+        this.notification.success(this.i18n.t('account.profile.saveSuccess'));
       },
       error: (err) => {
         this.saving.set(false);
         if (err.status === 409) {
-          this.notification.error(this.i18n.t('admin.profile.emailInUse'));
+          this.notification.error(this.i18n.t('account.profile.emailInUse'));
         } else if (err.status === 400) {
           if (err.error?.validationErrors) {
             this.fieldErrors.set(err.error.validationErrors);
           }
           const msg = err.error?.message || '';
           if (msg.includes('password') && msg.includes('incorrect')) {
-            this.notification.error(this.i18n.t('admin.profile.incorrectPassword'));
+            this.notification.error(this.i18n.t('account.profile.incorrectPassword'));
           } else if (msg.includes('password') && msg.includes('required')) {
-            this.notification.error(this.i18n.t('admin.profile.currentPasswordRequired'));
+            this.notification.error(this.i18n.t('account.profile.currentPasswordRequired'));
           } else if (!err.error?.validationErrors) {
-            this.notification.error(this.i18n.t('admin.profile.saveError'));
+            this.notification.error(this.i18n.t('account.profile.saveError'));
           }
         } else {
-          this.notification.error(this.i18n.t('admin.profile.saveError'));
+          this.notification.error(this.i18n.t('account.profile.saveError'));
         }
       },
     });

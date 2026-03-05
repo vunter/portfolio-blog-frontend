@@ -133,3 +133,31 @@
         transition: none;
       }
     }
+
+    // Skeleton shimmer for i18n loading state
+    .i18n-loading {
+      .header__nav a,
+      .footer a,
+      .footer p {
+        color: transparent;
+        background: linear-gradient(90deg, var(--skeleton-base, #e5e7eb) 25%, var(--skeleton-shine, #f3f4f6) 50%, var(--skeleton-base, #e5e7eb) 75%);
+        background-size: 200% 100%;
+        animation: i18n-shimmer 1.5s infinite;
+        border-radius: 4px;
+        pointer-events: none;
+      }
+    }
+
+    @keyframes i18n-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    :host-context(.theme-dark) .i18n-loading {
+      .header__nav a,
+      .footer a,
+      .footer p {
+        --skeleton-base: #374151;
+        --skeleton-shine: #4b5563;
+      }
+    }

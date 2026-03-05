@@ -109,6 +109,7 @@ export interface ResumeProfile {
   locale?: string;
   fullName: string;
   title?: string;
+  avatarUrl?: string;
   email?: string;
   phone?: string;
   linkedin?: string;

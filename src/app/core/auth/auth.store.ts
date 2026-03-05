@@ -6,10 +6,12 @@ import {
   withComputed,
   patchState,
 } from '@ngrx/signals';
-import { switchMap, catchError, tap, of, map, firstValueFrom } from 'rxjs';
+import { switchMap, catchError, tap, of, map, firstValueFrom, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { UserResponse } from '../../models';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
+import { I18nService } from '../services/i18n.service';
 
 interface AuthState {
   user: UserResponse | null;
@@ -42,10 +44,6 @@ export const AuthStore = signalStore(
       const role = state.user()?.role;
       return role === 'ADMIN' || role === 'DEV';
     }),
-    isEditor: computed(() => {
-      const role = state.user()?.role;
-      return role === 'ADMIN' || role === 'DEV' || role === 'EDITOR';
-    }),
     userDisplayName: computed(
       () => state.user()?.name || state.user()?.username || 'User'
     ),
@@ -67,6 +65,16 @@ export const AuthStore = signalStore(
   withMethods((store) => {
     const storage = inject(StorageService);
     const authService = inject(AuthService);
+    const i18n = inject(I18nService);
+
+    function roleToTier(role?: string): string {
+      switch (role) {
+        case 'ADMIN': return 'admin';
+        case 'DEV': return 'dev';
+        case 'VIEWER': return 'viewer';
+        default: return 'public';
+      }
+    }
 
     return {
       login(user: UserResponse) {
@@ -80,6 +88,8 @@ export const AuthStore = signalStore(
         });
         storage.set(STORAGE_KEYS.USER, user);
         storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
+        // Refresh i18n with role-appropriate translations
+        i18n.setAuthTier(roleToTier(user.role));
       },
 
       logout() {
@@ -92,6 +102,8 @@ export const AuthStore = signalStore(
         storage.removeSession(STORAGE_KEYS.USER);
         storage.removeSession(STORAGE_KEYS.IS_AUTHENTICATED);
         storage.removeSession(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+        // Reset i18n to public tier
+        i18n.setAuthTier('public');
         // Invalidate refresh token on backend (clears cookies server-side)
         authService.logout().subscribe({
           error: () => { /* Logout API failure is non-critical — local state already cleared */ },
@@ -166,7 +178,14 @@ export const AuthStore = signalStore(
         const auth$ = isExpired
           ? refreshAndValidate$
           : authService.getCurrentUser().pipe(
-              catchError(() => refreshAndValidate$)
+              catchError((err) => {
+                // Only attempt refresh if the server explicitly rejected the token (401).
+                // Network errors / 5xx mean the backend is down — no point trying refresh.
+                if (err instanceof HttpErrorResponse && err.status === 401) {
+                  return refreshAndValidate$;
+                }
+                return throwError(() => err);
+              })
             );
 
         // Return a Promise so APP_INITIALIZER waits for auth to resolve
@@ -178,11 +197,21 @@ export const AuthStore = signalStore(
               storage.set(STORAGE_KEYS.USER, freshUser);
               storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
             }),
-            catchError(() => {
-              patchState(store, { user: null, isAuthenticated: false, isLoading: false });
-              storage.remove(STORAGE_KEYS.USER);
-              storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
-              storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+            catchError((err) => {
+              // Only clear session on explicit auth rejection (401).
+              // Network errors or server downtime should preserve the cached session
+              // so the user isn't logged out just because the backend is temporarily unavailable.
+              const isAuthRejection = err instanceof HttpErrorResponse && err.status === 401;
+              if (isAuthRejection) {
+                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+                storage.remove(STORAGE_KEYS.USER);
+                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+              } else {
+                // Backend unreachable — keep cached user data and mark as authenticated
+                patchState(store, { user, isAuthenticated: true, isLoading: false });
+                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
+              }
               return of(null);
             }),
             map(() => void 0)

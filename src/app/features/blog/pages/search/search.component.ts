@@ -9,7 +9,7 @@ import { SearchService } from '../../services/search.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ArticleSummaryResponse, SearchSuggestion } from '../../../../models';
 
@@ -19,7 +19,7 @@ import { ArticleSummaryResponse, SearchSuggestion } from '../../../../models';
     FormsModule,
     ArticleCardComponent,
     PaginationComponent,
-    LoadingSpinnerComponent,
+    SkeletonComponent,
     EmptyStateComponent,
   ],
   templateUrl: './search.component.html',

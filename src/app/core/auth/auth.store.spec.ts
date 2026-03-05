@@ -34,17 +34,6 @@ describe('AuthStore', () => {
     updatedAt: '2025-07-15T12:00:00Z',
   };
 
-  const mockEditor: UserResponse = {
-    id: '1840234567890123458',
-    username: 'editoruser',
-    email: 'editor@catananti.dev',
-    name: 'Editor User',
-    role: 'EDITOR',
-    active: true,
-    createdAt: '2025-04-20T09:00:00Z',
-    updatedAt: '2025-07-10T11:00:00Z',
-  };
-
   const mockViewer: UserResponse = {
     id: '1840234567890123459',
     username: 'vieweruser',
@@ -247,11 +236,6 @@ describe('AuthStore', () => {
       expect(store.isAdmin()).toBeFalse();
     });
 
-    it('should return false for EDITOR role', () => {
-      store.login(mockEditor);
-      expect(store.isAdmin()).toBeFalse();
-    });
-
     it('should return false for VIEWER role', () => {
       store.login(mockViewer);
       expect(store.isAdmin()).toBeFalse();
@@ -273,36 +257,9 @@ describe('AuthStore', () => {
       expect(store.isDev()).toBeTrue();
     });
 
-    it('should return false for EDITOR role', () => {
-      store.login(mockEditor);
-      expect(store.isDev()).toBeFalse();
-    });
-
     it('should return false for VIEWER role', () => {
       store.login(mockViewer);
       expect(store.isDev()).toBeFalse();
-    });
-  });
-
-  describe('computed: isEditor', () => {
-    it('should return true for ADMIN role', () => {
-      store.login(mockAdmin);
-      expect(store.isEditor()).toBeTrue();
-    });
-
-    it('should return true for DEV role', () => {
-      store.login(mockDev);
-      expect(store.isEditor()).toBeTrue();
-    });
-
-    it('should return true for EDITOR role', () => {
-      store.login(mockEditor);
-      expect(store.isEditor()).toBeTrue();
-    });
-
-    it('should return false for VIEWER role', () => {
-      store.login(mockViewer);
-      expect(store.isEditor()).toBeFalse();
     });
   });
 

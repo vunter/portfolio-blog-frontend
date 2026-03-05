@@ -1,7 +1,7 @@
 ﻿ <!-- Skip to content link for accessibility -->
  <a href="#main-content" class="skip-link">{{ i18n.t('a11y.skipToContent') }}</a>
  
- <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()">
+ <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()" [class.i18n-loading]="i18n.translationsLoading()">
  <header class="header">
  <div class="header__container">
  <a routerLink="/" class="header__logo">
@@ -22,10 +22,9 @@
  </button>
  @if (langMenuOpen()) {
  <div class="lang-dropdown__menu">
- <button class="lang-dropdown__item" [class.active]="i18n.language() === 'en'" (click)="selectLanguage('en')"> English</button>
- <button class="lang-dropdown__item" [class.active]="i18n.language() === 'pt'" (click)="selectLanguage('pt')"> Português</button>
- <button class="lang-dropdown__item" [class.active]="i18n.language() === 'es'" (click)="selectLanguage('es')"> Español</button>
- <button class="lang-dropdown__item" [class.active]="i18n.language() === 'it'" (click)="selectLanguage('it')"> Italiano</button>
+ @for (lang of i18n.supportedLanguages(); track lang.code) {
+ <button class="lang-dropdown__item" [class.active]="i18n.language() === lang.code" (click)="selectLanguage(lang.code)"> {{ lang.nativeName }}</button>
+ }
  </div>
  }
  </div>
@@ -47,7 +46,7 @@
  </div>
  </div>
  <div class="user-menu__divider"></div>
- @if (authStore.isEditor()) {
+ @if (authStore.isDev()) {
  <a routerLink="/admin" class="user-menu__item" (click)="closeUserMenu()">
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
  {{ i18n.t('nav.dashboard') }}
@@ -106,7 +105,7 @@
  <span class="user-menu__avatar">{{ authStore.userInitials() }}</span>
  <span>{{ authStore.userDisplayName() }}</span>
  </div>
- @if (authStore.isEditor()) {
+ @if (authStore.isDev()) {
  <a routerLink="/admin" class="mobile-nav-link" (click)="closeMobileMenu()">
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
  {{ i18n.t('nav.dashboard') }}

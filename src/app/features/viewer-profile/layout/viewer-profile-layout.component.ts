@@ -36,7 +36,7 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
             <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('viewer.sidebar.myProfile') }}</span>
           </a>
 
-          @if (authStore.isEditor()) {
+          @if (authStore.isDev()) {
           <div class="nav-divider"></div>
           <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -75,7 +75,7 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
-            <span [class.hidden]="sidebarCollapsed()">{{ i18n.t('admin.sidebar.backToSite') }}</span>
+            <span [class.hidden]="sidebarCollapsed()">{{ i18n.t('account.sidebar.backToSite') }}</span>
           </a>
 
           <app-theme-toggle />
@@ -91,7 +91,7 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
               <polyline points="16 17 21 12 16 7"/>
               <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-            <span [class.hidden]="sidebarCollapsed()">{{ i18n.t('admin.sidebar.logout') }}</span>
+            <span [class.hidden]="sidebarCollapsed()">{{ i18n.t('account.sidebar.logout') }}</span>
           </button>
         </div>
       </aside>

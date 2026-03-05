@@ -16,7 +16,7 @@
  <button
  class="sidebar__toggle"
  (click)="toggleSidebar()"
- [attr.aria-label]="sidebarCollapsed() ? i18n.t('admin.sidebar.expand') : i18n.t('admin.sidebar.collapse')"
+ [attr.aria-label]="sidebarCollapsed() ? i18n.t('account.sidebar.expand') : i18n.t('account.sidebar.collapse')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  @if (sidebarCollapsed()) {
@@ -48,7 +48,11 @@
  <div class="sidebar__footer">
  <div class="user-info" [title]="authStore.user()?.name">
  <div class="user-info__avatar">
+ @if (authStore.user()?.avatarUrl) {
+ <img [src]="authStore.user()!.avatarUrl" [alt]="authStore.user()?.name" class="user-info__avatar-img" />
+ } @else {
  {{ authStore.user()?.name?.charAt(0) || 'U' }}
+ }
  </div>
  @if (!sidebarCollapsed()) {
  <div class="user-info__details">
@@ -84,7 +88,7 @@
  title="Italiano"
  >IT</button>
  </div>
- <a routerLink="/" class="nav-item back-link" [title]="i18n.t('admin.sidebar.backToSite')">
+ <a routerLink="/" class="nav-item back-link" [title]="i18n.t('account.sidebar.backToSite')">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -92,10 +96,10 @@
  </svg>
  </span>
  @if (!sidebarCollapsed()) {
- <span class="nav-item__label">{{ i18n.t('admin.sidebar.backToSite') }}</span>
+ <span class="nav-item__label">{{ i18n.t('account.sidebar.backToSite') }}</span>
  }
  </a>
- <a routerLink="/admin/profile" class="nav-item" routerLinkActive="active" [title]="i18n.t('admin.profile.title')">
+ <a routerLink="/admin/profile" class="nav-item" routerLinkActive="active" [title]="i18n.t('account.profile.title')">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -103,10 +107,10 @@
  </svg>
  </span>
  @if (!sidebarCollapsed()) {
- <span class="nav-item__label">{{ i18n.t('admin.profile.title') }}</span>
+ <span class="nav-item__label">{{ i18n.t('account.profile.title') }}</span>
  }
  </a>
- <button class="nav-item logout-link" [title]="i18n.t('admin.sidebar.logout')" (click)="logout()">
+ <button class="nav-item logout-link" [title]="i18n.t('account.sidebar.logout')" (click)="logout()">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -115,7 +119,7 @@
  </svg>
  </span>
  @if (!sidebarCollapsed()) {
- <span class="nav-item__label">{{ i18n.t('admin.sidebar.logout') }}</span>
+ <span class="nav-item__label">{{ i18n.t('account.sidebar.logout') }}</span>
  }
  </button>
  </div>
@@ -133,7 +137,7 @@
  <line x1="12" y1="8" x2="12" y2="12"/>
  <line x1="12" y1="16" x2="12.01" y2="16"/>
  </svg>
- {{ i18n.t('admin.notifications.connectionLost') }}
+ {{ i18n.t('account.notifications.connectionLost') }}
  <button class="reconnect-btn" (click)="reconnect()">{{ i18n.t('common.refresh') }}</button>
  </div>
  }

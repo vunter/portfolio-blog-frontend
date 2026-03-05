@@ -210,9 +210,9 @@ describe('ArticleListComponent', () => {
   }));
 
   it('should return correct status labels', () => {
-    expect(component.getStatusLabel('PUBLISHED')).toBe('admin.articles.published');
-    expect(component.getStatusLabel('DRAFT')).toBe('admin.articles.draft');
-    expect(component.getStatusLabel('ARCHIVED')).toBe('admin.articles.archived');
+    expect(component.getStatusLabel('PUBLISHED')).toBe('dev.articles.published');
+    expect(component.getStatusLabel('DRAFT')).toBe('dev.articles.draft');
+    expect(component.getStatusLabel('ARCHIVED')).toBe('dev.articles.archived');
     expect(component.getStatusLabel('UNKNOWN')).toBe('UNKNOWN');
   });
 

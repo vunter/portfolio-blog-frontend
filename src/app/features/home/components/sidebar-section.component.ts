@@ -28,6 +28,12 @@ export class SidebarSectionComponent implements OnInit {
   // Equivalent to shareReplay(1) — using static cache for simplicity with imperative API
   private static cachedPosts: ArticleSummaryResponse[] | null = null;
 
+  readonly avatarUrl = computed(() => {
+    const url = this.profile()?.avatarUrl;
+    if (!url) return null;
+    return url;
+  });
+
   readonly displayName = computed(() => this.profile()?.fullName ?? '');
 
   readonly initials = computed(() => {
