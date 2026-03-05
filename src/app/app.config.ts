@@ -10,7 +10,8 @@ import {
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
 import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
-import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions, withIncrementalHydration } from '@angular/platform-browser';
+// provideClientHydration removed — no SSR, and its TransferCacheInterceptorFn
+// caused the progress bar to stick (absorbed HTTP requests without completing the observable)
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideMarkdown, SANITIZE } from 'ngx-markdown';
@@ -65,9 +66,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideAnimationsAsync(),
-    provideClientHydration(withEventReplay(), withIncrementalHydration(), withHttpTransferCacheOptions({
-      includePostRequests: false,
-    })),
+    // provideClientHydration removed — see import comment above
     provideMarkdown({
       sanitize: {
         provide: SANITIZE,
