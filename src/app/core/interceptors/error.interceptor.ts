@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   HttpInterceptorFn,
@@ -11,7 +11,9 @@ import { NotificationService } from '../services/notification.service';
 import { I18nService } from '../services/i18n.service';
 
 /**
- * Error Interceptor - Handles HTTP errors globally with i18n support
+ * Error Interceptor - Handles HTTP errors globally with i18n support.
+ * Uses lazy I18nService resolution via Injector to avoid circular dependency
+ * (I18nService constructor triggers HTTP requests that pass through this interceptor).
  */
 export const errorInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -19,44 +21,50 @@ export const errorInterceptor: HttpInterceptorFn = (
 ) => {
   const notification = inject(NotificationService);
   const router = inject(Router);
-  const i18n = inject(I18nService);
+  const injector = inject(Injector);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      let errorMessage = i18n.t('error.unexpected');
+      // Lazily resolve I18nService — safe here because catchError runs async,
+      // after I18nService construction has completed
+      let i18n: I18nService | null = null;
+      try { i18n = injector.get(I18nService); } catch { /* fallback below */ }
+
+      const t = (key: string) => i18n?.t(key) ?? key;
+      let errorMessage = t('error.unexpected');
 
       switch (error.status) {
         case 0:
-          errorMessage = i18n.t('error.connectionFailed');
+          errorMessage = t('error.connectionFailed');
           break;
         case 400:
-          errorMessage = i18n.t('error.badRequest');
+          errorMessage = t('error.badRequest');
           break;
         case 401:
           // Handled by refresh token interceptor
           return throwError(() => error);
         case 403:
-          errorMessage = i18n.t('error.forbidden');
+          errorMessage = t('error.forbidden');
           break;
         case 404:
-          errorMessage = i18n.t('error.notFound');
+          errorMessage = t('error.notFound');
           break;
         case 409:
-          errorMessage = i18n.t('error.conflict');
+          errorMessage = t('error.conflict');
           break;
         case 422:
-          errorMessage = i18n.t('error.invalidData');
+          errorMessage = t('error.invalidData');
           break;
         case 429:
-          errorMessage = i18n.t('error.tooManyRequests');
+          errorMessage = t('error.tooManyRequests');
           break;
         case 500:
-          errorMessage = i18n.t('error.serverError');
+          errorMessage = t('error.serverError');
           break;
         case 502:
         case 503:
         case 504:
-          errorMessage = i18n.t('error.serviceUnavailable');
+          errorMessage = t('error.serviceUnavailable');
           break;
       }
 
