@@ -39,11 +39,13 @@ export class LoginComponent {
   error = signal<string | null>(null);
   googleEnabled = signal(false);
   githubEnabled = signal(false);
+  linkedinEnabled = signal(false);
 
   constructor() {
     this.authService.getOAuthProviders().subscribe(providers => {
       this.googleEnabled.set(!!providers['google']);
       this.githubEnabled.set(!!providers['github']);
+      this.linkedinEnabled.set(!!providers['linkedin']);
     });
   }
 
@@ -53,6 +55,10 @@ export class LoginComponent {
 
   loginWithGithub(): void {
     window.location.href = '/api/v1/admin/auth/oauth2/authorize/github';
+  }
+
+  loginWithLinkedin(): void {
+    window.location.href = '/api/v1/admin/auth/oauth2/authorize/linkedin';
   }
 
   onSubmit(): void {
