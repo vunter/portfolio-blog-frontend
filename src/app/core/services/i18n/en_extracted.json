@@ -1232,6 +1232,7 @@
   "common.monthsAgo": "{{count}} months ago",
   "account.security.scanQrDesc": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)",
   "auth.login.continueGithub": "Continue with GitHub",
+  "auth.login.continueLinkedin": "Continue with LinkedIn",
   "resume.editor.nameRequired": "Template name is required",
   "footer.copyright": "All rights reserved.",
   "dev.dashboard.moderateComments": "Moderate Comments",

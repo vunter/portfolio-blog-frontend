@@ -465,6 +465,14 @@
   }
 }
 
+.linkedin-btn {
+  &:hover {
+    background: #0A66C2;
+    color: #fff;
+    border-color: #0A66C2;
+  }
+}
+
 .auth-lang-toggle {
   position: fixed;
   top: 1rem;
