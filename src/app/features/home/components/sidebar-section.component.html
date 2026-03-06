@@ -32,8 +32,12 @@
  <h4>{{ i18n.t('home.sidebar.popularTags') }}</h4>
  <div class="tag-cloud">
  @if (hasTags()) {
- @for (tag of tags(); track tag) {
- <span class="tag">{{ tag }}</span>
+ @for (tag of tags(); track tag.name) {
+ @if (tag.slug) {
+ <a [routerLink]="['/blog']" [queryParams]="{tag: tag.slug}" class="tag" [style.border-color]="tag.color">{{ tag.name }}</a>
+ } @else {
+ <span class="tag">{{ tag.name }}</span>
+ }
  }
  } @else {
  <p class="no-tags">{{ i18n.t('home.sidebar.noTags') }}</p>

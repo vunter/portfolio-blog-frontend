@@ -103,4 +103,10 @@
   border-radius: 15px;
   font-size: 0.8rem;
   border: 1px solid var(--accent-tint-border);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+a.tag:hover {
+  background: var(--accent-light);
+  color: #fff;
 }
