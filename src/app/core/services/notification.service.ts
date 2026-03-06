@@ -5,6 +5,7 @@ export interface Notification {
   type: 'success' | 'error' | 'warning' | 'info';
   message: string;
   duration?: number;
+  route?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,9 +18,9 @@ export class NotificationService {
     return Math.random().toString(36).substring(2, 11);
   }
 
-  private show(type: Notification['type'], message: string, duration = 5000): string {
+  private show(type: Notification['type'], message: string, duration = 5000, route?: string): string {
     const id = this.generateId();
-    const notification: Notification = { id, type, message, duration };
+    const notification: Notification = { id, type, message, duration, ...(route ? { route } : {}) };
 
     this._notifications.update((current) => [...current, notification]);
 
@@ -42,8 +43,8 @@ export class NotificationService {
     return this.show('warning', message, duration);
   }
 
-  info(message: string, duration?: number): string {
-    return this.show('info', message, duration);
+  info(message: string, duration?: number, route?: string): string {
+    return this.show('info', message, duration, route);
   }
 
   dismiss(id: string): void {

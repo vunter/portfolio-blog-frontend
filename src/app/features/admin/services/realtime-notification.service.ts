@@ -17,6 +17,23 @@ export interface ServerNotificationEvent {
   timestamp: string;
 }
 
+/** Maps SSE event type+data to an admin route */
+export function resolveRoute(event: ServerNotificationEvent): string {
+  const routeMap: Record<string, string> = {
+    contact: '/admin/contacts',
+    article: '/admin/articles',
+    comment: '/admin/comments',
+    subscriber: '/admin/newsletter',
+    auth: '/admin/security',
+  };
+  const base = routeMap[event.type] ?? '/admin/dashboard';
+
+  if (event.type === 'article' && event.data?.['slug']) {
+    return `${base}/${event.data['slug']}/edit`;
+  }
+  return base;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RealtimeNotificationService {
   private readonly zone = inject(NgZone);
@@ -116,10 +133,11 @@ export class RealtimeNotificationService {
   private handleEvent(event: MessageEvent): void {
     try {
       const data: ServerNotificationEvent = JSON.parse(event.data);
+      const route = resolveRoute(data);
       this.zone.run(() => {
         this._events.update(current => [data, ...current].slice(0, 50));
         this._unreadCount.update(c => Math.min(c + 1, 99));
-        this.notifications.info(data.title);
+        this.notifications.info(data.title, undefined, route);
       });
     } catch {
       // Ignore malformed events
