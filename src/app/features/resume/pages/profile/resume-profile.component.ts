@@ -21,6 +21,7 @@ import {
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { getLocaleName } from '../../../../shared/utils/locale.utils';
+import { LinkedInImportService } from '../../services/linkedin-import.service';
 
 interface ExperienceFormEntry extends ResumeProfileExperience {
   _bulletsText?: string;
@@ -89,6 +90,14 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   errorMessage = signal('');
   fieldErrors = signal<Record<string, string>>({});
   formSubmitted = signal(false);
+
+  // LinkedIn Import
+  linkedinImportEnabled = signal(false);
+  linkedinImporting = signal(false);
+  linkedinImportPreview = signal<ResumeProfileRequest | null>(null);
+  showLinkedInConsentDialog = signal(false);
+  private readonly linkedinImportService = inject(LinkedInImportService);
+
   targetLang = 'EN';
   currentLocale = 'en';
   translateSourceLocale: string | null = null;
@@ -126,6 +135,8 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
     this.loadProfile();
     this.checkTranslationStatus();
     this.loadAvailableLocales();
+    this.checkLinkedInImportStatus();
+    this.handleLinkedInImportCallback();
   }
 
   private checkTranslationStatus(): void {
@@ -376,6 +387,92 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   // M-12: Helper to track message-clearing timers for cleanup
   private setMessageTimer(callback: () => void, delay: number): void {
     this.messageTimers.push(setTimeout(callback, delay));
+  }
+
+  // === LinkedIn Import ===
+
+  private checkLinkedInImportStatus(): void {
+    this.linkedinImportService.getImportStatus().subscribe({
+      next: (status) => this.linkedinImportEnabled.set(status.enabled),
+      error: () => this.linkedinImportEnabled.set(false),
+    });
+  }
+
+  private handleLinkedInImportCallback(): void {
+    const params = new URLSearchParams(window.location.search);
+    const importKey = params.get('linkedin-import');
+    const importError = params.get('linkedin-import-error');
+
+    if (importError) {
+      this.errorMessage.set(decodeURIComponent(importError));
+      this.setMessageTimer(() => this.errorMessage.set(''), 8000);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    if (importKey) {
+      this.linkedinImporting.set(true);
+      this.linkedinImportService.getImportResult(importKey).subscribe({
+        next: (imported) => {
+          this.linkedinImportPreview.set(imported);
+          this.linkedinImporting.set(false);
+          window.history.replaceState({}, '', window.location.pathname);
+        },
+        error: () => {
+          this.linkedinImporting.set(false);
+          this.errorMessage.set(this.i18n.t('linkedin.import.error'));
+          this.setMessageTimer(() => this.errorMessage.set(''), 8000);
+          window.history.replaceState({}, '', window.location.pathname);
+        },
+      });
+    }
+  }
+
+  openLinkedInConsentDialog(): void {
+    this.showLinkedInConsentDialog.set(true);
+  }
+
+  confirmLinkedInImport(): void {
+    this.showLinkedInConsentDialog.set(false);
+    this.linkedinImportService.startImport();
+  }
+
+  cancelLinkedInConsentDialog(): void {
+    this.showLinkedInConsentDialog.set(false);
+  }
+
+  applyLinkedInImport(): void {
+    const preview = this.linkedinImportPreview();
+    if (!preview) return;
+
+    this.profile = {
+      ...this.profile,
+      fullName: preview.fullName || this.profile.fullName,
+      title: preview.title || this.profile.title,
+      professionalSummary: preview.professionalSummary || this.profile.professionalSummary,
+      location: preview.location || this.profile.location,
+      website: preview.website || this.profile.website,
+      educations: preview.educations?.length ? preview.educations : this.profile.educations,
+      experiences: (preview.experiences?.length ? preview.experiences : this.profile.experiences).map((exp) => ({
+        ...exp,
+        _bulletsText: ((exp as any).bullets || []).join('\n'),
+      })),
+      skills: preview.skills?.length ? preview.skills : this.profile.skills,
+      languages: preview.languages?.length ? preview.languages : this.profile.languages,
+      certifications: preview.certifications?.length ? preview.certifications : this.profile.certifications,
+      projects: (preview.projects?.length ? preview.projects : this.profile.projects).map((proj) => ({
+        ...proj,
+        _techTagsText: ((proj as any).techTags || []).join(', '),
+      })),
+    };
+
+    this.linkedinImportPreview.set(null);
+    this.successMessage.set(this.i18n.t('linkedin.import.success'));
+    this.setMessageTimer(() => this.successMessage.set(''), 8000);
+  }
+
+  dismissLinkedInImport(): void {
+    this.linkedinImportPreview.set(null);
   }
 
   /** Check if a field has a backend validation error. Supports nested paths like 'educations[0].institution' */
