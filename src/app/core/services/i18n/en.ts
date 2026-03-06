@@ -297,6 +297,7 @@
     'auth.login.orContinueWith': 'or continue with',
     'auth.login.continueGoogle': 'Continue with Google',
     'auth.login.continueGithub': 'Continue with GitHub',
+    'auth.backToHome': '← Back to Home',
 
     // Auth Register
     'auth.register.title': 'Create Account',
