@@ -159,6 +159,29 @@
     'privacy.contact.title': 'Contact',
     'privacy.contact.description': 'For privacy-related questions, please use the contact form on our website.',
 
+    // Privacy — LinkedIn Data Import
+    'privacy.linkedin.title': 'LinkedIn Data Import',
+    'privacy.linkedin.intro': 'Our platform offers an optional feature to import your professional profile data from LinkedIn using the LinkedIn Member Data Portability API. This section explains how we handle data obtained through this feature.',
+    'privacy.linkedin.whatWeCollect.title': 'What We Collect',
+    'privacy.linkedin.whatWeCollect.description': 'When you choose to import your LinkedIn profile, the following data categories may be collected:',
+    'privacy.linkedin.whatWeCollect.item1': 'Professional positions and employment history',
+    'privacy.linkedin.whatWeCollect.item2': 'Skills and competencies',
+    'privacy.linkedin.whatWeCollect.item3': 'Education history',
+    'privacy.linkedin.whatWeCollect.item4': 'Certifications and licenses',
+    'privacy.linkedin.whatWeCollect.item5': 'Language proficiencies',
+    'privacy.linkedin.whatWeCollect.item6': 'Projects and portfolio items',
+    'privacy.linkedin.howWeUse.title': 'How We Use This Data',
+    'privacy.linkedin.howWeUse.description': 'LinkedIn data is used solely to pre-fill your resume profile on this platform. The data is collected once at the time of import, presented to you in an editable form, and only the version you confirm is stored. We do not share, sell, or transfer your LinkedIn data to any third party. The raw API response is held temporarily in memory and discarded after you confirm or cancel the import.',
+    'privacy.linkedin.storage.title': 'Storage and Security',
+    'privacy.linkedin.storage.description': 'Confirmed LinkedIn data is stored in our database alongside your other profile information, protected by encryption in transit (TLS) and at rest. Data imported from LinkedIn is tagged with its source for provenance tracking, allowing targeted deletion if requested.',
+    'privacy.linkedin.rights.title': 'Your Rights',
+    'privacy.linkedin.rights.description': 'You may edit or delete any imported data at any time through your profile editor. You can also request complete removal of all LinkedIn-imported data, which will be permanently and irreversibly deleted from our systems. This right applies regardless of whether you continue to use the platform.',
+    'privacy.linkedin.legal.title': 'Legal Basis',
+    'privacy.linkedin.legal.description': 'We process your LinkedIn data based on your explicit consent (GDPR Article 6(1)(a)). You provide this consent through an affirmative action (clicking "Import") after reviewing exactly which data categories will be collected and stored. You may withdraw consent at any time by deleting your imported data.',
+    'privacy.linkedin.controller.title': 'Data Controller',
+    'privacy.linkedin.controller.description': 'Catananti Dev (catananti.dev) acts as an independent data controller for LinkedIn-imported data, as defined by the LinkedIn Business Data Processing Agreement (BD DPA). We determine the purposes and means of processing your data independently of LinkedIn.',
+    'privacy.linkedin.disclaimer': 'This feature is not endorsed by, directly affiliated with, or sponsored by LinkedIn Corporation. LinkedIn is a registered trademark of LinkedIn Corporation.',
+
     // Terms of Use
     'terms.title': 'Terms of Use',
     'terms.lastUpdated': 'Last updated',
@@ -172,6 +195,13 @@
     'terms.disclaimer.description': 'The information on this website is provided "as is" without warranties. Code examples are for educational purposes and should be tested before use in production.',
     'terms.changes.title': 'Changes to Terms',
     'terms.changes.description': 'We reserve the right to modify these terms at any time. Changes will be posted on this page with an updated date.',
+
+    // Terms — Third-Party Data Import
+    'terms.thirdPartyImport.title': 'Third-Party Data Import',
+    'terms.thirdPartyImport.description': 'Our platform allows you to import professional profile data from third-party services such as LinkedIn. By using this feature, you acknowledge and agree to the following:',
+    'terms.thirdPartyImport.item1': 'You authorize catananti.dev to access and store the profile data you choose to import, as described in our Privacy Policy.',
+    'terms.thirdPartyImport.item2': 'You may request permanent deletion of all imported data at any time through your profile settings or by contacting us.',
+    'terms.thirdPartyImport.item3': 'This platform is not affiliated with, endorsed by, or sponsored by any third-party data provider. All trademarks belong to their respective owners.',
 
     // About Page
     'about.title': 'About',
