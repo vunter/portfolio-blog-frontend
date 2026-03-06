@@ -1,5 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy, HostListener } from '@angular/core';
-import { RealtimeNotificationService, ServerNotificationEvent } from '../../services/realtime-notification.service';
+import { Router } from '@angular/router';
+import { RealtimeNotificationService, ServerNotificationEvent, resolveRoute } from '../../services/realtime-notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 
 @Component({
@@ -27,7 +28,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
         </div>
         <div class="dropdown__list">
           @for (event of notifications.events(); track $index) {
-            <div class="dropdown__item">
+            <div class="dropdown__item" (click)="navigateToEvent(event)" role="button" tabindex="0">
               <span class="dropdown__icon" [attr.data-type]="event.type">{{ getIcon(event.type) }}</span>
               <div class="dropdown__content">
                 <span class="dropdown__item-title">{{ event.title }}</span>
@@ -141,6 +142,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
       padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--border-color-light, #f3f4f6);
       transition: background 0.15s;
+      cursor: pointer;
 
       &:hover { background: var(--bg-secondary, #f9fafb); }
       &:last-child { border-bottom: none; }
@@ -203,6 +205,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 export class NotificationBellComponent {
   readonly notifications = inject(RealtimeNotificationService);
   readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
   open = signal(false);
 
   @HostListener('document:click')
@@ -241,5 +244,11 @@ export class NotificationBellComponent {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h`;
     return date.toLocaleDateString();
+  }
+
+  navigateToEvent(event: ServerNotificationEvent): void {
+    const route = resolveRoute(event);
+    this.router.navigateByUrl(route);
+    this.open.set(false);
   }
 }

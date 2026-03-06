@@ -38,6 +38,14 @@
   border-left-color: var(--icon-info, #3b82f6);
 }
 
+.toast--clickable {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-secondary, #f8fafc);
+  }
+}
+
 .toast__icon {
   flex-shrink: 0;
   width: 1.25rem;

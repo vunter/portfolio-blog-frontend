@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { NotificationService, Notification } from '../../../core/services/notification.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
@@ -10,10 +11,17 @@ import { I18nService } from '../../../core/services/i18n.service';
 })
 export class ToastComponent {
   readonly notificationService = inject(NotificationService);
-  // M-06: Inject I18nService for translated aria-label
   readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
 
   dismiss(id: string): void {
     this.notificationService.dismiss(id);
+  }
+
+  onToastClick(notification: Notification): void {
+    if (notification.route) {
+      this.router.navigateByUrl(notification.route);
+      this.notificationService.dismiss(notification.id);
+    }
   }
 }
