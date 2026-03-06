@@ -79,6 +79,93 @@
  </div>
  </div>
 
+ <!-- LinkedIn Import Button -->
+ @if (linkedinImportEnabled() && !embedded()) {
+ <div class="linkedin-import-section">
+ <button type="button" class="btn btn-outline linkedin-import-btn"
+ (click)="openLinkedInConsentDialog()" [disabled]="linkedinImporting()">
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
+ <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/>
+ </svg>
+ @if (linkedinImporting()) {
+ {{ i18n.t('linkedin.import.importing') }}
+ } @else {
+ {{ i18n.t('linkedin.import.button') }}
+ }
+ </button>
+ <span class="import-hint">{{ i18n.t('linkedin.import.hint') }}</span>
+ </div>
+ }
+
+ <!-- LinkedIn Consent Dialog -->
+ @if (showLinkedInConsentDialog()) {
+ <div class="modal-overlay" (click)="cancelLinkedInConsentDialog()">
+ <div class="linkedin-consent-dialog" (click)="$event.stopPropagation()">
+ <h3>{{ i18n.t('linkedin.import.title') }}</h3>
+ <p>{{ i18n.t('linkedin.import.description') }}</p>
+ <div class="consent-data-list">
+ <h4>{{ i18n.t('linkedin.import.dataListTitle') }}</h4>
+ <ul>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.profile') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.positions') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.education') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.skills') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.certifications') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.languages') }}</li>
+ <li>✓ {{ i18n.t('linkedin.import.dataList.projects') }}</li>
+ </ul>
+ </div>
+ <p class="consent-usage">{{ i18n.t('linkedin.import.usage') }}</p>
+ <p class="consent-onetime">{{ i18n.t('linkedin.import.oneTime') }}</p>
+ <p class="consent-rights">{{ i18n.t('linkedin.import.rights') }}</p>
+ <p class="consent-storage-notice">{{ i18n.t('linkedin.import.storageConsent') }}</p>
+ <p class="consent-privacy-link">
+ <a routerLink="/privacy" target="_blank">{{ i18n.t('linkedin.import.privacyLink') }}</a>
+ </p>
+ <p class="consent-no-endorsement">{{ i18n.t('linkedin.import.noEndorsement') }}</p>
+ <div class="consent-actions">
+ <button type="button" class="btn btn-primary linkedin-confirm-btn" (click)="confirmLinkedInImport()">
+ {{ i18n.t('linkedin.import.button') }}
+ </button>
+ <button type="button" class="btn btn-outline" (click)="cancelLinkedInConsentDialog()">
+ {{ i18n.t('linkedin.import.cancel') }}
+ </button>
+ </div>
+ </div>
+ </div>
+ }
+
+ <!-- LinkedIn Import Preview -->
+ @if (linkedinImportPreview()) {
+ <div class="linkedin-import-preview">
+ <div class="preview-header">
+ <h3>{{ i18n.t('linkedin.import.preview.title') }}</h3>
+ <p>{{ i18n.t('linkedin.import.preview.description') }}</p>
+ </div>
+ <div class="preview-summary">
+ <ul>
+ @if (linkedinImportPreview()!.fullName) { <li><strong>Name:</strong> {{ linkedinImportPreview()!.fullName }}</li> }
+ @if (linkedinImportPreview()!.title) { <li><strong>Title:</strong> {{ linkedinImportPreview()!.title }}</li> }
+ @if (linkedinImportPreview()!.experiences?.length) { <li>{{ linkedinImportPreview()!.experiences!.length }} experiences</li> }
+ @if (linkedinImportPreview()!.educations?.length) { <li>{{ linkedinImportPreview()!.educations!.length }} education entries</li> }
+ @if (linkedinImportPreview()!.skills?.length) { <li>Skills imported</li> }
+ @if (linkedinImportPreview()!.certifications?.length) { <li>{{ linkedinImportPreview()!.certifications!.length }} certifications</li> }
+ @if (linkedinImportPreview()!.languages?.length) { <li>{{ linkedinImportPreview()!.languages!.length }} languages</li> }
+ @if (linkedinImportPreview()!.projects?.length) { <li>{{ linkedinImportPreview()!.projects!.length }} projects</li> }
+ </ul>
+ </div>
+ <p class="preview-edit-note">{{ i18n.t('linkedin.import.preview.editNote') }}</p>
+ <div class="preview-actions">
+ <button type="button" class="btn btn-primary" (click)="applyLinkedInImport()">
+ {{ i18n.t('linkedin.import.preview.save') }}
+ </button>
+ <button type="button" class="btn btn-outline" (click)="dismissLinkedInImport()">
+ {{ i18n.t('linkedin.import.preview.cancel') }}
+ </button>
+ </div>
+ </div>
+ }
+
  <form (ngSubmit)="save()" class="profile-form">
 
  <!-- Personal Info (hidden when embedded in admin profile) -->
