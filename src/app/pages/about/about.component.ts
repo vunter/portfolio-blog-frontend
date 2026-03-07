@@ -1,6 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { I18nService } from '../../core/services/i18n.service';
-import { PublicProfileService } from '../../core/services/public-profile.service';
 import { SeoService } from '../../core/services/seo.service';
 
 @Component({
@@ -11,7 +10,6 @@ import { SeoService } from '../../core/services/seo.service';
 })
 export class AboutComponent implements OnInit {
   i18n = inject(I18nService);
-  profileService = inject(PublicProfileService);
   private seo = inject(SeoService);
 
   ngOnInit(): void {
