@@ -52,6 +52,13 @@
   }
 }
 
+.not-found__logo {
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
