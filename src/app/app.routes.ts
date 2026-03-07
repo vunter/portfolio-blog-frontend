@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, devGuard } from './core/auth/auth.guard';
+import { authGuard, devGuard, setupGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   // Public routes with layout
@@ -91,7 +91,7 @@ export const routes: Routes = [
   // Admin routes (protected)
   {
     path: 'admin',
-    canActivate: [authGuard],
+    canActivate: [authGuard, setupGuard],
     loadChildren: () =>
       import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },
@@ -107,7 +107,7 @@ export const routes: Routes = [
   // Viewer profile routes (any authenticated user)
   {
     path: 'profile',
-    canActivate: [authGuard],
+    canActivate: [authGuard, setupGuard],
     loadChildren: () =>
       import('./features/viewer-profile/viewer-profile.routes').then((m) => m.viewerProfileRoutes),
   },

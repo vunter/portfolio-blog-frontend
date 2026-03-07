@@ -202,7 +202,8 @@
  ></textarea>
  </div>
 
- <!-- Resume contact fields (from resume profile) -->
+ <!-- Resume contact fields (from resume profile) — ADMIN/DEV only -->
+ @if (isDev()) {
  @if (resumeProfile(); as rp) {
  @if (!rp.loading()) {
  <div class="section-divider"></div>
@@ -247,6 +248,7 @@
  </div>
  }
  }
+ }
  </div>
 
  <!-- Save all sections -->
@@ -261,6 +263,7 @@
  </button>
  </div>
 
+ @if (isDev()) {
  <!-- Home Page Customization -->
  <div class="form-card">
  <h2>
@@ -273,6 +276,7 @@
 
  <!-- Resume Profile (embedded — personal info hidden, handled above) -->
  <app-resume-profile [embedded]="true" />
+ }
 
  <!-- Change password (last section) -->
  <div class="form-card">

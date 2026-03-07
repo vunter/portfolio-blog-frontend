@@ -52,6 +52,7 @@ export class ProfileComponent implements OnInit {
   fieldErrors = signal<Record<string, string>>({});
   formSubmitted = signal(false);
   isSetupMode = signal(false);
+  isDev = computed(() => this.authStore.isDev());
 
   editingEmail = signal(false);
   editingUsername = signal(false);
