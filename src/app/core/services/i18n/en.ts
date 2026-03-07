@@ -1465,6 +1465,7 @@
 
     // Home - Education
     'home.edu.title': 'Education & Certifications',
+    'home.edu.since': 'Since',
     'home.edu.viewCert': 'View Certificate',
     'home.edu.noData': 'No education data available. Please check back later.',
     'home.edu.alwaysLearning': 'Always Learning',
