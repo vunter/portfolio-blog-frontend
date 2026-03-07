@@ -30,6 +30,10 @@ RUN printf 'server {\n\
     add_header X-Content-Type-Options "nosniff" always;\n\
     add_header X-Frame-Options "SAMEORIGIN" always;\n\
   }\n\
+  location ~* /favicon\\.(ico|svg)$ {\n\
+    expires 7d;\n\
+    add_header Cache-Control "public, must-revalidate";\n\
+  }\n\
   location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot)$ {\n\
     expires 1y;\n\
     add_header Cache-Control "public, immutable";\n\
