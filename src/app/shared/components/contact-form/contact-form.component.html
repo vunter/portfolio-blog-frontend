@@ -79,6 +79,11 @@
  <span class="char-count">{{ contactForm.get('message')?.value?.length || 0 }}/2000</span>
  </div>
 
+ <p class="form-disclosure">
+  {{ i18n.t('contactForm.privacyDisclosure') }}
+  <a routerLink="/privacy">{{ i18n.t('contactForm.privacyLink') }}</a>.
+ </p>
+
  <button
  type="submit"
  class="submit-btn"

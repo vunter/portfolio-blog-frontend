@@ -92,6 +92,18 @@ textarea {
   color: var(--text-secondary, #64748b);
 }
 
+.form-disclosure {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.4;
+  margin: 0.75rem 0;
+
+  a {
+    color: var(--accent-color, #3b82f6);
+    text-decoration: underline;
+  }
+}
+
 .submit-btn {
   width: 100%;
   padding: 1rem;

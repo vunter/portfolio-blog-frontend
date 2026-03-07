@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -12,7 +13,7 @@ import { RecaptchaService } from '../../../core/services/recaptcha.service';
  */
 @Component({
   selector: 'app-newsletter-subscribe',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './newsletter-subscribe.component.html',
   styleUrl: './newsletter-subscribe.component.scss',
