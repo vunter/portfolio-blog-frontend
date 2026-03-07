@@ -8,7 +8,7 @@
  <h3><i class="fa-solid fa-graduation-cap edu-icon"></i> {{ edu.degree }}</h3>
  <div class="edu-title">{{ edu.fieldOfStudy }}</div>
  <div class="edu-institution">{{ edu.institution }}@if (edu.location) {, {{ edu.location }}}</div>
- <div class="edu-year">{{ edu.startDate }}@if (edu.endDate) { - {{ edu.endDate }}}</div>
+ <div class="edu-year">@if (edu.endDate) {{{ edu.startDate }} - {{ edu.endDate }}} @else {{{ i18n.t('home.edu.since') }} {{ edu.startDate }}}</div>
  @if (edu.description) {
  <p class="edu-description">{{ edu.description }}</p>
  }
