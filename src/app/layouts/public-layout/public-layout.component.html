@@ -4,8 +4,8 @@
  <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()" [class.i18n-loading]="i18n.translationsLoading()">
  <header class="header">
  <div class="header__container">
- <a routerLink="/" class="header__logo">
- <span class="logo-text">{{ ownerName() }}</span>
+ <a routerLink="/" class="header__logo" [attr.aria-label]="i18n.t('nav.home')">
+ <img src="images/logo-simplified.svg" alt="Catananti" class="header__logo-img">
  </a>
  <nav class="header__nav" aria-label="Main navigation">
  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ i18n.t('nav.home') }}</a>
