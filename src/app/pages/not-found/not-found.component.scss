@@ -43,10 +43,12 @@
 }
 
 .not-found__logo {
-  height: 80px;
+  height: 140px;
   object-fit: contain;
-  opacity: 0.7;
+  opacity: 0.85;
 }
+:host-context(.theme-dark) .not-found__logo { filter: invert(1) hue-rotate(180deg); }
+:host-context(.theme-light) .not-found__logo { filter: brightness(0.9); }
 
 .btn {
   display: inline-flex;
