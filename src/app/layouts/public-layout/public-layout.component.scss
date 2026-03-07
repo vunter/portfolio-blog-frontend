@@ -26,8 +26,11 @@
     .theme-light { --header-bg: rgba(255, 255, 255, 0.95); --header-border: #e2e8f0; --nav-text: #475569; --nav-hover: var(--accent-color); --btn-bg: #f1f5f9; --btn-hover: #e2e8f0; --footer-bg: #f8fafc; }
     .header { position: sticky; top: 0; background: var(--header-bg); border-bottom: 1px solid var(--header-border); z-index: var(--z-sticky); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .header__container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
-    .header__logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; font-weight: 700; font-size: 1.25rem; color: var(--text-primary); transition: color 0.2s; }
-    .header__logo:hover { color: var(--accent-light); }
+    .header__logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: opacity 0.2s; }
+    .header__logo:hover { opacity: 0.85; }
+    .header__logo-img { height: 40px; width: auto; display: block; transition: filter 0.3s; }
+    .theme-light .header__logo-img { filter: brightness(0.82) saturate(1.1); }
+    .theme-dark .header__logo-img { filter: drop-shadow(0 0 6px rgba(56, 212, 164, 0.2)); }
     .header__nav { display: flex; gap: 2rem; @media (max-width: 768px) { display: none; } }
     .header__nav a { color: var(--nav-text); text-decoration: none; font-weight: 500; font-size: 0.875rem; transition: color 0.2s; position: relative; }
     .header__nav a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--accent-color); transition: width 0.3s; }

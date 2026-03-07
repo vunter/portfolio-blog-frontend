@@ -19,7 +19,7 @@
 
  <div class="article-card__content">
  <div class="article-card__meta">
- @for (tag of (article().tags ?? []).slice(0, 3); track tag.id) {
+ @for (tag of article().tags.slice(0, 3); track tag.id) {
  <a
  [routerLink]="['/blog/tag', tag.slug]"
  class="article-card__tag"
