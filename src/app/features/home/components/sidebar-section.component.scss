@@ -7,13 +7,39 @@
   height: fit-content;
 }
 
-/* Desktop: sticky sidebar */
+/* Desktop: independently scrollable sidebar */
 @media (min-width: 1025px) {
   .blog-sidebar {
     display: block;
     position: sticky;
-    top: 100px;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
     padding-top: 1rem;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+
+    &:hover {
+      scrollbar-color: var(--text-muted, #666) transparent;
+    }
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 3px;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: var(--text-muted, #666);
+    }
   }
 }
 .sidebar-section {
