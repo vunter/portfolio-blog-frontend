@@ -9,32 +9,46 @@
  <p>{{ i18n.t('about.intro') }}</p>
  </section>
 
- @if (profileService.profile(); as profile) {
- <section class="about-details">
- <h2>{{ i18n.t('about.professional') }}</h2>
- @if (profile.title) {
- <p class="headline">{{ profile.title }}</p>
- }
- @if (profile.professionalSummary) {
- <p>{{ profile.professionalSummary }}</p>
- }
- </section>
-
- @if (profile.skills && profile.skills.length > 0) {
- <section class="about-skills">
- <h2>{{ i18n.t('about.skills') }}</h2>
- <div class="skills-grid">
- @for (skill of profile.skills; track skill.category) {
- <span class="skill-tag">{{ skill.content }}</span>
- }
+ <section class="about-site">
+ <h2>{{ i18n.t('about.whatYouFind') }}</h2>
+ <p class="section-description">{{ i18n.t('about.whatYouFind.description') }}</p>
+ <div class="features-grid">
+  <div class="feature-card">
+   <i class="fa-solid fa-pen-nib"></i>
+   <h3>{{ i18n.t('about.feature.blog') }}</h3>
+   <p>{{ i18n.t('about.feature.blog.description') }}</p>
+  </div>
+  <div class="feature-card">
+   <i class="fa-solid fa-briefcase"></i>
+   <h3>{{ i18n.t('about.feature.portfolio') }}</h3>
+   <p>{{ i18n.t('about.feature.portfolio.description') }}</p>
+  </div>
+  <div class="feature-card">
+   <i class="fa-solid fa-file-lines"></i>
+   <h3>{{ i18n.t('about.feature.resume') }}</h3>
+   <p>{{ i18n.t('about.feature.resume.description') }}</p>
+  </div>
+  <div class="feature-card">
+   <i class="fa-solid fa-magnifying-glass"></i>
+   <h3>{{ i18n.t('about.feature.search') }}</h3>
+   <p>{{ i18n.t('about.feature.search.description') }}</p>
+  </div>
+  <div class="feature-card">
+   <i class="fa-solid fa-language"></i>
+   <h3>{{ i18n.t('about.feature.i18n') }}</h3>
+   <p>{{ i18n.t('about.feature.i18n.description') }}</p>
+  </div>
+  <div class="feature-card">
+   <i class="fa-solid fa-circle-half-stroke"></i>
+   <h3>{{ i18n.t('about.feature.dark') }}</h3>
+   <p>{{ i18n.t('about.feature.dark.description') }}</p>
+  </div>
  </div>
  </section>
- }
- }
 
- <section class="about-site">
- <h2>{{ i18n.t('about.aboutSite') }}</h2>
- <p>{{ i18n.t('about.siteDescription') }}</p>
+ <section class="about-why">
+ <h2>{{ i18n.t('about.whyBuilt') }}</h2>
+ <p>{{ i18n.t('about.whyBuilt.description') }}</p>
  </section>
  </div>
 </div>

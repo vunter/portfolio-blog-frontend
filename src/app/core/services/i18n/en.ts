@@ -236,11 +236,25 @@
 
     // About Page
     'about.title': 'About',
-    'about.intro': 'Welcome to my portfolio and blog. This is where I share my professional experience, technical knowledge, and thoughts on software engineering.',
+    'about.intro': 'Catananti Dev is a platform for software engineers to share their work, write about what they know, and build a professional presence — all in one place.',
     'about.professional': 'Professional Background',
     'about.skills': 'Key Skills',
-    'about.aboutSite': 'About This Site',
-    'about.siteDescription': 'This site is built with Angular 20, Spring Boot 4 (WebFlux/R2DBC), PostgreSQL, and Redis. It features a blog with i18n support, a dynamic portfolio, and a resume builder.',
+    'about.whatYouFind': 'What You\'ll Find Here',
+    'about.whatYouFind.description': 'Whether you\'re a visitor exploring content or a developer showcasing your career, here\'s what the platform offers:',
+    'about.feature.blog': 'Blog',
+    'about.feature.blog.description': 'Read and publish articles on software engineering, architecture, lessons learned, and more. Available in multiple languages.',
+    'about.feature.portfolio': 'Developer Portfolios',
+    'about.feature.portfolio.description': 'Each developer has a dynamic portfolio showcasing their experience, projects, and skills — always up to date.',
+    'about.feature.resume': 'Resume Builder',
+    'about.feature.resume.description': 'Generate interactive resumes that can be viewed online or exported as PDF, with multilingual support.',
+    'about.feature.search': 'Search & Tags',
+    'about.feature.search.description': 'Quickly find content by topic using full-text search or browsing by tags across all published articles.',
+    'about.feature.i18n': 'Multilingual',
+    'about.feature.i18n.description': 'The entire platform supports multiple languages — both content and interface — making it accessible to a global audience.',
+    'about.feature.dark': 'Dark & Light Mode',
+    'about.feature.dark.description': 'Choose the theme that suits you best, or let the site follow your system preference.',
+    'about.whyBuilt': 'Why This Exists',
+    'about.whyBuilt.description': 'We believe developers deserve a space that\'s truly theirs — not just a profile on someone else\'s platform. A place to write freely, share your work, and grow your professional presence. That\'s what Catananti Dev is building.',
     
     // Common
     'common.loading': 'Loading...',
