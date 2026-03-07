@@ -33,6 +33,7 @@ export class RegisterComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(12), Validators.pattern(RegisterComponent.PASSWORD_PATTERN)]],
     confirmPassword: ['', [Validators.required]],
+    termsAccepted: [false, [Validators.requiredTrue]],
   });
 
   showPassword = signal(false);
@@ -89,6 +90,7 @@ export class RegisterComponent {
           name: name!,
           email: email!,
           password: password!,
+          termsAccepted: true,
           recaptchaToken: recaptchaToken ?? undefined,
         })
       ),

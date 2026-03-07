@@ -390,6 +390,11 @@
     'auth.register.validationError': 'Please check your information and try again.',
     'auth.register.genericError': 'An error occurred. Please try again.',
     'auth.register.success': 'Account created successfully! Welcome!',
+    'auth.register.termsPrefix': 'I have read and agree to the',
+    'auth.register.termsLink': 'Terms of Use',
+    'auth.register.termsAnd': 'and the',
+    'auth.register.privacyLink': 'Privacy Policy',
+    'auth.register.termsRequired': 'You must accept the Terms of Use and Privacy Policy to create an account.',
 
     // Auth MFA
     'auth.mfa.title': 'Two-Factor Authentication',
@@ -1555,6 +1560,8 @@
     'contactForm.success': "Message sent successfully! I'll reply soon.",
     'contactForm.successNotification': 'Message sent successfully!',
     'contactForm.errorNotification': 'Failed to send message. Please try again.',
+    'contactForm.privacyDisclosure': 'By submitting this form, your data will be processed solely to respond to your inquiry. See our',
+    'contactForm.privacyLink': 'Privacy Policy',
 
     // Not Found (404)
     'notFound.title': 'Page not found',
@@ -1570,6 +1577,8 @@
     'newsletter.subscribe.success': 'Check your email to confirm your subscription!',
     'newsletter.subscribe.error': 'Failed to subscribe. Please try again.',
     'newsletter.subscribe.checkEmail': 'Check your email to confirm!',
+    'newsletter.subscribe.privacyDisclosure': 'By subscribing, you consent to receive email updates. You can unsubscribe at any time. See our',
+    'newsletter.subscribe.privacyLink': 'Privacy Policy',
 
     // Accessibility
     'a11y.skipToContent': 'Skip to main content',

@@ -154,6 +154,27 @@
  }
  </div>
 
+ <!-- Terms & Privacy acceptance (LGPD Art. 8, GDPR Art. 7) -->
+ <div class="terms-acceptance">
+  <label class="terms-label">
+   <input type="checkbox"
+          formControlName="termsAccepted"
+          [attr.aria-describedby]="registerForm.get('termsAccepted')?.invalid && registerForm.get('termsAccepted')?.touched ? 'terms-error' : null"
+          [attr.aria-invalid]="registerForm.get('termsAccepted')?.invalid && registerForm.get('termsAccepted')?.touched">
+   <span class="terms-text">
+    {{ i18n.t('auth.register.termsPrefix') }}
+    <a routerLink="/terms" target="_blank">{{ i18n.t('auth.register.termsLink') }}</a>
+    {{ i18n.t('auth.register.termsAnd') }}
+    <a routerLink="/privacy" target="_blank">{{ i18n.t('auth.register.privacyLink') }}</a>
+   </span>
+  </label>
+  @if (registerForm.get('termsAccepted')?.invalid && registerForm.get('termsAccepted')?.touched) {
+  <small id="terms-error" class="field-error" role="alert">
+   {{ i18n.t('auth.register.termsRequired') }}
+  </small>
+  }
+ </div>
+
  <button type="submit" class="submit-btn" [disabled]="loading()">
  @if (loading()) {
  <span class="spinner"></span>

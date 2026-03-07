@@ -32,6 +32,7 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  termsAccepted: boolean;
   recaptchaToken?: string;
 }
 
