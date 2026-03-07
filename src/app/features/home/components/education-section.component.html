@@ -5,7 +5,7 @@
  @if (hasProfileData()) {
  @for (edu of educations(); track edu.id ?? $index) {
  <div class="edu-card">
- <h3> {{ edu.degree }}</h3>
+ <h3><i class="fa-solid fa-graduation-cap edu-icon"></i> {{ edu.degree }}</h3>
  <div class="edu-title">{{ edu.fieldOfStudy }}</div>
  <div class="edu-institution">{{ edu.institution }}@if (edu.location) {, {{ edu.location }}}</div>
  <div class="edu-year">{{ edu.startDate }}@if (edu.endDate) { - {{ edu.endDate }}}</div>
@@ -16,7 +16,7 @@
  }
  @for (cert of certifications(); track cert.id ?? $index) {
  <div class="edu-card">
- <h3> {{ cert.name }}</h3>
+ <h3><i class="fa-solid fa-certificate cert-icon"></i> {{ cert.name }}</h3>
  @if (cert.description) {
  <div class="edu-title">{{ cert.description }}</div>
  }
@@ -24,10 +24,18 @@
  <div class="edu-institution">{{ cert.issuer }}</div>
  }
  @if (cert.credentialUrl) {
- <a [href]="cert.credentialUrl" target="_blank" rel="noopener" class="cert-link">{{ i18n.t('home.edu.viewCert') }}</a>
+ <a [href]="cert.credentialUrl" target="_blank" rel="noopener" class="cert-link">{{ i18n.t('home.edu.viewCert') }} <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
  }
  </div>
  }
+
+ <!-- Always Learning card -->
+ <div class="edu-card learning-card">
+ <h3><i class="fa-solid fa-rocket learning-icon"></i> {{ i18n.t('home.edu.alwaysLearning') }}</h3>
+ <div class="edu-title">{{ i18n.t('home.edu.continuousGrowth') }}</div>
+ <div class="edu-institution">{{ i18n.t('home.edu.continuousGrowthDesc') }}</div>
+ <div class="coming-soon">{{ i18n.t('home.edu.comingSoon') }}</div>
+ </div>
  } @else {
  <div class="empty-state">
  <p>{{ i18n.t('home.edu.noData') }}</p>

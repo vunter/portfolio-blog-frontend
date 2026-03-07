@@ -1467,6 +1467,10 @@
     'home.edu.title': 'Education & Certifications',
     'home.edu.viewCert': 'View Certificate',
     'home.edu.noData': 'No education data available. Please check back later.',
+    'home.edu.alwaysLearning': 'Always Learning',
+    'home.edu.continuousGrowth': 'Continuous Growth',
+    'home.edu.continuousGrowthDesc': 'Committed to expanding knowledge through new certifications and courses',
+    'home.edu.comingSoon': 'More coming soon...',
 
     // Home - Languages & Availability
     'home.lang.title': 'Languages & Availability',
