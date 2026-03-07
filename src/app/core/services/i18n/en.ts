@@ -1422,6 +1422,18 @@
     'auth.resetPassword.expiredToken': 'Invalid or expired token.',
     'auth.resetPassword.genericError': 'An error occurred. Please try again.',
 
+    // Complete Profile (post-OAuth setup)
+    'auth.completeProfile.title': 'Complete Your Profile',
+    'auth.completeProfile.subtitle': 'Choose a username and set a password to secure your account.',
+    'auth.completeProfile.usernameLabel': 'Username',
+    'auth.completeProfile.usernamePattern': 'Only letters, numbers, hyphens and underscores allowed',
+    'auth.completeProfile.usernameRequired': 'Username is required (min 3 characters)',
+    'auth.completeProfile.usernameHint': 'Letters, numbers, hyphens and underscores only',
+    'auth.completeProfile.submit': 'Complete Setup',
+    'auth.completeProfile.submitting': 'Setting up...',
+    'auth.completeProfile.success': 'Profile setup complete!',
+    'auth.completeProfile.error': 'Failed to complete setup. Please try again.',
+
     // Verify Email Change
     'auth.verifyEmailChange.verifying': 'Verifying your email change...',
     'auth.verifyEmailChange.successTitle': 'Email Changed!',

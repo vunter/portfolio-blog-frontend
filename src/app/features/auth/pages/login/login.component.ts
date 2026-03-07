@@ -113,8 +113,7 @@ export class LoginComponent {
           this.authStore.login(user);
           this.notification.success(this.i18n.t('auth.login.success'));
 
-          // #21: Role-based default redirect — VIEWER goes to /profile, others to /admin
-          const defaultRoute = user.role === 'VIEWER' ? '/profile' : '/admin';
+          const defaultRoute = '/';
           const returnUrl =
             this.route.snapshot.queryParams['returnUrl'] || defaultRoute;
           // Prevent open redirect: only allow relative URLs starting with /

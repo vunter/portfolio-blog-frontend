@@ -28,9 +28,9 @@ export class OAuthCallbackComponent implements OnInit {
       next: (user) => {
         this.authStore.login(user);
         if (!user.hasPassword) {
-          this.router.navigateByUrl('/admin/profile?setup=true');
+          this.router.navigateByUrl('/auth/complete-profile');
         } else {
-          const defaultRoute = user.role === 'VIEWER' ? '/profile' : '/admin';
+          const defaultRoute = '/';
           this.router.navigateByUrl(defaultRoute);
         }
       },

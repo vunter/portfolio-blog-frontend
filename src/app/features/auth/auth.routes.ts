@@ -16,6 +16,13 @@ export const authRoutes: Routes = [
       ),
   },
   {
+    path: 'complete-profile',
+    loadComponent: () =>
+      import('./pages/complete-profile/complete-profile.component').then(
+        (m) => m.CompleteProfileComponent
+      ),
+  },
+  {
     path: 'mfa-verify',
     loadComponent: () =>
       import('./pages/mfa-verify/mfa-verify.component').then((m) => m.MfaVerifyComponent),
