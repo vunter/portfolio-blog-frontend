@@ -182,6 +182,43 @@
     'privacy.linkedin.controller.description': 'Catananti Dev (catananti.dev) acts as an independent data controller for LinkedIn-imported data, as defined by the LinkedIn Business Data Processing Agreement (BD DPA). We determine the purposes and means of processing your data independently of LinkedIn.',
     'privacy.linkedin.disclaimer': 'This feature is not endorsed by, directly affiliated with, or sponsored by LinkedIn Corporation. LinkedIn is a registered trademark of LinkedIn Corporation.',
 
+    // OAuth Authentication (Privacy)
+    'privacy.oauth.title': 'Third-Party Authentication',
+    'privacy.oauth.intro': 'We offer sign-in through third-party OAuth providers. When you authenticate using these services, we receive limited profile information as described below. We never receive or store your passwords from these providers.',
+
+    'privacy.oauth.google.title': 'Google Sign-In',
+    'privacy.oauth.google.description': 'When you sign in with Google, we receive:',
+    'privacy.oauth.google.item1': 'Your name and email address',
+    'privacy.oauth.google.item2': 'Your profile picture URL',
+    'privacy.oauth.google.item3': 'Your Google account identifier (used to link your account)',
+    'privacy.oauth.google.policy': 'Google\'s use of information is governed by the Google Privacy Policy (https://policies.google.com/privacy). Our use of Google APIs complies with the Google API Services User Data Policy, including the Limited Use requirements.',
+
+    'privacy.oauth.github.title': 'GitHub Sign-In',
+    'privacy.oauth.github.description': 'When you sign in with GitHub, we receive:',
+    'privacy.oauth.github.item1': 'Your name and email address',
+    'privacy.oauth.github.item2': 'Your profile picture URL',
+    'privacy.oauth.github.item3': 'Your GitHub username and account identifier',
+    'privacy.oauth.github.policy': 'GitHub\'s use of information is governed by the GitHub Privacy Statement (https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).',
+
+    'privacy.oauth.linkedin.title': 'LinkedIn Sign-In',
+    'privacy.oauth.linkedin.description': 'When you sign in with LinkedIn, we receive:',
+    'privacy.oauth.linkedin.item1': 'Your name and email address',
+    'privacy.oauth.linkedin.item2': 'Your profile picture URL',
+    'privacy.oauth.linkedin.item3': 'Your LinkedIn profile identifier',
+    'privacy.oauth.linkedin.item4': 'Your LinkedIn profile URL (if available)',
+    'privacy.oauth.linkedin.policy': 'LinkedIn\'s use of information is governed by the LinkedIn Privacy Policy (https://www.linkedin.com/legal/privacy-policy). Our integration uses LinkedIn\'s Sign In with LinkedIn v2 API.',
+
+    'privacy.oauth.dataHandling.title': 'How We Handle OAuth Data',
+    'privacy.oauth.dataHandling.howWeUse.title': 'How We Use Your Data',
+    'privacy.oauth.dataHandling.howWeUse.description': 'Data received from OAuth providers is used solely to create and maintain your account. We use your name and email to identify you, and your profile picture for display purposes. We do not sell, share, or use this data for advertising.',
+    'privacy.oauth.dataHandling.storage.title': 'Storage and Security',
+    'privacy.oauth.dataHandling.storage.description': 'OAuth data is stored securely in our database with encryption at rest. Access tokens are short-lived and refresh tokens are stored as HTTP-only secure cookies. We do not store provider passwords.',
+    'privacy.oauth.dataHandling.rights.title': 'Your Rights',
+    'privacy.oauth.dataHandling.rights.description': 'You can disconnect your social account at any time from your profile settings. You may also revoke access directly from the provider\'s settings (Google Account, GitHub Settings, or LinkedIn Settings). Upon disconnection, we retain only the basic account information needed for your local account.',
+    'privacy.oauth.dataHandling.legal.title': 'Legal Basis',
+    'privacy.oauth.dataHandling.legal.description': 'We process OAuth data based on your explicit consent (GDPR Art. 6(1)(a), LGPD Art. 7(I)) given when you click "Sign in with [Provider]". You may withdraw consent at any time by disconnecting the provider.',
+    'privacy.oauth.dataHandling.disclaimer': 'We are not affiliated with Google, GitHub, or LinkedIn. These are independent services with their own terms and privacy policies.',
+
     // Terms of Use
     'terms.title': 'Terms of Use',
     'terms.lastUpdated': 'Last updated',
@@ -202,6 +239,15 @@
     'terms.thirdPartyImport.item1': 'You authorize catananti.dev to access and store the profile data you choose to import, as described in our Privacy Policy.',
     'terms.thirdPartyImport.item2': 'You may request permanent deletion of all imported data at any time through your profile settings or by contacting us.',
     'terms.thirdPartyImport.item3': 'This platform is not affiliated with, endorsed by, or sponsored by any third-party data provider. All trademarks belong to their respective owners.',
+
+    // OAuth Authentication (Terms)
+    'terms.oauthAuth.title': 'Third-Party Authentication',
+    'terms.oauthAuth.description': 'You may create an account or sign in using third-party authentication providers (Google, GitHub, LinkedIn). By doing so, you agree to the following:',
+    'terms.oauthAuth.item1': 'You authorize us to access the basic profile information provided by the authentication provider (name, email, profile picture).',
+    'terms.oauthAuth.item2': 'You are responsible for maintaining the security of your third-party accounts. We are not liable for unauthorized access resulting from compromised provider accounts.',
+    'terms.oauthAuth.item3': 'You acknowledge that your use of third-party providers is also subject to their respective terms of service and privacy policies.',
+    'terms.oauthAuth.item4': 'We may store a link between your account and the third-party provider to enable future sign-ins. You can disconnect this link at any time.',
+    'terms.oauthAuth.item5': 'If you revoke access from the third-party provider, you may still access your account using your email and password (if set).',
 
     // LinkedIn Profile Import
     'linkedin.import.title': 'Import Profile from LinkedIn',
