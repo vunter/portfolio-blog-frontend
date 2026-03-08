@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { ApiService } from '../../../../core/services/api.service';
@@ -11,7 +11,7 @@ import { UserResponse } from '../../../../models';
 
 @Component({
   selector: 'app-complete-profile',
-  imports: [ReactiveFormsModule, ThemeToggleComponent],
+  imports: [ReactiveFormsModule, ThemeToggleComponent, RouterLink],
   templateUrl: './complete-profile.component.html',
   styleUrl: './complete-profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +38,7 @@ export class CompleteProfileComponent implements OnInit {
       Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
     newPassword: ['', [Validators.required, Validators.minLength(12), Validators.pattern(CompleteProfileComponent.PASSWORD_PATTERN)]],
     confirmPassword: ['', [Validators.required]],
+    termsAccepted: [false, [Validators.requiredTrue]],
   });
 
   ngOnInit(): void {
@@ -81,6 +82,7 @@ export class CompleteProfileComponent implements OnInit {
       name,
       username,
       newPassword,
+      termsAccepted: true,
     }).subscribe({
       next: (res) => {
         const updatedUser = res.body;
