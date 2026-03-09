@@ -31,6 +31,8 @@ export class CompleteProfileComponent implements OnInit {
   showPassword = signal(false);
   showConfirmPassword = signal(false);
   errorMessage = signal('');
+  /** True when user already has a password and only needs to accept terms */
+  termsOnlyMode = signal(false);
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
@@ -49,8 +51,16 @@ export class CompleteProfileComponent implements OnInit {
         username: user.username || this.suggestUsername(user.name || ''),
       });
     }
-    if (user?.hasPassword) {
+    if (user?.hasPassword && user?.termsAccepted) {
       this.router.navigateByUrl('/');
+      return;
+    }
+    if (user?.hasPassword) {
+      this.termsOnlyMode.set(true);
+      this.form.get('newPassword')!.clearValidators();
+      this.form.get('newPassword')!.updateValueAndValidity();
+      this.form.get('confirmPassword')!.clearValidators();
+      this.form.get('confirmPassword')!.updateValueAndValidity();
     }
   }
 
@@ -70,7 +80,7 @@ export class CompleteProfileComponent implements OnInit {
     }
     const { name, username, newPassword, confirmPassword } = this.form.value;
 
-    if (newPassword !== confirmPassword) {
+    if (!this.termsOnlyMode() && newPassword !== confirmPassword) {
       this.errorMessage.set(this.i18n.t('auth.register.passwordMismatch'));
       return;
     }
@@ -78,12 +88,16 @@ export class CompleteProfileComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.api.putResponse<UserResponse>('/admin/users/me', {
+    const payload: Record<string, unknown> = {
       name,
       username,
-      newPassword,
       termsAccepted: true,
-    }).subscribe({
+    };
+    if (!this.termsOnlyMode()) {
+      payload['newPassword'] = newPassword;
+    }
+
+    this.api.putResponse<UserResponse>('/admin/users/me', payload).subscribe({
       next: (res) => {
         const updatedUser = res.body;
         if (updatedUser) {

@@ -74,6 +74,7 @@
   }
   </div>
 
+  @if (!termsOnlyMode()) {
   <div class="form-group">
   <label for="password">{{ i18n.t('auth.register.password') }} <span class="required">*</span></label>
   <div class="password-input">
@@ -153,6 +154,7 @@
    <span class="field-error">{{ i18n.t('auth.register.passwordMismatch') }}</span>
   }
   </div>
+  }
 
   <!-- Terms & Privacy acceptance (LGPD Art. 8, GDPR Art. 7) -->
   <div class="terms-acceptance">
