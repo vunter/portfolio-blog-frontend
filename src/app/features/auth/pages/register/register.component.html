@@ -220,6 +220,13 @@
   </button>
   }
  </div>
+
+ <p class="social-terms-notice">
+  {{ i18n.t('auth.socialTermsPrefix') }}
+  <a routerLink="/terms" target="_blank">{{ i18n.t('auth.register.termsLink') }}</a>
+  {{ i18n.t('auth.register.termsAnd') }}
+  <a routerLink="/privacy" target="_blank">{{ i18n.t('footer.privacy') }}</a>.
+ </p>
  }
 
  <div class="auth-footer">

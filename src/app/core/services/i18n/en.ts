@@ -575,6 +575,7 @@
     'auth.register.termsAnd': 'and the',
     'auth.register.privacyLink': 'Privacy Policy',
     'auth.register.termsRequired': 'You must accept the Terms of Use and Privacy Policy to create an account.',
+    'auth.socialTermsPrefix': 'By continuing with a social account, you agree to the',
 
     // Auth MFA
     'auth.mfa.title': 'Two-Factor Authentication',
