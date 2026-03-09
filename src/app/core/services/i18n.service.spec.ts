@@ -3,11 +3,25 @@ import { I18nService, Language } from './i18n.service';
 
 describe('I18nService', () => {
   let service: I18nService;
-  let ptTranslations: Record<string, string>;
-
-  beforeAll(async () => {
-    ptTranslations = (await import('./i18n/pt')).pt;
-  });
+  // Mock PT translations (in prod these come from DB via /api/v1/i18n/pt)
+  const ptTranslations: Record<string, string> = {
+    'nav.home': 'Início',
+    'nav.blog': 'Blog',
+    'nav.login': 'Entrar',
+    'dev.articles.confirmDelete': 'Tem certeza que deseja excluir "{{title}}"?',
+    'admin.users.confirmDelete': 'Tem certeza que deseja excluir o usuário {{name}}?',
+    'dev.sidebar.articles': 'Artigos',
+    'admin.sidebar.users': 'Usuários',
+    'admin.sidebar.settings': 'Configurações',
+    'auth.login.welcome': 'Bem-vindo de volta',
+    'auth.login.submit': 'Entrar',
+    'auth.login.forgotPassword': 'Esqueceu a senha?',
+    'common.save': 'Salvar',
+    'common.cancel': 'Cancelar',
+    'common.delete': 'Excluir',
+    'common.edit': 'Editar',
+    'hero.subtitle': 'Engenheiro de Software Sênior | Java & Go',
+  };
 
   beforeEach(() => {
     localStorage.clear();
