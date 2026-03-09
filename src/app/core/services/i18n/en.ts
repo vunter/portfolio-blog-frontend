@@ -298,6 +298,12 @@
     // Terms of Use
     'terms.title': 'Terms of Use',
     'terms.lastUpdated': 'Last updated',
+    'terms.modal.title': 'Terms & Privacy Update',
+    'terms.modal.message': 'To continue using the site, please review and accept the Terms of Use and Privacy Policy.',
+    'terms.modal.accept': 'Accept & Continue',
+    'terms.modal.decline': 'Decline & Logout',
+    'terms.accepted': 'Terms accepted successfully.',
+    'terms.acceptError': 'Failed to accept terms. Please try again.',
     'terms.acceptance.title': 'Acceptance of Terms',
     'terms.acceptance.description': 'By accessing and using this website (catananti.dev), you accept and agree to be bound by these terms and conditions. If you do not agree with any part of these terms, you should not use this website.',
 

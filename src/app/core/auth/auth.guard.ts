@@ -76,14 +76,14 @@ export const guestGuard: CanActivateFn = () => {
 /**
  * Setup Guard - Redirects users to complete-profile when:
  * - No password set (OAuth users who haven't completed setup)
- * - Terms not accepted (required for all users)
+ * Terms acceptance is handled by the global TermsAcceptanceModalComponent.
  */
 export const setupGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
   const user = authStore.user();
-  if (user && (user.hasPassword === false || user.termsAccepted === false)) {
+  if (user && user.hasPassword === false) {
     router.navigateByUrl('/auth/complete-profile');
     return false;
   }
