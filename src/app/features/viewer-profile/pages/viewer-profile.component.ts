@@ -8,6 +8,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { AdminApiService } from '../../admin/services/admin-api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { ViewportScroller } from '@angular/common';
 import { UserResponse, RoleUpgradeRequestResponse } from '../../../models';
 
 interface ProfileForm {
@@ -34,6 +35,7 @@ export class ViewerProfileComponent implements OnInit {
   private api = inject(ApiService);
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
+  private viewportScroller = inject(ViewportScroller);
   i18n = inject(I18nService);
 
   avatarInput = viewChild<ElementRef<HTMLInputElement>>('avatarFileInput');
@@ -50,6 +52,13 @@ export class ViewerProfileComponent implements OnInit {
   showRoleRequestForm = signal(false);
   roleRequestReason = '';
   submittingRoleRequest = signal(false);
+
+  // Sensitive field editing (email/username require password confirmation)
+  editingEmail = signal(false);
+  editingUsername = signal(false);
+  sensitivePassword = signal('');
+  private originalEmail = '';
+  private originalUsername = '';
 
   /** Computed user from auth store for quick access */
   authUser = computed(() => this.authStore.user());
@@ -82,6 +91,8 @@ export class ViewerProfileComponent implements OnInit {
         this.form.name = user.name || '';
         this.form.email = user.email || '';
         this.form.username = user.username ?? '';
+        this.originalEmail = user.email || '';
+        this.originalUsername = user.username ?? '';
         this.form.avatarUrl = user.avatarUrl ?? '';
         this.form.bio = user.bio ?? '';
         this.loading.set(false);
@@ -97,6 +108,38 @@ export class ViewerProfileComponent implements OnInit {
       next: (req) => this.roleRequest.set(req),
       error: () => {}, // 204 No Content or error — no pending request
     });
+  }
+
+  enableEditEmail(): void {
+    this.editingEmail.set(true);
+  }
+
+  cancelEditEmail(): void {
+    this.form.email = this.originalEmail;
+    this.editingEmail.set(false);
+    this.sensitivePassword.set('');
+  }
+
+  enableEditUsername(): void {
+    this.editingUsername.set(true);
+  }
+
+  cancelEditUsername(): void {
+    this.form.username = this.originalUsername;
+    this.editingUsername.set(false);
+    this.sensitivePassword.set('');
+  }
+
+  confirmSensitiveChange(): void {
+    if (!this.sensitivePassword()) {
+      this.notification.error(this.i18n.t('account.profile.passwordRequiredForChange'));
+      return;
+    }
+    this.save();
+  }
+
+  scrollToRoleUpgrade(): void {
+    document.getElementById('role-upgrade')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   triggerAvatarUpload(): void {
@@ -161,6 +204,16 @@ export class ViewerProfileComponent implements OnInit {
       }
     }
 
+    // Detect sensitive field changes
+    const emailChanged = this.form.email.toLowerCase().trim() !== this.originalEmail.toLowerCase().trim();
+    const usernameChanged = this.form.username.trim() !== this.originalUsername.trim();
+    const sensitiveChanged = emailChanged || usernameChanged;
+
+    if (sensitiveChanged && !this.sensitivePassword()) {
+      this.notification.error(this.i18n.t('account.profile.passwordRequiredForChange'));
+      return;
+    }
+
     this.saving.set(true);
 
     const payload: Record<string, string | undefined> = {
@@ -171,6 +224,11 @@ export class ViewerProfileComponent implements OnInit {
       bio: this.form.bio || undefined,
     };
 
+    // Include password for sensitive changes
+    if (sensitiveChanged) {
+      payload['currentPassword'] = this.sensitivePassword();
+    }
+
     if (this.form.newPassword) {
       payload['currentPassword'] = this.form.currentPassword;
       payload['newPassword'] = this.form.newPassword;
@@ -180,9 +238,16 @@ export class ViewerProfileComponent implements OnInit {
       next: (updated) => {
         this.saving.set(false);
         this.user.set(updated);
+        this.originalEmail = updated.email || '';
+        this.originalUsername = updated.username ?? '';
+        this.form.email = updated.email || '';
+        this.form.username = updated.username ?? '';
         this.form.currentPassword = '';
         this.form.newPassword = '';
         this.form.confirmPassword = '';
+        this.sensitivePassword.set('');
+        this.editingEmail.set(false);
+        this.editingUsername.set(false);
         this.authStore.login(updated);
         this.notification.success(this.i18n.t('account.profile.saveSuccess'));
       },
