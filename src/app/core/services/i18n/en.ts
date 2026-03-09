@@ -1807,6 +1807,7 @@
     'newsletter.subscribe.checkEmail': 'Check your email to confirm!',
     'newsletter.subscribe.privacyDisclosure': 'By subscribing, you consent to receive email updates. You can unsubscribe at any time. See our',
     'newsletter.subscribe.privacyLink': 'Privacy Policy',
+    'newsletter.subscribe.analyticsConsent': 'I agree to anonymous email engagement tracking (open rates and link clicks) to help improve content quality.',
 
     // Accessibility
     'a11y.skipToContent': 'Skip to main content',

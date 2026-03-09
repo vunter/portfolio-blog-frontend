@@ -28,6 +28,7 @@ export class NewsletterSubscribeComponent {
 
   subscribeForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
+    analyticsConsent: [false],
   });
   submitting = signal(false);
   subscribed = signal(false);
@@ -38,7 +39,11 @@ export class NewsletterSubscribeComponent {
 
     this.submitting.set(true);
     this.recaptcha.execute('subscribe').then(recaptchaToken => {
-      this.api.post<{ message: string }>('/newsletter/subscribe', { email: emailValue, recaptchaToken })
+      this.api.post<{ message: string }>('/newsletter/subscribe', {
+          email: emailValue,
+          recaptchaToken,
+          analyticsConsent: this.subscribeForm.get('analyticsConsent')?.value ?? false,
+        })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
