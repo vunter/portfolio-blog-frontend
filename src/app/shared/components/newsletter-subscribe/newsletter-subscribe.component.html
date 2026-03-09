@@ -36,14 +36,14 @@
  {{ i18n.t('newsletter.subscribe.button') }}
  }
  </button>
- </form>
  <label class="newsletter-subscribe__consent">
-  <input type="checkbox" formControlName="analyticsConsent" [formGroup]="subscribeForm" />
+  <input type="checkbox" formControlName="analyticsConsent" />
   <span>{{ i18n.t('newsletter.subscribe.analyticsConsent') }}</span>
  </label>
  <p class="newsletter-subscribe__disclosure">
   {{ i18n.t('newsletter.subscribe.privacyDisclosure') }}
   <a routerLink="/privacy">{{ i18n.t('newsletter.subscribe.privacyLink') }}</a>.
  </p>
+ </form>
  }
 </div>
