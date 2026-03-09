@@ -21,7 +21,7 @@ describe('refreshTokenInterceptor', () => {
   let httpMock: HttpTestingController;
   let routerSpy: jasmine.SpyObj<Router>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let mockAuthStore: { isAuthenticated: ReturnType<typeof signal<boolean>>; logout: jasmine.Spy };
+  let mockAuthStore: { isAuthenticated: ReturnType<typeof signal<boolean>>; isLoading: ReturnType<typeof signal<boolean>>; logout: jasmine.Spy };
   let refreshState: RefreshTokenState;
 
   beforeEach(() => {
@@ -29,6 +29,7 @@ describe('refreshTokenInterceptor', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['refreshToken']);
     mockAuthStore = {
       isAuthenticated: signal(true),
+      isLoading: signal(false),
       logout: jasmine.createSpy('logout'),
     };
 
@@ -150,8 +151,9 @@ describe('refreshTokenInterceptor', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
   });
 
-  it('should logout and navigate when 401 and user is NOT authenticated', () => {
+  it('should logout and navigate when 401 and user is NOT authenticated and NOT loading', () => {
     mockAuthStore.isAuthenticated.set(false);
+    mockAuthStore.isLoading.set(false);
 
     http.get('/api/v1/admin/dashboard').subscribe({
       error: () => {},
@@ -163,6 +165,24 @@ describe('refreshTokenInterceptor', () => {
     expect(authServiceSpy.refreshToken).not.toHaveBeenCalled();
     expect(mockAuthStore.logout).toHaveBeenCalled();
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
+  });
+
+  it('should NOT logout during session restoration (isLoading=true, isAuthenticated=false)', () => {
+    mockAuthStore.isAuthenticated.set(false);
+    mockAuthStore.isLoading.set(true);
+
+    http.get('/api/v1/admin/users/me').subscribe({
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(401);
+      },
+    });
+
+    const req = httpMock.expectOne('/api/v1/admin/users/me');
+    req.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authServiceSpy.refreshToken).not.toHaveBeenCalled();
+    expect(mockAuthStore.logout).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalledWith(['/auth/login']);
   });
 
   it('should set isRefreshing back to false after successful refresh', () => {

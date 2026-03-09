@@ -84,7 +84,10 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
               })
             );
           }
-        } else {
+        } else if (!authStore.isLoading()) {
+          // Only force logout when not in the middle of session restoration.
+          // During initFromStorage(), isLoading is true and isAuthenticated is false
+          // while the store validates the session — let initFromStorage handle errors.
           authStore.logout();
           router.navigate(['/auth/login']);
         }
