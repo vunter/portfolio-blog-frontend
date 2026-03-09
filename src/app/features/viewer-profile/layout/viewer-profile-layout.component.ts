@@ -36,6 +36,20 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
             <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('viewer.sidebar.myProfile') }}</span>
           </a>
 
+          <a routerLink="/profile/security" routerLinkActive="active" class="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('viewer.sidebar.security') }}</span>
+          </a>
+
+          <a routerLink="/profile/reading-history" routerLinkActive="active" class="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('viewer.sidebar.readingHistory') }}</span>
+          </a>
+
           @if (authStore.isDev()) {
           <div class="nav-divider"></div>
           <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">

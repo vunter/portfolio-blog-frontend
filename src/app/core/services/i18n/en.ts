@@ -472,6 +472,8 @@
 
     // Viewer Profile
     'viewer.sidebar.myProfile': 'My Profile',
+    'viewer.sidebar.security': 'Security',
+    'viewer.sidebar.readingHistory': 'Reading History',
     'viewer.sidebar.dashboard': 'Dashboard',
     'viewer.sidebar.articles': 'Articles',
     'viewer.sidebar.resume': 'Resume',

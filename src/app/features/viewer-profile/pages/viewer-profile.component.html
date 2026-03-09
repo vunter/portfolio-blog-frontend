@@ -62,17 +62,12 @@
  {{ i18n.t('viewer.profile.quickLinks') }}
  </h2>
  <div class="quick-links">
- <a routerLink="/admin/profile" class="quick-link">
- <span class="quick-link__icon">👤</span>
- <span class="quick-link__label">{{ i18n.t('viewer.profile.editProfile') }}</span>
- <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
- </a>
- <a routerLink="/admin/security" class="quick-link">
+ <a routerLink="/profile/security" class="quick-link">
  <span class="quick-link__icon">🔒</span>
  <span class="quick-link__label">{{ i18n.t('viewer.profile.security') }}</span>
  <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
  </a>
- <a routerLink="/admin/reading-history" class="quick-link">
+ <a routerLink="/profile/reading-history" class="quick-link">
  <span class="quick-link__icon">📖</span>
  <span class="quick-link__label">{{ i18n.t('viewer.profile.readingHistory') }}</span>
  <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
