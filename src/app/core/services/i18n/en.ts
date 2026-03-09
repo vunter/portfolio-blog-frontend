@@ -148,17 +148,88 @@
     // Privacy Policy
     'privacy.title': 'Privacy Policy',
     'privacy.lastUpdated': 'Last updated',
-    'privacy.dataCollection.title': 'Data Collection',
-    'privacy.dataCollection.description': 'We collect minimal information necessary to provide our services.',
+    'privacy.intro': 'This Privacy Policy describes how catananti.dev collects, uses, and protects your personal data. We are committed to complying with the Brazilian General Data Protection Law (LGPD — Lei 13.709/2018), the European General Data Protection Regulation (GDPR), and other applicable data protection legislation.',
+
+    'privacy.controller.title': 'Data Controller',
+    'privacy.controller.description': 'The data controller responsible for your personal data is the owner of catananti.dev. For any data protection inquiries, please use the contact form available on this website.',
+
+    'privacy.dataCollection.title': 'Data We Collect',
+    'privacy.dataCollection.description': 'We collect minimal information necessary to provide our services:',
     'privacy.dataCollection.item1': 'Contact form submissions (name, email, message)',
     'privacy.dataCollection.item2': 'Newsletter subscriptions (email address)',
-    'privacy.dataCollection.item3': 'Comments on blog articles (name, email, content)',
-    'privacy.cookies.title': 'Cookies',
-    'privacy.cookies.description': 'We use essential cookies for authentication and theme preferences. No third-party tracking cookies are used.',
-    'privacy.dataUse.title': 'Data Usage',
-    'privacy.dataUse.description': 'Your data is used solely to provide the services you request: responding to contact messages, sending newsletters, and displaying comments. We do not sell or share your data with third parties.',
+    'privacy.dataCollection.item3': 'Account registration (name, email, password or OAuth profile)',
+
+    'privacy.dataCollection.automatic.title': 'Automatically Collected Data',
+    'privacy.dataCollection.automatic.description': 'When you visit our website, we may automatically collect certain technical information with your consent:',
+    'privacy.dataCollection.automatic.item1': 'Device type and browser family (parsed from user-agent, not stored raw)',
+    'privacy.dataCollection.automatic.item2': 'Pages visited and time spent (only with analytics consent)',
+    'privacy.dataCollection.automatic.item3': 'Referrer URL (external sources only)',
+    'privacy.dataCollection.automatic.item4': 'IP addresses are anonymized before storage (last octet removed for IPv4, /64 prefix for IPv6)',
+
+    'privacy.legalBasis.title': 'Legal Basis for Processing',
+    'privacy.legalBasis.description': 'We process your personal data based on the following legal grounds (LGPD Art. 7 / GDPR Art. 6):',
+    'privacy.legalBasis.consent': 'Consent (Art. 7-I LGPD / Art. 6(1)(a) GDPR): Analytics cookies, newsletter subscription, optional account features',
+    'privacy.legalBasis.contract': 'Contract performance (Art. 7-V LGPD / Art. 6(1)(b) GDPR): Account creation, comment functionality, contact form responses',
+    'privacy.legalBasis.legitimate': 'Legitimate interest (Art. 7-IX LGPD / Art. 6(1)(f) GDPR): Security measures, fraud prevention, browser language detection for localization',
+
+    'privacy.dataUse.title': 'How We Use Your Data',
+    'privacy.dataUse.description': 'Your data is used for the following purposes:',
+    'privacy.dataUse.item1': 'Providing and maintaining your account and the services you request',
+    'privacy.dataUse.item2': 'Responding to your contact form messages',
+    'privacy.dataUse.item3': 'Sending newsletters you have subscribed to (with easy unsubscribe)',
+    'privacy.dataUse.item4': 'Improving our website based on anonymized analytics (with your consent)',
+    'privacy.dataUse.item5': 'Ensuring the security and integrity of our services',
+
+    'privacy.analytics.title': 'Analytics',
+    'privacy.analytics.description': 'We use a first-party analytics system (no third-party services like Google Analytics). Analytics data is only collected when you explicitly grant consent via the cookie banner. We track:',
+    'privacy.analytics.item1': 'Page views and article reading time',
+    'privacy.analytics.item2': 'Scroll depth on articles (25%, 50%, 75%, 100%)',
+    'privacy.analytics.item3': 'Outbound link clicks and file downloads',
+    'privacy.analytics.item4': 'Device type and browser family (aggregated, not individual tracking)',
+    'privacy.analytics.item5': 'All data is anonymized and cannot be used to identify individual users',
+    'privacy.analytics.noThirdParty': 'We do not use any third-party analytics, advertising, or tracking services. All analytics data is processed and stored on our own infrastructure.',
+
+    'privacy.cookies.title': 'Cookies and Similar Technologies',
+    'privacy.cookies.description': 'We use cookies and localStorage for essential functionality, user preferences, and analytics (with consent). No third-party tracking cookies are used.',
+    'privacy.cookies.linkText': 'For detailed information about each cookie we use, please see our',
+    'privacy.cookies.linkLabel': 'Cookie Policy',
+
+    'privacy.newsletter.title': 'Newsletter',
+    'privacy.newsletter.description': 'If you subscribe to our newsletter:',
+    'privacy.newsletter.item1': 'We collect only your email address, stored securely in our database',
+    'privacy.newsletter.item2': 'Every email includes an unsubscribe link for easy opt-out at any time',
+    'privacy.newsletter.item3': 'We do not share your email with any third parties or use it for purposes other than sending the newsletter',
+
     'privacy.contact.title': 'Contact',
-    'privacy.contact.description': 'For privacy-related questions, please use the contact form on our website.',
+    'privacy.contact.description': 'For any privacy-related questions, data access requests, or to exercise your rights under LGPD or GDPR, please use the contact form on our website.',
+
+    'privacy.dataRetention.title': 'Data Retention',
+    'privacy.dataRetention.description': 'We retain your personal data only for as long as necessary to fulfill the purposes described in this policy:',
+    'privacy.dataRetention.item1': 'Account data: retained while your account is active; deleted upon account deletion request',
+    'privacy.dataRetention.item2': 'Analytics data: automatically purged after 90 days',
+    'privacy.dataRetention.item3': 'Contact form messages: retained for up to 12 months, then archived or deleted',
+
+    'privacy.dataRights.title': 'Your Rights',
+    'privacy.dataRights.description': 'Under LGPD (Art. 18) and GDPR (Art. 15-22), you have the following rights regarding your personal data:',
+    'privacy.dataRights.access': 'Right of access: You may request confirmation of whether we process your data and obtain a copy',
+    'privacy.dataRights.correction': 'Right of correction: You may request correction of incomplete or inaccurate data',
+    'privacy.dataRights.deletion': 'Right of deletion: You may request deletion of your personal data (LGPD Art. 18-VI, GDPR Art. 17)',
+    'privacy.dataRights.portability': 'Right of portability: You may request your data in a structured, machine-readable format',
+    'privacy.dataRights.withdrawal': 'Right to withdraw consent: You may withdraw consent at any time without affecting prior processing',
+    'privacy.dataRights.opposition': 'Right of opposition: You may oppose processing based on legitimate interest',
+    'privacy.dataRights.exercise': 'To exercise any of these rights, please contact us through the contact form. We will respond within 15 days (LGPD) or 30 days (GDPR).',
+
+    'privacy.security.title': 'Data Security',
+    'privacy.security.description': 'We implement appropriate technical and organizational measures to protect your personal data, including HTTPS encryption for all communications, secure HTTP-only cookies for authentication, IP anonymization before storage, CSRF protection, rate limiting, and regular security reviews.',
+
+    'privacy.international.title': 'International Data Transfers',
+    'privacy.international.description': 'Your data is primarily stored and processed on servers located in Brazil. If any data transfer to other jurisdictions occurs, we ensure adequate protection in compliance with LGPD Chapter V and GDPR Chapter V.',
+
+    'privacy.children.title': 'Children\'s Privacy',
+    'privacy.children.description': 'Our services are not directed to children under 18 years of age (or under the applicable age of consent in your jurisdiction). We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, please contact us.',
+
+    'privacy.changes.title': 'Changes to This Policy',
+    'privacy.changes.description': 'We may update this Privacy Policy periodically. When we make significant changes, we will update the "Last updated" date and, where required by law, notify you. We encourage you to review this policy regularly.',
 
     // Privacy — LinkedIn Data Import
     'privacy.linkedin.title': 'LinkedIn Data Import',
@@ -224,15 +295,50 @@
     'terms.title': 'Terms of Use',
     'terms.lastUpdated': 'Last updated',
     'terms.acceptance.title': 'Acceptance of Terms',
-    'terms.acceptance.description': 'By accessing and using this website, you accept and agree to be bound by these terms and conditions.',
+    'terms.acceptance.description': 'By accessing and using this website (catananti.dev), you accept and agree to be bound by these terms and conditions. If you do not agree with any part of these terms, you should not use this website.',
+
+    'terms.accounts.title': 'User Accounts',
+    'terms.accounts.description': 'When you create an account on our platform, you agree to the following:',
+    'terms.accounts.item1': 'You must provide accurate and complete information during registration',
+    'terms.accounts.item2': 'You are responsible for maintaining the confidentiality of your account credentials',
+    'terms.accounts.item3': 'You must notify us immediately of any unauthorized access to your account',
+    'terms.accounts.item4': 'We reserve the right to suspend or terminate accounts that violate these terms',
+
     'terms.intellectualProperty.title': 'Intellectual Property',
-    'terms.intellectualProperty.description': 'All content on this website, including articles, code examples, and images, is protected by copyright. You may share and reference content with proper attribution.',
+    'terms.intellectualProperty.description': 'All content on this website, including articles, code examples, images, and design elements, is protected by copyright and intellectual property laws. You may share and reference content with proper attribution, but reproduction of substantial portions without permission is prohibited.',
     'terms.userConduct.title': 'User Conduct',
-    'terms.userConduct.description': 'When commenting or using contact forms, you agree to be respectful and not post content that is abusive, spam, or violates any laws.',
+    'terms.userConduct.description': 'When using our services, including comments, contact forms, and community features, you agree to:',
+    'terms.userConduct.item1': 'Be respectful and not post abusive, threatening, or discriminatory content',
+    'terms.userConduct.item2': 'Not post spam, malware, or content that violates any applicable laws',
+    'terms.userConduct.item3': 'Not attempt to gain unauthorized access to other users\' accounts or our systems',
+    'terms.userConduct.item4': 'Not use automated tools to scrape, crawl, or extract data without permission',
+
+    'terms.userContent.title': 'User-Generated Content',
+    'terms.userContent.description': 'By posting comments, articles, or other content on our platform, you grant us a non-exclusive, worldwide license to display, store, and distribute that content within our platform. You retain ownership of your content and may request its removal at any time.',
+
+    'terms.dataProcessing.title': 'Data Processing',
+    'terms.dataProcessing.description': 'By using our services, you acknowledge that we process personal data as described in our Privacy Policy. Key aspects include:',
+    'terms.dataProcessing.item1': 'Analytics data is only collected with your explicit consent (opt-in via cookie banner)',
+    'terms.dataProcessing.item2': 'Your personal data is processed in accordance with LGPD (Brazil) and GDPR (EU) requirements',
+    'terms.dataProcessing.item3': 'You may exercise your data rights (access, correction, deletion, portability) at any time',
+
+    'terms.newsletter.title': 'Newsletter',
+    'terms.newsletter.description': 'By subscribing to our newsletter, you agree to the following:',
+    'terms.newsletter.item1': 'You consent to receive periodic emails about new articles, updates, and relevant content',
+    'terms.newsletter.item2': 'You can unsubscribe at any time using the link provided in every email',
+    'terms.newsletter.item3': 'Your email address will not be shared with third parties and is used solely for newsletter delivery',
+
     'terms.disclaimer.title': 'Disclaimer',
-    'terms.disclaimer.description': 'The information on this website is provided "as is" without warranties. Code examples are for educational purposes and should be tested before use in production.',
+    'terms.disclaimer.description': 'The information on this website is provided "as is" without warranties of any kind, express or implied. Code examples are for educational purposes and should be thoroughly tested before use in production environments. We do not guarantee the accuracy, completeness, or usefulness of any content.',
+
+    'terms.limitation.title': 'Limitation of Liability',
+    'terms.limitation.description': 'To the maximum extent permitted by applicable law, we shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of your use of or inability to use this website.',
+
+    'terms.governingLaw.title': 'Governing Law',
+    'terms.governingLaw.description': 'These terms are governed by and construed in accordance with the laws of the Federative Republic of Brazil, particularly the Brazilian Civil Code, Consumer Defense Code (CDC), Marco Civil da Internet (Law 12.965/2014), and the General Data Protection Law (LGPD — Law 13.709/2018). Any disputes shall be submitted to the competent courts of Brazil.',
+
     'terms.changes.title': 'Changes to Terms',
-    'terms.changes.description': 'We reserve the right to modify these terms at any time. Changes will be posted on this page with an updated date.',
+    'terms.changes.description': 'We reserve the right to modify these terms at any time. When significant changes are made, we will update the "Last updated" date on this page. Continued use of the website after changes constitutes acceptance of the revised terms.',
 
     // Terms — Third-Party Data Import
     'terms.thirdPartyImport.title': 'Third-Party Data Import',
@@ -1728,11 +1834,11 @@
     'cookie.banner.customize': 'Customize',
     'cookie.banner.savePreferences': 'Save Preferences',
     'cookie.category.necessary': 'Strictly Necessary',
-    'cookie.category.necessaryDesc': 'These cookies are essential for authentication, security (CSRF protection), and basic site functionality. They cannot be disabled.',
+    'cookie.category.necessaryDesc': 'Essential cookies for authentication (access_token), security (XSRF-TOKEN), consent storage, and basic site functionality. Required under ePrivacy Directive Art. 5(3) — no consent needed.',
     'cookie.category.functional': 'Functional',
-    'cookie.category.functionalDesc': 'These cookies remember your preferences such as language and theme to enhance your experience.',
+    'cookie.category.functionalDesc': 'These remember your preferences such as language, theme (dark/light mode), and sidebar state. Disabling means preferences reset each visit.',
     'cookie.category.analytics': 'Analytics',
-    'cookie.category.analyticsDesc': 'These cookies help us understand how visitors interact with the site to improve it.',
+    'cookie.category.analyticsDesc': 'First-party analytics only (no Google Analytics or third-party trackers). Collects anonymized page views, scroll depth, and reading time to help improve content. IPs are anonymized before storage.',
     'cookie.category.always': 'Always active',
     'cookie.privacyLink': 'Privacy Policy',
 

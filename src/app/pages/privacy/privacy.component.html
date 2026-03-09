@@ -1,7 +1,14 @@
 ﻿<div class="legal-page">
  <div class="legal-container">
  <h1>{{ i18n.t('privacy.title') }}</h1>
- <p class="legal-updated">{{ i18n.t('privacy.lastUpdated') }}: 2026-03-06</p>
+ <p class="legal-updated">{{ i18n.t('privacy.lastUpdated') }}: 2026-03-09</p>
+
+ <p class="legal-intro">{{ i18n.t('privacy.intro') }}</p>
+
+ <section>
+ <h2>{{ i18n.t('privacy.controller.title') }}</h2>
+ <p>{{ i18n.t('privacy.controller.description') }}</p>
+ </section>
 
  <section>
  <h2>{{ i18n.t('privacy.dataCollection.title') }}</h2>
@@ -11,16 +18,66 @@
  <li>{{ i18n.t('privacy.dataCollection.item2') }}</li>
  <li>{{ i18n.t('privacy.dataCollection.item3') }}</li>
  </ul>
+
+ <h3>{{ i18n.t('privacy.dataCollection.automatic.title') }}</h3>
+ <p>{{ i18n.t('privacy.dataCollection.automatic.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.dataCollection.automatic.item1') }}</li>
+ <li>{{ i18n.t('privacy.dataCollection.automatic.item2') }}</li>
+ <li>{{ i18n.t('privacy.dataCollection.automatic.item3') }}</li>
+ <li>{{ i18n.t('privacy.dataCollection.automatic.item4') }}</li>
+ </ul>
  </section>
 
  <section>
- <h2>{{ i18n.t('privacy.cookies.title') }}</h2>
- <p>{{ i18n.t('privacy.cookies.description') }}</p>
+ <h2>{{ i18n.t('privacy.legalBasis.title') }}</h2>
+ <p>{{ i18n.t('privacy.legalBasis.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.legalBasis.consent') }}</li>
+ <li>{{ i18n.t('privacy.legalBasis.contract') }}</li>
+ <li>{{ i18n.t('privacy.legalBasis.legitimate') }}</li>
+ </ul>
  </section>
 
  <section>
  <h2>{{ i18n.t('privacy.dataUse.title') }}</h2>
  <p>{{ i18n.t('privacy.dataUse.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.dataUse.item1') }}</li>
+ <li>{{ i18n.t('privacy.dataUse.item2') }}</li>
+ <li>{{ i18n.t('privacy.dataUse.item3') }}</li>
+ <li>{{ i18n.t('privacy.dataUse.item4') }}</li>
+ <li>{{ i18n.t('privacy.dataUse.item5') }}</li>
+ </ul>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.analytics.title') }}</h2>
+ <p>{{ i18n.t('privacy.analytics.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.analytics.item1') }}</li>
+ <li>{{ i18n.t('privacy.analytics.item2') }}</li>
+ <li>{{ i18n.t('privacy.analytics.item3') }}</li>
+ <li>{{ i18n.t('privacy.analytics.item4') }}</li>
+ <li>{{ i18n.t('privacy.analytics.item5') }}</li>
+ </ul>
+ <p>{{ i18n.t('privacy.analytics.noThirdParty') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.cookies.title') }}</h2>
+ <p>{{ i18n.t('privacy.cookies.description') }}</p>
+ <p>{{ i18n.t('privacy.cookies.linkText') }} <a routerLink="/cookies">{{ i18n.t('privacy.cookies.linkLabel') }}</a></p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.newsletter.title') }}</h2>
+ <p>{{ i18n.t('privacy.newsletter.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.newsletter.item1') }}</li>
+ <li>{{ i18n.t('privacy.newsletter.item2') }}</li>
+ <li>{{ i18n.t('privacy.newsletter.item3') }}</li>
+ </ul>
  </section>
 
  <section>
@@ -72,6 +129,50 @@
  <p>{{ i18n.t('privacy.oauth.dataHandling.legal.description') }}</p>
 
  <p><em>{{ i18n.t('privacy.oauth.dataHandling.disclaimer') }}</em></p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.dataRetention.title') }}</h2>
+ <p>{{ i18n.t('privacy.dataRetention.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.dataRetention.item1') }}</li>
+ <li>{{ i18n.t('privacy.dataRetention.item2') }}</li>
+ <li>{{ i18n.t('privacy.dataRetention.item3') }}</li>
+ </ul>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.dataRights.title') }}</h2>
+ <p>{{ i18n.t('privacy.dataRights.description') }}</p>
+ <ul>
+ <li>{{ i18n.t('privacy.dataRights.access') }}</li>
+ <li>{{ i18n.t('privacy.dataRights.correction') }}</li>
+ <li>{{ i18n.t('privacy.dataRights.deletion') }}</li>
+ <li>{{ i18n.t('privacy.dataRights.portability') }}</li>
+ <li>{{ i18n.t('privacy.dataRights.withdrawal') }}</li>
+ <li>{{ i18n.t('privacy.dataRights.opposition') }}</li>
+ </ul>
+ <p>{{ i18n.t('privacy.dataRights.exercise') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.security.title') }}</h2>
+ <p>{{ i18n.t('privacy.security.description') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.international.title') }}</h2>
+ <p>{{ i18n.t('privacy.international.description') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.children.title') }}</h2>
+ <p>{{ i18n.t('privacy.children.description') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('privacy.changes.title') }}</h2>
+ <p>{{ i18n.t('privacy.changes.description') }}</p>
  </section>
 
  <section>
