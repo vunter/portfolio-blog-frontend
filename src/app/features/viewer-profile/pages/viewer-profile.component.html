@@ -56,65 +56,6 @@
  </div>
 
 
- <!-- Role Upgrade Card (VIEWER only) -->
- @if (user()?.role === 'VIEWER') {
- <div class="form-card" id="role-upgrade">
- <h2>
- <span class="section-icon">⬆</span>
- {{ i18n.t('viewer.roleUpgrade.title') }}
- </h2>
- <p class="section-hint">{{ i18n.t('viewer.roleUpgrade.description') }}</p>
-
- @if (roleRequest(); as req) {
- <div class="role-request-status" [class]="'role-request-status--' + req.status.toLowerCase()">
- <div class="role-request-status__header">
- <span class="role-request-status__badge">{{ i18n.t('profile.roleRequest.status.' + req.status) }}</span>
- <span class="role-request-status__date">{{ i18n.t('viewer.roleUpgrade.submittedOn') }} {{ req.createdAt | date:'mediumDate' }}</span>
- </div>
- @if (req.reason) {
- <p class="role-request-status__reason">{{ req.reason }}</p>
- }
- @if (req.status === 'APPROVED' && req.reviewedAt) {
- <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.approved') }} — {{ i18n.t('viewer.roleUpgrade.reviewedOn') }} {{ req.reviewedAt | date:'mediumDate' }}</p>
- }
- @if (req.status === 'REJECTED') {
- <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.rejected') }}</p>
- }
- </div>
- }
-
- @if (canRequestUpgrade) {
- <div class="form-group">
- <label for="roleReason">{{ i18n.t('viewer.roleUpgrade.reason') }}</label>
- <textarea
- id="roleReason"
- name="roleReason"
- [(ngModel)]="roleRequestReason"
- rows="3"
- [placeholder]="i18n.t('viewer.roleUpgrade.reasonPlaceholder')"
- [disabled]="submittingRoleRequest()"
- maxlength="1000"
- ></textarea>
- </div>
-
- <div class="form-actions" style="margin-top: 1rem;">
- <button
- type="button"
- class="btn btn-accent"
- (click)="submitRoleRequest()"
- [disabled]="submittingRoleRequest()">
- @if (submittingRoleRequest()) {
- <span class="spinner-sm"></span>
- {{ i18n.t('profile.roleRequest.submitting') }}
- } @else {
- {{ i18n.t('viewer.roleUpgrade.submit') }}
- }
- </button>
- </div>
- }
- </div>
- }
-
  <!-- Quick Links Card -->
  <div class="form-card quick-links-card">
  <h2>
@@ -287,6 +228,67 @@
  }
  </button>
  </div>
+
+
+
+ <!-- Role Upgrade Card (VIEWER only) -->
+ @if (user()?.role === 'VIEWER') {
+ <div class="form-card" id="role-upgrade">
+ <h2>
+ <span class="section-icon">⬆</span>
+ {{ i18n.t('viewer.roleUpgrade.title') }}
+ </h2>
+ <p class="section-hint">{{ i18n.t('viewer.roleUpgrade.description') }}</p>
+
+ @if (roleRequest(); as req) {
+ <div class="role-request-status" [class]="'role-request-status--' + req.status.toLowerCase()">
+ <div class="role-request-status__header">
+ <span class="role-request-status__badge">{{ i18n.t('profile.roleRequest.status.' + req.status) }}</span>
+ <span class="role-request-status__date">{{ i18n.t('viewer.roleUpgrade.submittedOn') }} {{ req.createdAt | date:'mediumDate' }}</span>
+ </div>
+ @if (req.reason) {
+ <p class="role-request-status__reason">{{ req.reason }}</p>
+ }
+ @if (req.status === 'APPROVED' && req.reviewedAt) {
+ <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.approved') }} — {{ i18n.t('viewer.roleUpgrade.reviewedOn') }} {{ req.reviewedAt | date:'mediumDate' }}</p>
+ }
+ @if (req.status === 'REJECTED') {
+ <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.rejected') }}</p>
+ }
+ </div>
+ }
+
+ @if (canRequestUpgrade) {
+ <div class="form-group">
+ <label for="roleReason">{{ i18n.t('viewer.roleUpgrade.reason') }}</label>
+ <textarea
+ id="roleReason"
+ name="roleReason"
+ [(ngModel)]="roleRequestReason"
+ rows="3"
+ [placeholder]="i18n.t('viewer.roleUpgrade.reasonPlaceholder')"
+ [disabled]="submittingRoleRequest()"
+ maxlength="1000"
+ ></textarea>
+ </div>
+
+ <div class="form-actions" style="margin-top: 1rem;">
+ <button
+ type="button"
+ class="btn btn-accent"
+ (click)="submitRoleRequest()"
+ [disabled]="submittingRoleRequest()">
+ @if (submittingRoleRequest()) {
+ <span class="spinner-sm"></span>
+ {{ i18n.t('profile.roleRequest.submitting') }}
+ } @else {
+ {{ i18n.t('viewer.roleUpgrade.submit') }}
+ }
+ </button>
+ </div>
+ }
+ </div>
+ }
 
  <!-- Change password -->
  <div class="form-card">
