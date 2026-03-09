@@ -3,6 +3,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { DownloadService } from '../../../core/services/download.service';
+import { AnalyticsTrackingService } from '../../../core/services/analytics-tracking.service';
 import { ContactFormComponent } from '../../../shared/components/contact-form/contact-form.component';
 import { environment } from '../../../../environments/environment';
 import { ResumeProfile } from '../../../models/resume-profile.model';
@@ -19,6 +20,7 @@ export class ContactSectionComponent {
   private api = inject(ApiService);
   private notification = inject(NotificationService);
   private downloadService = inject(DownloadService);
+  private analyticsTracking = inject(AnalyticsTrackingService);
 
   profile = input<ResumeProfile | null>(null);
 
@@ -82,6 +84,7 @@ export class ContactSectionComponent {
           ? `${safeName}_Resume.pdf`
           : `${safeName}_Curriculo.pdf`;
         this.downloadService.downloadBlob(blob, filename);
+        this.analyticsTracking.trackDownload(filename, 'resume');
         this.downloadingResume.set(false);
       },
       error: () => {

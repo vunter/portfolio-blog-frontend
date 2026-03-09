@@ -103,6 +103,8 @@
     .footer__column h4 { font-size: 0.875rem; font-weight: 600; margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-light); }
     .footer__column a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
     .footer__column a:hover { color: var(--accent-light); }
+    .footer-link-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; font-family: inherit; text-align: left; }
+    .footer-link-btn:hover { color: var(--accent-light); }
     .footer__bottom { border-top: 1px solid var(--header-border); margin-top: 3rem; padding: 1.5rem; text-align: center; }
     .footer__bottom p { color: var(--text-muted); font-size: 0.875rem; margin: 0; }
 

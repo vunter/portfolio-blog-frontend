@@ -29,6 +29,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { SeoService } from '../../../../core/services/seo.service';
+import { AnalyticsTrackingService } from '../../../../core/services/analytics-tracking.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
@@ -79,6 +80,7 @@ export class ArticleDetailComponent implements OnInit {
   private readonly seo = inject(SeoService);
   readonly i18n = inject(I18nService);
   readonly authStore = inject(AuthStore);
+  private readonly analytics = inject(AnalyticsTrackingService);
 
   readonly dateLocale = computed(() => {
     const lang = this.i18n.language();
@@ -132,6 +134,8 @@ export class ArticleDetailComponent implements OnInit {
   private headingsProcessed = false;
   private codeBlocksProcessed = false;
   private headingObserver: IntersectionObserver | null = null;
+  private scrollDepthObserver: IntersectionObserver | null = null;
+  private firedScrollThresholds = new Set<number>();
   // PERF-F-06: Store cleanup functions for event listeners to prevent memory leaks
   private readonly eventCleanups: Array<() => void> = [];
   // PERF-F-03: Bound reference for scroll listener cleanup
@@ -167,6 +171,10 @@ export class ArticleDetailComponent implements OnInit {
     // F-328: DestroyRef-based cleanup replaces manual ngOnDestroy
     this.destroyRef.onDestroy(() => {
       this.headingObserver?.disconnect();
+      this.scrollDepthObserver?.disconnect();
+      // Send time-on-page analytics on navigation away
+      const article = this.article();
+      this.analytics.stopTimeTracking(article?.id ? +article.id : undefined);
       if (this.scrollThrottleTimer) {
         clearTimeout(this.scrollThrottleTimer);
         this.scrollThrottleTimer = null;
@@ -372,6 +380,10 @@ export class ArticleDetailComponent implements OnInit {
     this.articleService.trackView(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => { /* view tracking is non-critical */ }
     });
+    // Start time-on-page tracking
+    this.analytics.startTimeTracking();
+    // Init scroll depth tracking
+    this.initScrollDepthTracking();
     // Send UTM attribution if present
     if (isPlatformBrowser(this.platformId)) {
       const params = new URLSearchParams(window.location.search);
@@ -386,6 +398,51 @@ export class ArticleDetailComponent implements OnInit {
         this.articleService.trackUtmView(article?.id ? +article.id : undefined, metadata);
       }
     }
+  }
+
+  private initScrollDepthTracking(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.analytics.hasConsent()) return;
+    this.firedScrollThresholds.clear();
+    this.scrollDepthObserver?.disconnect();
+
+    // Delay slightly to ensure article content is rendered
+    requestAnimationFrame(() => {
+      const articleBody = document.querySelector('.article-content') as HTMLElement;
+      if (!articleBody) return;
+
+      // Ensure the article body is positioned for absolute sentinel placement
+      const position = getComputedStyle(articleBody).position;
+      if (position === 'static') {
+        articleBody.style.position = 'relative';
+      }
+
+      const thresholds = [25, 50, 75, 100];
+      const sentinels: HTMLElement[] = [];
+
+      thresholds.forEach(threshold => {
+        const sentinel = document.createElement('div');
+        sentinel.dataset['scrollThreshold'] = threshold.toString();
+        sentinel.style.cssText = 'height:1px;width:100%;position:absolute;pointer-events:none;opacity:0;';
+        sentinel.style.top = `${threshold}%`;
+        articleBody.appendChild(sentinel);
+        sentinels.push(sentinel);
+      });
+
+      this.scrollDepthObserver = new IntersectionObserver((entries) => {
+        const article = this.article();
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const threshold = parseInt(entry.target.getAttribute('data-scroll-threshold') || '0', 10);
+            if (threshold && !this.firedScrollThresholds.has(threshold)) {
+              this.firedScrollThresholds.add(threshold);
+              this.analytics.trackScrollDepth(threshold, article?.id ? +article.id : undefined);
+            }
+          }
+        });
+      }, { threshold: 0.1 });
+
+      sentinels.forEach(s => this.scrollDepthObserver!.observe(s));
+    });
   }
 
   loadComments(slug: string): void {

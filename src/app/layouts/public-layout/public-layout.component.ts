@@ -1,12 +1,14 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID, OnInit, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID, OnInit, DestroyRef, HostListener } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { fromEvent, throttleTime } from 'rxjs';
+import { fromEvent, throttleTime, filter } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ThemeService } from '../../core/services/theme.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { PublicProfileService } from '../../core/services/public-profile.service';
+import { AnalyticsTrackingService } from '../../core/services/analytics-tracking.service';
+import { CookieConsentService } from '../../core/services/cookie-consent.service';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 
 @Component({
@@ -27,6 +29,8 @@ export class PublicLayoutComponent implements OnInit {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
+  private analytics = inject(AnalyticsTrackingService);
+  private consentService = inject(CookieConsentService);
   currentYear = new Date().getFullYear();
   mobileMenuOpen = signal(false);
   showScrollTop = signal(false);
@@ -51,6 +55,17 @@ export class PublicLayoutComponent implements OnInit {
         this.showScrollTop.set(window.scrollY > 400);
       });
     }
+
+    // Track page views for non-article pages
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((event: NavigationEnd) => {
+      const url = event.urlAfterRedirects;
+      // Skip individual article pages — they have dedicated VIEW tracking
+      if (url.match(/^\/blog\/[^/]+$/) && url !== '/blog') return;
+      this.analytics.trackPageView(url);
+    });
   }
 
   toggleMobileMenu(): void { this.mobileMenuOpen.update(v => !v); }
@@ -84,6 +99,24 @@ export class PublicLayoutComponent implements OnInit {
   scrollToTop(): void {
     if (isPlatformBrowser(this.platformId)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  reopenCookieSettings(): void {
+    this.consentService.reopenBanner();
+  }
+
+  /** Track outbound link clicks automatically */
+  @HostListener('click', ['$event'])
+  onOutboundClick(event: Event): void {
+    const anchor = (event.target as HTMLElement).closest('a') as HTMLAnchorElement | null;
+    if (anchor?.href) {
+      try {
+        const linkHost = new URL(anchor.href).hostname;
+        if (linkHost !== location.hostname) {
+          this.analytics.trackOutboundClick(anchor.href, anchor.textContent?.trim());
+        }
+      } catch { /* invalid URL — ignore */ }
     }
   }
 

@@ -48,4 +48,9 @@ export class CookieConsentComponent {
     this.consentService.showBanner.set(false);
     this.router.navigate(['/privacy']);
   }
+
+  goToCookies(): void {
+    this.consentService.showBanner.set(false);
+    this.router.navigate(['/cookies']);
+  }
 }

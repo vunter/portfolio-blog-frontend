@@ -234,6 +234,12 @@
       text-decoration: underline;
     }
   }
+
+  .cookie-footer-separator {
+    margin: 0 0.5rem;
+    color: var(--text-muted, #9ca3af);
+    font-size: 0.75rem;
+  }
 }
 
 @keyframes slideUp {

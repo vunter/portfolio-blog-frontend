@@ -1806,5 +1806,69 @@
     'admin.users.activity.articlesCreated': 'Articles Created',
     'admin.users.activity.commentsPosted': 'Comments Posted',
     'admin.users.activity.noActivity': 'No activity recorded',
+
+    // Cookies page
+    'cookies.title': 'Cookie Policy',
+    'cookies.lastUpdated': 'Last updated',
+    'cookies.intro': 'This Cookie Policy explains how catananti.dev uses cookies and similar technologies to recognize you when you visit our website. It explains what these technologies are, why we use them, and your rights to control their use.',
+
+    'cookies.whatAreCookies.title': 'What Are Cookies',
+    'cookies.whatAreCookies.description': 'Cookies are small text files placed on your device when you visit a website. They are widely used to make websites work more efficiently and to provide information to site owners. We also use similar technologies such as localStorage for the same purposes.',
+
+    'cookies.necessary.title': 'Strictly Necessary Cookies',
+    'cookies.necessary.description': 'These cookies are essential for the website to function. They enable basic features like authentication, security protection, and remembering your consent preferences. They cannot be disabled.',
+    'cookies.necessary.accessToken': 'Authentication session token',
+    'cookies.necessary.csrf': 'Cross-Site Request Forgery protection',
+    'cookies.necessary.consent': 'Stores your cookie consent preferences',
+    'cookies.necessary.userCache': 'Cached user profile data for UI rendering',
+    'cookies.necessary.authState': 'Tracks authentication state for navigation',
+    'cookies.necessary.session': 'Session',
+    'cookies.necessary.persistent': 'Persistent',
+    'cookies.necessary.httpOnly': 'HTTP-Only Cookie',
+
+    'cookies.functional.title': 'Functional Cookies',
+    'cookies.functional.description': 'These cookies enable enhanced functionality and personalization. They remember your preferences so you do not need to re-enter them each visit. You can disable them, but some features may not work as expected.',
+    'cookies.functional.theme': 'Remembers your dark/light mode preference',
+    'cookies.functional.language': 'Remembers your language preference',
+    'cookies.functional.sidebar': 'Remembers sidebar collapsed/expanded state',
+    'cookies.functional.locale': 'Stores preferred locale for content delivery',
+
+    'cookies.analytics.title': 'Analytics Cookies',
+    'cookies.analytics.description': 'These cookies help us understand how visitors interact with the website by collecting anonymized information. All analytics data is processed with your explicit consent only. We do not use any third-party analytics services.',
+    'cookies.analytics.item1': 'Page views and scroll depth on articles',
+    'cookies.analytics.item2': 'Time spent on pages (visibility-aware, pauses when tab is hidden)',
+    'cookies.analytics.item3': 'Outbound link clicks and file downloads',
+    'cookies.analytics.item4': 'All IP addresses are anonymized before storage (LGPD Art. 12 / GDPR Art. 25)',
+
+    'cookies.manage.title': 'Managing Your Preferences',
+    'cookies.manage.description': 'You have full control over which cookies are used on this site:',
+    'cookies.manage.banner': 'Use our cookie consent banner to accept, reject, or customize cookie categories at any time.',
+    'cookies.manage.browser': 'Configure your browser settings to block or delete cookies. Note that blocking all cookies may affect site functionality.',
+    'cookies.manage.impact': 'Disabling functional cookies means your theme and language preferences will not persist between visits.',
+    'cookies.manage.openSettings': 'Open Cookie Settings',
+
+    'cookies.thirdParty.title': 'Third-Party Resources',
+    'cookies.thirdParty.description': 'We load the following external resources. These providers may set their own cookies according to their respective privacy policies:',
+    'cookies.thirdParty.googleFonts': 'Google Fonts — for typography (fonts are loaded from Google servers)',
+    'cookies.thirdParty.fontAwesome': 'Font Awesome — for icons (loaded from CDN)',
+
+    'cookies.changes.title': 'Changes to This Policy',
+    'cookies.changes.description': 'We may update this Cookie Policy to reflect changes in our practices or for operational, legal, or regulatory reasons. When we make changes, we will update the "Last updated" date at the top of this page.',
+
+    'cookies.contact.title': 'Contact',
+    'cookies.contact.description': 'If you have questions about our use of cookies or other technologies, please contact us through the contact form on our website.',
+
+    'cookies.table.name': 'Name',
+    'cookies.table.purpose': 'Purpose',
+    'cookies.table.duration': 'Duration',
+    'cookies.table.type': 'Type',
+
+    // Footer cookies/settings
+    'footer.cookiesPolicy': 'Cookie Policy',
+    'footer.cookieSettings': 'Cookie Settings',
+    'cookie.cookiesLink': 'Cookie Policy',
+
+    // SEO cookies
+    'seo.cookies.description': 'Learn how catananti.dev uses cookies and similar technologies, and how you can manage your preferences.',
 };
 

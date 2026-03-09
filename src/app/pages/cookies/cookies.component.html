@@ -1,0 +1,145 @@
+﻿<div class="legal-page">
+ <div class="legal-container">
+ <h1>{{ i18n.t('cookies.title') }}</h1>
+ <p class="legal-updated">{{ i18n.t('cookies.lastUpdated') }}: 2026-03-09</p>
+
+ <p class="legal-intro">{{ i18n.t('cookies.intro') }}</p>
+
+ <section>
+ <h2>{{ i18n.t('cookies.whatAreCookies.title') }}</h2>
+ <p>{{ i18n.t('cookies.whatAreCookies.description') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.necessary.title') }}</h2>
+ <p>{{ i18n.t('cookies.necessary.description') }}</p>
+ <div class="cookie-table-wrapper">
+   <table class="cookie-table">
+     <thead>
+       <tr>
+         <th>{{ i18n.t('cookies.table.name') }}</th>
+         <th>{{ i18n.t('cookies.table.purpose') }}</th>
+         <th>{{ i18n.t('cookies.table.duration') }}</th>
+         <th>{{ i18n.t('cookies.table.type') }}</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr>
+         <td><code>access_token</code></td>
+         <td>{{ i18n.t('cookies.necessary.accessToken') }}</td>
+         <td>{{ i18n.t('cookies.necessary.session') }}</td>
+         <td>{{ i18n.t('cookies.necessary.httpOnly') }}</td>
+       </tr>
+       <tr>
+         <td><code>XSRF-TOKEN</code></td>
+         <td>{{ i18n.t('cookies.necessary.csrf') }}</td>
+         <td>{{ i18n.t('cookies.necessary.session') }}</td>
+         <td>Cookie</td>
+       </tr>
+       <tr>
+         <td><code>cookie_consent</code></td>
+         <td>{{ i18n.t('cookies.necessary.consent') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+         <td>localStorage</td>
+       </tr>
+       <tr>
+         <td><code>user</code></td>
+         <td>{{ i18n.t('cookies.necessary.userCache') }}</td>
+         <td>{{ i18n.t('cookies.necessary.session') }}</td>
+         <td>localStorage</td>
+       </tr>
+       <tr>
+         <td><code>isAuthenticated</code></td>
+         <td>{{ i18n.t('cookies.necessary.authState') }}</td>
+         <td>{{ i18n.t('cookies.necessary.session') }}</td>
+         <td>localStorage</td>
+       </tr>
+     </tbody>
+   </table>
+ </div>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.functional.title') }}</h2>
+ <p>{{ i18n.t('cookies.functional.description') }}</p>
+ <div class="cookie-table-wrapper">
+   <table class="cookie-table">
+     <thead>
+       <tr>
+         <th>{{ i18n.t('cookies.table.name') }}</th>
+         <th>{{ i18n.t('cookies.table.purpose') }}</th>
+         <th>{{ i18n.t('cookies.table.duration') }}</th>
+       </tr>
+     </thead>
+     <tbody>
+       <tr>
+         <td><code>theme</code></td>
+         <td>{{ i18n.t('cookies.functional.theme') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+       </tr>
+       <tr>
+         <td><code>app-language</code></td>
+         <td>{{ i18n.t('cookies.functional.language') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+       </tr>
+       <tr>
+         <td><code>sidebar_collapsed</code></td>
+         <td>{{ i18n.t('cookies.functional.sidebar') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+       </tr>
+       <tr>
+         <td><code>preferred_locale</code></td>
+         <td>{{ i18n.t('cookies.functional.locale') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+       </tr>
+     </tbody>
+   </table>
+ </div>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.analytics.title') }}</h2>
+ <p>{{ i18n.t('cookies.analytics.description') }}</p>
+ <ul>
+   <li>{{ i18n.t('cookies.analytics.item1') }}</li>
+   <li>{{ i18n.t('cookies.analytics.item2') }}</li>
+   <li>{{ i18n.t('cookies.analytics.item3') }}</li>
+   <li>{{ i18n.t('cookies.analytics.item4') }}</li>
+ </ul>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.manage.title') }}</h2>
+ <p>{{ i18n.t('cookies.manage.description') }}</p>
+ <ul>
+   <li>{{ i18n.t('cookies.manage.banner') }}</li>
+   <li>{{ i18n.t('cookies.manage.browser') }}</li>
+   <li>{{ i18n.t('cookies.manage.impact') }}</li>
+ </ul>
+ <p>
+   <button type="button" class="cookie-settings-btn" (click)="openCookieSettings()">
+     {{ i18n.t('cookies.manage.openSettings') }}
+   </button>
+ </p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.thirdParty.title') }}</h2>
+ <p>{{ i18n.t('cookies.thirdParty.description') }}</p>
+ <ul>
+   <li>{{ i18n.t('cookies.thirdParty.googleFonts') }}</li>
+   <li>{{ i18n.t('cookies.thirdParty.fontAwesome') }}</li>
+ </ul>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.changes.title') }}</h2>
+ <p>{{ i18n.t('cookies.changes.description') }}</p>
+ </section>
+
+ <section>
+ <h2>{{ i18n.t('cookies.contact.title') }}</h2>
+ <p>{{ i18n.t('cookies.contact.description') }}</p>
+ </section>
+ </div>
+</div>

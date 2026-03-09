@@ -72,6 +72,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'cookies',
+        loadComponent: () =>
+          import('./pages/cookies/cookies.component').then(
+            (m) => m.CookiesComponent
+          ),
+      },
+      {
         path: 'about',
         loadComponent: () =>
           import('./pages/about/about.component').then(

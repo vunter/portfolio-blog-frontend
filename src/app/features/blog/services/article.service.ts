@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { AnalyticsTrackingService } from '../../../core/services/analytics-tracking.service';
 import {
   PageResponse,
   ArticleResponse,
@@ -12,6 +13,7 @@ import {
 export class ArticleService {
   private api = inject(ApiService);
   private i18n = inject(I18nService);
+  private analytics = inject(AnalyticsTrackingService);
 
   getArticles(
     page = 0,
@@ -62,24 +64,24 @@ export class ArticleService {
   }
 
   trackView(slug: string): Observable<void> {
-    return this.api.post<void>(`/articles/${slug}/view`);
+    return this.analytics.trackArticleView(slug);
   }
 
   trackShare(articleId: number | undefined, platform: string): void {
-    this.api.post<void>('/analytics/event', {
+    this.analytics.track({
       articleId,
       eventType: 'SHARE',
       metadata: { platform },
-    }).subscribe({ error: () => {} });
+    });
   }
 
   trackUtmView(articleId: number | undefined, metadata: Record<string, string>): void {
-    this.api.post<void>('/analytics/event', {
+    this.analytics.track({
       articleId,
       eventType: 'VIEW',
       referrer: metadata['utm_source'],
       metadata,
-    }).subscribe({ error: () => {} });
+    });
   }
 
   buildShareUrl(baseUrl: string, platform: string): string {
