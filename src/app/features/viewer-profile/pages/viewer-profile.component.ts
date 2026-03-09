@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, viewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ApiService } from '../../../core/services/api.service';
@@ -22,7 +23,7 @@ interface ProfileForm {
 
 @Component({
   selector: 'app-viewer-profile',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, RouterLink],
   templateUrl: './viewer-profile.component.html',
   styleUrl: './viewer-profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,8 +47,12 @@ export class ViewerProfileComponent implements OnInit {
 
   // Role upgrade request
   roleRequest = signal<RoleUpgradeRequestResponse | null>(null);
+  showRoleRequestForm = signal(false);
   roleRequestReason = '';
   submittingRoleRequest = signal(false);
+
+  /** Computed user from auth store for quick access */
+  authUser = computed(() => this.authStore.user());
 
   form: ProfileForm = {
     name: '',

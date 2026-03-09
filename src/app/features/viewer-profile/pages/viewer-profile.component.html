@@ -1,7 +1,7 @@
 ﻿<div class="profile-page">
  <header class="page-header">
  <div>
- <h1>{{ i18n.t('account.profile.title') }}</h1>
+ <h1>{{ i18n.t('viewer.profile.title') }}</h1>
  <p class="subtitle">{{ i18n.t('account.profile.subtitle') }}</p>
  </div>
  </header>
@@ -13,7 +13,7 @@
  </div>
  } @else {
  <div class="profile-layout">
- <!-- Avatar section -->
+ <!-- Avatar / User Info Card -->
  <div class="form-card avatar-card">
  <div class="avatar-section">
  <div class="avatar-upload-wrapper" (click)="triggerAvatarUpload()" [class.uploading]="uploadingAvatar()">
@@ -50,8 +50,33 @@
  <div class="avatar-info">
  <h3>{{ form.name || i18n.t('account.profile.unnamed') }}</h3>
  <span class="role-badge">{{ user()?.role }}</span>
- <p class="member-since">{{ i18n.t('account.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
+ <p class="member-since">{{ i18n.t('viewer.profile.memberSince') }} {{ user()?.createdAt | date:'mediumDate' }}</p>
  </div>
+ </div>
+ </div>
+
+ <!-- Quick Links Card -->
+ <div class="form-card quick-links-card">
+ <h2>
+ <span class="section-icon">🔗</span>
+ {{ i18n.t('viewer.profile.quickLinks') }}
+ </h2>
+ <div class="quick-links">
+ <a routerLink="/admin/profile" class="quick-link">
+ <span class="quick-link__icon">👤</span>
+ <span class="quick-link__label">{{ i18n.t('viewer.profile.editProfile') }}</span>
+ <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+ </a>
+ <a routerLink="/admin/security" class="quick-link">
+ <span class="quick-link__icon">🔒</span>
+ <span class="quick-link__label">{{ i18n.t('viewer.profile.security') }}</span>
+ <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+ </a>
+ <a routerLink="/admin/reading-history" class="quick-link">
+ <span class="quick-link__icon">📖</span>
+ <span class="quick-link__label">{{ i18n.t('viewer.profile.readingHistory') }}</span>
+ <svg class="quick-link__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+ </a>
  </div>
  </div>
 
@@ -210,39 +235,42 @@
  </div>
  </div>
 
- <!-- Request Dev Role -->
+ <!-- Role Upgrade Card (VIEWER only) -->
  @if (user()?.role === 'VIEWER') {
  <div class="form-card">
  <h2>
- <span class="section-icon"></span>
- {{ i18n.t('profile.roleRequest.title') }}
+ <span class="section-icon">⬆</span>
+ {{ i18n.t('viewer.roleUpgrade.title') }}
  </h2>
- <p class="section-hint">{{ i18n.t('profile.roleRequest.description') }}</p>
+ <p class="section-hint">{{ i18n.t('viewer.roleUpgrade.description') }}</p>
 
  @if (roleRequest(); as req) {
  <div class="role-request-status" [class]="'role-request-status--' + req.status.toLowerCase()">
  <div class="role-request-status__header">
  <span class="role-request-status__badge">{{ i18n.t('profile.roleRequest.status.' + req.status) }}</span>
- <span class="role-request-status__date">{{ req.createdAt | date:'mediumDate' }}</span>
+ <span class="role-request-status__date">{{ i18n.t('viewer.roleUpgrade.submittedOn') }} {{ req.createdAt | date:'mediumDate' }}</span>
  </div>
  @if (req.reason) {
  <p class="role-request-status__reason">{{ req.reason }}</p>
  }
+ @if (req.status === 'APPROVED' && req.reviewedAt) {
+ <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.approved') }} — {{ i18n.t('viewer.roleUpgrade.reviewedOn') }} {{ req.reviewedAt | date:'mediumDate' }}</p>
+ }
  @if (req.status === 'REJECTED') {
- <p class="role-request-status__hint">{{ i18n.t('profile.roleRequest.rejectedHint') }}</p>
+ <p class="role-request-status__hint">{{ i18n.t('viewer.roleUpgrade.rejected') }}</p>
  }
  </div>
  }
 
  @if (canRequestUpgrade) {
  <div class="form-group">
- <label for="roleReason">{{ i18n.t('profile.roleRequest.reasonLabel') }}</label>
+ <label for="roleReason">{{ i18n.t('viewer.roleUpgrade.reason') }}</label>
  <textarea
  id="roleReason"
  name="roleReason"
  [(ngModel)]="roleRequestReason"
  rows="3"
- [placeholder]="i18n.t('profile.roleRequest.reasonPlaceholder')"
+ [placeholder]="i18n.t('viewer.roleUpgrade.reasonPlaceholder')"
  [disabled]="submittingRoleRequest()"
  maxlength="1000"
  ></textarea>
@@ -258,7 +286,7 @@
  <span class="spinner-sm"></span>
  {{ i18n.t('profile.roleRequest.submitting') }}
  } @else {
- {{ i18n.t('profile.roleRequest.submit') }}
+ {{ i18n.t('viewer.roleUpgrade.submit') }}
  }
  </button>
  </div>

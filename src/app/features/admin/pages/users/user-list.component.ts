@@ -38,6 +38,11 @@ export class UserListComponent implements OnInit {
   totalPages = signal(0);
   totalElements = signal(0);
 
+  // User activity modal
+  selectedUserActivity = signal<any>(null);
+  showActivityModal = signal(false);
+  loadingActivity = signal(false);
+
   formData = {
     name: '',
     email: '',
@@ -192,6 +197,32 @@ export class UserListComponent implements OnInit {
         this.notification.error(this.i18n.t('admin.users.deleteError'));
       },
     });
+  }
+
+  viewActivity(userId: string): void {
+    this.loadingActivity.set(true);
+    this.showActivityModal.set(true);
+    this.selectedUserActivity.set(null);
+
+    this.apiService
+      .get<any>(`/admin/users/${userId}/activity`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (activity) => {
+          this.selectedUserActivity.set(activity);
+          this.loadingActivity.set(false);
+        },
+        error: () => {
+          this.notification.error(this.i18n.t('admin.users.activity.noActivity'));
+          this.loadingActivity.set(false);
+          this.showActivityModal.set(false);
+        },
+      });
+  }
+
+  closeActivityModal(): void {
+    this.showActivityModal.set(false);
+    this.selectedUserActivity.set(null);
   }
 
   getRoleLabel(role: string): string {

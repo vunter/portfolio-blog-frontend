@@ -74,6 +74,11 @@
  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
  </svg>
  </button>
+ <button class="action-btn" (click)="viewActivity(user.id)" [title]="i18n.t('admin.users.viewActivity')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+ </svg>
+ </button>
  <button
  class="action-btn"
  (click)="toggleUserStatus(user)"
@@ -160,6 +165,47 @@
  </button>
  </div>
  </form>
+ </div>
+ </div>
+ }
+
+ <!-- Activity Modal -->
+ @if (showActivityModal()) {
+ <div class="modal-overlay" (click)="closeActivityModal()">
+ <div class="modal activity-modal" (click)="$event.stopPropagation()">
+ <div class="modal__header">
+ <h2>{{ i18n.t('admin.users.activity.title') }}</h2>
+ <button class="modal__close" (click)="closeActivityModal()">✕</button>
+ </div>
+ <div class="modal__body">
+ @if (loadingActivity()) {
+ <div class="activity-loading">
+ <div class="spinner"></div>
+ <span>{{ i18n.t('common.loading') }}</span>
+ </div>
+ } @else if (selectedUserActivity(); as activity) {
+ <div class="activity-grid">
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.activity.lastLogin') }}</span>
+ <span class="activity-item__value">{{ activity.lastLogin ? formatDate(activity.lastLogin) : '—' }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.activity.accountCreated') }}</span>
+ <span class="activity-item__value">{{ activity.accountCreated ? formatDate(activity.accountCreated) : '—' }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.activity.articlesCreated') }}</span>
+ <span class="activity-item__value">{{ activity.articlesCreated ?? 0 }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.activity.commentsPosted') }}</span>
+ <span class="activity-item__value">{{ activity.commentsPosted ?? 0 }}</span>
+ </div>
+ </div>
+ } @else {
+ <p class="activity-empty">{{ i18n.t('admin.users.activity.noActivity') }}</p>
+ }
+ </div>
  </div>
  </div>
  }
