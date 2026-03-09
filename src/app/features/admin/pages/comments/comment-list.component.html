@@ -32,9 +32,34 @@
  </select>
  </div>
 
+ <!-- Bulk Action Bar -->
+ @if (selectedIds().size > 0) {
+ <div class="bulk-bar">
+ <span class="bulk-count">{{ selectedIds().size }} {{ i18n.t('dev.comments.selected') }}</span>
+ <button class="btn btn-sm btn-success" (click)="bulkAction('approve')">{{ i18n.t('dev.comments.bulkApprove') }}</button>
+ <button class="btn btn-sm btn-danger" (click)="bulkAction('reject')">{{ i18n.t('dev.comments.bulkReject') }}</button>
+ <button class="btn btn-sm btn-warning" (click)="bulkAction('spam')">{{ i18n.t('dev.comments.bulkSpam') }}</button>
+ <button class="btn btn-sm btn-ghost" (click)="clearSelection()">{{ i18n.t('common.cancel') }}</button>
+ </div>
+ }
+
+ <!-- Select All -->
+ @if (filteredComments().length > 0) {
+ <div class="select-all-bar">
+ <label class="select-all-label">
+ <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" />
+ {{ i18n.t('dev.comments.selectAll') }}
+ </label>
+ </div>
+ }
+
  <div class="comments-container">
  @for (comment of filteredComments(); track comment.id) {
- <div class="comment-card" [class.comment-card--pending]="comment.status === 'PENDING'">
+ <div class="comment-card" [class.comment-card--pending]="comment.status === 'PENDING'" [class.comment-card--selected]="isSelected(comment.id)">
+ <div class="comment-card__select">
+ <input type="checkbox" [checked]="isSelected(comment.id)" (change)="toggleSelect(comment.id)" />
+ </div>
+ <div class="comment-card__body">
  <div class="comment-card__header">
  <div class="comment-card__author">
  <div class="avatar">{{ comment.authorName?.charAt(0) || 'A' }}</div>
@@ -64,6 +89,7 @@
  <button class="btn btn-secondary" (click)="approve(comment)">{{ i18n.t('dev.comments.approve') }}</button>
  }
  <button class="btn btn-danger-outline" (click)="deleteComment(comment)">{{ i18n.t('common.delete') }}</button>
+ </div>
  </div>
  </div>
  } @empty {

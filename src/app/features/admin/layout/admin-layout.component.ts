@@ -147,6 +147,12 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       icon: 'contacts',
     },
     {
+      label: this.i18n.t('admin.sidebar.audit'),
+      route: '/admin/audit',
+      adminOnly: true,
+      icon: 'audit',
+    },
+    {
       label: this.i18n.t('admin.sidebar.settings'),
       route: '/admin/settings',
       adminOnly: true,

@@ -29,6 +29,7 @@ export class CommentListComponent implements OnInit {
   error = signal(false);
   statusFilter = '';
   searchQuery = signal('');
+  selectedIds = signal<Set<string>>(new Set());
   filteredComments = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return this.comments();
@@ -61,6 +62,7 @@ export class CommentListComponent implements OnInit {
         this.totalPages.set(response.totalPages);
         this.totalElements.set(response.totalElements);
         this.loading.set(false);
+        this.clearSelection();
       },
       error: () => {
         this.notification.error(this.i18n.t('dev.error.loadComments'));
@@ -129,6 +131,70 @@ export class CommentListComponent implements OnInit {
       error: () => {
         this.comments.set(snapshot);
         this.notification.error(this.i18n.t('dev.comments.deleteError'));
+      },
+    });
+  }
+
+  toggleSelect(id: string): void {
+    const current = new Set(this.selectedIds());
+    if (current.has(id)) {
+      current.delete(id);
+    } else {
+      current.add(id);
+    }
+    this.selectedIds.set(current);
+  }
+
+  toggleSelectAll(): void {
+    if (this.isAllSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(this.filteredComments().map(c => c.id)));
+    }
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  isAllSelected(): boolean {
+    const comments = this.filteredComments();
+    return comments.length > 0 && this.selectedIds().size === comments.length;
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  async bulkAction(action: 'approve' | 'reject' | 'spam'): Promise<void> {
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) return;
+
+    const actionLabels: Record<string, string> = {
+      approve: this.i18n.t('dev.comments.bulkApprove'),
+      reject: this.i18n.t('dev.comments.bulkReject'),
+      spam: this.i18n.t('dev.comments.bulkSpam'),
+    };
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.i18n.t('common.confirm'),
+      message: this.i18n.t('dev.comments.bulkConfirm')
+        .replace('{{action}}', actionLabels[action])
+        .replace('{{count}}', ids.length.toString()),
+      confirmText: this.i18n.t('common.confirm'),
+      cancelText: this.i18n.t('common.cancel'),
+      type: action === 'approve' ? 'warning' : 'danger',
+    });
+    if (!confirmed) return;
+
+    this.apiService.put(`/admin/comments/bulk-${action}`, ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('dev.comments.bulkSuccess'));
+        this.clearSelection();
+        this.loadComments();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('dev.comments.bulkError'));
       },
     });
   }

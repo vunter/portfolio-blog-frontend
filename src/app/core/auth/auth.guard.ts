@@ -74,15 +74,16 @@ export const guestGuard: CanActivateFn = () => {
 };
 
 /**
- * Setup Guard - Redirects users without password to complete-profile page.
- * Enforces mandatory profile completion for social login users.
+ * Setup Guard - Redirects users to complete-profile when:
+ * - No password set (OAuth users who haven't completed setup)
+ * - Terms not accepted (required for all users)
  */
 export const setupGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
   const user = authStore.user();
-  if (user && user.hasPassword === false) {
+  if (user && (user.hasPassword === false || user.termsAccepted === false)) {
     router.navigateByUrl('/auth/complete-profile');
     return false;
   }

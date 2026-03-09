@@ -15,7 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
-import { ArticleResponse, ArticleRequest, ArticleReview, TagResponse, ArticleStatus } from '../../../../models';
+import { ArticleResponse, ArticleRequest, ArticleReview, ArticleI18nResponse, TagResponse, ArticleStatus } from '../../../../models';
 
 // Monaco type declarations provided by shared/types/monaco.d.ts
 
@@ -69,6 +69,13 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   reviewHistory = signal<ArticleReview[]>([]);
   showReviewPanel = signal(false);
   reviewFeedbackText = signal('');
+
+  // Translation management
+  translations = signal<ArticleI18nResponse[]>([]);
+  availableLocales = signal<string[]>([]);
+  showTranslationPanel = signal(false);
+  selectedTranslationLocale = signal('');
+  translating = signal(false);
 
   // Split pane ratio (flex values)
   splitLeft = signal('1');
@@ -485,6 +492,9 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
           this.showReviewPanel.set(true);
           this.loadReviewHistory();
         }
+        // Load translations if editing existing article
+        this.loadTranslations();
+        this.loadAvailableLocales();
         // Sync content to Monaco editor
         if (this.monacoEditor) {
           this.monacoEditor.setValue(article.content || '');
@@ -669,6 +679,55 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.articleId) return;
     this.apiService.get<ArticleReview[]>(`/admin/articles/${this.articleId}/reviews`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (reviews) => this.reviewHistory.set(reviews),
+    });
+  }
+
+  // ===== Translation Management =====
+
+  loadTranslations(): void {
+    if (!this.articleId) return;
+    this.apiService.get<ArticleI18nResponse[]>(`/admin/articles/${this.articleId}/translations`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (translations) => this.translations.set(translations),
+    });
+  }
+
+  loadAvailableLocales(): void {
+    if (!this.articleId) return;
+    this.apiService.get<string[]>(`/admin/articles/${this.articleId}/translations/locales`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (locales) => this.availableLocales.set(locales),
+    });
+  }
+
+  translateArticle(targetLang: string): void {
+    if (!this.articleId || !targetLang) return;
+    this.translating.set(true);
+    this.apiService.post<ArticleI18nResponse>(`/admin/articles/${this.articleId}/translate`, {}, { targetLang }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.translating.set(false);
+        this.notification.success(this.i18n.t('dev.articles.translationAdded'));
+        this.loadTranslations();
+        this.loadAvailableLocales();
+        this.selectedTranslationLocale.set('');
+      },
+      error: () => {
+        this.translating.set(false);
+        this.notification.error(this.i18n.t('dev.articles.translationError'));
+      },
+    });
+  }
+
+  deleteTranslation(locale: string): void {
+    if (!this.articleId) return;
+    if (!confirm(this.i18n.t('dev.articles.deleteTranslationConfirm', { locale }))) return;
+    this.apiService.delete(`/admin/articles/${this.articleId}/translations/${locale}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.success(this.i18n.t('dev.articles.translationDeleted'));
+        this.loadTranslations();
+        this.loadAvailableLocales();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('dev.articles.translationDeleteError'));
+      },
     });
   }
 

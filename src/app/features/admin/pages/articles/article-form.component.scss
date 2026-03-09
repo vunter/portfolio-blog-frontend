@@ -689,6 +689,11 @@
   color: var(--badge-warning-text, #92400e);
 }
 
+.review-status--pending {
+  background: var(--badge-info-bg, #dbeafe);
+  color: var(--badge-info-text, #1e40af);
+}
+
 .review-date {
   font-size: 0.75rem;
   color: var(--text-muted, #9ca3af);
@@ -703,4 +708,220 @@
 .review-empty {
   color: var(--text-muted, #9ca3af);
   font-size: 0.875rem;
+}
+
+// Review entry pending state
+.review-entry--pending {
+  border-color: var(--badge-info-bg, #dbeafe);
+  background: var(--badge-info-bg, #dbeafe);
+}
+
+// ===== Translation Panel =====
+
+.translation-panel {
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  .panel-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--text-secondary, #666);
+    cursor: pointer;
+    transition: all 0.2s;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+      transition: transform 0.2s;
+
+      &.rotated {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:hover {
+      background: var(--bg-secondary, #f3f4f6);
+    }
+  }
+}
+
+.translation-content {
+  margin-top: 1rem;
+}
+
+.translate-action {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.translate-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: var(--card-bg, white);
+    color: var(--text-primary, #1a1a1a);
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color, #6366f1);
+    }
+  }
+
+  .btn {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+  }
+}
+
+.translation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.translation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--bg-secondary, #f9fafb);
+  transition: background 0.2s;
+
+  &:hover {
+    background: var(--bg-tertiary, #f3f4f6);
+  }
+}
+
+.translation-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.translation-locale {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: var(--primary-color, #6366f1);
+  color: white;
+  width: fit-content;
+  letter-spacing: 0.5px;
+}
+
+.translation-title {
+  font-size: 0.875rem;
+  color: var(--text-primary, #1a1a1a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.translation-badges {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.translation-badge {
+  display: inline-block;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+
+  &--auto {
+    background: var(--badge-info-bg, #dbeafe);
+    color: var(--badge-info-text, #1e40af);
+  }
+
+  &--reviewed {
+    background: var(--badge-success-bg, #dcfce7);
+    color: var(--badge-success-text, #166534);
+  }
+}
+
+.translation-date {
+  font-size: 0.75rem;
+  color: var(--text-muted, #9ca3af);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, white);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2;
+  }
+
+  &--danger {
+    color: var(--text-secondary, #666);
+
+    &:hover {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: #dc2626;
+    }
+  }
+}
+
+.translation-empty {
+  color: var(--text-muted, #9ca3af);
+  font-size: 0.875rem;
+  margin: 0;
 }

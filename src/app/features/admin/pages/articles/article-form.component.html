@@ -188,17 +188,23 @@
  @if (originalStatus === 'REVIEW') {
  <div class="review-feedback-form">
  <label>{{ i18n.t('dev.articles.reviewFeedback') }}</label>
- <textarea class="form-control" rows="3" [value]="reviewFeedbackText()" (input)="reviewFeedbackText.set($any($event.target).value)"></textarea>
+ <textarea class="form-control" rows="3" [value]="reviewFeedbackText()" (input)="reviewFeedbackText.set($any($event.target).value)" [placeholder]="i18n.t('dev.articles.reviewFeedbackPlaceholder')"></textarea>
  <button type="button" class="btn btn-outline btn-changes btn-sm" (click)="requestChanges()" [disabled]="saving()">
  {{ i18n.t('dev.articles.requestChanges') }}
  </button>
  </div>
  }
  @for (review of reviewHistory(); track review.id) {
- <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'">
+ <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'" [class.review-entry--pending]="review.status === 'PENDING'">
  <div class="review-entry-header">
  <span class="review-status-badge" [class]="'review-status--' + review.status.toLowerCase().replace('_', '-')">
- {{ review.status === 'APPROVED' ? i18n.t('dev.articles.reviewApproved') : i18n.t('dev.articles.reviewChangesRequested') }}
+ @if (review.status === 'APPROVED') {
+ {{ i18n.t('dev.articles.reviewApproved') }}
+ } @else if (review.status === 'PENDING') {
+ {{ i18n.t('dev.articles.statusReview') }}
+ } @else {
+ {{ i18n.t('dev.articles.reviewChangesRequested') }}
+ }
  </span>
  <span class="review-date">{{ review.createdAt | date:'short' }}</span>
  </div>
@@ -207,7 +213,70 @@
  }
  </div>
  } @empty {
- <p class="review-empty">{{ i18n.t('dev.articles.noArticles') }}</p>
+ <p class="review-empty">{{ i18n.t('dev.articles.noReviews') }}</p>
+ }
+ </div>
+ }
+
+ @if (isEditMode() && articleId) {
+ <div class="form-card translation-panel">
+ <div class="panel-header" (click)="showTranslationPanel.set(!showTranslationPanel())">
+ <h3>{{ i18n.t('dev.articles.translations') }}</h3>
+ <button type="button" class="panel-toggle-btn">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" [class.rotated]="showTranslationPanel()">
+ <polyline points="6 9 12 15 18 9"/>
+ </svg>
+ </button>
+ </div>
+ @if (showTranslationPanel()) {
+ <div class="translation-content">
+ <div class="translate-action">
+ <label>{{ i18n.t('dev.articles.translateTo') }}</label>
+ <div class="translate-row">
+ <select class="form-control" [value]="selectedTranslationLocale()" (change)="selectedTranslationLocale.set($any($event.target).value)">
+ <option value="">--</option>
+ @for (locale of availableLocales(); track locale) {
+ <option [value]="locale">{{ locale }}</option>
+ }
+ </select>
+ <button type="button" class="btn btn-primary btn-sm" (click)="translateArticle(selectedTranslationLocale())" [disabled]="translating() || !selectedTranslationLocale()">
+ @if (translating()) {
+ <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+ {{ i18n.t('dev.articles.translating') }}
+ } @else {
+ {{ i18n.t('dev.articles.translateTo') }}
+ }
+ </button>
+ </div>
+ </div>
+
+ @if (translations().length > 0) {
+ <div class="translation-list">
+ @for (translation of translations(); track translation.locale) {
+ <div class="translation-item">
+ <div class="translation-item-info">
+ <span class="translation-locale">{{ translation.locale }}</span>
+ <span class="translation-title">{{ translation.title }}</span>
+ <div class="translation-badges">
+ @if (translation.autoTranslated) {
+ <span class="translation-badge translation-badge--auto">{{ i18n.t('dev.articles.autoTranslated') }}</span>
+ }
+ @if (translation.reviewed) {
+ <span class="translation-badge translation-badge--reviewed">{{ i18n.t('dev.articles.reviewed') }}</span>
+ }
+ </div>
+ <span class="translation-date">{{ translation.translatedAt | date:'short' }}</span>
+ </div>
+ <button type="button" class="btn-icon btn-icon--danger" (click)="deleteTranslation(translation.locale)" [title]="i18n.t('dev.articles.deleteTranslation')">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+ </button>
+ </div>
+ }
+ </div>
+ } @else {
+ <p class="translation-empty">{{ i18n.t('dev.articles.noTranslations') }}</p>
+ }
+ </div>
  }
  </div>
  }

@@ -48,6 +48,7 @@ export class SecuritySettingsComponent implements OnInit {
   socialAccounts = signal<any[]>([]);
   socialLoading = signal(false);
   unlinking = signal<string | null>(null);
+  deletingLinkedin = signal(false);
 
   ngOnInit(): void {
     this.loadStatus();
@@ -255,6 +256,27 @@ export class SecuritySettingsComponent implements OnInit {
         this.notification.error(this.i18n.t('account.security.unlinkFailed'));
         this.unlinking.set(null);
       },
+    });
+  }
+
+  deleteLinkedInData(): void {
+    this.confirmDialog.confirm({
+      title: this.i18n.t('account.security.deleteLinkedinData'),
+      message: this.i18n.t('account.security.deleteLinkedinConfirm'),
+      type: 'danger',
+    }).then((confirmed) => {
+      if (!confirmed) return;
+      this.deletingLinkedin.set(true);
+      this.api.delete('/resume/profile/linkedin-data').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.success(this.i18n.t('account.security.linkedinDataDeleted'));
+          this.deletingLinkedin.set(false);
+        },
+        error: () => {
+          this.notification.error(this.i18n.t('account.security.linkedinDeleteError'));
+          this.deletingLinkedin.set(false);
+        },
+      });
     });
   }
 }

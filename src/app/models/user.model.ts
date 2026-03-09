@@ -53,6 +53,8 @@ export interface UserResponse {
   role: Role;
   active: boolean;
   hasPassword?: boolean;
+  termsAccepted?: boolean;
+  preferredLocale?: string;
   createdAt: string;
   updatedAt: string;
 }

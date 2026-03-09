@@ -125,6 +125,15 @@ export const adminRoutes: Routes = [
         data: { breadcrumb: 'admin.sidebar.contacts' },
       },
       {
+        path: 'audit',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/audit/audit.component').then(
+            (m) => m.AuditComponent
+          ),
+        data: { breadcrumb: 'admin.sidebar.audit' },
+      },
+      {
         path: 'settings',
         canActivate: [adminGuard],
         loadComponent: () =>

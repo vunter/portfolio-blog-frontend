@@ -201,6 +201,23 @@
       }
     </div>
 
+    <!-- LinkedIn Data Deletion (GDPR) -->
+    <div class="linkedin-data-card">
+      <div class="linkedin-data-header">
+        <h3>{{ i18n.t('account.security.linkedinData') }}</h3>
+        <p class="linkedin-data-desc">{{ i18n.t('account.security.linkedinDataDesc') }}</p>
+      </div>
+      <div class="linkedin-data-actions">
+        <button
+          class="btn btn-danger btn-sm"
+          (click)="deleteLinkedInData()"
+          [disabled]="deletingLinkedin()"
+        >
+          {{ deletingLinkedin() ? i18n.t('account.security.deleting') : i18n.t('account.security.deleteLinkedinData') }}
+        </button>
+      </div>
+    </div>
+
     <!-- Active Sessions -->
     <div class="sessions-card">
       <div class="sessions-header">

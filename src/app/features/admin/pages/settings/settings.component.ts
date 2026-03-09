@@ -7,6 +7,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { DownloadService } from '../../../../core/services/download.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { ApiService } from '../../../../core/services/api.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 
 interface EmailTemplate {
@@ -26,6 +27,7 @@ interface EmailTemplate {
 export class SettingsComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private adminApi = inject(AdminApiService);
+  private apiService = inject(ApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private downloadService = inject(DownloadService);
@@ -40,6 +42,11 @@ export class SettingsComponent implements OnInit {
   exportingMd = signal(false);
   importing = signal(false);
   cacheStats = signal({ entries: 0, size: '0 MB' });
+
+  // Health status
+  healthLoading = signal(false);
+  healthData = signal<any>(null);
+
   emailTemplates = signal<EmailTemplate[]>([]);
   emailTemplatesLoading = signal(false);
   previewingTemplate = signal<EmailTemplate | null>(null);
@@ -123,6 +130,20 @@ export class SettingsComponent implements OnInit {
       },
       error: () => {
         this.cacheStats.set({ entries: 0, size: '0 keys' });
+      },
+    });
+  }
+
+  checkHealth(): void {
+    this.healthLoading.set(true);
+    this.apiService.get<any>('/status').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => {
+        this.healthData.set(data);
+        this.healthLoading.set(false);
+      },
+      error: () => {
+        this.healthData.set({ status: 'ERROR' });
+        this.healthLoading.set(false);
       },
     });
   }

@@ -200,7 +200,27 @@ export interface ArticleReview {
   id: number;
   articleId: number;
   reviewerId: number;
-  status: string; // APPROVED, CHANGES_REQUESTED
+  status: string; // APPROVED, CHANGES_REQUESTED, PENDING
   feedback?: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+// ============================================
+// ARTICLE TRANSLATION (i18n)
+// ============================================
+
+export interface ArticleI18nResponse {
+  articleId: number;
+  locale: string;
+  title: string;
+  subtitle: string;
+  content: string;
+  excerpt: string;
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string;
+  autoTranslated: boolean;
+  reviewed: boolean;
+  translatedAt: string;
 }

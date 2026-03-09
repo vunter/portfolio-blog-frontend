@@ -117,6 +117,58 @@
  </div>
  </section>
 
+ <!-- System Health -->
+ <section class="settings-section">
+ <h2>{{ i18n.t('admin.settings.systemHealth') }}</h2>
+ <div class="settings-card">
+ <div class="setting-item">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.healthStatus') }}</h3>
+ <p>{{ i18n.t('admin.settings.healthStatusDesc') }}</p>
+ </div>
+ <div class="health-status">
+ <button class="btn btn-secondary btn-sm" (click)="checkHealth()" [disabled]="healthLoading()">
+ {{ healthLoading() ? i18n.t('admin.settings.checking') : i18n.t('admin.settings.checkHealth') }}
+ </button>
+ </div>
+ </div>
+ @if (healthData()) {
+ <div class="health-grid">
+ <div class="health-item" [class.health-item--up]="healthData()?.status === 'UP'" [class.health-item--down]="healthData()?.status !== 'UP'">
+ <span class="health-item__label">{{ i18n.t('admin.settings.overallStatus') }}</span>
+ <span class="health-item__value">{{ healthData()?.status }}</span>
+ </div>
+ @if (healthData()?.database) {
+ <div class="health-item" [class.health-item--up]="healthData()?.database?.status === 'UP'" [class.health-item--down]="healthData()?.database?.status !== 'UP'">
+ <span class="health-item__label">{{ i18n.t('admin.settings.database') }}</span>
+ <span class="health-item__value">{{ healthData()?.database?.status }} ({{ healthData()?.database?.type }})</span>
+ </div>
+ }
+ @if (healthData()?.redis) {
+ <div class="health-item" [class.health-item--up]="healthData()?.redis?.status === 'UP'" [class.health-item--down]="healthData()?.redis?.status !== 'UP'">
+ <span class="health-item__label">Redis</span>
+ <span class="health-item__value">{{ healthData()?.redis?.status }}</span>
+ </div>
+ }
+ @if (healthData()?.blog) {
+ <div class="health-item health-item--info">
+ <span class="health-item__label">{{ i18n.t('admin.settings.totalArticles') }}</span>
+ <span class="health-item__value">{{ healthData()?.blog?.totalArticles }} ({{ healthData()?.blog?.publishedArticles }} {{ i18n.t('admin.settings.published') }})</span>
+ </div>
+ <div class="health-item health-item--info">
+ <span class="health-item__label">{{ i18n.t('admin.settings.totalComments') }}</span>
+ <span class="health-item__value">{{ healthData()?.blog?.totalComments }}</span>
+ </div>
+ <div class="health-item health-item--info">
+ <span class="health-item__label">{{ i18n.t('admin.settings.activeSubscribers') }}</span>
+ <span class="health-item__value">{{ healthData()?.blog?.activeSubscribers }}</span>
+ </div>
+ }
+ </div>
+ }
+ </div>
+ </section>
+
  <!-- Social Links -->
  <section class="settings-section">
  <h2>{{ i18n.t('admin.settings.social') }}</h2>
