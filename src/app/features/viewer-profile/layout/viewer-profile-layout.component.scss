@@ -33,9 +33,21 @@
 
 .logo-link {
   text-decoration: none;
-  color: var(--sidebar-text-hover, white);
-  font-weight: 700;
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.logo-full {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
 .toggle-btn {
@@ -176,9 +188,9 @@
   }
 
   .nav-label,
-  .logo-text,
+  .logo-full,
   .user-info {
-    display: none;
+    display: none !important;
   }
 
   .main-content {

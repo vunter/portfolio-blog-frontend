@@ -14,7 +14,11 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
       <aside class="sidebar">
         <div class="sidebar-header">
           <a routerLink="/" class="logo-link">
-            <span class="logo-text" [class.hidden]="sidebarCollapsed()">{{ i18n.t('common.appName') }}</span>
+            @if (sidebarCollapsed()) {
+              <img src="images/favicon.svg" alt="C" class="logo-icon" />
+            } @else {
+              <img src="images/logo-simplified.svg" [alt]="i18n.t('common.appName')" class="logo-full" />
+            }
           </a>
           <button class="toggle-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed() ? 'Expand' : 'Collapse'">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
