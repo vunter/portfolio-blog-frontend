@@ -53,6 +53,27 @@
           {{ i18n.t('account.security.disableMfa') }}
         </button>
 
+        <!-- Add another method -->
+        @if (hasAvailableMethods()) {
+          @if (!showSetup()) {
+            <div class="setup-options setup-options--additional">
+              <h4>{{ i18n.t('account.security.addMethod') }}</h4>
+              <div class="setup-btns">
+                @if (!hasMethod('TOTP')) {
+                  <button class="btn btn-primary" (click)="setupTotp()" [disabled]="enabling()">
+                    🔐 {{ i18n.t('account.security.setupTotp') }}
+                  </button>
+                }
+                @if (!hasMethod('EMAIL')) {
+                  <button class="btn btn-secondary" (click)="enableEmail()" [disabled]="enabling()">
+                    📧 {{ i18n.t('account.security.setupEmail') }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+
         <!-- Backup Codes Section -->
         <div class="backup-codes-section">
           <h4>{{ i18n.t('account.security.backupCodes') }}</h4>
@@ -69,9 +90,17 @@
                   <code class="backup-code">{{ code }}</code>
                 }
               </div>
-              <button class="btn btn-secondary" (click)="dismissBackupCodes()">
-                {{ i18n.t('account.security.backupCodesDismiss') }}
-              </button>
+              <div class="backup-actions">
+                <button class="btn btn-secondary btn-sm" (click)="copyBackupCodes()">
+                  📋 {{ i18n.t('account.security.copyToClipboard') }}
+                </button>
+                <button class="btn btn-secondary btn-sm" (click)="downloadBackupCodes()">
+                  💾 {{ i18n.t('account.security.downloadTxt') }}
+                </button>
+                <button class="btn btn-outline btn-sm" (click)="dismissBackupCodes()">
+                  {{ i18n.t('account.security.backupCodesDismiss') }}
+                </button>
+              </div>
             </div>
           }
 

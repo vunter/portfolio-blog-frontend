@@ -23,8 +23,8 @@ export class MfaService {
   }
 
   /** Verify initial TOTP setup with the first code from the authenticator app. */
-  verifySetup(request: MfaVerifyRequest): Observable<{ verified: boolean; message: string }> {
-    return this.http.post<{ verified: boolean; message: string }>(`${this.baseUrl}/verify-setup`, request, {
+  verifySetup(request: MfaVerifyRequest): Observable<{ verified: boolean; message: string; backupCodes?: string[] }> {
+    return this.http.post<{ verified: boolean; message: string; backupCodes?: string[] }>(`${this.baseUrl}/verify-setup`, request, {
       withCredentials: true,
     });
   }

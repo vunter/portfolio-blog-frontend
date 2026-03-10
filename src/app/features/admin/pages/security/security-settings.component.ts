@@ -86,9 +86,12 @@ export class SecuritySettingsComponent implements OnInit {
   enableEmail(): void {
     this.enabling.set(true);
     this.mfaService.setup('EMAIL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.notification.success(this.i18n.t('account.security.emailOtpEnabled'));
         this.enabling.set(false);
+        if (res.backupCodes?.length) {
+          this.backupCodes.set(res.backupCodes);
+        }
         this.loadStatus();
       },
       error: () => {
@@ -115,6 +118,9 @@ export class SecuritySettingsComponent implements OnInit {
           this.showSetup.set(false);
           this.setupData.set(null);
           this.verifyForm.reset();
+          if (result.backupCodes?.length) {
+            this.backupCodes.set(result.backupCodes);
+          }
           this.loadStatus();
         } else {
           this.notification.error(result.message || this.i18n.t('account.security.invalidCode'));
@@ -174,6 +180,37 @@ export class SecuritySettingsComponent implements OnInit {
 
   dismissBackupCodes(): void {
     this.backupCodes.set([]);
+  }
+
+  hasMethod(method: string): boolean {
+    return this.mfaStatus()?.methods?.includes(method) ?? false;
+  }
+
+  hasAvailableMethods(): boolean {
+    const methods = this.mfaStatus()?.methods ?? [];
+    return methods.length < 2;
+  }
+
+  copyBackupCodes(): void {
+    const text = this.backupCodes().join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      this.notification.success(this.i18n.t('account.security.codesCopied'));
+    });
+  }
+
+  downloadBackupCodes(): void {
+    const text = 'Catananti Portfolio — MFA Backup Codes\n'
+      + '========================================\n\n'
+      + this.backupCodes().join('\n')
+      + '\n\nGenerated: ' + new Date().toISOString()
+      + '\nKeep these codes in a safe place.';
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-codes.txt';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   loadSessions(): void {

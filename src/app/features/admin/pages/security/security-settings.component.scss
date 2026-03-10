@@ -376,6 +376,18 @@
   color: var(--text-primary, inherit);
 }
 
+.backup-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.setup-options--additional {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
 .linked-accounts-card {
   background: var(--card-bg, #fff);
   border: 1px solid var(--border-color, #e5e7eb);
