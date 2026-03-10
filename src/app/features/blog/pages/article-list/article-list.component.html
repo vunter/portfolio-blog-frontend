@@ -92,37 +92,11 @@
  <aside class="sidebar">
  <section class="sidebar-section">
  <h3>Tags</h3>
- @if (tagsLoading()) {
- <app-loading-spinner [inline]="true" [size]="24" />
- } @else {
- <div class="tags-cloud">
- @for (tag of tags(); track tag.id) {
- <a
- [routerLink]="['/blog/tag', tag.slug]"
- class="tag-chip"
- [style.background-color]="tag.color || '#6366f1'"
- >
- {{ tag.name }}
- <span class="tag-chip__count">{{ tag.articleCount }}</span>
- </a>
- }
- </div>
- }
+ <app-tag-cloud [tags]="tags()" [loading]="tagsLoading()" />
  </section>
 
  <section class="sidebar-section">
- <h3>{{ i18n.t('blog.newsletter.title') }}</h3>
- <p>{{ i18n.t('blog.newsletter.description') }}</p>
- <form class="newsletter-form" (submit)="subscribeNewsletter($event)">
- <input
- type="email"
- [placeholder]="i18n.t('blog.newsletter.placeholder')"
- required
- [(ngModel)]="newsletterEmail"
- name="newsletterEmail"
- />
- <button type="submit" [disabled]="newsletterSubmitting()">{{ newsletterSubmitting() ? i18n.t('blog.newsletter.subscribing') : i18n.t('blog.newsletter.subscribe') }}</button>
- </form>
+ <app-newsletter-subscribe />
  </section>
 
  @if (popularArticles().length > 0) {

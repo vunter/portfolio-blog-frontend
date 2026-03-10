@@ -8,11 +8,12 @@ import { TagService } from '../../blog/services/tag.service';
 import { ArticleSummaryResponse } from '../../../models/article.model';
 import { TagResponse } from '../../../models/article.model';
 import { NewsletterSubscribeComponent } from '../../../shared/components/newsletter-subscribe/newsletter-subscribe.component';
+import { TagCloudComponent } from '../../../shared/components/tag-cloud/tag-cloud.component';
 import { ResumeProfile } from '../../../models/resume-profile.model';
 
 @Component({
   selector: 'app-sidebar-section',
-  imports: [RouterLink, DatePipe, NgOptimizedImage, NewsletterSubscribeComponent],
+  imports: [RouterLink, DatePipe, NgOptimizedImage, NewsletterSubscribeComponent, TagCloudComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sidebar-section.component.html',
   styleUrl: './sidebar-section.component.scss',

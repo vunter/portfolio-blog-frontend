@@ -1,32 +1,29 @@
 import { Component, inject, signal, OnInit, DestroyRef, ChangeDetectionStrategy, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ArticleService } from '../../services/article.service';
 import { TagService } from '../../services/tag.service';
-import { ApiService } from '../../../../core/services/api.service';
-import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
-import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { TagCloudComponent } from '../../../../shared/components/tag-cloud/tag-cloud.component';
+import { NewsletterSubscribeComponent } from '../../../../shared/components/newsletter-subscribe/newsletter-subscribe.component';
 import { ArticleSummaryResponse, TagResponse, PageResponse } from '../../../../models';
 
 @Component({
   selector: 'app-article-list',
   imports: [
     RouterLink,
-    FormsModule,
     ArticleCardComponent,
     PaginationComponent,
-    LoadingSpinnerComponent,
     EmptyStateComponent,
     SkeletonComponent,
+    TagCloudComponent,
+    NewsletterSubscribeComponent,
   ],
   templateUrl: './article-list.component.html',
   styleUrl: './article-list.component.scss',
@@ -35,12 +32,9 @@ import { ArticleSummaryResponse, TagResponse, PageResponse } from '../../../../m
 export class ArticleListComponent implements OnInit {
   private articleService = inject(ArticleService);
   private tagService = inject(TagService);
-  private apiService = inject(ApiService);
-  private notification = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
-  private recaptcha = inject(RecaptchaService);
   private seo = inject(SeoService);
   readonly i18n = inject(I18nService);
 
@@ -52,8 +46,6 @@ export class ArticleListComponent implements OnInit {
   currentPage = signal(0);
   totalPages = signal(0);
   totalElements = signal(0);
-  newsletterEmail = '';
-  newsletterSubmitting = signal(false);
   activeTagSlug = signal<string | null>(null);
   popularArticles = signal<ArticleSummaryResponse[]>([]);
   dateFrom = signal('');
@@ -187,31 +179,5 @@ export class ArticleListComponent implements OnInit {
 
   hasActiveFilters(): boolean {
     return !!(this.searchQuery() || this.dateFrom() || this.dateTo());
-  }
-
-  subscribeNewsletter(event: Event): void {
-    event.preventDefault();
-    const email = this.newsletterEmail.trim();
-    if (!email) return;
-
-    this.newsletterSubmitting.set(true);
-    this.recaptcha.execute('subscribe').then(recaptchaToken => {
-      this.apiService.post('/newsletter/subscribe', { email, recaptchaToken })
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.notification.success(this.i18n.t('blog.newsletter.success'));
-            this.newsletterEmail = '';
-            this.newsletterSubmitting.set(false);
-          },
-          error: () => {
-            this.notification.error(this.i18n.t('blog.newsletter.error'));
-            this.newsletterSubmitting.set(false);
-          },
-        });
-    }).catch(() => {
-      this.newsletterSubmitting.set(false);
-      this.notification.error(this.i18n.t('blog.newsletter.error'));
-    });
   }
 }
