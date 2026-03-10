@@ -147,8 +147,30 @@ export const AuthStore = signalStore(
           storage.get<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT) ??
           storage.getSession<number>(STORAGE_KEYS.TOKEN_EXPIRES_AT);
 
-        if (!storedAuth || !user) {
+        if (!storedAuth) {
           return Promise.resolve();
+        }
+
+        // If auth flag is set but no cached user data (e.g., OAuth callback stored
+        // the flag but getCurrentUser() failed), try to recover from cookies.
+        if (!user) {
+          patchState(store, { isLoading: true });
+          return firstValueFrom(
+            authService.getCurrentUser().pipe(
+              tap((freshUser) => {
+                patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
+                storage.set(STORAGE_KEYS.USER, freshUser);
+                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
+              }),
+              catchError(() => {
+                patchState(store, { isLoading: false });
+                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+                return of(null);
+              }),
+              map(() => void 0)
+            )
+          );
         }
 
         // SEC-F-03: Load cached user data optimistically for UI (name, role display),

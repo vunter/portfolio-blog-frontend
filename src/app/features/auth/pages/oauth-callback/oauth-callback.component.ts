@@ -35,6 +35,8 @@ export class OAuthCallbackComponent implements OnInit {
         }
       },
       error: () => {
+        // Clear the auth flag set above — getCurrentUser failed so there's no session
+        this.authStore.logout();
         this.router.navigateByUrl('/auth/login');
       },
     });
