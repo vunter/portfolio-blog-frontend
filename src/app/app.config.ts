@@ -9,7 +9,7 @@ import {
   SecurityContext,
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
-import { provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions, PreloadAllModules } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 // provideClientHydration re-enabled — progress interceptor now skips on server
 // to avoid TransferCacheInterceptorFn conflict (see progress.interceptor.ts)
 import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
@@ -48,7 +48,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }), withPreloading(PreloadAllModules)),
+    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
     provideHttpClient(
       withFetch(),
       withInterceptors([
