@@ -32,6 +32,8 @@ export class SecuritySettingsComponent implements OnInit {
   disabling = signal(false);
   verifying = signal(false);
   emailSetupPending = signal(false);
+  removingMethod = signal<string | null>(null);
+  removingMethodLoading = signal(false);
 
   mfaStatus = signal<MfaStatusResponse | null>(null);
   setupData = signal<MfaSetupResponse | null>(null);
@@ -42,6 +44,10 @@ export class SecuritySettingsComponent implements OnInit {
   });
 
   emailVerifyForm = this.fb.group({
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
+  });
+
+  removeMethodForm = this.fb.group({
     code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
   });
 
@@ -137,6 +143,47 @@ export class SecuritySettingsComponent implements OnInit {
   cancelEmailSetup(): void {
     this.emailSetupPending.set(false);
     this.emailVerifyForm.reset();
+  }
+
+  startRemoveMethod(method: string): void {
+    this.removingMethod.set(method);
+    this.removeMethodForm.reset();
+  }
+
+  cancelRemoveMethod(): void {
+    this.removingMethod.set(null);
+    this.removeMethodForm.reset();
+  }
+
+  confirmRemoveMethod(): void {
+    if (this.removeMethodForm.invalid) {
+      this.removeMethodForm.markAllAsTouched();
+      return;
+    }
+
+    const method = this.removingMethod();
+    if (!method) return;
+
+    this.removingMethodLoading.set(true);
+    const code = this.removeMethodForm.getRawValue().code!;
+
+    this.mfaService.disableMethod(method, code).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (res) => {
+        this.removingMethodLoading.set(false);
+        if (res.success) {
+          this.notification.success(this.i18n.t('account.security.methodDisabled'));
+          this.removingMethod.set(null);
+          this.removeMethodForm.reset();
+          this.loadStatus();
+        } else {
+          this.notification.error(res.message || this.i18n.t('account.security.invalidCode'));
+        }
+      },
+      error: () => {
+        this.removingMethodLoading.set(false);
+        this.notification.error(this.i18n.t('account.security.invalidCode'));
+      },
+    });
   }
 
   verifySetup(): void {

@@ -50,6 +50,13 @@ export class MfaService {
     });
   }
 
+  /** Disable a single MFA method after OTP verification. */
+  disableMethod(method: string, code: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(`${this.baseUrl}/disable-method`, { method, code }, {
+      withCredentials: true,
+    });
+  }
+
   /** Get MFA status for the authenticated user. */
   getStatus(): Observable<MfaStatusResponse> {
     return this.http.get<MfaStatusResponse>(`${this.baseUrl}/status`, {

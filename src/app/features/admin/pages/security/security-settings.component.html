@@ -32,19 +32,60 @@
           <h4>{{ i18n.t('account.security.activeMethods') }}</h4>
           <ul>
             @for (method of mfaStatus()?.methods ?? []; track method) {
-              <li>
-                @if (method === 'TOTP') {
-                  🔐 {{ i18n.t('account.security.authenticatorApp') }}
-                } @else {
-                  📧 {{ i18n.t('account.security.emailOtp') }}
-                }
-                @if (method === mfaStatus()?.preferredMethod) {
-                  <span class="preferred-badge">{{ i18n.t('account.security.preferred') }}</span>
-                }
+              <li class="method-item">
+                <span class="method-info">
+                  @if (method === 'TOTP') {
+                    🔐 {{ i18n.t('account.security.authenticatorApp') }}
+                  } @else {
+                    📧 {{ i18n.t('account.security.emailOtp') }}
+                  }
+                  @if (method === mfaStatus()?.preferredMethod) {
+                    <span class="preferred-badge">{{ i18n.t('account.security.preferred') }}</span>
+                  }
+                </span>
+                <button class="btn btn-outline btn-sm btn-danger-text" (click)="startRemoveMethod(method)"
+                        [disabled]="removingMethod() !== null">
+                  {{ i18n.t('account.security.removeMethod') }}
+                </button>
               </li>
             }
           </ul>
         </div>
+
+        <!-- Remove method verification -->
+        @if (removingMethod()) {
+          <div class="remove-method-verify">
+            <h4>{{ i18n.t('account.security.confirmRemove') }}</h4>
+            <p>{{ i18n.t('account.security.confirmRemoveDesc') }}</p>
+
+            <form class="verify-form" [formGroup]="removeMethodForm" (ngSubmit)="confirmRemoveMethod()">
+              <div class="form-group">
+                <label for="remove-verify-code">{{ i18n.t('account.security.enterCode') }}</label>
+                <input
+                  type="text"
+                  id="remove-verify-code"
+                  formControlName="code"
+                  placeholder="000000"
+                  maxlength="6"
+                  autocomplete="one-time-code"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                />
+              </div>
+              <div class="setup-actions">
+                <button type="submit" class="btn btn-danger" [disabled]="removingMethodLoading()">
+                  @if (removingMethodLoading()) {
+                    <span class="spinner"></span>
+                  }
+                  {{ i18n.t('account.security.confirmRemoveBtn') }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="cancelRemoveMethod()">
+                  {{ i18n.t('common.cancel') }}
+                </button>
+              </div>
+            </form>
+          </div>
+        }
 
         <button class="btn btn-danger" (click)="disableMfa()" [disabled]="disabling()">
           @if (disabling()) {

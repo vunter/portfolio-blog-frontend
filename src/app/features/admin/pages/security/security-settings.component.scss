@@ -69,6 +69,46 @@
     padding: 0.5rem 0;
     font-size: 0.9375rem;
   }
+
+  .method-item {
+    justify-content: space-between;
+  }
+
+  .method-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.btn-danger-text {
+  color: var(--danger, #ef4444) !important;
+  border-color: var(--danger, #ef4444) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--danger, #ef4444);
+    color: #fff !important;
+  }
+}
+
+.remove-method-verify {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--danger-tint, #fef2f2);
+  border: 1px solid var(--danger-border, #fecaca);
+  border-radius: 0.5rem;
+
+  h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+    color: var(--danger, #ef4444);
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary, #6b7280);
+  }
 }
 
 .preferred-badge {
