@@ -1,4 +1,5 @@
 import { Component, input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ArticleSummaryResponse } from '../../../models';
 import { BookmarkService } from '../../../core/services/bookmark.service';
@@ -6,7 +7,7 @@ import { getInitials } from '../../utils/string.utils';
 
 @Component({
   selector: 'app-article-card',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   templateUrl: './article-card.component.html',
   styleUrl: './article-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

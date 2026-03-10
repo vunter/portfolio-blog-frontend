@@ -11,7 +11,7 @@
  <i [class]="topic.emoji"></i>
  }
  @case ('img') {
- <img [src]="topic.emoji" class="topic-icon" alt="" />
+ <img [ngSrc]="topic.emoji!" class="topic-icon" alt="" width="24" height="24" />
  }
  @case ('emoji') {
  <span class="topic-emoji">{{ topic.emoji }}</span>

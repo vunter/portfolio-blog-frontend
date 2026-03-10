@@ -1,4 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
@@ -11,7 +12,7 @@ import { ThemeToggleComponent } from '../../../../shared/components/theme-toggle
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, signal, input, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ArticleService } from '../../blog/services/article.service';
@@ -12,7 +12,7 @@ import { ResumeProfile } from '../../../models/resume-profile.model';
 
 @Component({
   selector: 'app-sidebar-section',
-  imports: [RouterLink, DatePipe, NewsletterSubscribeComponent],
+  imports: [RouterLink, DatePipe, NgOptimizedImage, NewsletterSubscribeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sidebar-section.component.html',
   styleUrl: './sidebar-section.component.scss',

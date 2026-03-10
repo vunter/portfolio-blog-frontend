@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminApiService, MediaAssetResponse, MediaPurpose } from '../../../features/admin/services/admin-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { MediaUploadComponent } from '../media-upload/media-upload.component';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
 
 /**
  * Media library browser.
@@ -21,7 +21,7 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-media-library',
   standalone: true,
-  imports: [MediaUploadComponent, DatePipe],
+  imports: [MediaUploadComponent, DatePipe, NgOptimizedImage],
   templateUrl: './media-library.component.html',
   styleUrl: './media-library.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

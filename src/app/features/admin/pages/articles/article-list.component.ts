@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -16,7 +17,7 @@ import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-admin-article-list',
-  imports: [RouterLink, FormsModule, PaginationComponent, MarkdownModule, SkeletonComponent],
+  imports: [RouterLink, FormsModule, NgOptimizedImage, PaginationComponent, MarkdownModule, SkeletonComponent],
   templateUrl: './article-list.component.html',
   styleUrl: './article-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

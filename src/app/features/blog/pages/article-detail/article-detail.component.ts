@@ -15,7 +15,7 @@ import {
   ElementRef,
   NgZone,
 } from '@angular/core';
-import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { DatePipe, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -53,6 +53,7 @@ interface TocItem {
   imports: [
     RouterLink,
     DatePipe,
+    NgOptimizedImage,
     FormsModule,
     MarkdownModule,
     LoadingSpinnerComponent,

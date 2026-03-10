@@ -12,7 +12,7 @@
  <i [class]="prof.icon"></i>
  }
  @case ('img') {
- <img [src]="prof.icon" class="prof-icon" alt="" />
+ <img [ngSrc]="prof.icon!" class="prof-icon" alt="" width="24" height="24" />
  }
  @case ('emoji') {
  <span class="prof-emoji">{{ prof.icon }}</span>

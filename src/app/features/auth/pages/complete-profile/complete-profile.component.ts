@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -11,7 +12,7 @@ import { UserResponse } from '../../../../models';
 
 @Component({
   selector: 'app-complete-profile',
-  imports: [ReactiveFormsModule, ThemeToggleComponent, RouterLink],
+  imports: [ReactiveFormsModule, ThemeToggleComponent, RouterLink, NgOptimizedImage],
   templateUrl: './complete-profile.component.html',
   styleUrl: './complete-profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

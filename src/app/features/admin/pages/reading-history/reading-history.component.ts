@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NgOptimizedImage } from '@angular/common';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { ApiService } from '../../../../core/services/api.service';
@@ -17,7 +18,7 @@ interface ReadingHistoryItem {
 
 @Component({
   selector: 'app-reading-history',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   templateUrl: './reading-history.component.html',
   styleUrl: './reading-history.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

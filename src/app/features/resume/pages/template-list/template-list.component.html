@@ -21,7 +21,7 @@
  <div class="template-card">
  <div class="template-card__preview">
  @if (template.thumbnailUrl) {
- <img [src]="template.thumbnailUrl" [alt]="template.name" loading="lazy" />
+ <img [ngSrc]="template.thumbnailUrl" [alt]="template.name" fill />
  } @else {
  <div class="template-card__placeholder">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">

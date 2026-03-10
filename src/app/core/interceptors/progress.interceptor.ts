@@ -1,9 +1,14 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import { finalize } from 'rxjs';
 import { ProgressBarService } from '../services/progress-bar.service';
 
 export const progressInterceptor: HttpInterceptorFn = (req, next) => {
+  if (isPlatformServer(inject(PLATFORM_ID))) {
+    return next(req);
+  }
+
   const progressBar = inject(ProgressBarService);
 
   const skipUrls = ['/sse', '/actuator', '/health'];

@@ -1,10 +1,10 @@
-﻿<article class="article-card" (click)="navigateToArticle()">
+<article class="article-card" (click)="navigateToArticle()">
  @if (article().coverImageUrl) {
  <div class="article-card__image">
  <img
- [src]="article().coverImageUrl"
+ [ngSrc]="article().coverImageUrl!"
  [alt]="article().title"
- loading="lazy"
+ fill
  />
  </div>
  } @else {
@@ -56,10 +56,11 @@
  <div class="article-card__author">
  @if (article().author.avatarUrl) {
  <img
- [src]="article().author.avatarUrl"
+ [ngSrc]="article().author.avatarUrl!"
  [alt]="article().author.name"
  class="article-card__avatar"
- loading="lazy"
+ width="32"
+ height="32"
  />
  } @else {
  <div class="article-card__avatar article-card__avatar--placeholder">

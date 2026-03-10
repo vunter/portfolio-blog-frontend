@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ResumeService } from '../../services/resume.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -11,7 +12,7 @@ import { ResumeTemplate } from '../../../../models';
 
 @Component({
   selector: 'app-template-list',
-  imports: [RouterLink, LoadingSpinnerComponent],
+  imports: [RouterLink, NgOptimizedImage, LoadingSpinnerComponent],
   templateUrl: './template-list.component.html',
   styleUrl: './template-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

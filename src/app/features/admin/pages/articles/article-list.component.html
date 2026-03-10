@@ -79,7 +79,7 @@
  <td>
  <div class="article-info">
  @if (article.coverImageUrl) {
- <img [src]="article.coverImageUrl" [alt]="article.title" class="article-thumb" loading="lazy" />
+ <img [ngSrc]="article.coverImageUrl" [alt]="article.title" class="article-thumb" width="80" height="48" />
  } @else {
  <div class="article-thumb article-thumb--placeholder">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">

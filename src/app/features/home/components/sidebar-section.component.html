@@ -2,7 +2,7 @@
  <div class="sidebar-section author-card">
   <div class="author-avatar">
     @if (avatarUrl()) {
-      <img [src]="avatarUrl()" [alt]="displayName()" class="author-avatar-img" />
+      <img [ngSrc]="avatarUrl()!" [alt]="displayName()" class="author-avatar-img" width="80" height="80" />
     } @else {
       {{ initials() }}
     }

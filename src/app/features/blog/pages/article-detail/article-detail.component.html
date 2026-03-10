@@ -28,10 +28,11 @@
  <div class="author-info">
  @if (article()!.author.avatarUrl) {
  <img
- [src]="article()!.author.avatarUrl"
+ [ngSrc]="article()!.author.avatarUrl!"
  [alt]="article()!.author.name"
  class="author-avatar"
- loading="lazy"
+ width="48"
+ height="48"
  />
  } @else {
  <div class="author-avatar author-avatar--placeholder">
@@ -66,7 +67,7 @@
 
  @if (article()!.coverImageUrl) {
  <div class="article-header__cover">
- <img [src]="article()!.coverImageUrl" [alt]="article()!.title" loading="eager" />
+ <img [ngSrc]="article()!.coverImageUrl!" [alt]="article()!.title" fill priority />
  </div>
  }
  </header>

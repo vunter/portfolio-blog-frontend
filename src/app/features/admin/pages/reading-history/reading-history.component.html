@@ -36,7 +36,7 @@
  <div class="history-card">
  @if (item.article.coverImageUrl) {
  <div class="card-image">
- <img [src]="item.article.coverImageUrl" [alt]="item.article.title" loading="lazy" />
+ <img [ngSrc]="item.article.coverImageUrl" [alt]="item.article.title" width="80" height="48" />
  </div>
  }
  <div class="card-content">

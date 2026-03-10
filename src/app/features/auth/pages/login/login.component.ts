@@ -1,4 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
@@ -12,7 +13,7 @@ import { ThemeToggleComponent } from '../../../../shared/components/theme-toggle
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

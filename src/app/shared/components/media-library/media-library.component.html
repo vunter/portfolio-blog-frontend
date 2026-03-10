@@ -55,7 +55,7 @@
  (click)="selectAsset(asset)" role="button" tabindex="0"
  (keydown.enter)="selectAsset(asset)" (keydown.space)="selectAsset(asset)">
  <div class="asset-thumb">
- <img [src]="asset.url" [alt]="asset.altText || asset.originalFilename" loading="lazy" />
+ <img [ngSrc]="asset.url" [alt]="asset.altText || asset.originalFilename" fill />
  </div>
  <div class="asset-info">
  <span class="asset-name" [title]="asset.originalFilename">{{ asset.originalFilename }}</span>

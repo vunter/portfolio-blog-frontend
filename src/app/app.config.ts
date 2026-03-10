@@ -9,9 +9,10 @@ import {
   SecurityContext,
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
-import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
-// provideClientHydration removed — no SSR, and its TransferCacheInterceptorFn
-// caused the progress bar to stick (absorbed HTTP requests without completing the observable)
+import { provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions, PreloadAllModules } from '@angular/router';
+// provideClientHydration re-enabled — progress interceptor now skips on server
+// to avoid TransferCacheInterceptorFn conflict (see progress.interceptor.ts)
+import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideMarkdown, SANITIZE } from 'ngx-markdown';
@@ -47,7 +48,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
+    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }), withPreloading(PreloadAllModules)),
     provideHttpClient(
       withFetch(),
       withInterceptors([
@@ -66,7 +67,9 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideAnimationsAsync(),
-    // provideClientHydration removed — see import comment above
+    provideClientHydration(withHttpTransferCacheOptions({
+      includePostRequests: false,
+    })),
     provideMarkdown({
       sanitize: {
         provide: SANITIZE,

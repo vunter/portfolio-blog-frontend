@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
@@ -29,7 +30,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent, BreadcrumbsComponent, SafeIconPipe, NotificationBellComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgOptimizedImage, ThemeToggleComponent, BreadcrumbsComponent, SafeIconPipe, NotificationBellComponent],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

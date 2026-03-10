@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ResumeProfile } from '../../../models/resume-profile.model';
 import { getIconType } from '../../../shared/utils/icon.utils';
 
 @Component({
   selector: 'app-proficiency-section',
-  imports: [],
+  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './proficiency-section.component.html',
   styleUrl: './proficiency-section.component.scss',
