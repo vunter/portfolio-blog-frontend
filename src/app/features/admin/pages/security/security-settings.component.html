@@ -171,6 +171,41 @@
           </form>
         </div>
       }
+
+      <!-- Email OTP Verification Flow -->
+      @if (emailSetupPending()) {
+        <div class="email-setup">
+          <h4>📧 {{ i18n.t('account.security.verifyEmail') }}</h4>
+          <p>{{ i18n.t('account.security.verifyEmailDesc') }}</p>
+
+          <form class="verify-form" [formGroup]="emailVerifyForm" (ngSubmit)="verifyEmailSetup()">
+            <div class="form-group">
+              <label for="email-verify-code">{{ i18n.t('account.security.enterCode') }}</label>
+              <input
+                type="text"
+                id="email-verify-code"
+                formControlName="code"
+                placeholder="000000"
+                maxlength="6"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+                pattern="[0-9]*"
+              />
+            </div>
+            <div class="setup-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="verifying()">
+                @if (verifying()) {
+                  <span class="spinner"></span>
+                }
+                {{ i18n.t('account.security.verifyAndEnable') }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="cancelEmailSetup()">
+                {{ i18n.t('common.cancel') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
     </div>
 
     <!-- Linked Accounts -->

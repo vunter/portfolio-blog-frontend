@@ -31,12 +31,17 @@ export class SecuritySettingsComponent implements OnInit {
   enabling = signal(false);
   disabling = signal(false);
   verifying = signal(false);
+  emailSetupPending = signal(false);
 
   mfaStatus = signal<MfaStatusResponse | null>(null);
   setupData = signal<MfaSetupResponse | null>(null);
   showSetup = signal(false);
 
   verifyForm = this.fb.group({
+    code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
+  });
+
+  emailVerifyForm = this.fb.group({
     code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
   });
 
@@ -86,19 +91,52 @@ export class SecuritySettingsComponent implements OnInit {
   enableEmail(): void {
     this.enabling.set(true);
     this.mfaService.setup('EMAIL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res: any) => {
-        this.notification.success(this.i18n.t('account.security.emailOtpEnabled'));
+      next: () => {
+        this.notification.success(this.i18n.t('account.security.emailCodeSent'));
         this.enabling.set(false);
-        if (res.backupCodes?.length) {
-          this.backupCodes.set(res.backupCodes);
-        }
-        this.loadStatus();
+        this.emailSetupPending.set(true);
       },
       error: () => {
         this.notification.error(this.i18n.t('account.security.setupFailed'));
         this.enabling.set(false);
       },
     });
+  }
+
+  verifyEmailSetup(): void {
+    if (this.emailVerifyForm.invalid) {
+      this.emailVerifyForm.markAllAsTouched();
+      return;
+    }
+
+    this.verifying.set(true);
+    const code = this.emailVerifyForm.getRawValue().code!;
+
+    this.mfaService.verifySetup({ code, method: 'EMAIL' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (result) => {
+        this.verifying.set(false);
+        if (result.verified) {
+          this.notification.success(this.i18n.t('account.security.emailOtpEnabled'));
+          this.emailSetupPending.set(false);
+          this.emailVerifyForm.reset();
+          if (result.backupCodes?.length) {
+            this.backupCodes.set(result.backupCodes);
+          }
+          this.loadStatus();
+        } else {
+          this.notification.error(result.message || this.i18n.t('account.security.invalidCode'));
+        }
+      },
+      error: () => {
+        this.verifying.set(false);
+        this.notification.error(this.i18n.t('account.security.invalidCode'));
+      },
+    });
+  }
+
+  cancelEmailSetup(): void {
+    this.emailSetupPending.set(false);
+    this.emailVerifyForm.reset();
   }
 
   verifySetup(): void {
