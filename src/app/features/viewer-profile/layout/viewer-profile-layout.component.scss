@@ -17,6 +17,7 @@
   bottom: 0;
   z-index: var(--z-fixed, 1030);
   transition: width 0.3s ease;
+  overflow: hidden;
 
   .sidebar-collapsed & {
     width: 72px;
@@ -29,6 +30,11 @@
   justify-content: space-between;
   padding: 1rem;
   border-bottom: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.1));
+
+  .sidebar-collapsed & {
+    justify-content: center;
+    padding: 0.75rem;
+  }
 }
 
 .logo-link {
@@ -48,6 +54,10 @@
   width: 32px;
   height: 32px;
   display: block;
+}
+
+.expand-btn {
+  margin: 0 auto 0.25rem;
 }
 
 .toggle-btn {
@@ -85,6 +95,11 @@
   transition: all 0.2s;
   font-size: 0.9rem;
 
+  .sidebar-collapsed & {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
   &:hover {
     background: var(--sidebar-item-hover, rgba(255, 255, 255, 0.1));
     color: var(--sidebar-text-hover, white);
@@ -114,6 +129,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+
+  .sidebar-collapsed & {
+    align-items: center;
+  }
 }
 
 .footer-link {
@@ -131,6 +150,12 @@
   cursor: pointer;
   width: 100%;
   text-align: left;
+
+  .sidebar-collapsed & {
+    justify-content: center;
+    width: auto;
+    padding: 0.5rem;
+  }
 
   &:hover {
     background: var(--sidebar-item-hover, rgba(255, 255, 255, 0.1));

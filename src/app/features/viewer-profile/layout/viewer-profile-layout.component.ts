@@ -20,16 +20,22 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
               <img src="images/logo-simplified.svg" [alt]="i18n.t('common.appName')" class="logo-full" />
             }
           </a>
-          <button class="toggle-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed() ? 'Expand' : 'Collapse'">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              @if (sidebarCollapsed()) {
-                <polyline points="9 18 15 12 9 6" />
-              } @else {
+          @if (!sidebarCollapsed()) {
+            <button class="toggle-btn" (click)="toggleSidebar()" title="Collapse">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6" />
-              }
+              </svg>
+            </button>
+          }
+        </div>
+
+        @if (sidebarCollapsed()) {
+          <button class="toggle-btn expand-btn" (click)="toggleSidebar()" title="Expand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
-        </div>
+        }
 
         <nav class="sidebar-nav">
           <a routerLink="/profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
@@ -96,7 +102,9 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
             <span [class.hidden]="sidebarCollapsed()">{{ i18n.t('account.sidebar.backToSite') }}</span>
           </a>
 
-          <app-theme-toggle />
+          @if (!sidebarCollapsed()) {
+            <app-theme-toggle />
+          }
 
           <div class="user-info" [class.hidden]="sidebarCollapsed()">
             <span class="user-name">{{ authStore.userDisplayName() }}</span>
