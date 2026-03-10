@@ -56,6 +56,7 @@ export const AuthStore = signalStore(
         .toUpperCase()
         .slice(0, 2);
     }),
+    userAvatarUrl: computed(() => state.user()?.avatarUrl || null),
     isTokenExpired: computed(() => {
       const expiresAt = state.tokenExpiresAt();
       if (!expiresAt) return true;

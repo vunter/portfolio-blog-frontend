@@ -32,14 +32,26 @@
  @if (authStore.isAuthenticated()) {
  <div class="user-menu">
  <button class="user-menu__trigger" (click)="toggleUserMenu($event)">
- <span class="user-menu__avatar">{{ authStore.userInitials() }}</span>
+ <span class="user-menu__avatar">
+ @if (authStore.userAvatarUrl()) {
+ <img [src]="authStore.userAvatarUrl()!" [alt]="authStore.userDisplayName()" class="user-menu__avatar-img" />
+ } @else {
+ {{ authStore.userInitials() }}
+ }
+ </span>
  <span class="user-menu__name">{{ authStore.userDisplayName() }}</span>
  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
  </button>
  @if (userMenuOpen()) {
  <div class="user-menu__dropdown">
  <div class="user-menu__header">
- <span class="user-menu__avatar user-menu__avatar--lg">{{ authStore.userInitials() }}</span>
+ <span class="user-menu__avatar user-menu__avatar--lg">
+ @if (authStore.userAvatarUrl()) {
+ <img [src]="authStore.userAvatarUrl()!" [alt]="authStore.userDisplayName()" class="user-menu__avatar-img" />
+ } @else {
+ {{ authStore.userInitials() }}
+ }
+ </span>
  <div class="user-menu__info">
  <span class="user-menu__display-name">{{ authStore.userDisplayName() }}</span>
  <span class="user-menu__role">{{ authStore.user()?.role }}</span>
@@ -102,7 +114,13 @@
  @if (authStore.isAuthenticated()) {
  <div class="mobile-auth">
  <div class="mobile-auth__user">
- <span class="user-menu__avatar">{{ authStore.userInitials() }}</span>
+ <span class="user-menu__avatar">
+ @if (authStore.userAvatarUrl()) {
+ <img [src]="authStore.userAvatarUrl()!" [alt]="authStore.userDisplayName()" class="user-menu__avatar-img" />
+ } @else {
+ {{ authStore.userInitials() }}
+ }
+ </span>
  <span>{{ authStore.userDisplayName() }}</span>
  </div>
  @if (authStore.isDev()) {
