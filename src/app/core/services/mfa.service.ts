@@ -57,6 +57,13 @@ export class MfaService {
     });
   }
 
+  /** Send an email OTP to the authenticated user for security verification. */
+  sendAuthenticatedOtp(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/send-otp`, {}, {
+      withCredentials: true,
+    });
+  }
+
   /** Get MFA status for the authenticated user. */
   getStatus(): Observable<MfaStatusResponse> {
     return this.http.get<MfaStatusResponse>(`${this.baseUrl}/status`, {

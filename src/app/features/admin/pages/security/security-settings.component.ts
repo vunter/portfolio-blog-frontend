@@ -148,6 +148,13 @@ export class SecuritySettingsComponent implements OnInit {
   startRemoveMethod(method: string): void {
     this.removingMethod.set(method);
     this.removeMethodForm.reset();
+    // Auto-send email OTP if EMAIL is active
+    if (this.hasMethod('EMAIL')) {
+      this.mfaService.sendAuthenticatedOtp().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => this.notification.success(this.i18n.t('account.security.otpSentForVerification')),
+        error: () => {},
+      });
+    }
   }
 
   cancelRemoveMethod(): void {
