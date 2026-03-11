@@ -45,6 +45,8 @@ export class RealtimeNotificationService {
   private eventSource: EventSource | null = null;
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly eventTypes = ['article', 'comment', 'subscriber', 'contact', 'auth'] as const;
+  private boundHandler: ((e: MessageEvent) => void) | null = null;
 
   private readonly _connected = signal(false);
   private readonly _events = signal<ServerNotificationEvent[]>([]);
@@ -77,25 +79,10 @@ export class RealtimeNotificationService {
         });
       };
 
-      this.eventSource.addEventListener('article', (e: MessageEvent) => {
-        this.handleEvent(e);
-      });
-
-      this.eventSource.addEventListener('comment', (e: MessageEvent) => {
-        this.handleEvent(e);
-      });
-
-      this.eventSource.addEventListener('subscriber', (e: MessageEvent) => {
-        this.handleEvent(e);
-      });
-
-      this.eventSource.addEventListener('contact', (e: MessageEvent) => {
-        this.handleEvent(e);
-      });
-
-      this.eventSource.addEventListener('auth', (e: MessageEvent) => {
-        this.handleEvent(e);
-      });
+      this.boundHandler = (e: MessageEvent) => this.handleEvent(e);
+      for (const type of this.eventTypes) {
+        this.eventSource.addEventListener(type, this.boundHandler);
+      }
 
       this.eventSource.onerror = () => {
         this.zone.run(() => {
@@ -114,6 +101,12 @@ export class RealtimeNotificationService {
       this.reconnectTimer = null;
     }
     if (this.eventSource) {
+      if (this.boundHandler) {
+        for (const type of this.eventTypes) {
+          this.eventSource.removeEventListener(type, this.boundHandler);
+        }
+        this.boundHandler = null;
+      }
       this.eventSource.close();
       this.eventSource = null;
     }

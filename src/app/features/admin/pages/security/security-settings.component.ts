@@ -370,6 +370,10 @@ export class SecuritySettingsComponent implements OnInit {
   }
 
   linkSocialAccount(provider: string): void {
+    const allowedProviders = ['GOOGLE', 'GITHUB', 'LINKEDIN'];
+    if (!allowedProviders.includes(provider.toUpperCase())) {
+      return;
+    }
     window.location.href = `/api/v1/admin/auth/oauth2/authorize/${provider}?link=true`;
   }
 

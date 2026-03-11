@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, signal, computed, effect, PLATFORM_ID, inject, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CookieConsentService } from './cookie-consent.service';
 
@@ -12,6 +12,7 @@ export class ThemeService {
   private readonly STORAGE_KEY = 'app-theme';
   private readonly platformId = inject(PLATFORM_ID);
   private readonly consent = inject(CookieConsentService);
+  private readonly destroyRef = inject(DestroyRef);
   private mediaQuery: MediaQueryList | null = null;
   private mediaListener: ((e: MediaQueryListEvent) => void) | null = null;
 
@@ -29,6 +30,11 @@ export class ThemeService {
         }
       };
       this.mediaQuery.addEventListener('change', this.mediaListener);
+      this.destroyRef.onDestroy(() => {
+        if (this.mediaQuery && this.mediaListener) {
+          this.mediaQuery.removeEventListener('change', this.mediaListener);
+        }
+      });
     }
 
     effect(() => {

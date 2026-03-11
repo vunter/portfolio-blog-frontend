@@ -1199,7 +1199,7 @@
 
     // Blog Tags page
     'blog.tags.title': 'Tags',
-    'blog.tags.subtitle': 'Explore articles by category',
+    'blog.tags.subtitle': 'Explore articles by tag',
     'blog.tags.loading': 'Loading tags...',
     'blog.tags.article': 'article',
     'blog.tags.articles': 'articles',
