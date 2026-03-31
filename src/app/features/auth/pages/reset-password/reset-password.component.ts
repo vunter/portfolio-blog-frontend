@@ -21,10 +21,13 @@ export class ResetPasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
   i18n = inject(I18nService);
 
+  // Password must have: uppercase, lowercase, digit, special char (anything non-alphanumeric)
+  private static readonly PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/;
+
   token: string | null = null;
 
   resetForm = this.fb.group({
-    password: ['', [Validators.required, Validators.minLength(12)]],
+    password: ['', [Validators.required, Validators.minLength(12), Validators.pattern(ResetPasswordComponent.PASSWORD_PATTERN)]],
     confirmPassword: ['', [Validators.required]],
   });
 

@@ -1,6 +1,7 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, OnInit, DestroyRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MfaService } from '../../../../core/services/mfa.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
@@ -23,6 +24,7 @@ export class MfaVerifyComponent implements OnInit {
   private router = inject(Router);
   private notification = inject(NotificationService);
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   mfaForm = this.fb.group({
@@ -39,9 +41,10 @@ export class MfaVerifyComponent implements OnInit {
   private email = '';
 
   ngOnInit(): void {
-    // Get MFA token and method from navigation state
-    const nav = this.router.getCurrentNavigation()?.extras?.state ??
-                history.state;
+    // Get MFA token and method from navigation state only.
+    // Do NOT fall back to history.state — on page refresh, redirect to login
+    // instead of exposing stale MFA tokens from browser history.
+    const nav = this.router.getCurrentNavigation()?.extras?.state;
     this.mfaToken = nav?.['mfaToken'] ?? '';
     this.email = nav?.['email'] ?? '';
     const preferredMethod = nav?.['method'] ?? 'TOTP';
@@ -75,6 +78,7 @@ export class MfaVerifyComponent implements OnInit {
         }
         return this.authService.getCurrentUser();
       }),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (user) => {
         this.authStore.login(user);
@@ -96,7 +100,7 @@ export class MfaVerifyComponent implements OnInit {
   resendEmailOtp(): void {
     if (!this.mfaToken) return;
     this.sendingOtp.set(true);
-    this.mfaService.sendEmailOtp(this.mfaToken).subscribe({
+    this.mfaService.sendEmailOtp(this.mfaToken).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.sendingOtp.set(false);
         this.notification.success(this.i18n.t('auth.mfa.otpSent'));

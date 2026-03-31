@@ -1,5 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 
@@ -17,6 +18,7 @@ export class OAuthCallbackComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly authStore = inject(AuthStore);
+  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     const expiresIn = Number(this.route.snapshot.queryParams['expires_in']) || 900;
@@ -24,7 +26,7 @@ export class OAuthCallbackComponent implements OnInit {
     this.authStore.setAuthenticated();
     this.authStore.setTokenExpiry(expiresIn);
 
-    this.authService.getCurrentUser().subscribe({
+    this.authService.getCurrentUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (user) => {
         this.authStore.login(user);
         if (!user.hasPassword) {
