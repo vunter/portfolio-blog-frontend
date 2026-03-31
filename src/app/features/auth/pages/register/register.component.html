@@ -46,13 +46,15 @@
  [placeholder]="i18n.t('auth.register.namePlaceholder')"
  [disabled]="loading()"
  [class.input-error]="(registerForm.get('name')?.touched && registerForm.get('name')?.invalid) || fieldErrors()['name']"
+ [attr.aria-describedby]="(registerForm.get('name')?.touched && registerForm.get('name')?.invalid) || fieldErrors()['name'] ? 'name-error' : null"
+ [attr.aria-invalid]="(registerForm.get('name')?.touched && registerForm.get('name')?.invalid) || fieldErrors()['name']"
  />
  @if (registerForm.get('name')?.touched && registerForm.get('name')?.hasError('required')) {
- <span class="field-error">{{ i18n.t('auth.register.nameRequired') }}</span>
+ <span class="field-error" id="name-error" role="alert">{{ i18n.t('auth.register.nameRequired') }}</span>
  } @else if (registerForm.get('name')?.touched && registerForm.get('name')?.hasError('minlength')) {
- <span class="field-error">{{ i18n.t('auth.register.nameTooShort') }}</span>
+ <span class="field-error" id="name-error" role="alert">{{ i18n.t('auth.register.nameTooShort') }}</span>
  } @else if (fieldErrors()['name']) {
- <span class="field-error">{{ fieldErrors()['name'] }}</span>
+ <span class="field-error" id="name-error" role="alert">{{ fieldErrors()['name'] }}</span>
  }
  </div>
 
@@ -65,13 +67,15 @@
  [placeholder]="i18n.t('auth.register.emailPlaceholder')"
  [disabled]="loading()"
  [class.input-error]="(registerForm.get('email')?.touched && registerForm.get('email')?.invalid) || fieldErrors()['email']"
+ [attr.aria-describedby]="(registerForm.get('email')?.touched && registerForm.get('email')?.invalid) || fieldErrors()['email'] ? 'email-error' : null"
+ [attr.aria-invalid]="(registerForm.get('email')?.touched && registerForm.get('email')?.invalid) || fieldErrors()['email']"
  />
  @if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')) {
- <span class="field-error">{{ i18n.t('auth.register.emailRequired') }}</span>
+ <span class="field-error" id="email-error" role="alert">{{ i18n.t('auth.register.emailRequired') }}</span>
  } @else if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')) {
- <span class="field-error">{{ i18n.t('auth.register.emailInvalid') }}</span>
+ <span class="field-error" id="email-error" role="alert">{{ i18n.t('auth.register.emailInvalid') }}</span>
  } @else if (fieldErrors()['email']) {
- <span class="field-error">{{ fieldErrors()['email'] }}</span>
+ <span class="field-error" id="email-error" role="alert">{{ fieldErrors()['email'] }}</span>
  }
  </div>
 
@@ -85,6 +89,8 @@
  placeholder="••••••••••••"
  [disabled]="loading()"
  [class.input-error]="(registerForm.get('password')?.touched && registerForm.get('password')?.invalid) || fieldErrors()['password']"
+ [attr.aria-describedby]="(registerForm.get('password')?.touched && registerForm.get('password')?.invalid) || fieldErrors()['password'] ? 'password-error' : 'password-hint'"
+ [attr.aria-invalid]="(registerForm.get('password')?.touched && registerForm.get('password')?.invalid) || fieldErrors()['password']"
  />
  <button
  type="button"
@@ -106,15 +112,15 @@
  </button>
  </div>
  @if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')) {
- <span class="field-error">{{ i18n.t('auth.register.passwordRequired') }}</span>
+ <span class="field-error" id="password-error" role="alert">{{ i18n.t('auth.register.passwordRequired') }}</span>
  } @else if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')) {
- <span class="field-error">{{ i18n.t('auth.register.passwordTooShort') }}</span>
+ <span class="field-error" id="password-error" role="alert">{{ i18n.t('auth.register.passwordTooShort') }}</span>
  } @else if (registerForm.get('password')?.touched && registerForm.get('password')?.hasError('pattern')) {
- <span class="field-error">{{ i18n.t('auth.register.passwordWeak') }}</span>
+ <span class="field-error" id="password-error" role="alert">{{ i18n.t('auth.register.passwordWeak') }}</span>
  } @else if (fieldErrors()['password']) {
- <span class="field-error">{{ fieldErrors()['password'] }}</span>
+ <span class="field-error" id="password-error" role="alert">{{ fieldErrors()['password'] }}</span>
  } @else {
- <span class="field-hint">{{ i18n.t('auth.register.passwordHint') }}</span>
+ <span class="field-hint" id="password-hint">{{ i18n.t('auth.register.passwordHint') }}</span>
  }
  </div>
 
@@ -128,6 +134,8 @@
  placeholder="••••••••••••"
  [disabled]="loading()"
  [class.input-error]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || (registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value && registerForm.get('confirmPassword')?.value))"
+ [attr.aria-describedby]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || (registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value && registerForm.get('confirmPassword')?.value)) ? 'confirm-password-error' : null"
+ [attr.aria-invalid]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || (registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value && registerForm.get('confirmPassword')?.value))"
  />
  <button
  type="button"
@@ -149,9 +157,9 @@
  </button>
  </div>
  @if (registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.hasError('required')) {
- <span class="field-error">{{ i18n.t('auth.register.confirmPasswordRequired') }}</span>
+ <span class="field-error" id="confirm-password-error" role="alert">{{ i18n.t('auth.register.confirmPasswordRequired') }}</span>
  } @else if (registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.value && registerForm.get('confirmPassword')?.value !== registerForm.get('password')?.value) {
- <span class="field-error">{{ i18n.t('auth.register.passwordMismatch') }}</span>
+ <span class="field-error" id="confirm-password-error" role="alert">{{ i18n.t('auth.register.passwordMismatch') }}</span>
  }
  </div>
 

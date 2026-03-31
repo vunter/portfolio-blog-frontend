@@ -47,9 +47,9 @@ describe('tokenInterceptor', () => {
   });
 
   it('should add withCredentials to POST requests', () => {
-    http.post('/api/v1/admin/auth/login/v2', { email: 'admin@catananti.dev', password: 'test' }).subscribe();
+    http.post('/api/v1/admin/auth/login', { email: 'admin@catananti.dev', password: 'test' }).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/admin/auth/login/v2');
+    const req = httpMock.expectOne('/api/v1/admin/auth/login');
     expect(req.request.withCredentials).toBeTrue();
     req.flush({});
   });

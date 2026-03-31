@@ -90,13 +90,13 @@ describe('refreshTokenInterceptor', () => {
   });
 
   it('should NOT trigger refresh for 401 on /auth/ endpoints', () => {
-    http.post('/api/v1/admin/auth/login/v2', {}).subscribe({
+    http.post('/api/v1/admin/auth/login', {}).subscribe({
       error: (err: HttpErrorResponse) => {
         expect(err.status).toBe(401);
       },
     });
 
-    const req = httpMock.expectOne('/api/v1/admin/auth/login/v2');
+    const req = httpMock.expectOne('/api/v1/admin/auth/login');
     req.flush(null, { status: 401, statusText: 'Unauthorized' });
 
     expect(authServiceSpy.refreshToken).not.toHaveBeenCalled();

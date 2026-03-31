@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/admin/auth/login/v2`, request, {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/admin/auth/login`, request, {
       withCredentials: true,
     });
   }

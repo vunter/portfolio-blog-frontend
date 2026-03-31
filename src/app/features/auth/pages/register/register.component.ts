@@ -1,14 +1,16 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { ThemeToggleComponent } from '../../../../shared/components/theme-toggle/theme-toggle.component';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -24,6 +26,7 @@ export class RegisterComponent {
   private notification = inject(NotificationService);
   private recaptcha = inject(RecaptchaService);
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   // Password must have: uppercase, lowercase, digit, special char (anything non-alphanumeric)
@@ -47,7 +50,7 @@ export class RegisterComponent {
   linkedinEnabled = signal(false);
 
   constructor() {
-    this.authService.getOAuthProviders().subscribe(providers => {
+    this.authService.getOAuthProviders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(providers => {
       this.googleEnabled.set(!!providers['google']);
       this.githubEnabled.set(!!providers['github']);
       this.linkedinEnabled.set(!!providers['linkedin']);
@@ -55,15 +58,15 @@ export class RegisterComponent {
   }
 
   loginWithGoogle(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/google';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/google`;
   }
 
   loginWithGithub(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/github';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/github`;
   }
 
   loginWithLinkedin(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/linkedin';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/linkedin`;
   }
 
   onSubmit(): void {
@@ -102,6 +105,7 @@ export class RegisterComponent {
         }
       }),
       switchMap(() => this.authService.getCurrentUser()),
+      takeUntilDestroyed(this.destroyRef),
     )
       .subscribe({
         next: (user) => {

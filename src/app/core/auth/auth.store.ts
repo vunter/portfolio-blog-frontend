@@ -6,7 +6,7 @@ import {
   withComputed,
   patchState,
 } from '@ngrx/signals';
-import { switchMap, catchError, tap, of, map, firstValueFrom, throwError } from 'rxjs';
+import { switchMap, catchError, tap, of, map, firstValueFrom, throwError, take } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UserResponse } from '../../models';
 import { StorageService } from '../services/storage.service';
@@ -106,7 +106,7 @@ export const AuthStore = signalStore(
         // Reset i18n to public tier
         i18n.setAuthTier('public');
         // Invalidate refresh token on backend (clears cookies server-side)
-        authService.logout().subscribe({
+        authService.logout().pipe(take(1)).subscribe({
           error: () => { /* Logout API failure is non-critical — local state already cleared */ },
         });
       },

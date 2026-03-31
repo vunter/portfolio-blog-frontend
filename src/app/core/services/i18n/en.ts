@@ -906,6 +906,9 @@
     'account.profile.hcSaveSuccess': 'Home page settings saved successfully!',
     'account.profile.hcSaveError': 'Failed to save home settings',
     'account.profile.saveAll': 'Save',
+    'account.profile.nameRequired': 'Name is required',
+    'account.profile.emailRequired': 'Email is required',
+    'account.profile.fullNameRequired': 'Full name is required',
 
     // Admin Tags
     'dev.tags.title': 'Tags',

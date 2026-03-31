@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { ThemeToggleComponent } from '../../../../shared/components/theme-toggle/theme-toggle.component';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +44,7 @@ export class LoginComponent {
   linkedinEnabled = signal(false);
 
   constructor() {
-    this.authService.getOAuthProviders().subscribe(providers => {
+    this.authService.getOAuthProviders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(providers => {
       this.googleEnabled.set(!!providers['google']);
       this.githubEnabled.set(!!providers['github']);
       this.linkedinEnabled.set(!!providers['linkedin']);
@@ -51,15 +52,15 @@ export class LoginComponent {
   }
 
   loginWithGoogle(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/google';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/google`;
   }
 
   loginWithGithub(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/github';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/github`;
   }
 
   loginWithLinkedin(): void {
-    window.location.href = '/api/v1/admin/auth/oauth2/authorize/linkedin';
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/linkedin`;
   }
 
   onSubmit(): void {

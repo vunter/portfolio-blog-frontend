@@ -3,6 +3,8 @@ import {
   HttpRequest,
   HttpHandlerFn,
 } from '@angular/common/http';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
 const LANG_STORAGE_KEY = 'app-language';
@@ -23,8 +25,9 @@ export const tokenInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
+  const platformId = inject(PLATFORM_ID);
   if (req.url.startsWith(environment.apiUrl)) {
-    const lang = typeof window !== 'undefined'
+    const lang = isPlatformBrowser(platformId)
       ? localStorage.getItem(LANG_STORAGE_KEY) || 'en'
       : 'en';
     const acceptLanguage = LANG_MAP[lang] || LANG_MAP['en'];

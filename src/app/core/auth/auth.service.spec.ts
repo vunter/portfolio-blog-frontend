@@ -58,7 +58,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should send POST to /admin/auth/login/v2 with credentials', () => {
+    it('should send POST to /admin/auth/login with credentials', () => {
       const credentials = { email: 'admin@catananti.dev', password: 'admin123456789' };
 
       service.login(credentials).subscribe((response) => {
@@ -67,7 +67,7 @@ describe('AuthService', () => {
         expect(response.tokenType).toBe('Bearer');
       });
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login/v2`);
+      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(credentials);
       expect(req.request.withCredentials).toBeTrue();
@@ -83,7 +83,7 @@ describe('AuthService', () => {
         },
       });
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login/v2`);
+      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login`);
       req.flush({ message: 'Invalid credentials' }, { status: 401, statusText: 'Unauthorized' });
     });
 
@@ -96,7 +96,7 @@ describe('AuthService', () => {
         },
       });
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login/v2`);
+      const req = httpMock.expectOne(`${baseUrl}/admin/auth/login`);
       req.flush({ message: 'Too many login attempts' }, { status: 429, statusText: 'Too Many Requests' });
     });
   });

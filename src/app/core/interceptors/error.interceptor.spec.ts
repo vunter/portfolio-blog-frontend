@@ -133,7 +133,7 @@ describe('errorInterceptor', () => {
   });
 
   it('should show "Too many requests" for 429', () => {
-    http.post('/api/v1/admin/auth/login/v2', {}).subscribe({
+    http.post('/api/v1/admin/auth/login', {}).subscribe({
       error: () => {},
     });
 
@@ -143,7 +143,7 @@ describe('errorInterceptor', () => {
     });
 
     // Flush the silent one first
-    const loginReq = httpMock.expectOne('/api/v1/admin/auth/login/v2');
+    const loginReq = httpMock.expectOne('/api/v1/admin/auth/login');
     loginReq.flush(null, { status: 429, statusText: 'Too Many Requests' });
 
     const dashReq = httpMock.expectOne('/api/v1/admin/dashboard');
@@ -180,11 +180,11 @@ describe('errorInterceptor', () => {
 
   // Silent endpoints
   it('should NOT show notification for /auth/login errors', () => {
-    http.post('/api/v1/admin/auth/login/v2', {}).subscribe({
+    http.post('/api/v1/admin/auth/login', {}).subscribe({
       error: () => {},
     });
 
-    const req = httpMock.expectOne('/api/v1/admin/auth/login/v2');
+    const req = httpMock.expectOne('/api/v1/admin/auth/login');
     req.flush({ message: 'Invalid' }, { status: 400, statusText: 'Bad Request' });
 
     expect(notificationSpy.error).not.toHaveBeenCalled();
