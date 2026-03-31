@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
@@ -42,7 +42,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly realtimeNotifications = inject(RealtimeNotificationService);
-  sidebarCollapsed = signal(false);
+  private readonly platformId = inject(PLATFORM_ID);
+  private static readonly SIDEBAR_STORAGE_KEY = 'admin_sidebar_collapsed';
+  // Q8.14: Restore sidebar collapse state from localStorage
+  sidebarCollapsed = signal(this.loadSidebarState());
   // INC-03: Expose connectionLost signal for reconnection UI
   readonly connectionLost = this.realtimeNotifications.connectionLost;
 
@@ -183,6 +186,22 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update((v) => !v);
+    // Q8.14: Persist sidebar state to localStorage
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        localStorage.setItem(AdminLayoutComponent.SIDEBAR_STORAGE_KEY, String(this.sidebarCollapsed()));
+      } catch { /* storage unavailable */ }
+    }
+  }
+
+  // Q8.14: Load persisted sidebar collapse state
+  private loadSidebarState(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        return localStorage.getItem(AdminLayoutComponent.SIDEBAR_STORAGE_KEY) === 'true';
+      } catch { /* storage unavailable */ }
+    }
+    return false;
   }
 
   logout(): void {

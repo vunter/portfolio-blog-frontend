@@ -3,18 +3,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
-import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService, ReadingHistoryEntry } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
-import { PageResponse } from '../../../../models/common.model';
 import { ArticleResponse } from '../../../../models/article.model';
 import { RouterLink } from '@angular/router';
-
-interface ReadingHistoryItem {
-  article: ArticleResponse;
-  lastReadAt: string;
-  readCount: number;
-}
 
 @Component({
   selector: 'app-reading-history',
@@ -25,15 +18,14 @@ interface ReadingHistoryItem {
 })
 export class ReadingHistoryComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
-  private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
 
-  private readonly endpoint = '/admin/reading-history';
   private readonly pageSize = 20;
 
-  items = signal<ReadingHistoryItem[]>([]);
+  items = signal<ReadingHistoryEntry[]>([]);
   loading = signal(true);
   error = signal(false);
   currentPage = signal(0);
@@ -47,10 +39,8 @@ export class ReadingHistoryComponent implements OnInit {
   loadHistory(page = 0): void {
     this.loading.set(true);
     this.error.set(false);
-    this.apiService.get<PageResponse<ReadingHistoryItem>>(this.endpoint, {
-      page,
-      size: this.pageSize,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.getReadingHistory(page, this.pageSize)
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.items.set(response.content);
         this.currentPage.set(response.page);
@@ -81,7 +71,7 @@ export class ReadingHistoryComponent implements OnInit {
     });
     if (!confirmed) return;
 
-    this.apiService.delete(this.endpoint).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.clearReadingHistory().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.items.set([]);
         this.totalElements.set(0);

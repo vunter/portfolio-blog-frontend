@@ -2,23 +2,11 @@ import { Component, inject, signal, effect, ChangeDetectionStrategy, DestroyRef 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService, AuditLog } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
-
-interface AuditLog {
-  id: number;
-  action: string;
-  entityType: string;
-  entityId: string;
-  performedBy: number;
-  performedByEmail: string;
-  details: string;
-  ipAddress: string;
-  createdAt: string;
-}
 
 @Component({
   selector: 'app-audit',
@@ -29,7 +17,7 @@ interface AuditLog {
 })
 export class AuditComponent {
   private destroyRef = inject(DestroyRef);
-  private api = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   i18n = inject(I18nService);
 
@@ -48,10 +36,8 @@ export class AuditComponent {
 
   loadLogs(): void {
     this.loading.set(true);
-    this.api.get<AuditLog[]>('/admin/audit/recent', {
-      days: this.days(),
-      limit: this.limit(),
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.getRecentAuditLogs(this.days(), this.limit())
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.logs.set(data);
         this.loading.set(false);
@@ -64,7 +50,7 @@ export class AuditComponent {
   }
 
   exportCsv(): void {
-    this.api.getText('/admin/audit/export/csv', { days: this.days() })
+    this.adminApi.exportAuditCsv(this.days())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (csv) => {
@@ -78,7 +64,7 @@ export class AuditComponent {
   }
 
   exportJson(): void {
-    this.api.get<AuditLog[]>('/admin/audit/export/json', { days: this.days() })
+    this.adminApi.exportAuditJson(this.days())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {

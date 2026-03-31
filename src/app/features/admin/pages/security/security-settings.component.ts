@@ -9,6 +9,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MfaSetupResponse, MfaStatusResponse } from '../../../../models';
 import { AuthService, SessionInfo } from '../../../../core/auth/auth.service';
 import { DatePipe } from '@angular/common';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-security-settings',
@@ -374,7 +375,7 @@ export class SecuritySettingsComponent implements OnInit {
     if (!allowedProviders.includes(provider.toUpperCase())) {
       return;
     }
-    window.location.href = `/api/v1/admin/auth/oauth2/authorize/${provider}?link=true`;
+    window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/${provider}?link=true`;
   }
 
   unlinkSocialAccount(provider: string): void {

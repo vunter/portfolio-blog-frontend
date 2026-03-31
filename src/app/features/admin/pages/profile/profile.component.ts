@@ -191,11 +191,11 @@ export class ProfileComponent implements OnInit {
 
     // Validate required fields
     if (!this.form.name?.trim()) {
-      this.fieldErrors.set({ name: 'Name is required' });
+      this.fieldErrors.set({ name: this.i18n.t('account.profile.nameRequired') });
       return;
     }
     if (!this.form.email?.trim()) {
-      this.fieldErrors.set({ email: 'Email is required' });
+      this.fieldErrors.set({ email: this.i18n.t('account.profile.emailRequired') });
       return;
     }
 

@@ -10,6 +10,7 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { UserResponse, PageResponse } from '../../../../models';
+import { UserActivity } from '../../services/admin-api.service';
 
 @Component({
   selector: 'app-user-list',
@@ -39,7 +40,7 @@ export class UserListComponent implements OnInit {
   totalElements = signal(0);
 
   // User activity modal
-  selectedUserActivity = signal<any>(null);
+  selectedUserActivity = signal<UserActivity | null>(null);
   showActivityModal = signal(false);
   loadingActivity = signal(false);
 
@@ -205,7 +206,7 @@ export class UserListComponent implements OnInit {
     this.selectedUserActivity.set(null);
 
     this.apiService
-      .get<any>(`/admin/users/${userId}/activity`)
+      .get<UserActivity>(`/admin/users/${userId}/activity`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (activity) => {

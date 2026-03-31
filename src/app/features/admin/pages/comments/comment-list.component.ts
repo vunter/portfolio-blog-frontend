@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, D
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
@@ -20,6 +21,7 @@ import { CommentResponse, PageResponse } from '../../../../models';
 export class CommentListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
@@ -187,7 +189,7 @@ export class CommentListComponent implements OnInit {
     });
     if (!confirmed) return;
 
-    this.apiService.put(`/admin/comments/bulk-${action}`, ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.bulkCommentAction(action, ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.comments.bulkSuccess'));
         this.clearSelection();

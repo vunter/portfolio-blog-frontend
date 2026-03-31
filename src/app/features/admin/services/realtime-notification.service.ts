@@ -47,6 +47,8 @@ export class RealtimeNotificationService {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly eventTypes = ['article', 'comment', 'subscriber', 'contact', 'auth'] as const;
   private boundHandler: ((e: MessageEvent) => void) | null = null;
+  private visibilityHandler: (() => void) | null = null;
+  private wasConnectedBeforeHidden = false;
 
   private readonly _connected = signal(false);
   private readonly _events = signal<ServerNotificationEvent[]>([]);
@@ -58,14 +60,18 @@ export class RealtimeNotificationService {
   readonly hasUnread = computed(() => this._unreadCount() > 0);
 
   constructor() {
-    // CRIT-02: Use DestroyRef for cleanup instead of OnDestroy
-    this.destroyRef.onDestroy(() => this.disconnect());
+    this.destroyRef.onDestroy(() => {
+      this.disconnect();
+      this.removeVisibilityListener();
+    });
   }
 
   connect(): void {
     if (this.eventSource || !isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    this.setupVisibilityListener();
 
     const url = `${environment.apiUrl}/${environment.apiVersion}/admin/notifications/stream`;
 
@@ -112,6 +118,30 @@ export class RealtimeNotificationService {
     }
     this._connected.set(false);
     this.reconnectAttempts = 0;
+  }
+
+  /** Pause SSE when tab is hidden, resume when visible */
+  private setupVisibilityListener(): void {
+    if (this.visibilityHandler) return;
+    this.visibilityHandler = () => {
+      if (document.hidden) {
+        this.wasConnectedBeforeHidden = !!this.eventSource;
+        if (this.eventSource) {
+          this.disconnect();
+        }
+      } else if (this.wasConnectedBeforeHidden) {
+        this.wasConnectedBeforeHidden = false;
+        this.connect();
+      }
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+  }
+
+  private removeVisibilityListener(): void {
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
   }
 
   markAllRead(): void {

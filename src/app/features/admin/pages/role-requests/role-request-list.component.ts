@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -17,7 +17,7 @@ import { SkeletonComponent } from '../../../../shared/components/skeleton/skelet
 })
 export class RoleRequestListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
-  private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
@@ -33,8 +33,8 @@ export class RoleRequestListComponent implements OnInit {
   loadRequests(): void {
     this.error.set(false);
     this.loading.set(true);
-    this.apiService
-      .get<RoleUpgradeRequestResponse[]>('/admin/users/role-requests')
+    this.adminApi
+      .getRoleRequests()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
@@ -65,8 +65,8 @@ export class RoleRequestListComponent implements OnInit {
     const snapshot = this.requests();
     this.requests.update(list => list.filter(r => r.id !== req.id));
 
-    this.apiService
-      .put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${req.id}/approve`, {})
+    this.adminApi
+      .approveRoleRequest(req.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -94,8 +94,8 @@ export class RoleRequestListComponent implements OnInit {
     const snapshot = this.requests();
     this.requests.update(list => list.filter(r => r.id !== req.id));
 
-    this.apiService
-      .put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${req.id}/reject`, {})
+    this.adminApi
+      .rejectRoleRequest(req.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
