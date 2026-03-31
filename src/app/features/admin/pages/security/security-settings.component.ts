@@ -11,6 +11,13 @@ import { AuthService, SessionInfo } from '../../../../core/auth/auth.service';
 import { DatePipe } from '@angular/common';
 import { environment } from '../../../../../environments/environment';
 
+interface SocialAccount {
+  provider: string;
+  providerAccountId: string;
+  email?: string;
+  linkedAt?: string;
+}
+
 @Component({
   selector: 'app-security-settings',
   imports: [ReactiveFormsModule, DatePipe],
@@ -57,7 +64,7 @@ export class SecuritySettingsComponent implements OnInit {
   revokingId = signal<number | null>(null);
   backupCodes = signal<string[]>([]);
   generatingCodes = signal(false);
-  socialAccounts = signal<any[]>([]);
+  socialAccounts = signal<SocialAccount[]>([]);
   socialLoading = signal(false);
   unlinking = signal<string | null>(null);
   deletingLinkedin = signal(false);
@@ -355,7 +362,7 @@ export class SecuritySettingsComponent implements OnInit {
 
   loadSocialAccounts(): void {
     this.socialLoading.set(true);
-    this.api.get<any[]>('/admin/auth/oauth2/accounts').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.api.get<SocialAccount[]>('/admin/auth/oauth2/accounts').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (accounts) => {
         this.socialAccounts.set(accounts);
         this.socialLoading.set(false);

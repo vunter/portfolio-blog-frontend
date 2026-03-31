@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { ErrorHandler, Injectable, inject, isDevMode, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable()
@@ -9,7 +9,9 @@ export class GlobalErrorHandler implements ErrorHandler {
     const message = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack ?? '' : '';
 
-    console.error('[GlobalErrorHandler]', message, stack);
+    if (isDevMode()) {
+      console.error('[GlobalErrorHandler]', message, stack);
+    }
 
     // Reload on chunk loading errors (lazy route failures) — browser only, with guard against infinite loops
     if (

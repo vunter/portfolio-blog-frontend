@@ -142,6 +142,8 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'admin.sidebar.settings' },
       },
+      // Intentionally no extra guard beyond parent authGuard — security settings
+      // (MFA, sessions, linked accounts) are self-service for all authenticated users.
       {
         path: 'security',
         loadComponent: () =>
@@ -150,6 +152,8 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'account.sidebar.security' },
       },
+      // Intentionally no extra guard beyond parent authGuard — reading history
+      // is a self-service feature available to all authenticated users.
       {
         path: 'reading-history',
         loadComponent: () =>

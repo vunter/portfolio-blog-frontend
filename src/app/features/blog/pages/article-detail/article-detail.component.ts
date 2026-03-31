@@ -422,6 +422,9 @@ export class ArticleDetailComponent implements OnInit {
       const articleBody = document.querySelector('.article-content') as HTMLElement;
       if (!articleBody) return;
 
+      // Remove any existing sentinel nodes before creating new ones
+      articleBody.querySelectorAll('[data-scroll-threshold]').forEach(el => el.remove());
+
       // Ensure the article body is positioned for absolute sentinel placement
       const position = getComputedStyle(articleBody).position;
       if (position === 'static') {

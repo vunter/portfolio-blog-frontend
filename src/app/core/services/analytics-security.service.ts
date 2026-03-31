@@ -1,4 +1,4 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, isDevMode, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -157,6 +157,9 @@ export class AnalyticsSecurityService {
       }
     }
 
+    if (isDevMode()) {
+      console.warn(`[AnalyticsSecurity] PoW exceeded maximum attempts (${MAX_ATTEMPTS}) for nonce="${nonce}", difficulty=${difficulty}`);
+    }
     throw new Error(`PoW exceeded maximum attempts (${MAX_ATTEMPTS})`);
   }
 
