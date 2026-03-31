@@ -1,0 +1,175 @@
+<!-- Email Templates -->
+<section class="settings-section">
+<h2>
+  <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="22,6 12,13 2,6"/>
+  </svg>
+  {{ i18n.t('admin.settings.emailTemplates') }}
+</h2>
+<p class="section-desc">{{ i18n.t('admin.settings.emailTemplatesDesc') }}</p>
+<div class="settings-card">
+  @if (emailTemplatesLoading()) {
+    <div class="setting-item"><span class="loading-text">{{ i18n.t('dev.common.loading') }}</span></div>
+  } @else {
+    <div class="template-grid">
+      @for (template of emailTemplates(); track template.id) {
+        <div class="template-card-wrapper">
+          <button class="template-card" [class.template-card--customized]="template.customized" (click)="previewTemplate(template)">
+            @if (template.customized) {
+              <span class="template-badge">Customized</span>
+            }
+            <span class="template-card__name">{{ template.name }}</span>
+            <span class="template-card__desc">{{ template.description }}</span>
+          </button>
+          <button class="template-edit-btn" (click)="editTemplate(template)" title="Edit template">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+</section>
+
+<!-- Template Preview Modal -->
+@if (previewingTemplate()) {
+  <div class="template-preview-overlay" (click)="closePreview()">
+    <div class="template-preview-modal" (click)="$event.stopPropagation()">
+      <div class="template-preview-header">
+        <h3>{{ previewingTemplate()!.name }}</h3>
+        <button class="close-btn" (click)="closePreview()">&#x2715;</button>
+      </div>
+      <iframe class="template-preview-iframe" [srcdoc]="previewHtml()" sandbox=""></iframe>
+    </div>
+  </div>
+}
+
+<!-- Template Editor Modal -->
+@if (editingTemplate()) {
+  <div class="template-editor-overlay">
+    <div class="template-editor-modal">
+      <div class="template-editor-header">
+        <div class="template-editor-title">
+          <h3>{{ editingTemplate()!.name }}</h3>
+          @if (editorIsOverride()) {
+            <span class="template-badge">Customized</span>
+          } @else {
+            <span class="template-badge template-badge--default">Default</span>
+          }
+        </div>
+        <div class="template-editor-actions">
+          <button class="btn btn-sm btn-secondary" (click)="togglePlaceholders()">
+            {{ editorShowPlaceholders() ? 'Hide Vars' : 'Variables' }}
+          </button>
+          <button class="btn btn-sm btn-secondary" (click)="previewEditorChanges()" [disabled]="editorLoading()">
+            Preview
+          </button>
+          @if (editorIsOverride()) {
+            <button class="btn btn-sm btn-danger" (click)="revertEditorTemplate()">
+              Revert
+            </button>
+          }
+          <button class="btn btn-sm btn-primary" (click)="saveEditorTemplate()" [disabled]="editorSaving() || !editorHasChanges()">
+            {{ editorSaving() ? 'Saving...' : 'Save' }}
+          </button>
+          <button class="close-btn" (click)="closeEditor()">&#x2715;</button>
+        </div>
+      </div>
+      @if (editorShowPlaceholders()) {
+        <div class="editor-placeholders">
+          <div class="placeholders-header">
+            <span class="placeholders-title">Built-in Variables</span>
+            <span class="placeholders-hint">Dynamic per-email: user name, links, tokens — auto-injected by the system. Click to insert.</span>
+          </div>
+          <div class="placeholders-grid">
+            @for (ph of placeholderEntries(); track ph.key) {
+              <button class="placeholder-chip" (click)="insertPlaceholder(ph.thymeleaf)" [title]="ph.value">
+                <code>{{ ph.thymeleaf }}</code>
+                <span class="placeholder-sample">{{ ph.value.length > 40 ? ph.value.slice(0, 40) + '...' : ph.value }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Custom Variables -->
+          @if (globalCustomVars().length || templateCustomVars().length) {
+            <div class="placeholders-header custom-vars-header">
+              <span class="placeholders-title">Custom Variables</span>
+              <span class="placeholders-hint">Static config values (company name, support email, branding). Same for all emails.</span>
+            </div>
+            @if (globalCustomVars().length) {
+              <div class="custom-vars-scope-label">Global</div>
+              <div class="placeholders-grid">
+                @for (cv of globalCustomVars(); track cv.id) {
+                  <div class="custom-var-row">
+                    <button class="placeholder-chip placeholder-chip--custom" (click)="insertPlaceholder(formatThymeleafVar(cv.key))" [title]="cv.description || cv.value">
+                      <code>{{ formatThymeleafVar(cv.key) }}</code>
+                      <span class="placeholder-sample custom-var-value">{{ cv.value.length > 30 ? cv.value.slice(0, 30) + '...' : cv.value }}</span>
+                      <span class="custom-var-badge">Global</span>
+                    </button>
+                    <button class="custom-var-delete" (click)="deleteCustomVar(cv)" title="Delete variable">&times;</button>
+                  </div>
+                }
+              </div>
+            }
+            @if (templateCustomVars().length) {
+              <div class="custom-vars-scope-label">Template: {{ editingTemplate()?.id }}</div>
+              <div class="placeholders-grid">
+                @for (cv of templateCustomVars(); track cv.id) {
+                  <div class="custom-var-row">
+                    <button class="placeholder-chip placeholder-chip--custom placeholder-chip--template" (click)="insertPlaceholder(formatThymeleafVar(cv.key))" [title]="cv.description || cv.value">
+                      <code>{{ formatThymeleafVar(cv.key) }}</code>
+                      <span class="placeholder-sample custom-var-value">{{ cv.value.length > 30 ? cv.value.slice(0, 30) + '...' : cv.value }}</span>
+                      <span class="custom-var-badge custom-var-badge--template">Template</span>
+                    </button>
+                    <button class="custom-var-delete" (click)="deleteCustomVar(cv)" title="Delete variable">&times;</button>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- Add Variable Form -->
+          <div class="custom-var-add-section">
+            @if (!showAddVarForm()) {
+              <button class="btn btn-sm btn-outline" (click)="toggleAddVarForm()">+ Add Variable</button>
+            } @else {
+              <div class="custom-var-form">
+                <div class="custom-var-form-row">
+                  <select class="form-select form-select-sm" [value]="newVarScope()" (change)="newVarScope.set($any($event.target).value === 'template' ? 'template' : 'global')">
+                    <option value="global">Global</option>
+                    <option value="template">This Template</option>
+                  </select>
+                  <input class="form-input form-input-sm" placeholder="variableName" [value]="newVarKey()" (input)="newVarKey.set($any($event.target).value)" />
+                  <input class="form-input form-input-sm" placeholder="Value" [value]="newVarValue()" (input)="newVarValue.set($any($event.target).value)" />
+                  <input class="form-input form-input-sm" placeholder="Description (optional)" [value]="newVarDesc()" (input)="newVarDesc.set($any($event.target).value)" />
+                </div>
+                <div class="custom-var-form-actions">
+                  <button class="btn btn-sm btn-primary" (click)="addCustomVariable()" [disabled]="!newVarKey() || !newVarValue()">Create</button>
+                  <button class="btn btn-sm btn-secondary" (click)="toggleAddVarForm()">Cancel</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      <div class="template-editor-body" [class.template-editor-body--split]="editorShowPreview()">
+        @if (editorLoading()) {
+          <div class="editor-loading">Loading template...</div>
+        } @else {
+          <div class="editor-pane">
+            <textarea class="editor-textarea" [value]="editorHtml()" (input)="onEditorInput($event)" spellcheck="false"></textarea>
+          </div>
+          @if (editorShowPreview()) {
+            <div class="editor-preview-pane">
+              <iframe class="template-preview-iframe" [srcdoc]="editorPreviewHtml()" sandbox=""></iframe>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

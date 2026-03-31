@@ -1,0 +1,113 @@
+<!-- Translations Management -->
+<section class="settings-section">
+<h2>
+  <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M5 8l6 6"/>
+    <path d="M4 14l6-6 2-3"/>
+    <path d="M2 5h12"/>
+    <path d="M7 2h1"/>
+    <path d="m22 22-5-10-5 10"/>
+    <path d="M14 18h6"/>
+  </svg>
+  Translations
+</h2>
+<p class="section-desc">Manage i18n translations stored in the database. Changes take effect after cache invalidation.</p>
+
+<div class="settings-card trans-panel">
+  <!-- Locale tabs -->
+  <div class="trans-tabs">
+    @for (lang of i18n.supportedLanguages(); track lang.code) {
+      <button class="trans-tab" [class.active]="transLocale() === lang.code" (click)="setTransLocale(lang.code)">
+        {{ lang.code.toUpperCase() }}
+      </button>
+    }
+    <div class="trans-tabs__spacer"></div>
+    <button class="trans-tab" [class.active]="transNamespace() === 'frontend'" (click)="setTransNamespace('frontend')">Frontend</button>
+    <button class="trans-tab" [class.active]="transNamespace() === 'backend'" (click)="setTransNamespace('backend')">Backend</button>
+  </div>
+
+  <!-- Search & actions bar -->
+  <div class="trans-toolbar">
+    <input class="trans-search" type="text" placeholder="Search keys or values..." [value]="transSearch()" (input)="searchTranslations($event)" />
+    <button class="btn btn-sm btn-secondary" (click)="loadTranslations()">Refresh</button>
+    <button class="btn btn-sm btn-secondary" (click)="invalidateI18nCache()" [disabled]="transInvalidating()">
+      {{ transInvalidating() ? 'Invalidating...' : 'Invalidate Cache' }}
+    </button>
+    <button class="btn btn-sm btn-primary" (click)="showAddTrans.set(!showAddTrans())">
+      {{ showAddTrans() ? 'Cancel' : '+ Add' }}
+    </button>
+  </div>
+
+  <!-- Add translation form -->
+  @if (showAddTrans()) {
+    <div class="trans-add-form">
+      <input class="form-input form-input-sm" placeholder="translation.key" [value]="newTransKey()" (input)="newTransKey.set($any($event.target).value)" />
+      <input class="form-input form-input-sm" placeholder="Translated value" [value]="newTransValue()" (input)="newTransValue.set($any($event.target).value)" />
+      <select class="form-select form-select-sm" [value]="newTransVisibility()" (change)="newTransVisibility.set($any($event.target).value)">
+        <option value="public">public</option>
+        <option value="viewer">viewer</option>
+        <option value="dev">dev</option>
+        <option value="admin">admin</option>
+      </select>
+      <button class="btn btn-sm btn-primary" (click)="addTranslation()" [disabled]="!newTransKey() || !newTransValue()">Create</button>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (transLoading()) {
+    <div class="trans-loading">Loading translations...</div>
+  } @else if (transData(); as data) {
+    <div class="trans-table-wrap">
+      <table class="trans-table">
+        <thead>
+          <tr>
+            <th class="col-key">Key</th>
+            <th class="col-value">Value</th>
+            <th class="col-vis">Visibility</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data.items; track item.id) {
+            <tr>
+              <td class="col-key"><code>{{ item.translationKey }}</code></td>
+              <td class="col-value">
+                @if (transEditId() === item.id) {
+                  <textarea class="trans-edit-input" [value]="transEditValue()" (input)="transEditValue.set($any($event.target).value)" rows="2"></textarea>
+                } @else {
+                  <span class="trans-value-text">{{ item.value }}</span>
+                }
+              </td>
+              <td class="col-vis"><span class="trans-vis-badge trans-vis--{{ item.visibility }}">{{ item.visibility }}</span></td>
+              <td class="col-actions">
+                @if (transEditId() === item.id) {
+                  <button class="btn-icon" (click)="saveTranslation()" [disabled]="transSaving()" title="Save">&#x2713;</button>
+                  <button class="btn-icon" (click)="cancelEditTranslation()" title="Cancel">&#x2715;</button>
+                } @else {
+                  <button class="btn-icon" (click)="startEditTranslation(item)" title="Edit">&#x270E;</button>
+                  <button class="btn-icon btn-icon--danger" (click)="deleteTrans(item)" title="Delete">&#x1F5D1;</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="trans-empty">No translations found</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (data.totalPages > 1) {
+      <div class="trans-pagination">
+        <button class="btn btn-sm btn-secondary" [disabled]="data.page === 0" (click)="transPageTo(data.page - 1)">&larr; Prev</button>
+        <span class="trans-page-info">Page {{ data.page + 1 }} of {{ data.totalPages }} ({{ data.total }} keys)</span>
+        <button class="btn btn-sm btn-secondary" [disabled]="data.page >= data.totalPages - 1" (click)="transPageTo(data.page + 1)">Next &rarr;</button>
+      </div>
+    } @else if (data.total > 0) {
+      <div class="trans-pagination">
+        <span class="trans-page-info">{{ data.total }} keys</span>
+      </div>
+    }
+  }
+</div>
+</section>
