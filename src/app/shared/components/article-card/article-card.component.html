@@ -1,4 +1,4 @@
-<article class="article-card" (click)="navigateToArticle()">
+<article class="article-card" (click)="navigateToArticle()" (keydown.enter)="navigateToArticle()" role="button" tabindex="0" [attr.aria-label]="'Read article: ' + article().title">
  @if (article().coverImageUrl) {
  <div class="article-card__image">
  <img

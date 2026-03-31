@@ -13,6 +13,12 @@
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
   }
 
+  // Q13.1: WCAG 2.4.7 — visible focus indicator for keyboard navigation
+  &:focus-visible {
+    outline: 2px solid var(--accent-color, #6366f1);
+    outline-offset: 2px;
+  }
+
   &__image {
     aspect-ratio: 16 / 9;
     overflow: hidden;
@@ -163,6 +169,11 @@
   cursor: pointer;
   color: var(--text-muted, #999);
   padding: 0.25rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
   transition: color 0.2s, transform 0.2s;
   line-height: 0;

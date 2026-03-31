@@ -23,6 +23,7 @@ import { MarkdownModule } from 'ngx-markdown';
 // PERF-F-02: PrismJS is lazy-loaded only when article content is rendered,
 // instead of being included in global scripts (which blocked initial page load).
 // ngx-markdown auto-detects window.Prism for syntax highlighting.
+import { environment } from '../../../../../environments/environment';
 import { ArticleService } from '../../services/article.service';
 import { CommentService } from '../../services/comment.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -41,6 +42,8 @@ import {
   ArticleSummaryResponse,
   CommentResponse,
 } from '../../../../models';
+import { shareNative, shareTwitter as shareTwitterUtil, shareLinkedIn as shareLinkedInUtil, shareFacebook as shareFacebookUtil, copyArticleLink } from './utils/share.util';
+import { setCopyIcon, setCheckIcon } from './utils/copy-icon.util';
 
 interface TocItem {
   id: string;
@@ -141,6 +144,10 @@ export class ArticleDetailComponent implements OnInit {
   private readonly eventCleanups: Array<() => void> = [];
   // PERF-F-03: Bound reference for scroll listener cleanup
   private readonly boundScrollHandler = () => this.onWindowScroll();
+  // Q8.8: Debounce map for comment like operations — tracks pending timeouts per comment ID
+  private readonly pendingLikes = new Map<number | string, ReturnType<typeof setTimeout>>();
+  // Q8.11: Scroll depth thresholds from environment config
+  private static readonly SCROLL_DEPTH_THRESHOLDS = environment.scrollDepthThresholds;
 
   tocItems = computed(() => {
     const content = this.article()?.content;
@@ -183,6 +190,9 @@ export class ArticleDetailComponent implements OnInit {
       if (isPlatformBrowser(this.platformId)) {
         window.removeEventListener('scroll', this.boundScrollHandler);
       }
+      // Q8.8: Clear all pending like debounce timers
+      this.pendingLikes.forEach(timer => clearTimeout(timer));
+      this.pendingLikes.clear();
       this.eventCleanups.forEach(cleanup => cleanup());
       this.eventCleanups.length = 0;
     });
@@ -281,16 +291,16 @@ export class ArticleDetailComponent implements OnInit {
           this.renderer.setStyle(btn, 'z-index', '1');
           this.renderer.setStyle(btn, 'transition', 'background 0.2s, color 0.2s');
           // F-337: Use Renderer2 instead of innerHTML to avoid bypassing Angular sanitization
-          this.setCopyIcon(btn);
+          setCopyIcon(this.renderer, btn);
           // PERF-F-06: Store unlisten function for cleanup in ngOnDestroy
           const unlisten = this.renderer.listen(btn, 'click', () => {
             const code = pre.querySelector('code')?.textContent || pre.textContent || '';
             navigator.clipboard.writeText(code).then(() => {
               this.zone.run(() => {
-                this.setCheckIcon(btn);
+                setCheckIcon(this.renderer, btn);
                 this.notification.success(this.i18n.t('blog.codeCopied'));
                 setTimeout(() => {
-                  this.setCopyIcon(btn);
+                  setCopyIcon(this.renderer, btn);
                 }, 2000);
               });
             }).catch(() => {
@@ -340,6 +350,7 @@ export class ArticleDetailComponent implements OnInit {
     this.loading.set(true);
     this.headingsProcessed = false;
     this.codeBlocksProcessed = false;
+    this.commentSubmitted.set(false);
 
     this.articleService.getArticleBySlug(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (article) => {
@@ -417,7 +428,7 @@ export class ArticleDetailComponent implements OnInit {
         articleBody.style.position = 'relative';
       }
 
-      const thresholds = [25, 50, 75, 100];
+      const thresholds = ArticleDetailComponent.SCROLL_DEPTH_THRESHOLDS;
       const sentinels: HTMLElement[] = [];
 
       thresholds.forEach(threshold => {
@@ -455,7 +466,9 @@ export class ArticleDetailComponent implements OnInit {
         this.commentTotalElements.set(response.totalElements);
         this.hasMoreComments.set(response.page < response.totalPages - 1);
         this.commentPage.set(response.page);
-        this.loadCommentLikeStatuses(slug, response.content ?? []);
+        if (this.authStore.isAuthenticated()) {
+          this.loadCommentLikeStatuses(slug, response.content ?? []);
+        }
       },
       error: () => {
         this.comments.set([]);
@@ -477,7 +490,9 @@ export class ArticleDetailComponent implements OnInit {
         this.commentPage.set(response.page);
         this.hasMoreComments.set(response.page < response.totalPages - 1);
         this.loadingMoreComments.set(false);
-        this.loadCommentLikeStatuses(slug, response.content ?? []);
+        if (this.authStore.isAuthenticated()) {
+          this.loadCommentLikeStatuses(slug, response.content ?? []);
+        }
       },
       error: () => {
         this.loadingMoreComments.set(false);
@@ -499,20 +514,29 @@ export class ArticleDetailComponent implements OnInit {
       this.notification.warning(this.i18n.t('blog.loginToLike'));
       return;
     }
+    // Q8.8: Optimistic UI update (instant toggle)
     const wasLiked = this.commentLiked()[comment.id] || false;
     this.commentLiked.update(map => ({ ...map, [comment.id]: !wasLiked }));
     this.updateCommentLikeCount(comment.id, wasLiked ? -1 : 1);
 
-    this.commentService.toggleCommentLike(slug, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.commentLiked.update(map => ({ ...map, [comment.id]: res.liked }));
-        this.updateCommentLikeCount(comment.id, 0, res.likesCount);
-      },
-      error: () => {
-        this.commentLiked.update(map => ({ ...map, [comment.id]: wasLiked }));
-        this.updateCommentLikeCount(comment.id, wasLiked ? 0 : -1);
-      },
-    });
+    // Q8.8: Cancel any pending backend call for this comment
+    const pending = this.pendingLikes.get(comment.id);
+    if (pending) clearTimeout(pending);
+
+    // Q8.8: Debounce the backend call — only send final state after 500ms
+    this.pendingLikes.set(comment.id, setTimeout(() => {
+      this.pendingLikes.delete(comment.id);
+      this.commentService.toggleCommentLike(slug, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (res) => {
+          this.commentLiked.update(map => ({ ...map, [comment.id]: res.liked }));
+          this.updateCommentLikeCount(comment.id, 0, res.likesCount);
+        },
+        error: () => {
+          this.commentLiked.update(map => ({ ...map, [comment.id]: wasLiked }));
+          this.updateCommentLikeCount(comment.id, wasLiked ? 0 : -1);
+        },
+      });
+    }, 500));
   }
 
   private updateCommentLikeCount(commentId: string, delta: number, absolute?: number): void {
@@ -590,21 +614,13 @@ export class ArticleDetailComponent implements OnInit {
     });
   }
 
+  // Q8.2: Share methods delegated to utils/share.util.ts
+  private get shareCtx() {
+    return { platformId: this.platformId, article: this.article(), articleService: this.articleService, notification: this.notification, i18n: this.i18n };
+  }
+
   shareArticle(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const article = this.article();
-    const shareUrl = this.articleService.buildShareUrl(window.location.href, 'native');
-    if (navigator.share) {
-      navigator.share({
-        title: article?.title,
-        url: shareUrl,
-      }).then(() => this.articleService.trackShare(article?.id ? +article.id : undefined, 'native'))
-        .catch(() => { /* user cancelled */ });
-    } else {
-      navigator.clipboard.writeText(shareUrl).catch(() => { /* clipboard not available */ });
-      this.notification.success(this.i18n.t('blog.linkCopied'));
-      this.articleService.trackShare(article?.id ? +article.id : undefined, 'native');
-    }
+    shareNative(this.shareCtx);
   }
 
   submitComment(): void {
@@ -754,83 +770,19 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   shareTwitter(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const article = this.article();
-    const title = article?.title || '';
-    const url = this.articleService.buildShareUrl(window.location.href, 'twitter');
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
-      '_blank',
-      'noopener,noreferrer,width=600,height=400'
-    );
-    this.articleService.trackShare(article?.id ? +article.id : undefined, 'twitter');
+    shareTwitterUtil(this.shareCtx);
   }
 
   shareLinkedIn(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const article = this.article();
-    const url = this.articleService.buildShareUrl(window.location.href, 'linkedin');
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-      '_blank',
-      'noopener,noreferrer,width=600,height=400'
-    );
-    this.articleService.trackShare(article?.id ? +article.id : undefined, 'linkedin');
+    shareLinkedInUtil(this.shareCtx);
   }
 
   shareFacebook(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const article = this.article();
-    const url = this.articleService.buildShareUrl(window.location.href, 'facebook');
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      '_blank',
-      'noopener,noreferrer,width=600,height=400'
-    );
-    this.articleService.trackShare(article?.id ? +article.id : undefined, 'facebook');
+    shareFacebookUtil(this.shareCtx);
   }
 
   copyLink(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const article = this.article();
-    const url = this.articleService.buildShareUrl(window.location.href, 'clipboard');
-    navigator.clipboard.writeText(url)
-      .then(() => this.notification.success(this.i18n.t('blog.linkCopied')))
-      .catch(() => this.notification.error(this.i18n.t('common.error')));
-    this.articleService.trackShare(article?.id ? +article.id : undefined, 'clipboard');
+    copyArticleLink(this.shareCtx);
   }
 
-  // F-337: SVG icon helpers using Renderer2 instead of innerHTML
-  private createSvg(children: Array<{tag: string; attrs: Record<string, string>}>): SVGElement {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    this.renderer.setAttribute(svg, 'width', '14');
-    this.renderer.setAttribute(svg, 'height', '14');
-    this.renderer.setAttribute(svg, 'viewBox', '0 0 24 24');
-    this.renderer.setAttribute(svg, 'fill', 'none');
-    this.renderer.setAttribute(svg, 'stroke', 'currentColor');
-    this.renderer.setAttribute(svg, 'stroke-width', '2');
-    for (const child of children) {
-      const el = document.createElementNS('http://www.w3.org/2000/svg', child.tag);
-      for (const [attr, val] of Object.entries(child.attrs)) {
-        this.renderer.setAttribute(el, attr, val);
-      }
-      this.renderer.appendChild(svg, el);
-    }
-    return svg;
-  }
-
-  private setCopyIcon(btn: HTMLElement): void {
-    while (btn.firstChild) btn.removeChild(btn.firstChild);
-    this.renderer.appendChild(btn, this.createSvg([
-      { tag: 'rect', attrs: { x: '9', y: '9', width: '13', height: '13', rx: '2' } },
-      { tag: 'path', attrs: { d: 'M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1' } },
-    ]));
-  }
-
-  private setCheckIcon(btn: HTMLElement): void {
-    while (btn.firstChild) btn.removeChild(btn.firstChild);
-    this.renderer.appendChild(btn, this.createSvg([
-      { tag: 'polyline', attrs: { points: '20 6 9 17 4 12' } },
-    ]));
-  }
 }

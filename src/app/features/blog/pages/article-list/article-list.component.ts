@@ -54,6 +54,12 @@ export class ArticleListComponent implements OnInit {
   showDateFilter = signal(false);
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    });
+  }
+
   ngOnInit(): void {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -288,6 +288,11 @@
         background: var(--bg-tertiary, #e5e7eb);
       }
 
+      &:focus-visible {
+        outline: 2px solid var(--accent-color, #6366f1);
+        outline-offset: 2px;
+      }
+
       svg.liked {
         fill: #ef4444;
         stroke: #ef4444;
@@ -368,6 +373,11 @@
       &:hover {
         background: var(--hover-bg, #f1f5f9);
         color: #ef4444;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent-color, #6366f1);
+        outline-offset: 2px;
       }
 
       &--liked {
@@ -667,6 +677,11 @@
         background: var(--hover-bg, #f1f5f9);
         color: var(--primary, #6366f1);
       }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent-color, #6366f1);
+        outline-offset: 2px;
+      }
     }
 
     .comment__replies {
@@ -679,7 +694,7 @@
       .comment__avatar--small {
         width: 32px;
         height: 32px;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
       }
     }
 
@@ -687,7 +702,7 @@
       .comment__avatar--small {
         width: 28px;
         height: 28px;
-        font-size: 0.65rem;
+        font-size: 0.75rem;
       }
     }
 
@@ -952,6 +967,11 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent-color, #6366f1);
+        outline-offset: 2px;
       }
 
       &--twitter:hover {
