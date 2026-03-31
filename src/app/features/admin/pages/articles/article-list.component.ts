@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MarkdownModule } from 'ngx-markdown';
 import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -25,6 +26,7 @@ import { getDateLocale } from '../../../../core/utils/date-format.util';
 export class ArticleListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
@@ -204,7 +206,7 @@ export class ArticleListComponent implements OnInit {
     });
     if (!confirmed) return;
 
-    this.apiService.put('/admin/articles/bulk-status', { ids, status }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.bulkUpdateArticleStatus(ids, status).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.bulkSuccess'));
         this.selectedIds.set(new Set());
@@ -216,15 +218,17 @@ export class ArticleListComponent implements OnInit {
     });
   }
 
+  /** Pre-computed status label map to avoid object allocation on every template call */
+  statusLabelMap = computed<Record<string, string>>(() => ({
+    PUBLISHED: this.i18n.t('dev.articles.published'),
+    DRAFT: this.i18n.t('dev.articles.draft'),
+    SCHEDULED: this.i18n.t('dev.articles.scheduled'),
+    REVIEW: this.i18n.t('dev.articles.statusReview'),
+    ARCHIVED: this.i18n.t('dev.articles.archived'),
+  }));
+
   getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      PUBLISHED: this.i18n.t('dev.articles.published'),
-      DRAFT: this.i18n.t('dev.articles.draft'),
-      SCHEDULED: this.i18n.t('dev.articles.scheduled'),
-      REVIEW: this.i18n.t('dev.articles.statusReview'),
-      ARCHIVED: this.i18n.t('dev.articles.archived'),
-    };
-    return labels[status] || status;
+    return this.statusLabelMap()[status] || status;
   }
 
   formatDate(dateString: string): string {

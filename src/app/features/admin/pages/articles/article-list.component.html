@@ -63,7 +63,7 @@
  <table class="data-table" aria-label="Articles">
  <thead>
  <tr>
- <th class="col-check"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" /></th>
+ <th class="col-check"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" [attr.aria-label]="i18n.t('dev.articles.selectAll')" /></th>
  <th>{{ i18n.t('dev.articles.titleColumn') }}</th>
  <th>{{ i18n.t('common.status') }}</th>
  <th>{{ i18n.t('dev.articles.viewsColumn') }}</th>
@@ -75,7 +75,7 @@
  <tbody>
  @for (article of articles(); track article.id) {
  <tr>
- <td class="col-check"><input type="checkbox" [checked]="isSelected(article.id)" (change)="toggleSelect(article.id)" /></td>
+ <td class="col-check"><input type="checkbox" [checked]="isSelected(article.id)" (change)="toggleSelect(article.id)" [attr.aria-label]="i18n.t('dev.articles.selectArticle')" /></td>
  <td>
  <div class="article-info">
  @if (article.coverImageUrl) {

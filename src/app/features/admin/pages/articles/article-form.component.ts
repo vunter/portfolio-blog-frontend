@@ -11,11 +11,13 @@ import { ArticleTagsComponent } from './components/article-tags/article-tags.com
 import { EditorToolbarComponent } from './components/editor-toolbar/editor-toolbar.component';
 import { Subject, debounceTime } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
+import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
 import { ArticleResponse, ArticleRequest, ArticleReview, ArticleI18nResponse, TagResponse, ArticleStatus } from '../../../../models';
+import { getMarkdownInsert } from './utils/markdown-insert.util';
 
 // Monaco type declarations provided by shared/types/monaco.d.ts
 
@@ -48,6 +50,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+  private readonly adminApi = inject(AdminApiService);
   private readonly notification = inject(NotificationService);
   private readonly themeService = inject(ThemeService);
   private readonly monacoLoader = inject(MonacoLoaderService);
@@ -274,7 +277,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const data: ArticleRequest = {
       slug: formValue.slug,
-      title: formValue.title || 'Untitled',
+      title: formValue.title || this.i18n.t('dev.articleForm.untitledDefault'),
       content: formValue.content,
       excerpt: formValue.excerpt || undefined,
       coverImageUrl: formValue.featuredImageUrl || undefined,
@@ -378,79 +381,14 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const selection = this.monacoEditor.getSelection();
     const selectedText = this.monacoEditor.getModel().getValueInRange(selection) || '';
-    let insert = '';
-    let cursorOffset = 0;
+    const { text, cursorOffset } = getMarkdownInsert(type, selectedText);
 
-    switch (type) {
-      case 'bold':
-        insert = `**${selectedText || 'bold text'}**`;
-        if (!selectedText) cursorOffset = -2;
-        break;
-      case 'italic':
-        insert = `*${selectedText || 'italic text'}*`;
-        if (!selectedText) cursorOffset = -1;
-        break;
-      case 'strikethrough':
-        insert = `~~${selectedText || 'text'}~~`;
-        if (!selectedText) cursorOffset = -2;
-        break;
-      case 'h1':
-        insert = `# ${selectedText || 'Heading 1'}`;
-        break;
-      case 'h2':
-        insert = `## ${selectedText || 'Heading 2'}`;
-        break;
-      case 'h3':
-        insert = `### ${selectedText || 'Heading 3'}`;
-        break;
-      case 'ul':
-        insert = selectedText
-          ? selectedText.split('\n').map((l: string) => `- ${l}`).join('\n')
-          : '- Item 1\n- Item 2\n- Item 3';
-        break;
-      case 'ol':
-        insert = selectedText
-          ? selectedText.split('\n').map((l: string, i: number) => `${i + 1}. ${l}`).join('\n')
-          : '1. Item 1\n2. Item 2\n3. Item 3';
-        break;
-      case 'checklist':
-        insert = selectedText
-          ? selectedText.split('\n').map((l: string) => `- [ ] ${l}`).join('\n')
-          : '- [ ] Task 1\n- [ ] Task 2\n- [x] Task 3';
-        break;
-      case 'link':
-        insert = selectedText ? `[${selectedText}](url)` : '[link text](url)';
-        break;
-      case 'image':
-        insert = selectedText ? `![${selectedText}](url)` : '![alt text](image-url)';
-        break;
-      case 'code':
-        insert = `\`${selectedText || 'code'}\``;
-        if (!selectedText) cursorOffset = -1;
-        break;
-      case 'codeblock':
-        insert = `\n\`\`\`\n${selectedText || 'code here'}\n\`\`\`\n`;
-        break;
-      case 'quote':
-        insert = selectedText
-          ? selectedText.split('\n').map((l: string) => `> ${l}`).join('\n')
-          : '> quote';
-        break;
-      case 'hr':
-        insert = '\n---\n';
-        break;
-      case 'table':
-        insert = '\n| Header 1 | Header 2 | Header 3 |\n| --- | --- | --- |\n| Cell 1 | Cell 2 | Cell 3 |\n| Cell 4 | Cell 5 | Cell 6 |\n';
-        break;
-    }
-
-    const op = {
+    this.monacoEditor.executeEdits('markdown-toolbar', [{
       identifier: { major: 1, minor: 1 },
       range: selection,
-      text: insert,
+      text,
       forceMoveMarkers: true,
-    };
-    this.monacoEditor.executeEdits('markdown-toolbar', [op]);
+    }]);
 
     if (cursorOffset) {
       const pos = this.monacoEditor.getPosition();
@@ -556,7 +494,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     input.value = '';
 
     this.uploadingCoverImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.form.controls.featuredImageUrl.setValue(res.url);
         this.uploadingCoverImage.set(false);
@@ -576,7 +514,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     input.value = '';
 
     this.uploadingContentImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/images/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.uploadingContentImage.set(false);
         const altText = file.name.replace(/\.[^.]+$/, '');
@@ -633,7 +571,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   submitForReview(): void {
     if (!this.articleId) return;
     this.saving.set(true);
-    this.apiService.post(`/admin/articles/${this.articleId}/submit-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.submitArticleForReview(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.submitReviewSuccess'));
         this.router.navigate(['/admin/articles']);
@@ -648,7 +586,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   approveReview(): void {
     if (!this.articleId) return;
     this.saving.set(true);
-    this.apiService.post(`/admin/articles/${this.articleId}/approve-review`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.approveArticleReview(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.approveReviewSuccess'));
         this.router.navigate(['/admin/articles']);
@@ -663,7 +601,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   requestChanges(): void {
     if (!this.articleId) return;
     this.saving.set(true);
-    this.apiService.post(`/admin/articles/${this.articleId}/request-changes`, { feedback: this.reviewFeedbackText() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.requestArticleChanges(this.articleId, this.reviewFeedbackText()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.requestChangesSuccess'));
         this.router.navigate(['/admin/articles']);
@@ -677,7 +615,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadReviewHistory(): void {
     if (!this.articleId) return;
-    this.apiService.get<ArticleReview[]>(`/admin/articles/${this.articleId}/reviews`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.getArticleReviews(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (reviews) => this.reviewHistory.set(reviews),
     });
   }
@@ -686,14 +624,14 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadTranslations(): void {
     if (!this.articleId) return;
-    this.apiService.get<ArticleI18nResponse[]>(`/admin/articles/${this.articleId}/translations`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.getArticleTranslations(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (translations) => this.translations.set(translations),
     });
   }
 
   loadAvailableLocales(): void {
     if (!this.articleId) return;
-    this.apiService.get<string[]>(`/admin/articles/${this.articleId}/translations/locales`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.getArticleTranslationLocales(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (locales) => this.availableLocales.set(locales),
     });
   }
@@ -701,7 +639,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   translateArticle(targetLang: string): void {
     if (!this.articleId || !targetLang) return;
     this.translating.set(true);
-    this.apiService.post<ArticleI18nResponse>(`/admin/articles/${this.articleId}/translate`, {}, { targetLang }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.translateArticle(this.articleId, targetLang).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.translating.set(false);
         this.notification.success(this.i18n.t('dev.articles.translationAdded'));
@@ -719,7 +657,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   deleteTranslation(locale: string): void {
     if (!this.articleId) return;
     if (!confirm(this.i18n.t('dev.articles.deleteTranslationConfirm', { locale }))) return;
-    this.apiService.delete(`/admin/articles/${this.articleId}/translations/${locale}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.deleteArticleTranslation(this.articleId, locale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.translationDeleted'));
         this.loadTranslations();
@@ -762,6 +700,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         // I-03: Complete autoSave$ before navigating to prevent race condition
         this.autoSave$.complete();
         this.autoSaveStatus.set(null);
+        this.saving.set(false);
         this.notification.success(
           this.isEditMode() ? this.i18n.t('dev.articleForm.updateSuccess') : this.i18n.t('dev.articleForm.createSuccess')
         );

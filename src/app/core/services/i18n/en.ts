@@ -768,6 +768,8 @@
     'dev.articles.reviewed': 'Reviewed',
     'dev.articles.noTranslations': 'No translations yet',
     'dev.articles.existingLocales': 'Available languages',
+    'dev.articles.selectAll': 'Select all articles',
+    'dev.articles.selectArticle': 'Select article',
 
     // Admin Article Form
     'dev.articleForm.editTitle': 'Edit Article',
@@ -807,6 +809,7 @@
     'dev.articleForm.imageUploadError': 'Failed to upload image',
     'dev.articleForm.schedule': 'Schedule',
     'dev.articleForm.confirmSchedule': 'Confirm Schedule',
+    'dev.articleForm.untitledDefault': 'Untitled',
 
     // Admin Media Library
     'account.media.library': 'Media Library',
