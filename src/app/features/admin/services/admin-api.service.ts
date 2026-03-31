@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { environment } from '../../../../environments/environment';
-import { PageResponse, UserResponse, ArticleResponse, TagResponse, CommentResponse } from '../../../models';
-import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareResponse } from '../../../models/article.model';
+import { PageResponse, UserResponse, ArticleResponse, TagResponse, CommentResponse, RoleUpgradeRequestResponse } from '../../../models';
+import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareResponse, ArticleReview, ArticleI18nResponse } from '../../../models/article.model';
 
 // ============================================
 // ADMIN-SPECIFIC RESPONSE TYPES
@@ -156,6 +156,34 @@ export interface UserStats {
   activeUsers: number;
   admins: number;
   authors: number;
+}
+
+// Q8.3: User activity response (was previously untyped `any`)
+export interface UserActivity {
+  lastLogin?: string;
+  accountCreated?: string;
+  articlesCreated: number;
+  commentsPosted: number;
+}
+
+// Audit log entry
+export interface AuditLog {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: string;
+  performedBy: number;
+  performedByEmail: string;
+  details: string;
+  ipAddress: string;
+  createdAt: string;
+}
+
+// Reading history entry
+export interface ReadingHistoryEntry {
+  article: ArticleResponse;
+  lastReadAt: string;
+  readCount: number;
 }
 
 // ============================================
@@ -345,7 +373,7 @@ export class AdminApiService {
   // ==================== IMAGE UPLOAD ====================
 
   uploadImage(file: File): Observable<{ url: string }> {
-    return this.api.upload<{ url: string }>('/admin/images/upload', file);
+    return this.api.upload<{ url: string }>('/admin/media/upload', file);
   }
 
   // ==================== MEDIA LIBRARY ====================
@@ -562,5 +590,89 @@ export class AdminApiService {
 
   invalidateI18nCache(): Observable<{ status: string }> {
     return this.api.post<{ status: string }>('/admin/settings/translations/cache/invalidate');
+  }
+
+  // ==================== AUDIT ====================
+
+  getRecentAuditLogs(days: number, limit: number): Observable<AuditLog[]> {
+    return this.api.get<AuditLog[]>('/admin/audit/recent', { days, limit });
+  }
+
+  exportAuditCsv(days: number): Observable<string> {
+    return this.api.getText('/admin/audit/export/csv', { days });
+  }
+
+  exportAuditJson(days: number): Observable<AuditLog[]> {
+    return this.api.get<AuditLog[]>('/admin/audit/export/json', { days });
+  }
+
+  // ==================== READING HISTORY ====================
+
+  getReadingHistory(page: number, size: number): Observable<PageResponse<ReadingHistoryEntry>> {
+    return this.api.get<PageResponse<ReadingHistoryEntry>>('/admin/reading-history', { page, size });
+  }
+
+  clearReadingHistory(): Observable<void> {
+    return this.api.delete<void>('/admin/reading-history');
+  }
+
+  // ==================== ROLE REQUESTS ====================
+
+  getRoleRequests(): Observable<RoleUpgradeRequestResponse[]> {
+    return this.api.get<RoleUpgradeRequestResponse[]>('/admin/users/role-requests');
+  }
+
+  approveRoleRequest(id: string): Observable<RoleUpgradeRequestResponse> {
+    return this.api.put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${id}/approve`, {});
+  }
+
+  rejectRoleRequest(id: string): Observable<RoleUpgradeRequestResponse> {
+    return this.api.put<RoleUpgradeRequestResponse>(`/admin/users/role-requests/${id}/reject`, {});
+  }
+
+  // ==================== ARTICLE REVIEW ====================
+
+  submitArticleForReview(articleId: string): Observable<void> {
+    return this.api.post<void>(`/admin/articles/${articleId}/submit-review`, {});
+  }
+
+  approveArticleReview(articleId: string): Observable<void> {
+    return this.api.post<void>(`/admin/articles/${articleId}/approve-review`, {});
+  }
+
+  requestArticleChanges(articleId: string, feedback: string): Observable<void> {
+    return this.api.post<void>(`/admin/articles/${articleId}/request-changes`, { feedback });
+  }
+
+  getArticleReviews(articleId: string): Observable<ArticleReview[]> {
+    return this.api.get<ArticleReview[]>(`/admin/articles/${articleId}/reviews`);
+  }
+
+  // ==================== ARTICLE TRANSLATION ====================
+
+  getArticleTranslations(articleId: string): Observable<ArticleI18nResponse[]> {
+    return this.api.get<ArticleI18nResponse[]>(`/admin/articles/${articleId}/translations`);
+  }
+
+  getArticleTranslationLocales(articleId: string): Observable<string[]> {
+    return this.api.get<string[]>(`/admin/articles/${articleId}/translations/locales`);
+  }
+
+  translateArticle(articleId: string, targetLang: string): Observable<ArticleI18nResponse> {
+    return this.api.post<ArticleI18nResponse>(`/admin/articles/${articleId}/translate`, {}, { targetLang });
+  }
+
+  deleteArticleTranslation(articleId: string, locale: string): Observable<void> {
+    return this.api.delete<void>(`/admin/articles/${articleId}/translations/${locale}`);
+  }
+
+  // ==================== BULK OPERATIONS ====================
+
+  bulkUpdateArticleStatus(ids: string[], status: string): Observable<void> {
+    return this.api.put<void>('/admin/articles/bulk-status', { ids, status });
+  }
+
+  bulkCommentAction(action: 'approve' | 'reject' | 'spam', ids: string[]): Observable<void> {
+    return this.api.put<void>(`/admin/comments/bulk-${action}`, ids);
   }
 }
