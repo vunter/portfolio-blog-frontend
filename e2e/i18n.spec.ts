@@ -108,7 +108,7 @@ test.describe('Internationalization (i18n)', () => {
     test('should toggle language on public pages', async ({ page }) => {
       await dismissCookieConsent(page);
       await page.goto('/');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       // Find the language dropdown toggle button in the header
       const toggleBtn = page.locator('.lang-dropdown .toggle-btn');

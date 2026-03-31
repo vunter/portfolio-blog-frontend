@@ -33,14 +33,14 @@ test.describe('Authentication Flows', () => {
   });
 
   test('should show error with invalid credentials', async ({ page }) => {
-    await loginViaUI(page, 'admin@catananti.dev', 'wrongpassword123');
+    await loginViaUI(page, 'admin@catananti.dev', 'wrongpassword123', { waitForNavigation: false });
 
     // Wait for error alert to appear
     await expect(page.locator('.error-alert')).toBeVisible({ timeout: 10000 });
   });
 
   test('should show error with non-existent user', async ({ page }) => {
-    await loginViaUI(page, 'nonexistent@test.com', 'somepassword123');
+    await loginViaUI(page, 'nonexistent@test.com', 'somepassword123', { waitForNavigation: false });
 
     await expect(page.locator('.error-alert')).toBeVisible({ timeout: 10000 });
   });

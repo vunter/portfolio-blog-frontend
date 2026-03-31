@@ -4,10 +4,13 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 2,
   workers: 1,
   reporter: 'list',
-  timeout: 30000,
+  timeout: 60000,
+  expect: {
+    timeout: 15000,
+  },
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',

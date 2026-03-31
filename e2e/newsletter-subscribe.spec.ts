@@ -39,7 +39,7 @@ test.describe('Newsletter Subscribe Flow', () => {
 
   test('newsletter subscribe form should be visible on public pages', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // The newsletter-subscribe component is rendered in the sidebar
@@ -49,7 +49,7 @@ test.describe('Newsletter Subscribe Flow', () => {
     if (await newsletterWidget.count() === 0) {
       // Try the blog page
       await page.goto('/blog');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
     }
 
@@ -66,14 +66,14 @@ test.describe('Newsletter Subscribe Flow', () => {
 
   test('subscribe button should be disabled with empty email', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Find the newsletter widget (may need to go to a page where it's rendered)
     let newsletterWidget = page.locator('.newsletter-subscribe').first();
     if (!(await newsletterWidget.isVisible())) {
       await page.goto('/blog');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
       newsletterWidget = page.locator('.newsletter-subscribe').first();
     }
@@ -84,13 +84,13 @@ test.describe('Newsletter Subscribe Flow', () => {
 
   test('should subscribe with a valid email', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     let newsletterWidget = page.locator('.newsletter-subscribe').first();
     if (!(await newsletterWidget.isVisible())) {
       await page.goto('/blog');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
       newsletterWidget = page.locator('.newsletter-subscribe').first();
     }
@@ -120,13 +120,13 @@ test.describe('Newsletter Subscribe Flow', () => {
 
   test('subscribe with invalid email should show error', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     let newsletterWidget = page.locator('.newsletter-subscribe').first();
     if (!(await newsletterWidget.isVisible())) {
       await page.goto('/blog');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
       newsletterWidget = page.locator('.newsletter-subscribe').first();
     }
@@ -173,13 +173,13 @@ test.describe('Newsletter Subscribe Flow', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     let newsletterWidget = page.locator('.newsletter-subscribe').first();
     if (!(await newsletterWidget.isVisible())) {
       await page.goto('/blog');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
       newsletterWidget = page.locator('.newsletter-subscribe').first();
     }
@@ -214,7 +214,7 @@ test.describe('Newsletter Subscribe Flow', () => {
 
     await page.locator('a.nav-item[href="/admin/newsletter"]').click();
     await expect(page).toHaveURL(/\/admin\/newsletter/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     await expect(page.locator('.main-content')).toBeVisible();

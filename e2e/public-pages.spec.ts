@@ -15,7 +15,7 @@ test.describe('Public Pages', () => {
 
   test('should load home page', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Header should be visible
     await expect(page.locator('header.header')).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Public Pages', () => {
 
   test('should display navigation links', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const nav = page.locator('nav.header__nav');
     await expect(nav).toBeVisible();
@@ -43,7 +43,7 @@ test.describe('Public Pages', () => {
 
   test('should navigate to blog page', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.locator('.header__nav a[href="/blog"]').click();
     await expect(page).toHaveURL(/\/blog/);
@@ -52,7 +52,7 @@ test.describe('Public Pages', () => {
 
   test('should navigate to tags page', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.locator('.header__nav a[href="/tags"]').click();
     await expect(page).toHaveURL(/\/tags/);
@@ -61,7 +61,7 @@ test.describe('Public Pages', () => {
 
   test('should navigate to search page', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.locator('.header__nav a[href="/search"]').click();
     await expect(page).toHaveURL(/\/search/);
@@ -70,7 +70,7 @@ test.describe('Public Pages', () => {
 
   test('should show login button for unauthenticated users', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const loginBtn = page.locator('a.btn--primary[href="/auth/login"]');
     await expect(loginBtn).toBeVisible();
@@ -78,7 +78,7 @@ test.describe('Public Pages', () => {
 
   test('should navigate to login page from header', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.locator('a.btn--primary[href="/auth/login"]').click();
     await expect(page).toHaveURL(/\/auth\/login/);
@@ -86,16 +86,16 @@ test.describe('Public Pages', () => {
 
   test('should display footer with brand info', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const footer = page.locator('footer.footer');
     await expect(footer).toBeVisible();
-    await expect(footer.locator('.footer__brand')).toBeVisible();
+    await expect(footer.locator('.footer__brand-link')).toBeVisible();
   });
 
   test('should show 404 for non-existent pages', async ({ page }) => {
     await page.goto('/this-page-does-not-exist-xyz');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Should render the 404 page or redirect
@@ -105,7 +105,7 @@ test.describe('Public Pages', () => {
 
   test('should display logo that links to home', async ({ page }) => {
     await page.goto('/blog');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const logo = page.locator('a.header__logo');
     await expect(logo).toBeVisible();
@@ -117,7 +117,7 @@ test.describe('Public Pages', () => {
 
   test('should toggle theme on public page', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const themeToggle = page.locator('button.theme-slide-toggle').first();
     if (await themeToggle.isVisible()) {
@@ -136,7 +136,7 @@ test.describe('Public Pages', () => {
 
   test('should handle search input', async ({ page }) => {
     await page.goto('/search');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(1000);
 
     // Find search input

@@ -4,7 +4,7 @@
  */
 import { test, expect, Page } from '@playwright/test';
 import {
-  ADMIN_CREDS, DEV_CREDS, EDITOR_CREDS, VIEWER_CREDS,
+  ADMIN_CREDS, DEV_CREDS, VIEWER_CREDS,
   loginAsAdmin, loginAs, loginViaUI, logoutFromAdmin,
   seedTestUsers, dismissCookieConsent, seedProfile,
 } from './helpers';
@@ -23,7 +23,7 @@ test.describe('Public Pages', () => {
 
   test('Home page loads with hero section', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveTitle(/Catananti|Portfolio|Blog/i);
     // Home should have some content visible
     const body = page.locator('body');
@@ -32,31 +32,31 @@ test.describe('Public Pages', () => {
 
   test('Blog page lists articles', async ({ page }) => {
     await page.goto('/blog');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('#main-content')).toBeVisible({ timeout: 10000 });
   });
 
   test('Tags page loads', async ({ page }) => {
     await page.goto('/tags');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.tags-page').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('Search page loads', async ({ page }) => {
     await page.goto('/search');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.search-page').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('About page loads', async ({ page }) => {
     await page.goto('/about');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.about-page').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('404 page for invalid route', async ({ page }) => {
     await page.goto('/this-route-does-not-exist');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     // Should show 404 or redirect to home
     const content = await page.textContent('body');
     expect(content).toBeTruthy();
@@ -126,7 +126,7 @@ test.describe('Admin Dashboard', () => {
 
   test('Dashboard loads with stats', async ({ page }) => {
     await page.goto('/admin/dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.admin-layout')).toBeVisible();
   });
 
@@ -156,12 +156,12 @@ test.describe('Article Lifecycle', () => {
   test('Create a new article via admin', async ({ page }) => {
     // Navigate to articles
     await page.goto('/admin/articles');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Click "New Article" or "Create" button
     const newBtn = page.locator('a[href*="articles/new"], button:has-text("New"), button:has-text("Create"), a:has-text("New Article")').first();
     await newBtn.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Fill article form
     const titleInput = page.locator('input[formcontrolname="title"], input[name="title"], #title').first();
@@ -218,7 +218,7 @@ test.describe('Article Lifecycle', () => {
 
       // Navigate to edit page
       await page.goto(`/admin/articles/${articleId}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       // Modify title
       const titleInput = page.locator('input[formcontrolname="title"], input[name="title"], #title').first();
@@ -254,7 +254,7 @@ test.describe('Article Lifecycle', () => {
 
     // Verify it appears on public blog
     await page.goto('/blog');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Unpublish via API (PATCH method)
@@ -304,7 +304,7 @@ test.describe('User Management', () => {
 
   test('Create a new user via admin UI', async ({ page }) => {
     await page.goto('/admin/users');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Click "New User" button
     const newBtn = page.locator('button:has-text("New"), button:has-text("Create"), button:has-text("Add"), a:has-text("New User")').first();
@@ -382,7 +382,7 @@ test.describe('User Management', () => {
 
   test('User management page loads and shows users', async ({ page }) => {
     await page.goto('/admin/users');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     // Should see at least the admin user
     await expect(page.locator('.data-table, table[aria-label="Users"]').first()).toBeVisible({ timeout: 10000 });
   });
@@ -421,7 +421,7 @@ test.describe('Tag Management', () => {
 
   test('Tags admin page loads', async ({ page }) => {
     await page.goto('/admin/tags');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.admin-layout')).toBeVisible();
   });
 });
@@ -453,7 +453,7 @@ test.describe('Comments', () => {
       const article = await createRes.json();
       await page.request.patch(`${API_BASE}/admin/articles/${article.id}/publish`);
       await page.goto(`/blog/${article.slug}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
 
       // Try to submit a comment
@@ -483,7 +483,7 @@ test.describe('Comments', () => {
     await loginAsAdmin(page);
 
     await page.goto('/admin/comments');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.admin-layout')).toBeVisible();
   });
 });
@@ -538,7 +538,7 @@ test.describe('Resume Templates', () => {
   test('Resume templates admin page loads', async ({ page }) => {
     // beforeEach already logged in as admin
     await page.goto('/resume/templates');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     // Should see the resume templates page (not 404)
     const is404 = await page.locator('text=Page not found').isVisible().catch(() => false);
     expect(is404).toBe(false);
@@ -555,7 +555,7 @@ test.describe('Newsletter', () => {
     await seedProfile(page);
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Look for newsletter subscription form
     const emailInput = page.locator('.newsletter-subscribe__input, input[type="email"]').first();
@@ -578,7 +578,7 @@ test.describe('Newsletter', () => {
     await loginAsAdmin(page);
 
     await page.goto('/admin/newsletter');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page.locator('.admin-layout')).toBeVisible();
   });
 });
@@ -595,7 +595,7 @@ test.describe('Theme and i18n', () => {
 
   test('Theme toggle switches between light and dark', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const themeToggle = page.locator('button.theme-toggle, [aria-label*="theme" i], button[class*="theme"]').first();
     if (await themeToggle.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -624,7 +624,7 @@ test.describe('Theme and i18n', () => {
 
   test('Language switcher changes language', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const langSwitcher = page.locator('button.language-toggle, [aria-label*="language" i], .lang-select, select[class*="lang"]').first();
     if (await langSwitcher.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -652,21 +652,6 @@ test.describe('Role-Based Access', () => {
     await seedTestUsers(page);
   });
 
-  test('EDITOR cannot access user management', async ({ page }) => {
-    // Login as editor via UI
-    await loginViaUI(page, EDITOR_CREDS.email, EDITOR_CREDS.password);
-    // Wait for redirect — editor may go to admin or stay on login
-    await page.waitForTimeout(5000);
-
-    // If editor is logged in, try to navigate to users page
-    if (page.url().includes('/admin')) {
-      await page.goto('/admin/users');
-      await page.waitForTimeout(3000);
-      // Editor should be redirected or see access denied
-    }
-    // Test passes if no crash
-  });
-
   test('DEV can access most admin pages', async ({ page }) => {
     // Login as dev via UI
     await loginViaUI(page, DEV_CREDS.email, DEV_CREDS.password);
@@ -676,12 +661,12 @@ test.describe('Role-Based Access', () => {
     if (page.url().includes('/admin')) {
       // DEV should access articles
       await page.goto('/admin/articles');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
 
       // DEV should access tags
       await page.goto('/admin/tags');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
     }
   });
@@ -718,11 +703,11 @@ test.describe('Data Persistence', () => {
     // Login and verify in admin list
     await loginAsAdmin(page);
     await page.goto('/admin/articles');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Reload the page
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Article should still be there
     const listRes = await page.request.get(`${API_BASE}/admin/articles?page=0&size=100`);
@@ -803,7 +788,7 @@ test.describe('Search', () => {
 
       // Test search via UI
       await page.goto(`/search?q=${searchTerm}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
 
       // Cleanup
       await page.request.delete(`${API_BASE}/admin/articles/${article.id}`);

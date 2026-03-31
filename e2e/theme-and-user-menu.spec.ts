@@ -35,7 +35,7 @@ test.describe('Theme Toggle', () => {
 
   test('should toggle theme on public header', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const themeToggle = page.locator('button.theme-slide-toggle.compact');
     if (await themeToggle.isVisible()) {
@@ -56,7 +56,7 @@ test.describe('User Menu Flow (Public)', () => {
 
     // Navigate to public site
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // User menu trigger should be visible (we're logged in)
     const userMenuTrigger = page.locator('button.user-menu__trigger');
@@ -79,7 +79,7 @@ test.describe('User Menu Flow (Public)', () => {
   test('should logout from public user menu', async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const userMenuTrigger = page.locator('button.user-menu__trigger');
     if (await userMenuTrigger.isVisible()) {

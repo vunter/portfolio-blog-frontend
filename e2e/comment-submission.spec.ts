@@ -1,8 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, dismissCookieConsent, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, loginViaUI, acceptTermsIfVisible, dismissCookieConsent, ADMIN_CREDS } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testSlug = `e2e-comment-test-${Date.now()}`;
+
+/**
+ * Login as admin and navigate to blog article, preserving auth state.
+ * Uses loginViaUI (lands on home page) then navigates directly to blog
+ * instead of going through /admin first, to minimize full page reloads.
+ */
+async function loginAndGoToArticle(page: import('@playwright/test').Page) {
+  await loginViaUI(page, ADMIN_CREDS.email, ADMIN_CREDS.password);
+  await acceptTermsIfVisible(page);
+  await page.goto(`/blog/${testSlug}`);
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(3000);
+}
 
 test.describe('Comment Submission Flow', () => {
 
@@ -48,33 +61,24 @@ test.describe('Comment Submission Flow', () => {
 
   test('should navigate to the published article public page', async ({ page }) => {
     await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // The article detail page should load (or at least the main content area)
     await expect(page.locator('main#main-content')).toBeVisible({ timeout: 10000 });
   });
 
-  test('comment form should be visible with author name, email, and content fields', async ({ page }) => {
-    await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('comment form should be visible with content field and submit button', async ({ page }) => {
+    // Login and navigate directly to the article (minimizes full page reloads)
+    await loginAndGoToArticle(page);
 
     // Comments section should be present
     const commentsSection = page.locator('.comments-section');
-    await expect(commentsSection).toBeVisible({ timeout: 10000 });
+    await expect(commentsSection).toBeVisible({ timeout: 15000 });
 
-    // Comment form should be visible
+    // Comment form should be visible (authenticated users only)
     const commentForm = page.locator('form.comment-form');
-    await expect(commentForm).toBeVisible();
-
-    // Author name input
-    const nameInput = page.locator('#comment-name');
-    await expect(nameInput).toBeVisible();
-
-    // Email input
-    const emailInput = page.locator('#comment-email');
-    await expect(emailInput).toBeVisible();
+    await expect(commentForm).toBeVisible({ timeout: 15000 });
 
     // Content textarea
     const contentTextarea = page.locator('#comment-content');
@@ -86,18 +90,14 @@ test.describe('Comment Submission Flow', () => {
   });
 
   test('empty comment should show validation / submit button disabled', async ({ page }) => {
-    await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // Login and navigate directly to the article
+    await loginAndGoToArticle(page);
 
     const commentForm = page.locator('form.comment-form');
+    await expect(commentForm).toBeVisible({ timeout: 15000 });
     const submitBtn = commentForm.locator('button[type="submit"]');
 
-    // Without filling anything, the submit button should be disabled
-    await expect(submitBtn).toBeDisabled();
-
-    // Fill only name (no content) — still disabled because content < 10 chars
-    await page.locator('#comment-name').fill('Test User');
+    // Without filling anything, the submit button should be disabled (content < 10 chars)
     await expect(submitBtn).toBeDisabled();
 
     // Type short content — button still disabled
@@ -106,16 +106,18 @@ test.describe('Comment Submission Flow', () => {
   });
 
   test('content too short should show validation error on blur', async ({ page }) => {
-    await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // Login and navigate directly to the article
+    await loginAndGoToArticle(page);
+
+    const commentForm = page.locator('form.comment-form');
+    await expect(commentForm).toBeVisible({ timeout: 15000 });
 
     const contentTextarea = page.locator('#comment-content');
 
     // Type short content and blur to trigger touched state
     await contentTextarea.click();
     await contentTextarea.fill('Short');
-    await page.locator('#comment-name').click(); // blur the textarea
+    await page.locator('.comment-form__title').click(); // blur the textarea
 
     // The field-error message should appear (minlength validation)
     const fieldError = page.locator('.comment-form .field-error');
@@ -123,16 +125,16 @@ test.describe('Comment Submission Flow', () => {
   });
 
   test('should submit a comment successfully', async ({ page }) => {
-    await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // Login and navigate directly to the article
+    await loginAndGoToArticle(page);
 
-    // Fill comment form
-    await page.locator('#comment-name').fill('E2E Test Commenter');
-    await page.locator('#comment-email').fill('e2e-commenter@test.com');
+    const commentForm = page.locator('form.comment-form');
+    await expect(commentForm).toBeVisible({ timeout: 15000 });
+
+    // Fill comment content (authenticated form only has content field)
     await page.locator('#comment-content').fill('This is an E2E test comment with enough content to pass the validation.');
 
-    const submitBtn = page.locator('form.comment-form button[type="submit"]');
+    const submitBtn = commentForm.locator('button[type="submit"]');
     await expect(submitBtn).toBeEnabled();
 
     // Intercept the API call to verify 201
@@ -145,15 +147,15 @@ test.describe('Comment Submission Flow', () => {
     const response = await responsePromise;
     expect(response.status()).toBe(201);
 
-    // After submission, a success message should appear
+    // After submission, the comment should appear in the list (optimistic update)
     await page.waitForTimeout(1000);
-    const successMsg = page.locator('.comment-success');
-    await expect(successMsg).toBeVisible({ timeout: 5000 });
+    const newComment = page.locator('.comment__text', { hasText: 'E2E test comment' });
+    await expect(newComment.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('comment count should display', async ({ page }) => {
     await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Comments section title should display a count in parentheses
@@ -167,7 +169,7 @@ test.describe('Comment Submission Flow', () => {
 
   test('comment should appear in comments list if auto-approved', async ({ page }) => {
     await page.goto(`/blog/${testSlug}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Look for the comment in the list — may or may not be visible depending on approval settings
@@ -188,10 +190,9 @@ test.describe('Comment Submission Flow', () => {
 
     await page.locator('a.nav-item[href="/admin/comments"]').click();
     await expect(page).toHaveURL(/\/admin\/comments/);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
-    await expect(page.locator('.main-content')).toBeVisible();
+    await expect(page.locator('.main-content')).toBeVisible({ timeout: 15000 });
 
     // Look for the test comment in the admin comment list
     const commentEntry = page.locator('.main-content', { hasText: 'E2E Test Commenter' });

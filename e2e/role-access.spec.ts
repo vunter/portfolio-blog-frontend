@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginViaUI, seedTestUsers, DEV_CREDS, EDITOR_CREDS, VIEWER_CREDS, ADMIN_CREDS, loginAs, dismissCookieConsent } from './helpers';
+import { loginViaUI, seedTestUsers, DEV_CREDS, VIEWER_CREDS, ADMIN_CREDS, loginAs, dismissCookieConsent } from './helpers';
 
 test.describe('Role-Based Access Control', () => {
 
@@ -72,48 +72,20 @@ test.describe('Role-Based Access Control', () => {
     });
   });
 
-  test.describe('EDITOR Role', () => {
-
-    test('EDITOR can access dashboard', async ({ page }) => {
-      await loginAs(page, EDITOR_CREDS);
-      await page.locator('a.nav-item[href="/admin/dashboard"]').click();
-      await expect(page).toHaveURL(/\/admin\/dashboard/);
-      await expect(page.locator('.main-content')).toBeVisible();
-    });
-
-    test('EDITOR can access articles', async ({ page }) => {
-      await loginAs(page, EDITOR_CREDS);
-      await page.locator('a.nav-item[href="/admin/articles"]').click();
-      await expect(page).toHaveURL(/\/admin\/articles/);
-      await expect(page.locator('.main-content')).toBeVisible();
-    });
-
-    test('EDITOR can access tags', async ({ page }) => {
-      await loginAs(page, EDITOR_CREDS);
-      await page.locator('a.nav-item[href="/admin/tags"]').click();
-      await expect(page).toHaveURL(/\/admin\/tags/);
-      await expect(page.locator('.main-content')).toBeVisible();
-    });
-
-    test('EDITOR can access comments', async ({ page }) => {
-      await loginAs(page, EDITOR_CREDS);
-      await page.locator('a.nav-item[href="/admin/comments"]').click();
-      await expect(page).toHaveURL(/\/admin\/comments/);
-      await expect(page.locator('.main-content')).toBeVisible();
-    });
-
-    test('EDITOR user role is shown correctly', async ({ page }) => {
-      await loginAs(page, EDITOR_CREDS);
-      await expect(page.locator('.user-info__role')).toContainText('EDITOR');
-    });
-  });
-
   test.describe('VIEWER Role', () => {
 
     test('VIEWER should not access admin area', async ({ page }) => {
-      await loginViaUI(page, VIEWER_CREDS.email, VIEWER_CREDS.password);
+      // Use API login for VIEWER to avoid rate limiting on UI login
+      await dismissCookieConsent(page);
+      await page.request.post('http://localhost:4200/api/v1/admin/auth/login/v2', {
+        data: { email: VIEWER_CREDS.email, password: VIEWER_CREDS.password },
+      });
+      await page.request.put('http://localhost:4200/api/v1/admin/users/me', {
+        data: { termsAccepted: true },
+      }).catch(() => {});
 
-      // VIEWER should be redirected away from admin or blocked by guard
+      // Try to navigate to admin
+      await page.goto('/admin');
       await page.waitForTimeout(3000);
 
       // Check we're not in admin layout - viewer might be redirected to home

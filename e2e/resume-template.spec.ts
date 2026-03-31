@@ -14,7 +14,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('should navigate to resume templates list', async ({ page }) => {
     await page.goto('/resume/templates');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Template list page should load
@@ -28,7 +28,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('should navigate to template editor for new template', async ({ page }) => {
     await page.goto('/resume/templates');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Click the "New" button which links to /resume/editor
@@ -37,7 +37,7 @@ test.describe('Resume Template CRUD', () => {
     await newBtn.click();
 
     await expect(page).toHaveURL(/\/resume\/editor$/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Editor should be visible
@@ -47,7 +47,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('should create a new template', async ({ page }) => {
     await page.goto('/resume/editor');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(3000);
 
     // Fill template name
@@ -79,7 +79,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('template should appear in the list', async ({ page }) => {
     await page.goto('/resume/templates');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Look for our test template
@@ -116,7 +116,7 @@ test.describe('Resume Template CRUD', () => {
 
         // Navigate to preview
         await page.goto(`/resume/preview/${createdTemplateId}`);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         await page.waitForTimeout(2000);
 
         // Preview page should load
@@ -145,7 +145,7 @@ test.describe('Resume Template CRUD', () => {
 
     if (createdTemplateId) {
       await page.goto(`/resume/editor/${createdTemplateId}`);
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(3000);
 
       // Editor should be visible with existing template data
@@ -186,7 +186,7 @@ test.describe('Resume Template CRUD', () => {
 
     if (templateId) {
       await page.goto('/resume/templates');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('load');
       await page.waitForTimeout(2000);
 
       // Find the template card with the delete button

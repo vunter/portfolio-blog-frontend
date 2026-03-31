@@ -4,13 +4,12 @@ const API_BASE = 'http://localhost:4200/api/v1';
 
 export const ADMIN_CREDS = { email: 'admin@catananti.dev', password: 'Admin123456789!' };
 export const DEV_CREDS = { email: 'dev@test.com', password: 'DevPass123!@#' };
-export const EDITOR_CREDS = { email: 'editor@test.com', password: 'EditorPass123!@#' };
 export const VIEWER_CREDS = { email: 'viewer@test.com', password: 'ViewerPass123!@#' };
 
 /**
  * Login via the UI form — simulates a real user typing credentials.
  */
-export async function loginViaUI(page: Page, email: string, password: string) {
+export async function loginViaUI(page: Page, email: string, password: string, options?: { waitForNavigation?: boolean }) {
   await dismissCookieConsent(page);
   await page.goto('/auth/login');
   await page.waitForSelector('.auth-form', { timeout: 10000 });
@@ -29,6 +28,38 @@ export async function loginViaUI(page: Page, email: string, password: string) {
   await passwordInput.pressSequentially(password, { delay: 30 });
 
   await submitBtn.click();
+  if (options?.waitForNavigation !== false) {
+    // Wait for login POST to complete and page to navigate away from /auth/login
+    await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'), { timeout: 30000 });
+    await page.waitForLoadState('load');
+  }
+}
+
+/**
+ * Accept Terms & Privacy modal if it appears after login.
+ * Waits briefly for the modal to potentially appear, then handles it.
+ */
+export async function acceptTermsIfVisible(page: Page) {
+  // Wait a moment for post-login state to settle
+  const modal = page.locator('.terms-overlay');
+  try {
+    await modal.waitFor({ state: 'visible', timeout: 3000 });
+    await page.locator('.terms-modal__checkbox input[type="checkbox"]').check();
+    await page.locator('.terms-modal__actions .btn-primary').click();
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+  } catch {
+    // Modal didn't appear — terms already accepted, continue
+  }
+}
+
+/**
+ * Accept terms for a user via API. Call after API login to ensure
+ * the Terms & Privacy modal doesn't block UI tests.
+ */
+export async function acceptTermsViaAPI(page: Page) {
+  await page.request.put(`${API_BASE}/admin/users/me`, {
+    data: { termsAccepted: true },
+  }).catch(() => {});
 }
 
 /**
@@ -36,8 +67,11 @@ export async function loginViaUI(page: Page, email: string, password: string) {
  */
 export async function loginAsAdmin(page: Page) {
   await loginViaUI(page, ADMIN_CREDS.email, ADMIN_CREDS.password);
-  await page.waitForURL('**/admin/**', { timeout: 10000 });
-  await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
+  await acceptTermsIfVisible(page);
+  // Login redirects to home (/), not /admin — navigate explicitly
+  await page.goto('/admin');
+  await page.waitForURL('**/admin/**', { timeout: 30000 });
+  await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 30000 });
 }
 
 /**
@@ -45,8 +79,11 @@ export async function loginAsAdmin(page: Page) {
  */
 export async function loginAs(page: Page, creds: { email: string; password: string }) {
   await loginViaUI(page, creds.email, creds.password);
-  await page.waitForURL('**/admin/**', { timeout: 10000 });
-  await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
+  await acceptTermsIfVisible(page);
+  // Login redirects to home (/), not /admin — navigate explicitly
+  await page.goto('/admin');
+  await page.waitForURL('**/admin/**', { timeout: 30000 });
+  await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 30000 });
 }
 
 /**
@@ -82,10 +119,14 @@ export async function seedTestUsers(page: Page) {
     return;
   }
 
+  // Accept terms for admin user so the modal doesn't block UI tests
+  await page.request.put(`${API_BASE}/admin/users/me`, {
+    data: { termsAccepted: true },
+  }).catch(() => {});
+
   // Create test users (ignore errors if they already exist)
   const users = [
     { name: 'Dev User', email: DEV_CREDS.email, password: DEV_CREDS.password, role: 'DEV' },
-    { name: 'Editor User', email: EDITOR_CREDS.email, password: EDITOR_CREDS.password, role: 'EDITOR' },
     { name: 'Viewer User', email: VIEWER_CREDS.email, password: VIEWER_CREDS.password, role: 'VIEWER' },
   ];
 
@@ -98,7 +139,7 @@ export async function seedTestUsers(page: Page) {
  * Wait for Angular app to be ready.
  */
 export async function waitForApp(page: Page) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('load');
 }
 
 /**
@@ -111,6 +152,11 @@ export async function seedProfile(page: Page) {
     data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
   });
   if (!loginRes.ok()) return;
+
+  // Accept terms for admin user so the modal doesn't block UI tests
+  await page.request.put(`${API_BASE}/admin/users/me`, {
+    data: { termsAccepted: true },
+  }).catch(() => {});
 
   // Create a resume template with the expected alias
   await page.request.post(`${API_BASE}/resume/templates`, {
