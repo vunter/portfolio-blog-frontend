@@ -224,17 +224,13 @@ export const AuthStore = signalStore(
               // Only clear session on explicit auth rejection (401).
               // Network errors or server downtime should preserve the cached session
               // so the user isn't logged out just because the backend is temporarily unavailable.
-              const isAuthRejection = err instanceof HttpErrorResponse && err.status === 401;
-              if (isAuthRejection) {
-                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
-                storage.remove(STORAGE_KEYS.USER);
-                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
-                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
-              } else {
-                // Backend unreachable — keep cached user data and mark as authenticated
-                patchState(store, { user, isAuthenticated: true, isLoading: false });
-                storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
-              }
+              // Both auth rejection (401) and backend unreachable (network error / 5xx)
+              // clear the session. This is the safer default: a stale cached auth flag
+              // must not grant access when the server cannot confirm the session.
+              patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+              storage.remove(STORAGE_KEYS.USER);
+              storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+              storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
               return of(null);
             }),
             map(() => void 0)
