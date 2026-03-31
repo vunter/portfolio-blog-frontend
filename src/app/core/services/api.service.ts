@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { retry, timer } from 'rxjs';
+import { retry, timer, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -20,6 +20,7 @@ export class ApiService {
     // 4xx client errors (400, 401, 403, 404, 409, 422) are thrown immediately
     // since retrying them is pointless and wastes bandwidth.
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, { params }).pipe(
+      timeout(30000),
       retry({
         count: 2,
         delay: (error, retryCount) => {
@@ -39,7 +40,7 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params });
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000));
   }
 
   put<T>(endpoint: string, body: unknown, queryParams?: Record<string, string | number | boolean>): Observable<T> {
@@ -49,25 +50,25 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { params });
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000));
   }
 
   putResponse<T>(endpoint: string, body: unknown): Observable<HttpResponse<T>> {
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { observe: 'response' });
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { observe: 'response' }).pipe(timeout(30000));
   }
 
   patch<T>(endpoint: string, body?: unknown): Observable<T> {
-    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, body);
+    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, body).pipe(timeout(30000));
   }
 
   delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}${endpoint}`);
+    return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(timeout(30000));
   }
 
   upload<T>(endpoint: string, file: File, fieldName = 'file'): Observable<T> {
     const formData = new FormData();
     formData.append(fieldName, file);
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, formData);
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, formData).pipe(timeout(30000));
   }
 
   getText(endpoint: string, queryParams?: Record<string, string | number | boolean>): Observable<string> {
@@ -77,11 +78,11 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'text' });
+    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'text' }).pipe(timeout(30000));
   }
 
   postText(endpoint: string, body: unknown): Observable<string> {
-    return this.http.post(`${this.baseUrl}${endpoint}`, body, { responseType: 'text' });
+    return this.http.post(`${this.baseUrl}${endpoint}`, body, { responseType: 'text' }).pipe(timeout(30000));
   }
 
   getBlob(endpoint: string, queryParams?: Record<string, string | number | boolean>): Observable<Blob> {
@@ -91,7 +92,7 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'blob' }).pipe(timeout(30000));
   }
 
   getBlobResponse(endpoint: string, queryParams?: Record<string, string | number | boolean>): Observable<HttpResponse<Blob>> {
@@ -101,10 +102,10 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'blob', observe: 'response' });
+    return this.http.get(`${this.baseUrl}${endpoint}`, { params, responseType: 'blob', observe: 'response' }).pipe(timeout(30000));
   }
 
   postBlob(endpoint: string, body?: unknown): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}${endpoint}`, body, { responseType: 'blob' });
+    return this.http.post(`${this.baseUrl}${endpoint}`, body, { responseType: 'blob' }).pipe(timeout(30000));
   }
 }

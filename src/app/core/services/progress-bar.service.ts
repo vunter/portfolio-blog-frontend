@@ -60,19 +60,26 @@ export class ProgressBarService {
     this.animationId = requestAnimationFrame(tick);
   }
 
+  private trickleTimer: ReturnType<typeof setInterval> | null = null;
+
   private trickle(): void {
-    const tick = () => {
+    this.clearTrickle();
+    this.trickleTimer = setInterval(() => {
       const current = this.progress();
-      if (current >= 95) return;
+      if (current >= 95) {
+        this.clearTrickle();
+        return;
+      }
       const increment = current < 80 ? 0.5 : current < 90 ? 0.2 : 0.05;
       this.progress.set(Math.min(current + increment, 95));
-      this.animationId = requestAnimationFrame(() => {
-        setTimeout(() => {
-          this.animationId = requestAnimationFrame(tick);
-        }, 200);
-      });
-    };
-    this.animationId = requestAnimationFrame(tick);
+    }, 200);
+  }
+
+  private clearTrickle(): void {
+    if (this.trickleTimer) {
+      clearInterval(this.trickleTimer);
+      this.trickleTimer = null;
+    }
   }
 
   private cancelAnimation(): void {
@@ -80,6 +87,7 @@ export class ProgressBarService {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
+    this.clearTrickle();
   }
 
   private resetSafetyTimeout(): void {

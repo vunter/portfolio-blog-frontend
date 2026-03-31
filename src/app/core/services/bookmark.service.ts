@@ -1,7 +1,8 @@
-import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, signal, computed, PLATFORM_ID, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout, catchError, EMPTY } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CookieConsentService } from './cookie-consent.service';
 
@@ -14,6 +15,7 @@ export class BookmarkService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly http = inject(HttpClient);
   private readonly consent = inject(CookieConsentService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly baseUrl = `${environment.apiUrl}/${environment.apiVersion}/bookmarks`;
 
   /** Set of article slugs currently bookmarked */
@@ -66,13 +68,17 @@ export class BookmarkService {
     if (isPlatformBrowser(this.platformId)) {
       const headers = this.visitorHeaders();
       if (isNowBookmarked) {
-        this.http.post(`${this.baseUrl}/${slug}`, null, { headers }).subscribe({
-          error: () => this.revertToggle(slug, false),
-        });
+        this.http.post(`${this.baseUrl}/${slug}`, null, { headers }).pipe(
+          timeout(10000),
+          takeUntilDestroyed(this.destroyRef),
+          catchError(() => { this.revertToggle(slug, false); return EMPTY; })
+        ).subscribe();
       } else {
-        this.http.delete(`${this.baseUrl}/${slug}`, { headers }).subscribe({
-          error: () => this.revertToggle(slug, true),
-        });
+        this.http.delete(`${this.baseUrl}/${slug}`, { headers }).pipe(
+          timeout(10000),
+          takeUntilDestroyed(this.destroyRef),
+          catchError(() => { this.revertToggle(slug, true); return EMPTY; })
+        ).subscribe();
       }
     }
 
@@ -103,6 +109,11 @@ export class BookmarkService {
         headers,
         params: { page: '0', size: '50' },
       })
+      .pipe(
+        timeout(10000),
+        takeUntilDestroyed(this.destroyRef),
+        catchError(() => EMPTY)
+      )
       .subscribe({
         next: (response) => {
           const backendSlugs = new Set(response.content.map((a) => a.slug));
@@ -114,14 +125,13 @@ export class BookmarkService {
           // Push local-only bookmarks to backend
           for (const slug of localSlugs) {
             if (!backendSlugs.has(slug)) {
-              this.http.post(`${this.baseUrl}/${slug}`, null, { headers }).subscribe({
-                error: () => { /* CQ-07: silently ignore sync failures — localStorage fallback works */ },
-              });
+              this.http.post(`${this.baseUrl}/${slug}`, null, { headers }).pipe(
+                timeout(10000),
+                takeUntilDestroyed(this.destroyRef),
+                catchError(() => EMPTY)
+              ).subscribe();
             }
           }
-        },
-        error: () => {
-          // Backend unavailable — localStorage-only is fine
         },
       });
   }
