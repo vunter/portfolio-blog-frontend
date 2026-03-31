@@ -6,7 +6,6 @@ import {
   isDevMode,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
-  SecurityContext,
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
 import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
@@ -15,7 +14,7 @@ import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angu
 import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideMarkdown, SANITIZE } from 'ngx-markdown';
+import { provideMarkdown } from 'ngx-markdown';
 import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -70,12 +69,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withHttpTransferCacheOptions({
       includePostRequests: false,
     })),
-    provideMarkdown({
-      sanitize: {
-        provide: SANITIZE,
-        useValue: SecurityContext.HTML,
-      },
-    }),
+    provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: APP_INITIALIZER,

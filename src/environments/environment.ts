@@ -13,4 +13,6 @@ export const environment = {
   recaptchaSiteKey: '6LcCNGgsAAAAADA_ubUZ2dj68W7Lin6h0RbPSqJi',
   // BUG-RT2: Allow disabling reCAPTCHA in dev to match backend RECAPTCHA_ENABLED=false
   recaptchaEnabled: false,
+  // Q8.11: Configurable scroll depth tracking thresholds (percentage points)
+  scrollDepthThresholds: [25, 50, 75, 100] as readonly number[],
 } as const;

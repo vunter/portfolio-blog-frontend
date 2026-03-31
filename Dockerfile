@@ -22,6 +22,7 @@ RUN printf 'server {\n\
   listen 4000;\n\
   root /usr/share/nginx/html;\n\
   index index.html;\n\
+  charset utf-8;\n\
   gzip on;\n\
   gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;\n\
   gzip_min_length 256;\n\
