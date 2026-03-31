@@ -153,7 +153,7 @@ export class TemplateEditorComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   loadTemplate(id: string): void {
-    this.resumeService.getTemplate(id).subscribe({
+    this.resumeService.getTemplate(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (template) => {
         this.templateName = template.name;
         this.templateDescription = template.description || '';
@@ -388,7 +388,7 @@ h2 {
       ? this.resumeService.updateTemplate(this.templateId, template)
       : this.resumeService.createTemplate(template);
 
-    request.subscribe({
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {
         this.notification.success(this.i18n.t('resume.editor.saveSuccess'));
         this.originalContent = { html: this.htmlContent, css: this.cssContent };
@@ -433,7 +433,7 @@ h2 {
       htmlContent: fullHtml,
       paperSize: this.paperSize,
       filename: `${this.templateName.replace(/\s+/g, '_')}.pdf`,
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
         this.downloadService.downloadBlob(blob, `${this.templateName.replace(/\s+/g, '_')}.pdf`);
         this.generatingPdf.set(false);
@@ -449,7 +449,7 @@ h2 {
   importFromProfile(): void {
     this.importingProfile.set(true);
 
-    this.profileService.generateHtml(this.importLang()).subscribe({
+    this.profileService.generateHtml(this.importLang()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (html) => {
         // Extract CSS from the generated HTML
         let cssContent = '';

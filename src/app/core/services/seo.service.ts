@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { I18nService } from './i18n.service';
 
 export interface SeoConfig {
   title: string;
@@ -26,9 +27,12 @@ export class SeoService {
   private readonly meta = inject(Meta);
   private readonly titleService = inject(Title);
   private readonly doc = inject(DOCUMENT);
+  private readonly i18n = inject(I18nService);
 
   private readonly siteName = 'Catananti Dev';
-  private readonly defaultDescription = 'Portfolio and blog about software development, architecture, and technology.';
+  private get defaultDescription(): string {
+    return this.i18n.t('seo.default.description');
+  }
   private readonly siteUrl = environment.siteUrl;
   private readonly defaultImage = `${this.siteUrl}/icons/icon-512x512.png`;
 

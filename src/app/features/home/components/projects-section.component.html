@@ -57,7 +57,9 @@
  @for (project of projects(); track project.id ?? project.title) {
  <div class="project-card">
  @if (project.imageUrl) {
- <div class="project-image">{{ project.imageUrl }}</div>
+ <div class="project-image">
+ <img [src]="project.imageUrl" [alt]="project.title" loading="lazy" />
+ </div>
  }
  <div class="project-content">
  <h3>{{ project.title }}</h3>

@@ -11,6 +11,8 @@
     'nav.myProfile': 'My Profile',
     'nav.mobileMenuToggle': 'Toggle mobile menu',
     'nav.mobileMenu': 'Mobile menu',
+    'nav.selectLanguage': 'Select language',
+    'nav.userMenu': 'User account menu',
 
     // Theme toggle
     'theme.auto': 'Auto (system)',
@@ -442,6 +444,7 @@
     'common.active': 'Active',
     'common.inactive': 'Inactive',
     'common.closeNotification': 'Close notification',
+    'common.offlineMessage': 'You are currently offline. Some features may be unavailable.',
     'common.saving': 'Saving...',
     'common.name': 'Name',
     'common.email': 'Email',
@@ -1770,6 +1773,9 @@
     'home.contact.downloading': 'Downloading...',
     'home.contact.downloadCV': 'Download CV (PDF)',
     'home.contact.downloadError': 'Failed to download resume. Please try again.',
+    'home.contact.emailAriaLabel': 'Send email',
+    'home.contact.linkedinAriaLabel': 'LinkedIn profile (opens in new tab)',
+    'home.contact.githubAriaLabel': 'GitHub profile (opens in new tab)',
 
     // Home - Sidebar
     'home.sidebar.bio': 'Welcome to my blog — sharing insights on software engineering.',
@@ -1868,6 +1874,7 @@
     'newsletter.subscribe.checkEmail': 'Check your email to confirm!',
     'newsletter.subscribe.privacyDisclosure': 'By subscribing, you consent to receive email updates. You can unsubscribe at any time. See our',
     'newsletter.subscribe.privacyLink': 'Privacy Policy',
+    'newsletter.subscribe.invalidEmail': 'Please enter a valid email address.',
     'newsletter.subscribe.analyticsConsent': 'I agree to anonymous email engagement tracking (open rates and link clicks) to help improve content quality.',
 
     // Accessibility
@@ -1887,6 +1894,7 @@
     'seo.privacy.description': 'Privacy policy for Catananti Dev — how we handle your data and protect your privacy.',
     'seo.terms.description': 'Terms of service for Catananti Dev — rules and guidelines for using this website.',
     'seo.newsletter.unsubscribe.description': 'Unsubscribe from the Catananti Dev newsletter.',
+    'seo.default.description': 'Portfolio and blog about software development, architecture, and technology.',
 
     // Cookie consent
     'cookie.banner.title': 'Cookie Settings',

@@ -105,7 +105,7 @@
  @if (fieldErrors()['name']) {
  <span class="field-error">{{ fieldErrors()['name'] }}</span>
  } @else if (formSubmitted() && !form.name) {
- <span class="field-error">Name is required</span>
+ <span class="field-error">{{ i18n.t('account.profile.nameRequired') }}</span>
  }
  </div>
 

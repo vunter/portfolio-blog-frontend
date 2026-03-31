@@ -18,13 +18,23 @@
  </div>
  } @else {
  <form class="newsletter-subscribe__form" [formGroup]="subscribeForm" (ngSubmit)="subscribe()">
+ <label for="newsletter-email" class="sr-only">{{ i18n.t('newsletter.subscribe.placeholder') }}</label>
  <input
  type="email"
+ id="newsletter-email"
  formControlName="email"
  [placeholder]="i18n.t('newsletter.subscribe.placeholder')"
  class="newsletter-subscribe__input"
+ [class.invalid]="subscribeForm.get('email')?.invalid && subscribeForm.get('email')?.touched"
+ [attr.aria-invalid]="subscribeForm.get('email')?.invalid && subscribeForm.get('email')?.touched"
+ [attr.aria-describedby]="subscribeForm.get('email')?.invalid && subscribeForm.get('email')?.touched ? 'newsletter-email-error' : null"
  [attr.disabled]="submitting() ? '' : null"
  />
+ @if (subscribeForm.get('email')?.invalid && subscribeForm.get('email')?.touched) {
+ <span class="newsletter-subscribe__error" id="newsletter-email-error" role="alert">
+  {{ i18n.t('newsletter.subscribe.invalidEmail') }}
+ </span>
+ }
  <button
  type="submit"
  class="newsletter-subscribe__btn"

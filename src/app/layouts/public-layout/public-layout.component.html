@@ -16,12 +16,12 @@
  </nav>
  <div class="header__actions">
  <div class="lang-dropdown">
- <button class="toggle-btn" (click)="toggleLangMenu($event)" title="Language">
+ <button class="toggle-btn" (click)="toggleLangMenu($event)" [attr.aria-label]="i18n.t('nav.selectLanguage')" [attr.aria-expanded]="langMenuOpen()">
  <span class="toggle-label"> {{ currentLangLabel() }}</span>
  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
  </button>
  @if (langMenuOpen()) {
- <div class="lang-dropdown__menu">
+ <div class="lang-dropdown__menu" role="menu" [attr.aria-label]="i18n.t('nav.selectLanguage')">
  @for (lang of i18n.supportedLanguages(); track lang.code) {
  <button class="lang-dropdown__item" [class.active]="i18n.language() === lang.code" (click)="selectLanguage(lang.code)"> {{ lang.nativeName }}</button>
  }
@@ -31,7 +31,7 @@
  <app-theme-toggle variant="segmented" />
  @if (authStore.isAuthenticated()) {
  <div class="user-menu">
- <button class="user-menu__trigger" (click)="toggleUserMenu($event)">
+ <button class="user-menu__trigger" (click)="toggleUserMenu($event)" [attr.aria-label]="i18n.t('nav.userMenu')" [attr.aria-expanded]="userMenuOpen()">
  <span class="user-menu__avatar">
  @if (authStore.userAvatarUrl()) {
  <img [src]="authStore.userAvatarUrl()!" [alt]="authStore.userDisplayName()" class="user-menu__avatar-img" />
@@ -161,7 +161,10 @@
  </div>
  }
  </header>
- <main id="main-content" class="main" role="main"><router-outlet /></main>
+ @if (isOffline()) {
+<div class="offline-banner" role="alert">{{ i18n.t('common.offlineMessage') }}</div>
+}
+<main id="main-content" class="main" role="main"><router-outlet /></main>
  <footer class="footer" role="contentinfo">
  <div class="footer__container">
  <div class="footer__content">

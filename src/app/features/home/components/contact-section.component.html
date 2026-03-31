@@ -11,9 +11,9 @@
  </div>
 
  <div class="contact-buttons">
- <a [href]="'mailto:' + email()" class="btn btn-primary">{{ i18n.t('home.contact.sendEmail') }}</a>
- <a [href]="linkedinUrl()" class="btn btn-secondary" target="_blank" rel="noopener">LinkedIn</a>
- <a [href]="githubUrl()" class="btn btn-secondary" target="_blank" rel="noopener">GitHub</a>
+ <a [href]="'mailto:' + email()" class="btn btn-primary" [attr.aria-label]="i18n.t('home.contact.emailAriaLabel')">{{ i18n.t('home.contact.sendEmail') }}</a>
+ <a [href]="linkedinUrl()" class="btn btn-secondary" target="_blank" rel="noopener" [attr.aria-label]="i18n.t('home.contact.linkedinAriaLabel')">LinkedIn</a>
+ <a [href]="githubUrl()" class="btn btn-secondary" target="_blank" rel="noopener" [attr.aria-label]="i18n.t('home.contact.githubAriaLabel')">GitHub</a>
  <button class="btn btn-outline btn-download" (click)="downloadResume()" [disabled]="downloadingResume()">
  @if (downloadingResume()) {
  <span class="btn-spinner"></span>

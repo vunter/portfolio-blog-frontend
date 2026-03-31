@@ -156,6 +156,19 @@ export class TemplatePreviewComponent implements OnInit {
   }
 
   /**
+   * Q5.3: Sanitize CSS to strip potentially dangerous directives.
+   * Removes @import, javascript: URLs, expression(), and -moz-binding.
+   */
+  private sanitizeCss(css: string): string {
+    return css
+      .replace(/@import\b[^;]*;?/gi, '/* @import removed */')
+      .replace(/javascript\s*:/gi, '/* blocked */:')
+      .replace(/expression\s*\(/gi, '/* expression blocked */(')
+      .replace(/-moz-binding\s*:/gi, '/* -moz-binding blocked */:')
+      .replace(/behavior\s*:/gi, '/* behavior blocked */:');
+  }
+
+  /**
    * Apply variables to the preview
    */
   applyVariables(): void {
@@ -175,7 +188,7 @@ export class TemplatePreviewComponent implements OnInit {
       <!DOCTYPE html>
       <html>
         <head>
-          <style>${template.cssContent || ''}</style>
+          <style>${this.sanitizeCss(template.cssContent || '')}</style>
         </head>
         <body>${html}</body>
       </html>
@@ -193,7 +206,7 @@ export class TemplatePreviewComponent implements OnInit {
       <!DOCTYPE html>
       <html>
         <head>
-          <style>${template.cssContent || ''}</style>
+          <style>${this.sanitizeCss(template.cssContent || '')}</style>
         </head>
         <body>${template.htmlContent || ''}</body>
       </html>

@@ -21,6 +21,16 @@
       outline-offset: 2px;
     }
     
+    /* Q13.5: Offline detection banner */
+    .offline-banner {
+      background: #dc2626;
+      color: white;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
     .layout { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s, color 0.3s; }
     .theme-dark { --header-bg: rgba(15, 23, 42, 0.95); --header-border: var(--accent-tint-border); --nav-text: #cbd5e1; --nav-hover: var(--accent-light); --btn-bg: var(--accent-tint); --btn-hover: var(--accent-tint-border); --footer-bg: #0f172a; }
     .theme-light { --header-bg: rgba(255, 255, 255, 0.95); --header-border: #e2e8f0; --nav-text: #475569; --nav-hover: var(--accent-color); --btn-bg: #f1f5f9; --btn-hover: #e2e8f0; --footer-bg: #f8fafc; }
@@ -57,7 +67,7 @@
     .mobile-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: var(--z-modal-backdrop); animation: fadeIn 0.2s ease-out; @media (max-width: 768px) { display: block; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .mobile-menu { display: none; padding: 1rem 1.5rem 1.5rem; border-top: 1px solid var(--header-border); background: var(--header-bg); animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1); position: relative; z-index: var(--z-modal); @media (max-width: 768px) { display: block; } }
-    .mobile-menu-close { position: absolute; top: 0.75rem; right: 0.75rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--btn-bg); border: 1px solid var(--header-border); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; &:hover { background: var(--btn-hover); color: var(--text-primary); } }
+    .mobile-menu-close { position: absolute; top: 0.75rem; right: 0.75rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--btn-bg); border: 1px solid var(--header-border); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; &:hover { background: var(--btn-hover); color: var(--text-primary); } }
     .btn--full-width { width: 100%; justify-content: center; }
 /* CSS-08: Improved enter animation with smooth easing */
 @keyframes slideDown { from { opacity: 0; transform: translateY(-12px) scaleY(0.95); } to { opacity: 1; transform: translateY(0) scaleY(1); } }

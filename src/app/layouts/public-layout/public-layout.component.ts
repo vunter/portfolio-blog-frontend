@@ -36,6 +36,8 @@ export class PublicLayoutComponent implements OnInit {
   showScrollTop = signal(false);
   userMenuOpen = signal(false);
   langMenuOpen = signal(false);
+  // Q13.5: Offline detection
+  isOffline = signal(false);
 
   readonly currentLangLabel = computed(() => {
     return this.i18n.language().toUpperCase();
@@ -48,6 +50,15 @@ export class PublicLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      // Q13.5: Offline detection — show banner when connectivity is lost
+      this.isOffline.set(!navigator.onLine);
+      fromEvent(window, 'offline').pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.isOffline.set(true));
+      fromEvent(window, 'online').pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.isOffline.set(false));
+
       fromEvent(window, 'scroll').pipe(
         throttleTime(100),
         takeUntilDestroyed(this.destroyRef)
