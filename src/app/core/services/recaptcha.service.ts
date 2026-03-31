@@ -37,18 +37,18 @@ export class RecaptchaService {
     await this.loadScript();
 
     return new Promise<string | null>((resolve) => {
-      const grecaptcha = (window as any)['grecaptcha'];
-      if (!grecaptcha) {
+      const recaptchaEnterprise = window.grecaptcha?.enterprise;
+      if (!recaptchaEnterprise) {
         // CQ-07: reCAPTCHA unavailable — resolve null silently
         resolve(null);
         return;
       }
 
-      grecaptcha.ready(() => {
-        grecaptcha
+      recaptchaEnterprise.ready(() => {
+        recaptchaEnterprise
           .execute(this.siteKey, { action })
-          .then((token: string) => resolve(token))
-          .catch((err: unknown) => {
+          .then((token) => resolve(token))
+          .catch(() => {
             // CQ-07: reCAPTCHA failure — resolve null, backend handles missing token
             resolve(null);
           });

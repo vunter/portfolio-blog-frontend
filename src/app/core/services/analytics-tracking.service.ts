@@ -1,8 +1,10 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID, DestroyRef, isDevMode } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieConsentService } from './cookie-consent.service';
-import { EMPTY, Observable, catchError } from 'rxjs';
+import { AnalyticsSecurityService } from './analytics-security.service';
+import { RecaptchaService } from './recaptcha.service';
+import { EMPTY, Observable, catchError, from, switchMap } from 'rxjs';
 
 export interface AnalyticsEvent {
   articleId?: number;
@@ -11,39 +13,68 @@ export interface AnalyticsEvent {
   metadata?: Record<string, unknown>;
 }
 
+interface SecuredAnalyticsPayload extends AnalyticsEvent {
+  recaptchaToken?: string | null;
+  challengeId?: string;
+  solution?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AnalyticsTrackingService {
   private http = inject(HttpClient);
   private consent = inject(CookieConsentService);
   private platformId = inject(PLATFORM_ID);
-
-  private readonly analyticsHeaders = new HttpHeaders({
-    'X-Analytics-Consent': 'granted',
-  });
+  private security = inject(AnalyticsSecurityService);
+  private recaptcha = inject(RecaptchaService);
+  private destroyRef = inject(DestroyRef);
 
   // Time-on-page tracking state
   private pageEntryTime = 0;
   private accumulatedTime = 0;
   private isPageVisible = true;
   private visibilityHandler: (() => void) | null = null;
+  private initialized = false;
 
   /** Check if analytics consent is given */
   hasConsent(): boolean {
     return this.consent.hasConsent('analytics');
   }
 
-  /** Track a generic analytics event. No-ops if analytics consent not given. */
-  track(event: AnalyticsEvent): void {
-    if (!this.hasConsent()) return;
-    this.http.post<void>('/api/v1/analytics/event', event, { headers: this.analyticsHeaders })
-      .pipe(catchError(() => EMPTY))
-      .subscribe();
+  /**
+   * Initialize security tokens after consent is granted.
+   * Pre-fetches token and pre-solves a PoW challenge for instant use.
+   */
+  initSecurity(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.hasConsent() || this.initialized) return;
+    this.initialized = true;
+    // Pre-fetch token and pre-solve challenge in background
+    this.security.getToken().catch(() => {});
+    this.security.preSolveChallenge();
   }
 
-  /** Track an article view by slug. Consent-gated. */
+  /** Track a generic analytics event with all security layers. No-ops if no consent. */
+  track(event: AnalyticsEvent): void {
+    if (!this.hasConsent()) return;
+    this.initSecurity();
+
+    from(this.buildSecuredRequest(event)).pipe(
+      switchMap(({ payload, headers }) =>
+        this.http.post<void>('/api/v1/analytics/event', payload, { headers })
+      ),
+      catchError((err) => {
+        if (isDevMode()) {
+          console.warn('[Analytics] Error:', err);
+        }
+        return EMPTY;
+      })
+    ).subscribe();
+  }
+
+  /** Track an article view by slug. Consent-gated. Simplified path (no PoW/token). */
   trackArticleView(slug: string): Observable<void> {
     if (!this.hasConsent()) return EMPTY;
-    return this.http.post<void>(`/api/v1/analytics/view/${slug}`, null, { headers: this.analyticsHeaders })
+    const headers = new HttpHeaders({ 'X-Analytics-Consent': 'granted' });
+    return this.http.post<void>(`/api/v1/analytics/view/${slug}`, null, { headers })
       .pipe(catchError(() => EMPTY));
   }
 
@@ -58,6 +89,7 @@ export class AnalyticsTrackingService {
 
   /** Track outbound link clicks. */
   trackOutboundClick(url: string, label?: string): void {
+    if (!this.hasConsent()) return;
     this.track({
       eventType: 'CLICK',
       metadata: { url, type: 'outbound', label: label || '' },
@@ -66,6 +98,7 @@ export class AnalyticsTrackingService {
 
   /** Track file downloads. */
   trackDownload(fileName: string, fileType: string): void {
+    if (!this.hasConsent()) return;
     this.track({
       eventType: 'DOWNLOAD',
       metadata: { file: fileName, type: fileType },
@@ -74,6 +107,7 @@ export class AnalyticsTrackingService {
 
   /** Track scroll depth at a specific threshold. */
   trackScrollDepth(depth: number, articleId?: number): void {
+    if (!this.hasConsent()) return;
     this.track({
       articleId,
       eventType: 'SCROLL_DEPTH',
@@ -98,6 +132,14 @@ export class AnalyticsTrackingService {
       }
     };
     document.addEventListener('visibilitychange', this.visibilityHandler);
+
+    // Safety: clean up listener if service is destroyed
+    this.destroyRef.onDestroy(() => {
+      if (this.visibilityHandler) {
+        document.removeEventListener('visibilitychange', this.visibilityHandler);
+        this.visibilityHandler = null;
+      }
+    });
   }
 
   /** Stop time tracking and send the duration event. */
@@ -124,17 +166,57 @@ export class AnalyticsTrackingService {
 
   /**
    * Track using fetch with keepalive for reliable delivery on page unload.
-   * sendBeacon cannot include custom headers, so we use fetch keepalive instead.
+   * Uses pre-cached security tokens when available; falls back gracefully.
    */
   trackBeacon(event: AnalyticsEvent): void {
     if (!this.hasConsent() || !isPlatformBrowser(this.platformId)) return;
-    const url = '/api/v1/analytics/event';
-    const body = JSON.stringify(event);
-    fetch(url, {
-      method: 'POST',
-      body,
-      headers: { 'Content-Type': 'application/json', 'X-Analytics-Consent': 'granted' },
-      keepalive: true,
+
+    this.buildSecuredRequest(event).then(({ payload, headers }) => {
+      const url = '/api/v1/analytics/event';
+      const headerRecord: Record<string, string> = { 'Content-Type': 'application/json' };
+      headers.keys().forEach(key => {
+        const val = headers.get(key);
+        if (val) headerRecord[key] = val;
+      });
+
+      fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: headerRecord,
+        keepalive: true,
+      }).catch(() => {});
     }).catch(() => {});
+  }
+
+  /**
+   * Build a secured analytics request with all security layers:
+   * 1. Session token (X-Analytics-Token header)
+   * 2. Proof-of-work (challengeId + solution in body)
+   * 3. reCAPTCHA v3 token (recaptchaToken in body)
+   */
+  private async buildSecuredRequest(event: AnalyticsEvent): Promise<{
+    payload: SecuredAnalyticsPayload;
+    headers: HttpHeaders;
+  }> {
+    // Fetch all security artifacts in parallel
+    const [token, challenge, recaptchaToken] = await Promise.all([
+      this.security.getToken().catch(() => null),
+      this.security.getSolvedChallenge().catch(() => null),
+      this.recaptcha.execute('analytics_event').catch(() => null),
+    ]);
+
+    const payload: SecuredAnalyticsPayload = {
+      ...event,
+      recaptchaToken: recaptchaToken ?? undefined,
+      challengeId: challenge?.challengeId,
+      solution: challenge?.solution,
+    };
+
+    let headers = new HttpHeaders({ 'X-Analytics-Consent': 'granted' });
+    if (token) {
+      headers = headers.set('X-Analytics-Token', token);
+    }
+
+    return { payload, headers };
   }
 }
