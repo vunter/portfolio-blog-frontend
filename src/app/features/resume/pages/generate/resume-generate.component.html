@@ -75,6 +75,8 @@
  <div class="empty-state">
  <div class="empty-icon"></div>
  <h2>{{ i18n.t('resume.generate.empty') }}</h2>
+ <!-- innerHTML is intentional: this translation contains <strong> tags for emphasis.
+      Angular's built-in sanitizer handles it safely (no bypass needed). -->
  <p [innerHTML]="i18n.t('resume.generate.emptyHint')"></p>
  </div>
  }

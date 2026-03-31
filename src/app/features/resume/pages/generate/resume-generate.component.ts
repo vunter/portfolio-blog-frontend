@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, isDevMode, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -81,7 +81,10 @@ export class ResumeGenerateComponent implements OnInit {
         if (err.status === 404) {
           this.errorMessage.set(this.i18n.t('resume.generate.profileNotFound'));
         } else {
-          this.errorMessage.set(this.i18n.t('resume.generate.errorGenerating') + ': ' + (err.error?.message || err.message || ''));
+          if (isDevMode()) {
+            console.error('[ResumeGenerate] generate error:', err.error?.message || err.message);
+          }
+          this.errorMessage.set(this.i18n.t('resume.generate.errorGenerating'));
         }
       },
     });
@@ -104,7 +107,10 @@ export class ResumeGenerateComponent implements OnInit {
         this.downloadService.downloadBlob(blob, filename);
       },
       error: (err) => {
-        this.errorMessage.set(this.i18n.t('resume.generate.errorDownload') + ': ' + (err.error?.message || err.message || ''));
+        if (isDevMode()) {
+          console.error('[ResumeGenerate] download error:', err.error?.message || err.message);
+        }
+        this.errorMessage.set(this.i18n.t('resume.generate.errorDownload'));
       },
     });
   }
@@ -130,7 +136,10 @@ export class ResumeGenerateComponent implements OnInit {
       },
       error: (err) => {
         this.generatingPdf.set(false);
-        this.errorMessage.set(this.i18n.t('resume.generate.errorPdf') + ': ' + (err.error?.message || err.message || ''));
+        if (isDevMode()) {
+          console.error('[ResumeGenerate] PDF error:', err.error?.message || err.message);
+        }
+        this.errorMessage.set(this.i18n.t('resume.generate.errorPdf'));
       },
     });
   }
@@ -179,7 +188,10 @@ export class ResumeGenerateComponent implements OnInit {
       },
       error: (err) => {
         this.savingTemplate.set(false);
-        this.errorMessage.set(this.i18n.t('resume.generate.errorSavingTemplate') + ': ' + (err.error?.message || err.message || ''));
+        if (isDevMode()) {
+          console.error('[ResumeGenerate] save template error:', err.error?.message || err.message);
+        }
+        this.errorMessage.set(this.i18n.t('resume.generate.errorSavingTemplate'));
       },
     });
   }
@@ -221,7 +233,10 @@ export class ResumeGenerateComponent implements OnInit {
       },
       error: (err) => {
         this.updatingTemplate.set(false);
-        this.errorMessage.set(this.i18n.t('resume.generate.errorUpdatingTemplate') + ': ' + (err.error?.message || err.message || ''));
+        if (isDevMode()) {
+          console.error('[ResumeGenerate] update template error:', err.error?.message || err.message);
+        }
+        this.errorMessage.set(this.i18n.t('resume.generate.errorUpdatingTemplate'));
       },
     });
   }
