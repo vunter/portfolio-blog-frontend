@@ -6,8 +6,7 @@ import {
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
-
-const LANG_STORAGE_KEY = 'app-language';
+import { LANG_STORAGE_KEY } from '../services/i18n.service';
 
 const LANG_MAP: Record<string, string> = {
   pt: 'pt-BR,pt;q=0.9,en;q=0.5',

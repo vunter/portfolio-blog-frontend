@@ -4,6 +4,8 @@ import { HttpClient, HttpBackend } from '@angular/common/http';
 import { en } from './i18n/en';
 import { CookieConsentService } from './cookie-consent.service';
 
+export const LANG_STORAGE_KEY = 'app-language';
+
 export type Language = string;
 
 export interface LanguageOption {
@@ -37,7 +39,7 @@ const I18N_CACHE_TTL = 86400_000; // 24h
   providedIn: 'root',
 })
 export class I18nService {
-  private readonly STORAGE_KEY = 'app-language';
+  private readonly STORAGE_KEY = LANG_STORAGE_KEY;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly consent = inject(CookieConsentService);
   private readonly http = inject(HttpClient);
