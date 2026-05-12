@@ -1,15 +1,20 @@
 // Karma configuration file (Q12.2)
-// Coverage thresholds enforce minimum test quality in CI
+// Coverage thresholds enforce minimum test quality in CI.
+//
+// The Angular CLI moved its Karma integration from
+// `@angular-devkit/build-angular/plugins/karma` to the modern
+// `@angular/build:karma` builder declared in angular.json. The builder
+// injects its own framework + plugin, so this file only declares jasmine
+// and the launcher / reporter plugins.
 module.exports = function (config) {
   config.set({
     basePath: '',
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    frameworks: ['jasmine'],
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-coverage'),
       require('karma-jasmine-html-reporter'),
-      require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
       jasmine: {},
