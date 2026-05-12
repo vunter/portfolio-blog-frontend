@@ -13,8 +13,8 @@
  </svg>
  <input
  type="text"
- [(ngModel)]="searchQuery"
- (ngModelChange)="onSearchChange($event)"
+ [ngModel]="searchQuery()"
+ (ngModelChange)="searchQuery.set($event); onSearchChange($event)"
  [placeholder]="i18n.t('search.placeholder')"
  class="search-input"
  autocomplete="off"
@@ -37,6 +37,7 @@
  type="button"
  class="suggestion-item"
  role="option"
+ [attr.aria-selected]="false"
  (click)="selectSuggestion(suggestion)"
  >
  <span class="suggestion-type">{{ suggestion.type }}</span>

@@ -1,7 +1,8 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../../core/services/api.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -20,6 +21,7 @@ export class ContactFormComponent {
   private readonly api = inject(ApiService);
   private readonly recaptcha = inject(RecaptchaService);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   contactForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -52,9 +54,9 @@ export class ContactFormComponent {
       // Reset form after success is signalled
       this.contactForm.reset();
 
-      // Hide success message after 5 seconds
-      setTimeout(() => this.success.set(false), 5000);
-    } catch (error) {
+      // Q7.2: Hide success message after 5 seconds, auto-cancelled on destroy
+      timer(5000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.success.set(false));
+    } catch (_error) {
       this.notification.error(this.i18n.t('contactForm.errorNotification'));
     } finally {
       this.submitting.set(false);

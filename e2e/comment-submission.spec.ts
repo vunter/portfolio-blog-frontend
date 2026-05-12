@@ -29,7 +29,7 @@ test.describe('Comment Submission Flow', () => {
     const page = await browser.newPage();
 
     // Login as admin via API
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
 
@@ -51,7 +51,7 @@ test.describe('Comment Submission Flow', () => {
     const page = await browser.newPage();
 
     // Cleanup: login and delete the test article
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
 

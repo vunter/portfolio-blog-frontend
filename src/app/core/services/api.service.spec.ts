@@ -146,6 +146,91 @@ describe('ApiService', () => {
     });
   });
 
+  describe('cachedGet', () => {
+    it('should return cached data on second call within TTL', () => {
+      const mockData = { id: 1, name: 'Test' };
+      let callCount = 0;
+
+      // First call — cache miss
+      service.cachedGet('/articles/1').subscribe((data) => {
+        expect(data).toEqual(mockData);
+        callCount++;
+      });
+      httpMock.expectOne(`${baseUrl}/articles/1`).flush(mockData);
+
+      // Second call — should return cached data, no HTTP request
+      service.cachedGet('/articles/1').subscribe((data) => {
+        expect(data).toEqual(mockData);
+        callCount++;
+      });
+      httpMock.expectNone(`${baseUrl}/articles/1`);
+      expect(callCount).toBe(2);
+    });
+
+    it('should deduplicate concurrent in-flight requests', () => {
+      const mockData = { id: 1 };
+
+      // Two concurrent calls
+      service.cachedGet('/tags').subscribe();
+      service.cachedGet('/tags').subscribe();
+
+      // Only one HTTP request should be made
+      const reqs = httpMock.match(`${baseUrl}/tags`);
+      expect(reqs.length).toBe(1);
+      reqs[0].flush(mockData);
+    });
+
+    it('should include query params in cache key', () => {
+      service.cachedGet('/articles', { status: 'PUBLISHED' }).subscribe();
+      service.cachedGet('/articles', { status: 'DRAFT' }).subscribe();
+
+      // Different params = different cache keys = two HTTP requests
+      const reqs = httpMock.match(r => r.url.includes('/articles'));
+      expect(reqs.length).toBe(2);
+      expect(reqs[0].request.params.get('status')).toBe('PUBLISHED');
+      expect(reqs[1].request.params.get('status')).toBe('DRAFT');
+      reqs[0].flush([]);
+      reqs[1].flush([]);
+    });
+  });
+
+  describe('invalidateCache', () => {
+    it('should clear all cached entries when called without prefix', () => {
+      const mockData = { id: 1 };
+
+      // Populate cache
+      service.cachedGet('/articles/1').subscribe();
+      httpMock.expectOne(`${baseUrl}/articles/1`).flush(mockData);
+
+      // Invalidate
+      service.invalidateCache();
+
+      // Next call should make a new request (proves cache was cleared)
+      service.cachedGet('/articles/1').subscribe();
+      expect(httpMock.match(`${baseUrl}/articles/1`).length).toBe(1);
+    });
+
+    it('should clear only matching prefix entries', () => {
+      // Populate cache with two different endpoints
+      service.cachedGet('/articles/1').subscribe();
+      httpMock.expectOne(`${baseUrl}/articles/1`).flush({ id: 1 });
+
+      service.cachedGet('/tags').subscribe();
+      httpMock.expectOne(`${baseUrl}/tags`).flush([]);
+
+      // Invalidate only articles
+      service.invalidateCache('/articles');
+
+      // Articles should need a new request
+      service.cachedGet('/articles/1').subscribe();
+      expect(httpMock.match(`${baseUrl}/articles/1`).length).toBe(1);
+
+      // Tags should still be cached — no new HTTP request
+      service.cachedGet('/tags').subscribe();
+      expect(httpMock.match(`${baseUrl}/tags`).length).toBe(0);
+    });
+  });
+
   describe('error handling', () => {
     it('should propagate 404 errors', () => {
       service.get('/articles/nonexistent-slug').subscribe({

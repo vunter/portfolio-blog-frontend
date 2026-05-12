@@ -1,0 +1,33 @@
+<div class="review-panel">
+ <h3>{{ i18n.t('dev.articles.reviewHistory') }}</h3>
+ @if (originalStatus() === 'REVIEW') {
+ <div class="review-feedback-form">
+ <label>{{ i18n.t('dev.articles.reviewFeedback') }}</label>
+ <textarea class="form-control" rows="3" [value]="feedbackText()" (input)="feedbackText.set($any($event.target).value)" [placeholder]="i18n.t('dev.articles.reviewFeedbackPlaceholder')"></textarea>
+ <button type="button" class="btn btn-outline btn-changes btn-sm" (click)="requestChanges()">
+ {{ i18n.t('dev.articles.requestChanges') }}
+ </button>
+ </div>
+ }
+ @for (review of reviewHistory(); track review.id) {
+ <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'" [class.review-entry--pending]="review.status === 'PENDING'">
+ <div class="review-entry-header">
+ <span class="review-status-badge" [class]="'review-status--' + review.status.toLowerCase().replace('_', '-')">
+ @if (review.status === 'APPROVED') {
+ {{ i18n.t('dev.articles.reviewApproved') }}
+ } @else if (review.status === 'PENDING') {
+ {{ i18n.t('dev.articles.statusReview') }}
+ } @else {
+ {{ i18n.t('dev.articles.reviewChangesRequested') }}
+ }
+ </span>
+ <span class="review-date">{{ review.createdAt | date:'short' }}</span>
+ </div>
+ @if (review.feedback) {
+ <p class="review-feedback">{{ review.feedback }}</p>
+ }
+ </div>
+ } @empty {
+ <p class="review-empty">{{ i18n.t('dev.articles.noReviews') }}</p>
+ }
+</div>

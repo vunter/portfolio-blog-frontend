@@ -1,0 +1,17 @@
+// Q11.1: Skip-to-content link — hidden until focused via keyboard
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color, #3b82f6);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0;
+
+  &:focus {
+    top: 0;
+  }
+}

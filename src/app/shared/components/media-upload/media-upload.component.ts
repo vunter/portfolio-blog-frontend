@@ -20,7 +20,6 @@ import { I18nService } from '../../../core/services/i18n.service';
  */
 @Component({
   selector: 'app-media-upload',
-  standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './media-upload.component.html',
   styleUrl: './media-upload.component.scss',

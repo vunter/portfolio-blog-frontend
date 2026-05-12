@@ -17,22 +17,18 @@ import {
 } from '@angular/core';
 import { DatePipe, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarkdownModule } from 'ngx-markdown';
 // PERF-F-02: PrismJS is lazy-loaded only when article content is rendered,
 // instead of being included in global scripts (which blocked initial page load).
 // ngx-markdown auto-detects window.Prism for syntax highlighting.
-import { environment } from '../../../../../environments/environment';
+import { ScrollDepthTrackerService } from './services/scroll-depth-tracker.service';
 import { ArticleService } from '../../services/article.service';
-import { CommentService } from '../../services/comment.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
-import { RecaptchaService } from '../../../../core/services/recaptcha.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AnalyticsTrackingService } from '../../../../core/services/analytics-tracking.service';
 import { AuthStore } from '../../../../core/auth/auth.store';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { BreadcrumbsComponent, Breadcrumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
@@ -40,10 +36,10 @@ import { getInitials } from '../../../../shared/utils/string.utils';
 import {
   ArticleResponse,
   ArticleSummaryResponse,
-  CommentResponse,
 } from '../../../../models';
+import { ArticleCommentsComponent } from './components/article-comments/article-comments.component';
 import { shareNative, shareTwitter as shareTwitterUtil, shareLinkedIn as shareLinkedInUtil, shareFacebook as shareFacebookUtil, copyArticleLink } from './utils/share.util';
-import { setCopyIcon, setCheckIcon } from './utils/copy-icon.util';
+import { ContentProcessorService } from './services/content-processor.service';
 
 interface TocItem {
   id: string;
@@ -57,12 +53,11 @@ interface TocItem {
     RouterLink,
     DatePipe,
     NgOptimizedImage,
-    FormsModule,
     MarkdownModule,
-    LoadingSpinnerComponent,
     SkeletonComponent,
     ArticleCardComponent,
     BreadcrumbsComponent,
+    ArticleCommentsComponent,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
@@ -73,11 +68,9 @@ interface TocItem {
 export class ArticleDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly articleService = inject(ArticleService);
-  private readonly commentService = inject(CommentService);
   private readonly notification = inject(NotificationService);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly recaptcha = inject(RecaptchaService);
   private readonly renderer = inject(Renderer2);
   private readonly elementRef = inject(ElementRef);
   private readonly zone = inject(NgZone);
@@ -85,6 +78,8 @@ export class ArticleDetailComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly authStore = inject(AuthStore);
   private readonly analytics = inject(AnalyticsTrackingService);
+  private readonly contentProcessor = inject(ContentProcessorService);
+  private readonly scrollDepthTracker = inject(ScrollDepthTrackerService);
 
   readonly dateLocale = computed(() => {
     const lang = this.i18n.language();
@@ -93,30 +88,11 @@ export class ArticleDetailComponent implements OnInit {
   });
 
   article = signal<ArticleResponse | null>(null);
-  comments = signal<CommentResponse[]>([]);
-  commentPage = signal(0);
-  commentTotalElements = signal(0);
-  hasMoreComments = signal(false);
-  loadingMoreComments = signal(false);
-  commentSort = signal<string>('liked');
-  commentLiked = signal<Record<string, boolean>>({});
   relatedArticles = signal<ArticleSummaryResponse[]>([]);
   loading = signal(true);
   liked = signal(false);
-
-  // Comment form signals
-  commentName = signal('');
-  commentEmail = signal('');
-  commentContent = signal('');
-  submittingComment = signal(false);
-  commentSubmitted = signal(false);
-
-  // Reply form signals
-  replyingTo = signal<CommentResponse | null>(null);
-  replyParentId = signal<string | null>(null);
-  replyName = signal('');
-  replyContent = signal('');
-  submittingReply = signal(false);
+  likePending = signal(false);
+  commentTotalElements = signal(0);
 
   // Reading progress & ToC
   readingProgress = signal(0);
@@ -138,16 +114,8 @@ export class ArticleDetailComponent implements OnInit {
   private headingsProcessed = false;
   private codeBlocksProcessed = false;
   private headingObserver: IntersectionObserver | null = null;
-  private scrollDepthObserver: IntersectionObserver | null = null;
-  private firedScrollThresholds = new Set<number>();
-  // PERF-F-06: Store cleanup functions for event listeners to prevent memory leaks
-  private readonly eventCleanups: Array<() => void> = [];
-  // PERF-F-03: Bound reference for scroll listener cleanup
-  private readonly boundScrollHandler = () => this.onWindowScroll();
-  // Q8.8: Debounce map for comment like operations — tracks pending timeouts per comment ID
-  private readonly pendingLikes = new Map<number | string, ReturnType<typeof setTimeout>>();
-  // Q8.11: Scroll depth thresholds from environment config
-  private static readonly SCROLL_DEPTH_THRESHOLDS = environment.scrollDepthThresholds;
+  private progressObserver: IntersectionObserver | null = null;
+  private readonly eventCleanups: (() => void)[] = [];
 
   tocItems = computed(() => {
     const content = this.article()?.content;
@@ -164,7 +132,7 @@ export class ArticleDetailComponent implements OnInit {
       const match = line.match(/^(#{2,3})\s+(.+)$/);
       if (match) {
         const level = match[1].length;
-        const text = match[2].replace(/[*_`\[\]]/g, '').trim();
+        const text = match[2].replace(/[*_`[\]]/g, '').trim();
         const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
         items.push({ id, text, level });
       }
@@ -179,20 +147,11 @@ export class ArticleDetailComponent implements OnInit {
     // F-328: DestroyRef-based cleanup replaces manual ngOnDestroy
     this.destroyRef.onDestroy(() => {
       this.headingObserver?.disconnect();
-      this.scrollDepthObserver?.disconnect();
+      this.scrollDepthTracker.destroy();
+      this.progressObserver?.disconnect();
       // Send time-on-page analytics on navigation away
       const article = this.article();
       this.analytics.stopTimeTracking(article?.id ? +article.id : undefined);
-      if (this.scrollThrottleTimer) {
-        clearTimeout(this.scrollThrottleTimer);
-        this.scrollThrottleTimer = null;
-      }
-      if (isPlatformBrowser(this.platformId)) {
-        window.removeEventListener('scroll', this.boundScrollHandler);
-      }
-      // Q8.8: Clear all pending like debounce timers
-      this.pendingLikes.forEach(timer => clearTimeout(timer));
-      this.pendingLikes.clear();
       this.eventCleanups.forEach(cleanup => cleanup());
       this.eventCleanups.length = 0;
     });
@@ -210,13 +169,17 @@ export class ArticleDetailComponent implements OnInit {
     });
 
     // PERF-01: Use afterNextRender + effect instead of ngAfterViewChecked
-    // This runs only once per render cycle, not on every change detection
+    // This runs only once per render cycle, not on every change detection.
+    // The progress observer ALSO needs to wait for the article DOM to render —
+    // calling it from ngOnInit returned null because .article-content wasn't
+    // in the tree yet.
     effect(() => {
       const article = this.article();
       if (article && isPlatformBrowser(this.platformId)) {
-        // Schedule DOM processing after Angular finishes rendering
-        // Use requestAnimationFrame as afterNextRender only works in constructor context
-        requestAnimationFrame(() => this.processArticleContent());
+        requestAnimationFrame(() => {
+          this.processArticleContent();
+          this.zone.runOutsideAngular(() => this.initProgressObserver());
+        });
       }
     });
   }
@@ -229,89 +192,28 @@ export class ArticleDetailComponent implements OnInit {
         this.loadArticle(slug);
       }
     });
-
-    // PERF-F-03: Register scroll listener outside Angular zone to prevent change detection
-    // on every scroll event. The handler only updates signals when throttle timer fires.
-    if (isPlatformBrowser(this.platformId)) {
-      this.zone.runOutsideAngular(() => {
-        window.addEventListener('scroll', this.boundScrollHandler, { passive: true });
-      });
-    }
   }
 
-  // PERF-01: Extracted from ngAfterViewChecked — runs once after render, not every CD cycle
-  // CRIT-01: Angular-native DOM manipulation using Renderer2 instead of direct DOM access
+  // Q7.1: DOM processing delegated to ContentProcessorService
   private processArticleContent(): void {
     const hostEl = this.elementRef.nativeElement as HTMLElement;
 
     if (!this.headingsProcessed) {
       const contentEl = hostEl.querySelector('.article-content');
       if (contentEl) {
-        const headings = contentEl.querySelectorAll('h2, h3');
+        const headings = this.contentProcessor.processHeadings(this.renderer, contentEl);
         if (headings.length > 0) {
-          headings.forEach((h) => {
-            const text = (h.textContent || '').trim();
-            const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-            this.renderer.setAttribute(h, 'id', id);
-          });
           this.headingsProcessed = true;
           this.setupHeadingObserver(headings);
         }
       }
     }
 
-    // Add copy buttons to code blocks using Renderer2
-    // PERF-F-06: Click handler references stored in eventCleanups, cleaned up via DestroyRef
     if (!this.codeBlocksProcessed) {
       const codeBlocks = hostEl.querySelectorAll('.article-content pre');
       if (codeBlocks.length > 0) {
-        codeBlocks.forEach((pre) => {
-          if (pre.querySelector('.code-copy-btn')) return;
-          const wrapper = this.renderer.createElement('div');
-          this.renderer.addClass(wrapper, 'code-block-wrapper');
-          this.renderer.setStyle(wrapper, 'position', 'relative');
-          this.renderer.setStyle(wrapper, 'margin', '1.5rem 0');
-          this.renderer.insertBefore(pre.parentNode, wrapper, pre);
-          this.renderer.appendChild(wrapper, pre);
-          this.renderer.setStyle(pre, 'margin', '0');
-
-          const btn = this.renderer.createElement('button');
-          this.renderer.addClass(btn, 'code-copy-btn');
-          this.renderer.setAttribute(btn, 'title', this.i18n.t('blog.copyCode'));
-          this.renderer.setStyle(btn, 'position', 'absolute');
-          this.renderer.setStyle(btn, 'top', '0.5rem');
-          this.renderer.setStyle(btn, 'right', '0.5rem');
-          this.renderer.setStyle(btn, 'background', 'rgba(255, 255, 255, 0.12)');
-          this.renderer.setStyle(btn, 'border', '1px solid rgba(255, 255, 255, 0.15)');
-          this.renderer.setStyle(btn, 'border-radius', '6px');
-          this.renderer.setStyle(btn, 'color', '#94a3b8');
-          this.renderer.setStyle(btn, 'cursor', 'pointer');
-          this.renderer.setStyle(btn, 'padding', '0.375rem');
-          this.renderer.setStyle(btn, 'line-height', '0');
-          this.renderer.setStyle(btn, 'z-index', '1');
-          this.renderer.setStyle(btn, 'transition', 'background 0.2s, color 0.2s');
-          // F-337: Use Renderer2 instead of innerHTML to avoid bypassing Angular sanitization
-          setCopyIcon(this.renderer, btn);
-          // PERF-F-06: Store unlisten function for cleanup in ngOnDestroy
-          const unlisten = this.renderer.listen(btn, 'click', () => {
-            const code = pre.querySelector('code')?.textContent || pre.textContent || '';
-            navigator.clipboard.writeText(code).then(() => {
-              this.zone.run(() => {
-                setCheckIcon(this.renderer, btn);
-                this.notification.success(this.i18n.t('blog.codeCopied'));
-                setTimeout(() => {
-                  setCopyIcon(this.renderer, btn);
-                }, 2000);
-              });
-            }).catch(() => {
-              this.zone.run(() => {
-                this.notification.error(this.i18n.t('blog.copyFailed'));
-              });
-            });
-          });
-          this.eventCleanups.push(unlisten);
-          this.renderer.appendChild(wrapper, btn);
-        });
+        const cleanups = this.contentProcessor.addCopyButtons(this.renderer, hostEl);
+        this.eventCleanups.push(...cleanups);
         this.codeBlocksProcessed = true;
       }
     }
@@ -333,25 +235,41 @@ export class ArticleDetailComponent implements OnInit {
     headings.forEach((h) => this.headingObserver!.observe(h));
   }
 
-  private scrollThrottleTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * Q8.3: IntersectionObserver-based reading progress — replaces scroll listener.
+   * Observes the article content element with fine-grained thresholds.
+   */
+  private initProgressObserver(): void {
+    const hostEl = this.elementRef.nativeElement as HTMLElement;
+    const contentEl = hostEl.querySelector('.article-content');
+    if (!contentEl) return;
 
-  onWindowScroll(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.scrollThrottleTimer) return;
-    this.scrollThrottleTimer = setTimeout(() => {
-      this.scrollThrottleTimer = null;
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      this.readingProgress.set(docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0);
-    }, 60);
+    // Generate thresholds at 1% intervals for smooth progress
+    const thresholds = Array.from({ length: 101 }, (_, i) => i / 100);
+
+    this.progressObserver?.disconnect();
+    this.progressObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        // intersectionRatio tells us how much of the article is visible;
+        // as user scrolls down, the ratio of the part above viewport increases.
+        // Use the bounding rect to compute actual read progress.
+        const rect = entry.boundingClientRect;
+        const viewportHeight = entry.rootBounds?.height ?? window.innerHeight;
+        const totalHeight = rect.height;
+        if (totalHeight <= 0) continue;
+        // How far the top of the article has scrolled past the top of the viewport
+        const scrolledPast = Math.max(0, -rect.top);
+        const progress = Math.min((scrolledPast / (totalHeight - viewportHeight)) * 100, 100);
+        this.readingProgress.set(Math.max(0, progress));
+      }
+    }, { threshold: thresholds });
+    this.progressObserver.observe(contentEl);
   }
 
   loadArticle(slug: string): void {
     this.loading.set(true);
     this.headingsProcessed = false;
     this.codeBlocksProcessed = false;
-    this.commentSubmitted.set(false);
-
     this.articleService.getArticleBySlug(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (article) => {
         this.article.set(article);
@@ -371,7 +289,6 @@ export class ArticleDetailComponent implements OnInit {
           this.trackView(slug);
         }
         this.isLanguageReload = false;
-        this.loadComments(slug);
         this.loadRelatedArticles(slug);
         this.loadLikeStatus(slug);
       },
@@ -395,7 +312,8 @@ export class ArticleDetailComponent implements OnInit {
     // Start time-on-page tracking
     this.analytics.startTimeTracking();
     // Init scroll depth tracking
-    this.initScrollDepthTracking();
+    const article = this.article();
+    this.scrollDepthTracker.init(article?.id ? +article.id : undefined);
     // Send UTM attribution if present
     if (isPlatformBrowser(this.platformId)) {
       const params = new URLSearchParams(window.location.search);
@@ -412,169 +330,8 @@ export class ArticleDetailComponent implements OnInit {
     }
   }
 
-  private initScrollDepthTracking(): void {
-    if (!isPlatformBrowser(this.platformId) || !this.analytics.hasConsent()) return;
-    this.firedScrollThresholds.clear();
-    this.scrollDepthObserver?.disconnect();
-
-    // Delay slightly to ensure article content is rendered
-    requestAnimationFrame(() => {
-      const articleBody = document.querySelector('.article-content') as HTMLElement;
-      if (!articleBody) return;
-
-      // Remove any existing sentinel nodes before creating new ones
-      articleBody.querySelectorAll('[data-scroll-threshold]').forEach(el => el.remove());
-
-      // Ensure the article body is positioned for absolute sentinel placement
-      const position = getComputedStyle(articleBody).position;
-      if (position === 'static') {
-        articleBody.style.position = 'relative';
-      }
-
-      const thresholds = ArticleDetailComponent.SCROLL_DEPTH_THRESHOLDS;
-      const sentinels: HTMLElement[] = [];
-
-      thresholds.forEach(threshold => {
-        const sentinel = document.createElement('div');
-        sentinel.dataset['scrollThreshold'] = threshold.toString();
-        sentinel.style.cssText = 'height:1px;width:100%;position:absolute;pointer-events:none;opacity:0;';
-        sentinel.style.top = `${threshold}%`;
-        articleBody.appendChild(sentinel);
-        sentinels.push(sentinel);
-      });
-
-      this.scrollDepthObserver = new IntersectionObserver((entries) => {
-        const article = this.article();
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const threshold = parseInt(entry.target.getAttribute('data-scroll-threshold') || '0', 10);
-            if (threshold && !this.firedScrollThresholds.has(threshold)) {
-              this.firedScrollThresholds.add(threshold);
-              this.analytics.trackScrollDepth(threshold, article?.id ? +article.id : undefined);
-            }
-          }
-        });
-      }, { threshold: 0.1 });
-
-      sentinels.forEach(s => this.scrollDepthObserver!.observe(s));
-    });
-  }
-
-  loadComments(slug: string): void {
-    this.commentPage.set(0);
-    const sort = this.commentSort();
-    this.commentService.getCommentsPaged(slug, 0, 20, sort).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.comments.set(response.content ?? []);
-        this.commentTotalElements.set(response.totalElements);
-        this.hasMoreComments.set(response.page < response.totalPages - 1);
-        this.commentPage.set(response.page);
-        if (this.authStore.isAuthenticated()) {
-          this.loadCommentLikeStatuses(slug, response.content ?? []);
-        }
-      },
-      error: () => {
-        this.comments.set([]);
-        this.commentTotalElements.set(0);
-        this.hasMoreComments.set(false);
-      },
-    });
-  }
-
-  loadMoreComments(): void {
-    const slug = this.currentSlug;
-    if (!slug || this.loadingMoreComments()) return;
-    this.loadingMoreComments.set(true);
-    const nextPage = this.commentPage() + 1;
-    const sort = this.commentSort();
-    this.commentService.getCommentsPaged(slug, nextPage, 20, sort).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (response) => {
-        this.comments.update(prev => [...prev, ...(response.content ?? [])]);
-        this.commentPage.set(response.page);
-        this.hasMoreComments.set(response.page < response.totalPages - 1);
-        this.loadingMoreComments.set(false);
-        if (this.authStore.isAuthenticated()) {
-          this.loadCommentLikeStatuses(slug, response.content ?? []);
-        }
-      },
-      error: () => {
-        this.loadingMoreComments.set(false);
-      },
-    });
-  }
-
-  onCommentSortChange(sort: string): void {
-    this.commentSort.set(sort);
-    if (this.currentSlug) {
-      this.loadComments(this.currentSlug);
-    }
-  }
-
-  toggleCommentLike(comment: CommentResponse): void {
-    const slug = this.currentSlug;
-    if (!slug) return;
-    if (!this.authStore.isAuthenticated()) {
-      this.notification.warning(this.i18n.t('blog.loginToLike'));
-      return;
-    }
-    // Q8.8: Optimistic UI update (instant toggle)
-    const wasLiked = this.commentLiked()[comment.id] || false;
-    this.commentLiked.update(map => ({ ...map, [comment.id]: !wasLiked }));
-    this.updateCommentLikeCount(comment.id, wasLiked ? -1 : 1);
-
-    // Q8.8: Cancel any pending backend call for this comment
-    const pending = this.pendingLikes.get(comment.id);
-    if (pending) clearTimeout(pending);
-
-    // Q8.8: Debounce the backend call — only send final state after 500ms
-    this.pendingLikes.set(comment.id, setTimeout(() => {
-      this.pendingLikes.delete(comment.id);
-      this.commentService.toggleCommentLike(slug, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (res) => {
-          this.commentLiked.update(map => ({ ...map, [comment.id]: res.liked }));
-          this.updateCommentLikeCount(comment.id, 0, res.likesCount);
-        },
-        error: () => {
-          this.commentLiked.update(map => ({ ...map, [comment.id]: wasLiked }));
-          this.updateCommentLikeCount(comment.id, wasLiked ? 0 : -1);
-        },
-      });
-    }, 500));
-  }
-
-  private updateCommentLikeCount(commentId: string, delta: number, absolute?: number): void {
-    const updateInList = (list: CommentResponse[]): CommentResponse[] =>
-      list.map(c => {
-        if (c.id === commentId) {
-          return { ...c, likesCount: absolute !== undefined ? absolute : (c.likesCount || 0) + delta };
-        }
-        if (c.replies?.length) {
-          return { ...c, replies: updateInList(c.replies) };
-        }
-        return c;
-      });
-    this.comments.update(prev => updateInList(prev));
-  }
-
-  private loadCommentLikeStatuses(slug: string, comments: CommentResponse[]): void {
-    const allComments = this.flattenComments(comments);
-    allComments.forEach(c => {
-      this.commentService.getCommentLikeStatus(slug, c.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (res) => this.commentLiked.update(map => ({ ...map, [c.id]: res.liked })),
-        error: () => {},
-      });
-    });
-  }
-
-  private flattenComments(comments: CommentResponse[]): CommentResponse[] {
-    const result: CommentResponse[] = [];
-    for (const c of comments) {
-      result.push(c);
-      if (c.replies?.length) {
-        result.push(...this.flattenComments(c.replies));
-      }
-    }
-    return result;
+  onCommentCountChange(count: number): void {
+    this.commentTotalElements.set(count);
   }
 
   loadRelatedArticles(slug: string): void {
@@ -594,6 +351,8 @@ export class ArticleDetailComponent implements OnInit {
   likeArticle(): void {
     const article = this.article();
     if (!article) return;
+    // Q6.4: Prevent duplicate like requests
+    if (this.likePending()) return;
     if (!this.authStore.isAuthenticated()) {
       this.notification.warning(this.i18n.t('blog.loginToLike'));
       return;
@@ -602,16 +361,19 @@ export class ArticleDetailComponent implements OnInit {
     const prev = this.liked();
     const prevCount = article.likeCount;
     this.liked.set(!prev);
+    this.likePending.set(true);
     this.article.set({ ...article, likeCount: prev ? prevCount - 1 : prevCount + 1 });
 
     this.articleService.likeArticle(article.slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.liked.set(response.liked);
         this.article.set({ ...this.article()!, likeCount: response.likeCount });
+        this.likePending.set(false);
       },
       error: () => {
         this.liked.set(prev);
         this.article.set({ ...this.article()!, likeCount: prevCount });
+        this.likePending.set(false);
         this.notification.error(this.i18n.t('blog.failedToLike'));
       },
     });
@@ -624,141 +386,6 @@ export class ArticleDetailComponent implements OnInit {
 
   shareArticle(): void {
     shareNative(this.shareCtx);
-  }
-
-  submitComment(): void {
-    const article = this.article();
-    const content = this.commentContent().trim();
-    const user = this.authStore.user();
-
-    if (!article || !user || content.length < 10) return;
-
-    const name = user.name || user.username || 'User';
-    const email = user.email || '';
-
-    this.submittingComment.set(true);
-    this.commentSubmitted.set(false);
-
-    this.recaptcha.execute('comment').then(recaptchaToken => {
-      this.commentService
-        .createComment(article.slug, {
-          content,
-          authorName: name,
-          authorEmail: email,
-          recaptchaToken: recaptchaToken ?? undefined,
-        })
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (created) => {
-            const optimistic: CommentResponse = {
-              id: created?.id || crypto.randomUUID(),
-              articleId: article.id,
-              articleSlug: article.slug,
-              articleTitle: article.title,
-              authorName: name,
-              authorEmail: email,
-              content,
-              status: 'APPROVED',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-            this.comments.update(list => [optimistic, ...list]);
-            this.commentTotalElements.update(n => n + 1);
-            this.commentContent.set('');
-            this.submittingComment.set(false);
-            this.notification.success(this.i18n.t('article.comments.submitted'));
-          },
-          error: () => {
-            this.submittingComment.set(false);
-            this.notification.error(this.i18n.t('blog.failedToComment'));
-          },
-        });
-    }).catch(() => {
-      this.submittingComment.set(false);
-      this.notification.error(this.i18n.t('blog.failedToComment'));
-    });
-  }
-
-  startReply(comment: CommentResponse, rootParentId?: string): void {
-    this.replyingTo.set(comment);
-    this.replyParentId.set(rootParentId || comment.id);
-    this.replyName.set(this.commentName());
-    this.replyContent.set('');
-  }
-
-  cancelReply(): void {
-    this.replyingTo.set(null);
-    this.replyParentId.set(null);
-    this.replyContent.set('');
-  }
-
-  submitReply(): void {
-    const article = this.article();
-    const parentId = this.replyParentId();
-    const user = this.authStore.user();
-    if (!article || !parentId || !user) return;
-
-    const name = user.name || user.username || 'User';
-    const content = this.replyContent().trim();
-    if (content.length < 10) return;
-
-    const optimisticId = crypto.randomUUID();
-    const optimisticReply: CommentResponse = {
-      id: optimisticId,
-      articleId: article.id,
-      articleSlug: article.slug,
-      articleTitle: article.title,
-      authorName: name,
-      authorEmail: user.email || '',
-      content,
-      status: 'APPROVED',
-      parentId,
-      replies: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    this.comments.update(list =>
-      list.map(c =>
-        c.id === parentId
-          ? { ...c, replies: [...(c.replies || []), optimisticReply] }
-          : c
-      )
-    );
-    this.cancelReply();
-
-    this.recaptcha.execute('comment').then(recaptchaToken => {
-      this.commentService
-        .createComment(article.slug, {
-          authorName: name,
-          authorEmail: user.email || '',
-          content,
-          parentId,
-          recaptchaToken: recaptchaToken ?? undefined,
-        })
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          error: () => {
-            this.comments.update(list =>
-              list.map(c =>
-                c.id === parentId
-                  ? { ...c, replies: (c.replies || []).filter(r => r.id !== optimisticId) }
-                  : c
-              )
-            );
-            this.notification.error(this.i18n.t('blog.failedToComment'));
-          },
-        });
-    }).catch(() => {
-      this.comments.update(list =>
-        list.map(c =>
-          c.id === parentId
-            ? { ...c, replies: (c.replies || []).filter(r => r.id !== optimisticId) }
-            : c
-        )
-      );
-      this.notification.error(this.i18n.t('blog.failedToComment'));
-    });
   }
 
   getInitials = getInitials;

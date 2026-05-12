@@ -9,6 +9,7 @@ import {
 } from '@angular/common/http/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { BookmarkService } from './bookmark.service';
+import { CookieConsentService } from './cookie-consent.service';
 
 describe('BookmarkService', () => {
   let service: BookmarkService;
@@ -19,12 +20,16 @@ describe('BookmarkService', () => {
   beforeEach(() => {
     localStorage.clear();
 
+    const consentSpy = jasmine.createSpyObj('CookieConsentService', ['hasConsent']);
+    consentSpy.hasConsent.and.returnValue(true);
+
     TestBed.configureTestingModule({
       providers: [
         BookmarkService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: PLATFORM_ID, useValue: 'browser' },
+        { provide: CookieConsentService, useValue: consentSpy },
       ],
     });
 

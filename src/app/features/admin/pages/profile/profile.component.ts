@@ -9,6 +9,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { ImageOptimizerService } from '../../../../core/services/image-optimizer.service';
 import { UserResponse } from '../../../../models';
 import { HomeCustomizationComponent } from '../../components/home-customization/home-customization.component';
 import { ResumeProfileComponent } from '../../../resume/pages/profile/resume-profile.component';
@@ -39,6 +40,7 @@ export class ProfileComponent implements OnInit {
   private notification = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
+  private imageOptimizer = inject(ImageOptimizerService);
   i18n = inject(I18nService);
 
   resumeProfile = viewChild(ResumeProfileComponent);
@@ -136,7 +138,7 @@ export class ProfileComponent implements OnInit {
     this.avatarInput()?.nativeElement.click();
   }
 
-  onAvatarFileSelected(event: Event): void {
+  async onAvatarFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -153,7 +155,8 @@ export class ProfileComponent implements OnInit {
     }
 
     this.uploadingAvatar.set(true);
-    this.adminApi.uploadMedia(file, 'AVATAR').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const optimized = await this.imageOptimizer.optimize(file, 'avatar');
+    this.adminApi.uploadMedia(optimized, 'AVATAR').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (asset) => {
         this.uploadingAvatar.set(false);
         this.form.avatarUrl = asset.url;

@@ -44,11 +44,23 @@ export async function acceptTermsIfVisible(page: Page) {
   const modal = page.locator('.terms-overlay');
   try {
     await modal.waitFor({ state: 'visible', timeout: 3000 });
-    await page.locator('.terms-modal__checkbox input[type="checkbox"]').check();
-    await page.locator('.terms-modal__actions .btn-primary').click();
+    // Check the agreement checkbox (try multiple selectors for resilience)
+    const checkbox = page.locator('.terms-overlay input[type="checkbox"]').first();
+    await checkbox.check({ timeout: 3000 });
+    // Click the primary accept button
+    const acceptBtn = page.locator('.terms-overlay button.btn-primary, .terms-overlay button:has-text("Accept")').first();
+    await acceptBtn.click({ timeout: 3000 });
     await expect(modal).not.toBeVisible({ timeout: 5000 });
   } catch {
-    // Modal didn't appear — terms already accepted, continue
+    // Modal didn't appear or couldn't be dismissed — try API fallback
+    await page.request.put(`${API_BASE}/admin/users/me`, {
+      data: { termsAccepted: true },
+    }).catch(() => {});
+    // Reload to clear the modal if it's still visible
+    if (await modal.isVisible().catch(() => false)) {
+      await page.reload();
+      await page.waitForLoadState('load');
+    }
   }
 }
 
@@ -67,6 +79,8 @@ export async function acceptTermsViaAPI(page: Page) {
  */
 export async function loginAsAdmin(page: Page) {
   await loginViaUI(page, ADMIN_CREDS.email, ADMIN_CREDS.password);
+  // Accept terms via API first (ensures the modal won't appear)
+  await acceptTermsViaAPI(page);
   await acceptTermsIfVisible(page);
   // Login redirects to home (/), not /admin — navigate explicitly
   await page.goto('/admin');
@@ -79,6 +93,7 @@ export async function loginAsAdmin(page: Page) {
  */
 export async function loginAs(page: Page, creds: { email: string; password: string }) {
   await loginViaUI(page, creds.email, creds.password);
+  await acceptTermsViaAPI(page);
   await acceptTermsIfVisible(page);
   // Login redirects to home (/), not /admin — navigate explicitly
   await page.goto('/admin');
@@ -107,10 +122,11 @@ export async function logoutFromPublic(page: Page) {
 /**
  * Seed test users via the API using admin credentials.
  * Uses backend API directly to avoid UI overhead.
+ * Handles the case where users were previously soft-deleted by reactivating them.
  */
 export async function seedTestUsers(page: Page) {
   // Login as admin via API to get cookie
-  const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+  const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
     data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
   });
 
@@ -124,14 +140,25 @@ export async function seedTestUsers(page: Page) {
     data: { termsAccepted: true },
   }).catch(() => {});
 
-  // Create test users (ignore errors if they already exist)
   const users = [
     { name: 'Dev User', email: DEV_CREDS.email, password: DEV_CREDS.password, role: 'DEV' },
     { name: 'Viewer User', email: VIEWER_CREDS.email, password: VIEWER_CREDS.password, role: 'VIEWER' },
   ];
 
+  // Get existing users list to check for soft-deleted accounts
+  const listRes = await page.request.get(`${API_BASE}/admin/users?size=200`);
+  const existingUsers = listRes.ok() ? ((await listRes.json()).content || await listRes.json()) : [];
+
   for (const user of users) {
-    await page.request.post(`${API_BASE}/admin/users`, { data: user });
+    const createRes = await page.request.post(`${API_BASE}/admin/users`, { data: user });
+
+    if (!createRes.ok()) {
+      // User already exists (possibly soft-deleted) — find and reactivate
+      const existing = existingUsers.find((u: any) => u.email === user.email);
+      if (existing && !existing.active) {
+        await page.request.put(`${API_BASE}/admin/users/${existing.id}/activate`);
+      }
+    }
   }
 }
 
@@ -148,7 +175,7 @@ export async function waitForApp(page: Page) {
  * Safe to call multiple times (ignores errors if already exists).
  */
 export async function seedProfile(page: Page) {
-  const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+  const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
     data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
   });
   if (!loginRes.ok()) return;

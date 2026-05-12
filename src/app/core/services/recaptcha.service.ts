@@ -22,7 +22,7 @@ export class RecaptchaService {
   }
 
   get isEnabled(): boolean {
-    return !!(this.siteKey && environment.recaptchaEnabled !== false);
+    return !!(this.siteKey && (environment.recaptchaEnabled as boolean));
   }
 
   /**
@@ -68,7 +68,7 @@ export class RecaptchaService {
       return this.scriptLoading;
     }
 
-    this.scriptLoading = new Promise<void>((resolve, reject) => {
+    this.scriptLoading = new Promise<void>((resolve, _reject) => {
       if (!isPlatformBrowser(this.platformId)) {
         resolve();
         return;

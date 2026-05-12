@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -6,7 +6,6 @@ import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { AdminApiService, ReadingHistoryEntry } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
-import { ArticleResponse } from '../../../../models/article.model';
 import { RouterLink } from '@angular/router';
 
 @Component({

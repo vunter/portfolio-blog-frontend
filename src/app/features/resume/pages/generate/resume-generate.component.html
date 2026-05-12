@@ -63,11 +63,12 @@
  } @else if (htmlContent()) {
  <div class="preview-container">
  <div class="preview-label">{{ i18n.t('resume.generate.preview') }}</div>
- <!-- F-338: Restricted sandbox — no allow-scripts, no allow-popups -->
+ <!-- Empty sandbox = strictest. allow-same-origin would let any script that
+      survives sanitization (e.g. <svg onload>) read the parent's cookies/storage. -->
  <iframe
  class="resume-iframe"
  [srcdoc]="trustedHtml()"
- sandbox="allow-same-origin"
+ sandbox=""
  title="Resume Preview"
  ></iframe>
  </div>
@@ -83,11 +84,12 @@
 
  <!-- Save as Template Modal -->
  @if (showSaveModal()) {
- <div class="modal-overlay" (click)="closeSaveModal()">
+ <div class="modal-overlay" appAccessibleModal ariaLabelledBy="resume-save-title"
+      (close)="closeSaveModal()" (click)="closeSaveModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <div class="modal-header">
- <h2>{{ i18n.t('resume.generate.templateModalTitle') }}</h2>
- <button class="modal-close" (click)="closeSaveModal()"></button>
+ <h2 id="resume-save-title">{{ i18n.t('resume.generate.templateModalTitle') }}</h2>
+ <button class="modal-close" (click)="closeSaveModal()" [attr.aria-label]="i18n.t('resume.generate.cancel')">&times;</button>
  </div>
  <div class="modal-body">
  <div class="form-group">
@@ -125,11 +127,12 @@
 
  <!-- Update Existing Template Modal -->
  @if (showUpdateModal()) {
- <div class="modal-overlay" (click)="closeUpdateModal()">
+ <div class="modal-overlay" appAccessibleModal ariaLabelledBy="resume-update-title"
+      (close)="closeUpdateModal()" (click)="closeUpdateModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <div class="modal-header">
- <h2>{{ i18n.t('resume.generate.updateTemplateTitle') }}</h2>
- <button class="modal-close" (click)="closeUpdateModal()"></button>
+ <h2 id="resume-update-title">{{ i18n.t('resume.generate.updateTemplateTitle') }}</h2>
+ <button class="modal-close" (click)="closeUpdateModal()" [attr.aria-label]="i18n.t('resume.generate.cancel')">&times;</button>
  </div>
  <div class="modal-body">
  @if (loadingTemplates()) {

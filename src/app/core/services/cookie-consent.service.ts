@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export type CookieCategory = 'necessary' | 'functional' | 'analytics';
@@ -60,6 +60,21 @@ export class CookieConsentService {
     if (category === 'necessary') return true;
     return this.consent()[category];
   }
+
+  /**
+   * Q14.4: List of feature categories that are degraded due to denied consent.
+   * Empty when all consent categories are accepted.
+   */
+  readonly degradedCategories = computed<CookieCategory[]>(() => {
+    const c = this.consent();
+    const degraded: CookieCategory[] = [];
+    if (!c.functional) degraded.push('functional');
+    if (!c.analytics) degraded.push('analytics');
+    return degraded;
+  });
+
+  /** Whether any optional consent category is denied */
+  readonly hasDegradation = computed(() => this.degradedCategories().length > 0);
 
   /** Re-open the banner (e.g. from a footer "Cookie Settings" link) */
   reopenBanner(): void {

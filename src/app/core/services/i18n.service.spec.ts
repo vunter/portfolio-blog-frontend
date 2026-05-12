@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { I18nService, Language } from './i18n.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { I18nService } from './i18n.service';
+import { CookieConsentService } from './cookie-consent.service';
 
 describe('I18nService', () => {
   let service: I18nService;
@@ -34,8 +37,16 @@ describe('I18nService', () => {
   });
 
   function createService(): I18nService {
+    const consentSpy = jasmine.createSpyObj('CookieConsentService', ['hasConsent']);
+    consentSpy.hasConsent.and.returnValue(true);
+
     TestBed.configureTestingModule({
-      providers: [I18nService],
+      providers: [
+        I18nService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+        { provide: CookieConsentService, useValue: consentSpy },
+      ],
     });
     return TestBed.inject(I18nService);
   }
@@ -136,7 +147,7 @@ describe('I18nService', () => {
     });
 
     it('should return Portuguese translation', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('nav.home')).toBe('Início');
@@ -163,7 +174,7 @@ describe('I18nService', () => {
     });
 
     it('should translate PT with parameter substitution', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('dev.articles.confirmDelete', { title: 'Java 21' })).toBe(
@@ -172,7 +183,7 @@ describe('I18nService', () => {
     });
 
     it('should replace multiple params in one string', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       // admin.users.confirmDelete uses {{name}}
@@ -188,7 +199,7 @@ describe('I18nService', () => {
     });
 
     it('should translate admin sidebar items in PT', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('dev.sidebar.articles')).toBe('Artigos');
@@ -204,7 +215,7 @@ describe('I18nService', () => {
     });
 
     it('should translate login form in PT', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('auth.login.welcome')).toBe('Bem-vindo de volta');
@@ -221,7 +232,7 @@ describe('I18nService', () => {
     });
 
     it('should translate common actions in PT', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('common.save')).toBe('Salvar');
@@ -230,13 +241,45 @@ describe('I18nService', () => {
       expect(service.t('common.edit')).toBe('Editar');
     });
 
+    // Q10.1: Plural form handling
+    it('should return singular form when count is 1', () => {
+      // Simulate a plural key by directly testing the t() method with pipe-separated values
+      // We need to inject a translation with pipe format
+      const translations = (service as any).loadedTranslations;
+      const current = translations();
+      translations.set({ ...current, 'test.items': '{{count}} item|{{count}} items' });
+
+      expect(service.t('test.items', { count: 1 })).toBe('1 item');
+    });
+
+    it('should return plural form when count is not 1', () => {
+      const translations = (service as any).loadedTranslations;
+      const current = translations();
+      translations.set({ ...current, 'test.items': '{{count}} item|{{count}} items' });
+
+      expect(service.t('test.items', { count: 5 })).toBe('5 items');
+    });
+
+    it('should return plural form when count is 0', () => {
+      const translations = (service as any).loadedTranslations;
+      const current = translations();
+      translations.set({ ...current, 'test.items': '{{count}} item|{{count}} items' });
+
+      expect(service.t('test.items', { count: 0 })).toBe('0 items');
+    });
+
+    it('should not split on pipe when no count param is provided', () => {
+      // hero.subtitle contains a literal pipe — should NOT be split
+      expect(service.t('hero.subtitle')).toContain('|');
+    });
+
     // Test hero section
     it('should translate hero section', () => {
       expect(service.t('hero.subtitle')).toBe('Senior Software Engineer | Java & Go');
     });
 
     it('should translate hero section in PT', () => {
-      (service as any).cache.set('pt', ptTranslations);
+      (service as any).loadedTranslations.set({ ...(service as any).loadedTranslations(), ...ptTranslations });
       service.setLanguage('pt');
       TestBed.flushEffects();
       expect(service.t('hero.subtitle')).toBe('Engenheiro de Software Sênior | Java & Go');

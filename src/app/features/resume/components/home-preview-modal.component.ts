@@ -38,5 +38,6 @@ export class HomePreviewModalComponent {
   readonly i18n = inject(I18nService);
 
   readonly profile = input<ResumeProfile | null>(null);
+  // eslint-disable-next-line @angular-eslint/no-output-native
   readonly close = output<void>();
 }

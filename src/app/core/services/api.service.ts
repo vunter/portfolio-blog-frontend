@@ -1,13 +1,40 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { retry, timer, timeout } from 'rxjs';
+import { Observable, of, throwError, MonoTypeOperatorFunction } from 'rxjs';
+import { retry, timer, timeout, tap, shareReplay, finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
+  private readonly cache = new Map<string, CacheEntry<unknown>>();
+  private readonly inflight = new Map<string, Observable<unknown>>();
+  private static readonly DEFAULT_CACHE_TTL = 60_000; // 1 minute
+
+  /**
+   * Q6.3: Retry operator for transient errors.
+   * Retries on network errors (status 0) and gateway errors (502/503/504).
+   * Never retries 4xx (client errors) or 500 (server error — request may have been processed).
+   */
+  private retryTransient<T>(count = 1): MonoTypeOperatorFunction<T> {
+    return retry({
+      count,
+      delay: (error, retryCount) => {
+        if (error instanceof HttpErrorResponse) {
+          if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
+            return timer(retryCount * 1000);
+          }
+        }
+        return throwError(() => error);
+      },
+    });
+  }
 
   get<T>(endpoint: string, queryParams?: Record<string, string | number | boolean>): Observable<T> {
     let params = new HttpParams();
@@ -33,6 +60,49 @@ export class ApiService {
     );
   }
 
+  /**
+   * Q6.2: Cached GET with stale-while-revalidate semantics.
+   * Returns cached data immediately if within TTL; deduplicates in-flight requests.
+   */
+  cachedGet<T>(endpoint: string, queryParams?: Record<string, string | number | boolean>, ttlMs = ApiService.DEFAULT_CACHE_TTL): Observable<T> {
+    const cacheKey = this.buildCacheKey(endpoint, queryParams);
+    const cached = this.cache.get(cacheKey) as CacheEntry<T> | undefined;
+    if (cached && Date.now() - cached.timestamp < ttlMs) {
+      return of(cached.data);
+    }
+    const inflight = this.inflight.get(cacheKey) as Observable<T> | undefined;
+    if (inflight) {
+      return inflight;
+    }
+    const request$ = this.get<T>(endpoint, queryParams).pipe(
+      tap(data => {
+        this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      }),
+      finalize(() => this.inflight.delete(cacheKey)),
+      shareReplay({ bufferSize: 1, refCount: true }),
+    );
+    this.inflight.set(cacheKey, request$);
+    return request$;
+  }
+
+  invalidateCache(endpointPrefix?: string): void {
+    if (!endpointPrefix) {
+      this.cache.clear();
+      return;
+    }
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(endpointPrefix)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  private buildCacheKey(endpoint: string, queryParams?: Record<string, string | number | boolean>): string {
+    if (!queryParams) return endpoint;
+    const sorted = Object.entries(queryParams).sort(([a], [b]) => a.localeCompare(b));
+    return `${endpoint}?${sorted.map(([k, v]) => `${k}=${v}`).join('&')}`;
+  }
+
   post<T>(endpoint: string, body?: unknown, queryParams?: Record<string, string | number | boolean>): Observable<T> {
     let params = new HttpParams();
     if (queryParams) {
@@ -40,7 +110,7 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000));
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000), this.retryTransient());
   }
 
   put<T>(endpoint: string, body: unknown, queryParams?: Record<string, string | number | boolean>): Observable<T> {
@@ -50,19 +120,19 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000));
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000), this.retryTransient());
   }
 
   putResponse<T>(endpoint: string, body: unknown): Observable<HttpResponse<T>> {
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { observe: 'response' }).pipe(timeout(30000));
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, { observe: 'response' }).pipe(timeout(30000), this.retryTransient());
   }
 
   patch<T>(endpoint: string, body?: unknown): Observable<T> {
-    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, body).pipe(timeout(30000));
+    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, body).pipe(timeout(30000), this.retryTransient());
   }
 
   delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(timeout(30000));
+    return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(timeout(30000), this.retryTransient());
   }
 
   upload<T>(endpoint: string, file: File, fieldName = 'file'): Observable<T> {

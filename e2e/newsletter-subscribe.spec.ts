@@ -19,7 +19,7 @@ test.describe('Newsletter Subscribe Flow', () => {
     // Cleanup: remove the test subscriber via admin API
     const page = await browser.newPage();
 
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
 

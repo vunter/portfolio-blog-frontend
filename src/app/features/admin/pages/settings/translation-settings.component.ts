@@ -7,7 +7,6 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 
 @Component({
   selector: 'app-translation-settings',
-  standalone: true,
   templateUrl: './translation-settings.component.html',
   styleUrl: './translation-settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

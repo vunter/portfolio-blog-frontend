@@ -22,7 +22,7 @@
  class="search-input"
  [placeholder]="i18n.t('dev.common.search')"
  [ngModel]="searchQuery()"
- (ngModelChange)="searchQuery.set($event)"
+ (ngModelChange)="onSearchInput($event)"
  />
  <select [(ngModel)]="statusFilter" (ngModelChange)="loadComments()">
  <option value="">{{ i18n.t('common.all') }}</option>
@@ -44,7 +44,7 @@
  }
 
  <!-- Select All -->
- @if (filteredComments().length > 0) {
+ @if (comments().length > 0) {
  <div class="select-all-bar">
  <label class="select-all-label">
  <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" />
@@ -54,7 +54,7 @@
  }
 
  <div class="comments-container">
- @for (comment of filteredComments(); track comment.id) {
+ @for (comment of comments(); track comment.id) {
  <div class="comment-card" [class.comment-card--pending]="comment.status === 'PENDING'" [class.comment-card--selected]="isSelected(comment.id)">
  <div class="comment-card__select">
  <input type="checkbox" [checked]="isSelected(comment.id)" (change)="toggleSelect(comment.id)" />

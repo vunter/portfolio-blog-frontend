@@ -5,6 +5,7 @@ import { AdminApiService, CustomVariable } from '../../services/admin-api.servic
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 
 interface EmailTemplate {
   id: string;
@@ -15,7 +16,7 @@ interface EmailTemplate {
 
 @Component({
   selector: 'app-email-templates-settings',
-  standalone: true,
+  imports: [AccessibleModalDirective],
   templateUrl: './email-templates-settings.component.html',
   styleUrl: './email-templates-settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

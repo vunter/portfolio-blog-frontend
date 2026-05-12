@@ -29,6 +29,21 @@ export class CommentService {
     return this.api.get<{ liked: boolean; likesCount: number }>(`/articles/${articleSlug}/comments/${commentId}/like/status`);
   }
 
+  /** Batch like-status lookup — single round-trip for many commentIds. */
+  batchCommentLikeStatus(
+    articleSlug: string,
+    commentIds: string[],
+  ): Observable<Record<string, { liked: boolean; likesCount: number }>> {
+    if (commentIds.length === 0) {
+      return new Observable(sub => { sub.next({}); sub.complete(); });
+    }
+    // Backend expects numeric IDs; the comment-id strings round-trip cleanly through Long.
+    return this.api.post<Record<string, { liked: boolean; likesCount: number }>>(
+      `/articles/${articleSlug}/comments/like/status/batch`,
+      { commentIds: commentIds.map(id => Number(id)) },
+    );
+  }
+
   createComment(
     articleSlug: string,
     request: CommentRequest

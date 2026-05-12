@@ -102,7 +102,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('should preview a template', async ({ page }) => {
     // First get the template ID via API
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
 
@@ -128,7 +128,7 @@ test.describe('Resume Template CRUD', () => {
   test('should edit a template', async ({ page }) => {
     if (!createdTemplateId) {
       // Try to get template ID from API
-      await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+      await page.request.post(`${API_BASE}/admin/auth/login`, {
         data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
       });
 
@@ -166,7 +166,7 @@ test.describe('Resume Template CRUD', () => {
 
   test('should delete a template', async ({ page }) => {
     // Get the template ID
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
 

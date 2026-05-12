@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ThemeService, Theme } from './theme.service';
+import { CookieConsentService } from './cookie-consent.service';
 
 describe('ThemeService', () => {
   let service: ThemeService;
@@ -21,8 +24,16 @@ describe('ThemeService', () => {
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
     } as any);
 
+    const consentSpy = jasmine.createSpyObj('CookieConsentService', ['hasConsent']);
+    consentSpy.hasConsent.and.returnValue(true);
+
     TestBed.configureTestingModule({
-      providers: [ThemeService],
+      providers: [
+        ThemeService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+        { provide: CookieConsentService, useValue: consentSpy },
+      ],
     });
   });
 

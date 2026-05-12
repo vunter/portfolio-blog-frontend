@@ -3,7 +3,6 @@ import {
   provideHttpClient,
   withInterceptors,
   HttpClient,
-  HttpErrorResponse,
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -39,6 +38,8 @@ describe('errorInterceptor', () => {
   });
 
   afterEach(() => {
+    // Flush the I18nService background request for supported languages
+    httpMock.match('/api/v1/languages').forEach(r => r.flush([]));
     httpMock.verify();
   });
 

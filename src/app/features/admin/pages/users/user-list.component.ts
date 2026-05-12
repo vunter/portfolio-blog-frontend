@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, effect } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -9,12 +9,13 @@ import { getDateLocale } from '../../../../core/utils/date-format.util';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 import { UserResponse, PageResponse } from '../../../../models';
 import { UserActivity } from '../../services/admin-api.service';
 
 @Component({
   selector: 'app-user-list',
-  imports: [FormsModule, PaginationComponent, SkeletonComponent],
+  imports: [FormsModule, PaginationComponent, SkeletonComponent, AccessibleModalDirective],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -122,6 +123,19 @@ export class UserListComponent implements OnInit {
   }
 
   saveUser(): void {
+    // Q7.4: Enforce password complexity for new user creation
+    if (!this.editingUser() && this.formData.password) {
+      const pw = this.formData.password;
+      const hasUpper = /[A-Z]/.test(pw);
+      const hasLower = /[a-z]/.test(pw);
+      const hasDigit = /[0-9]/.test(pw);
+      const hasSpecial = /[^A-Za-z0-9]/.test(pw);
+      if (pw.length < 12 || !hasUpper || !hasLower || !hasDigit || !hasSpecial) {
+        this.notification.error(this.i18n.t('admin.users.passwordComplexity'));
+        return;
+      }
+    }
+
     this.saving.set(true);
     const data = this.editingUser()
       ? { name: this.formData.name, email: this.formData.email, role: this.formData.role }
@@ -162,7 +176,17 @@ export class UserListComponent implements OnInit {
 
     this.apiService.put(`/admin/users/${user.id}/${action}`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(user.active ? this.i18n.t('admin.users.deactivated') : this.i18n.t('admin.users.activated'));
+        // Q7.7: Undo toast for destructive user status toggle
+        this.notification.successWithUndo(
+          user.active ? this.i18n.t('admin.users.deactivated') : this.i18n.t('admin.users.activated'),
+          () => {
+            const reverseAction = user.active ? 'activate' : 'deactivate';
+            this.apiService.put(`/admin/users/${user.id}/${reverseAction}`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+              next: () => this.loadUsers(),
+              error: () => this.notification.error(this.i18n.t('admin.users.toggleError')),
+            });
+          }
+        );
       },
       error: () => {
         this.users.set(snapshot);

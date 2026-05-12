@@ -27,8 +27,14 @@ import { I18nService } from '../../../../core/services/i18n.service';
           }
         </div>
         <div class="dropdown__list">
-          @for (event of notifications.events(); track $index) {
-            <div class="dropdown__item" (click)="navigateToEvent(event)" role="button" tabindex="0">
+          @for (event of notifications.events(); track event.timestamp) {
+            <div
+              class="dropdown__item"
+              (click)="navigateToEvent(event)"
+              (keydown.enter)="navigateToEvent(event)"
+              (keydown.space)="$event.preventDefault(); navigateToEvent(event)"
+              role="button"
+              tabindex="0">
               <span class="dropdown__icon" [attr.data-type]="event.type">{{ getIcon(event.type) }}</span>
               <div class="dropdown__content">
                 <span class="dropdown__item-title">{{ event.title }}</span>

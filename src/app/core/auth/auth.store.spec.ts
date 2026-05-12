@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi, HttpErrorResponse } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthStore } from './auth.store';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
 import { UserResponse } from '../../models';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('AuthStore', () => {
   let store: InstanceType<typeof AuthStore>;
@@ -54,12 +56,16 @@ describe('AuthStore', () => {
       'setSession',
       'removeSession',
     ]);
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['logout']);
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['logout', 'refreshToken', 'getCurrentUser']);
     authServiceSpy.logout.and.returnValue(of(undefined));
+    authServiceSpy.refreshToken.and.returnValue(of({ tokenType: 'Bearer' as const, expiresIn: 3600, email: 'admin@catananti.dev', name: 'Vinicius Catananti' }));
+    authServiceSpy.getCurrentUser.and.returnValue(of(mockAdmin));
 
     TestBed.configureTestingModule({
       providers: [
         AuthStore,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: StorageService, useValue: storageSpy },
         { provide: AuthService, useValue: authServiceSpy },
       ],
@@ -211,17 +217,98 @@ describe('AuthStore', () => {
       expect(store.isAuthenticated()).toBeFalse();
     });
 
-    it('should not restore if user is missing from storage', () => {
+    it('should recover from server when user is missing from storage but isAuthenticated', async () => {
       storageSpy.get.and.callFake(<T>(key: string): T | null => {
         if (key === 'isAuthenticated') return true as unknown as T;
         return null;
       });
       storageSpy.getSession.and.returnValue(null);
+      authServiceSpy.getCurrentUser = jasmine.createSpy().and.returnValue(of(mockAdmin));
 
-      store.initFromStorage();
+      await store.initFromStorage();
+
+      // Should recover user from getCurrentUser() since auth flag was set
+      expect(store.user()).toEqual(mockAdmin);
+      expect(store.isAuthenticated()).toBeTrue();
+    });
+
+    it('should clear state when user is missing and server rejects', async () => {
+      storageSpy.get.and.callFake(<T>(key: string): T | null => {
+        if (key === 'isAuthenticated') return true as unknown as T;
+        return null;
+      });
+      storageSpy.getSession.and.returnValue(null);
+      authServiceSpy.getCurrentUser = jasmine.createSpy().and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      await store.initFromStorage();
 
       expect(store.user()).toBeNull();
       expect(store.isAuthenticated()).toBeFalse();
+    });
+  });
+
+  // Q6.1: initFromStorage error handling — only clear on 401, preserve on network errors
+  describe('initFromStorage error handling', () => {
+    it('should clear session on 401 response', async () => {
+      storageSpy.get.and.callFake(<T>(key: string): T | null => {
+        if (key === 'isAuthenticated') return true as unknown as T;
+        if (key === 'user') return mockAdmin as unknown as T;
+        return null;
+      });
+      storageSpy.getSession.and.returnValue(null);
+      authServiceSpy.getCurrentUser = jasmine.createSpy().and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+      authServiceSpy.refreshToken = jasmine.createSpy().and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+      );
+
+      await store.initFromStorage();
+
+      expect(store.isAuthenticated()).toBeFalse();
+      expect(store.user()).toBeNull();
+      expect(storageSpy.remove).toHaveBeenCalledWith('user');
+      expect(storageSpy.remove).toHaveBeenCalledWith('isAuthenticated');
+    });
+
+    it('should refuse to grant access on network error (status 0)', async () => {
+      storageSpy.get.and.callFake(<T>(key: string): T | null => {
+        if (key === 'isAuthenticated') return true as unknown as T;
+        if (key === 'user') return mockAdmin as unknown as T;
+        return null;
+      });
+      storageSpy.getSession.and.returnValue(null);
+      authServiceSpy.getCurrentUser = jasmine.createSpy().and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' }))
+      );
+
+      await store.initFromStorage();
+
+      // SEC-F-03: Backend unreachable — refuse to honor cached creds because
+      // server-side revocation cannot be observed during an outage.
+      expect(store.isAuthenticated()).toBeFalse();
+      expect(store.user()).toBeNull();
+      expect(store.isLoading()).toBeFalse();
+    });
+
+    it('should refuse to grant access on 500 server error', async () => {
+      storageSpy.get.and.callFake(<T>(key: string): T | null => {
+        if (key === 'isAuthenticated') return true as unknown as T;
+        if (key === 'user') return mockAdmin as unknown as T;
+        return null;
+      });
+      storageSpy.getSession.and.returnValue(null);
+      authServiceSpy.getCurrentUser = jasmine.createSpy().and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Internal Server Error' }))
+      );
+
+      await store.initFromStorage();
+
+      expect(store.isAuthenticated()).toBeFalse();
+      expect(store.user()).toBeNull();
+      expect(store.isLoading()).toBeFalse();
     });
   });
 

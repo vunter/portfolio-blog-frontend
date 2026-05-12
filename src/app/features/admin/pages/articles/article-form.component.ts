@@ -9,15 +9,20 @@ import { ArticleMetadataComponent } from './components/article-metadata/article-
 import { ArticleImageComponent } from './components/article-image/article-image.component';
 import { ArticleTagsComponent } from './components/article-tags/article-tags.component';
 import { EditorToolbarComponent } from './components/editor-toolbar/editor-toolbar.component';
-import { Subject, debounceTime } from 'rxjs';
+import { SeoPreviewComponent } from './components/seo-preview/seo-preview.component';
+import { ArticleReviewPanelComponent } from './components/article-review-panel/article-review-panel.component';
+import { ArticleTranslationsComponent } from './components/article-translations/article-translations.component';
+import { Subject, debounceTime, timer } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
-import { ArticleResponse, ArticleRequest, ArticleReview, ArticleI18nResponse, TagResponse, ArticleStatus } from '../../../../models';
+import { ImageOptimizerService } from '../../../../core/services/image-optimizer.service';
+import { ArticleResponse, ArticleRequest, TagResponse, ArticleStatus } from '../../../../models';
 import { getMarkdownInsert } from './utils/markdown-insert.util';
+import { SplitPaneResizeDirective } from '../../../../shared/directives/split-pane-resize.directive';
 
 // Monaco type declarations provided by shared/types/monaco.d.ts
 
@@ -33,7 +38,7 @@ interface ArticleForm {
 
 @Component({
   selector: 'app-article-form',
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent, SeoPreviewComponent, ArticleReviewPanelComponent, ArticleTranslationsComponent, SplitPaneResizeDirective],
   host: {
     '(window:keydown)': 'onKeyDown($event)',
   },
@@ -45,6 +50,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   // ANG20-05: viewChild() signal queries instead of @ViewChild decorators
   readonly monacoEditorContainer = viewChild<ElementRef>('monacoEditorContainer');
   readonly versionHistory = viewChild<VersionHistoryComponent>('versionHistory');
+  readonly splitPane = viewChild(SplitPaneResizeDirective);
 
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
@@ -56,6 +62,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly monacoLoader = inject(MonacoLoaderService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly imageOptimizer = inject(ImageOptimizerService);
   readonly i18n = inject(I18nService);
 
   isEditMode = signal(false);
@@ -69,24 +76,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   uploadingContentImage = signal(false);
   showScheduleInput = signal(false);
   scheduledAtControl = new FormControl('');
-  reviewHistory = signal<ArticleReview[]>([]);
   showReviewPanel = signal(false);
-  reviewFeedbackText = signal('');
-
-  // Translation management
-  translations = signal<ArticleI18nResponse[]>([]);
-  availableLocales = signal<string[]>([]);
-  showTranslationPanel = signal(false);
-  selectedTranslationLocale = signal('');
-  translating = signal(false);
-
-  // Split pane ratio (flex values)
-  splitLeft = signal('1');
-  splitRight = signal('1');
-  private resizing = false;
-  private resizeContainer: HTMLElement | null = null;
-  private resizeCleanup: (() => void) | null = null;
-  private rafPending = false;
 
   private monacoEditor: any = null;
   private monacoLoaded = false;
@@ -110,7 +100,9 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   articleId: string | null = null;
 
-  readonly keyboardShortcutsTitle = 'Ctrl+S: Save · Ctrl+P: Preview · Esc: Exit fullscreen';
+  get keyboardShortcutsTitle(): string {
+    return this.i18n.t('dev.articleForm.keyboardShortcuts');
+  }
 
   // ANG20-06: Moved from @HostListener to host property
   onKeyDown(event: KeyboardEvent): void {
@@ -185,8 +177,6 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       this.monacoEditor.dispose();
       this.monacoEditor = null;
     }
-    // HIGH-06: Clean up any active resize listeners if destroyed mid-resize
-    this.resizeCleanup?.();
   }
 
   // ===== Fullscreen =====
@@ -198,63 +188,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     }, { injector: this.injector });
   }
 
-  // ===== Resize Split Panes =====
-
-  onResizeStart(event: MouseEvent): void {
-    event.preventDefault();
-    this.resizing = true;
-    this.resizeContainer = (event.target as HTMLElement).closest('.editor-container');
-    const onMove = (e: MouseEvent) => this.onResizeMove(e.clientX);
-    const onUp = () => {
-      this.resizing = false;
-      this.resizeContainer = null;
-      this.resizeCleanup = null;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    // HIGH-06: Store cleanup for ngOnDestroy safety
-    this.resizeCleanup = onUp;
-  }
-
-  onResizeTouchStart(event: TouchEvent): void {
-    event.preventDefault();
-    this.resizing = true;
-    this.resizeContainer = (event.target as HTMLElement).closest('.editor-container');
-    const onMove = (e: TouchEvent) => this.onResizeMove(e.touches[0].clientX);
-    const onUp = () => {
-      this.resizing = false;
-      this.resizeContainer = null;
-      this.resizeCleanup = null;
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onUp);
-    };
-    document.addEventListener('touchmove', onMove);
-    document.addEventListener('touchend', onUp);
-    // HIGH-06: Store cleanup for ngOnDestroy safety
-    this.resizeCleanup = onUp;
-  }
-
-  private onResizeMove(clientX: number): void {
-    if (!this.resizing || !this.resizeContainer) return;
-    if (this.rafPending) return;
-    this.rafPending = true;
-    requestAnimationFrame(() => {
-      this.rafPending = false;
-      if (!this.resizing || !this.resizeContainer) return;
-      const rect = this.resizeContainer.getBoundingClientRect();
-      const total = rect.width;
-      const offsetX = clientX - rect.left;
-      const pct = Math.max(20, Math.min(80, (offsetX / total) * 100));
-      this.splitLeft.set(`${pct}`);
-      this.splitRight.set(`${100 - pct}`);
-      this.monacoEditor?.layout();
-    });
+  onSplitResized(): void {
+    this.monacoEditor?.layout();
   }
 
   // ===== Auto-save =====
@@ -292,12 +227,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.hasUnsavedChanges = false;
         this.lastSavedContent = currentContent;
         this.autoSaveStatus.set('saved');
-        // Clear "saved" indicator after 5 seconds
-        setTimeout(() => {
+        // Q7.2: Clear "saved" indicator after 5 seconds using RxJS timer
+        timer(5000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
           if (this.autoSaveStatus() === 'saved') {
             this.autoSaveStatus.set(null);
           }
-        }, 5000);
+        });
       },
       error: () => {
         this.autoSaveStatus.set('unsaved');
@@ -357,8 +292,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Reset split ratio when entering split mode
     if (mode === 'split') {
-      this.splitLeft.set('1');
-      this.splitRight.set('1');
+      this.splitPane()?.reset();
     }
 
     if (mode === 'preview') {
@@ -425,22 +359,18 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedTagIds.set(article.tags?.map((t) => t.id) || []);
         this.originalStatus = article.status || 'DRAFT';
         this.lastSavedContent = JSON.stringify(this.form.getRawValue());
-        // Load review history for articles in REVIEW status
+        // Show review panel for articles in REVIEW status
         if (article.status === 'REVIEW') {
           this.showReviewPanel.set(true);
-          this.loadReviewHistory();
         }
-        // Load translations if editing existing article
-        this.loadTranslations();
-        this.loadAvailableLocales();
         // Sync content to Monaco editor
         if (this.monacoEditor) {
           this.monacoEditor.setValue(article.content || '');
         } else {
           this.pendingContent = article.content || '';
         }
-        // Load version history
-        setTimeout(() => this.versionHistory()?.loadVersions(), 0);
+        // Q7.2: Load version history on next microtask
+        timer(0).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.versionHistory()?.loadVersions());
       },
       error: () => {
         this.notification.error(this.i18n.t('dev.error.loadArticle'));
@@ -453,14 +383,18 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.articleId) {
       this.apiService.get<ArticleResponse>(`/admin/articles/${this.articleId}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (article) => {
+          // Mirror the field mapping used in loadArticle() — the backend's
+          // canonical fields are coverImageUrl/seoTitle/seoDescription. The
+          // featuredImageUrl/metaTitle/metaDescription aliases on the response
+          // type are not always populated.
           this.form.patchValue({
             title: article.title || '',
             slug: article.slug || '',
             excerpt: article.excerpt || '',
             content: article.content || '',
-            featuredImageUrl: article.featuredImageUrl || article.coverImageUrl || '',
-            metaTitle: article.metaTitle || '',
-            metaDescription: article.metaDescription || '',
+            featuredImageUrl: article.coverImageUrl || article.featuredImageUrl || '',
+            metaTitle: article.seoTitle || article.metaTitle || article.title || '',
+            metaDescription: article.seoDescription || article.metaDescription || article.excerpt || '',
           });
           // Update Monaco editor if available
           if (this.monacoEditor) {
@@ -487,14 +421,15 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ===== Image Upload =====
 
-  onCoverImageSelected(event: Event): void {
+  async onCoverImageSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     input.value = '';
 
     this.uploadingCoverImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const optimized = await this.imageOptimizer.optimize(file, 'cover');
+    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', optimized).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.form.controls.featuredImageUrl.setValue(res.url);
         this.uploadingCoverImage.set(false);
@@ -507,14 +442,15 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onContentImageSelected(event: Event): void {
+  async onContentImageSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     input.value = '';
 
     this.uploadingContentImage.set(true);
-    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const optimized = await this.imageOptimizer.optimize(file, 'content');
+    this.apiService.upload<{ url: string; filename: string }>('/admin/media/upload', optimized).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.uploadingContentImage.set(false);
         const altText = file.name.replace(/\.[^.]+$/, '');
@@ -598,10 +534,10 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  requestChanges(): void {
+  requestChanges(feedback: string): void {
     if (!this.articleId) return;
     this.saving.set(true);
-    this.adminApi.requestArticleChanges(this.articleId, this.reviewFeedbackText()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.adminApi.requestArticleChanges(this.articleId, feedback).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.requestChangesSuccess'));
         this.router.navigate(['/admin/articles']);
@@ -609,62 +545,6 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       error: () => {
         this.notification.error(this.i18n.t('dev.articles.requestChangesError'));
         this.saving.set(false);
-      },
-    });
-  }
-
-  loadReviewHistory(): void {
-    if (!this.articleId) return;
-    this.adminApi.getArticleReviews(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (reviews) => this.reviewHistory.set(reviews),
-    });
-  }
-
-  // ===== Translation Management =====
-
-  loadTranslations(): void {
-    if (!this.articleId) return;
-    this.adminApi.getArticleTranslations(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (translations) => this.translations.set(translations),
-    });
-  }
-
-  loadAvailableLocales(): void {
-    if (!this.articleId) return;
-    this.adminApi.getArticleTranslationLocales(this.articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (locales) => this.availableLocales.set(locales),
-    });
-  }
-
-  translateArticle(targetLang: string): void {
-    if (!this.articleId || !targetLang) return;
-    this.translating.set(true);
-    this.adminApi.translateArticle(this.articleId, targetLang).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.translating.set(false);
-        this.notification.success(this.i18n.t('dev.articles.translationAdded'));
-        this.loadTranslations();
-        this.loadAvailableLocales();
-        this.selectedTranslationLocale.set('');
-      },
-      error: () => {
-        this.translating.set(false);
-        this.notification.error(this.i18n.t('dev.articles.translationError'));
-      },
-    });
-  }
-
-  deleteTranslation(locale: string): void {
-    if (!this.articleId) return;
-    if (!confirm(this.i18n.t('dev.articles.deleteTranslationConfirm', { locale }))) return;
-    this.adminApi.deleteArticleTranslation(this.articleId, locale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.notification.success(this.i18n.t('dev.articles.translationDeleted'));
-        this.loadTranslations();
-        this.loadAvailableLocales();
-      },
-      error: () => {
-        this.notification.error(this.i18n.t('dev.articles.translationDeleteError'));
       },
     });
   }
@@ -697,8 +577,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.hasUnsavedChanges = false;
         this.lastSavedContent = JSON.stringify(formValue);
-        // I-03: Complete autoSave$ before navigating to prevent race condition
-        this.autoSave$.complete();
+        // Don't .complete() the Subject here — that's terminal and silently
+        // drops every subsequent valueChanges emission, killing auto-save for
+        // the rest of the component's lifetime. Navigation triggers
+        // takeUntilDestroyed cleanup, and performAutoSave guards against
+        // overlap via the saving() flag.
         this.autoSaveStatus.set(null);
         this.saving.set(false);
         this.notification.success(

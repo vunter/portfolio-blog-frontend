@@ -3,8 +3,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpBackend } from '@angular/common/http';
 import { en } from './i18n/en';
 import { CookieConsentService } from './cookie-consent.service';
+import { LANG_STORAGE_KEY } from './locale.constants';
 
-export const LANG_STORAGE_KEY = 'app-language';
+// Q6.5: Re-export for backward compatibility with existing consumers
+export { LANG_STORAGE_KEY } from './locale.constants';
 
 export type Language = string;
 
@@ -96,12 +98,24 @@ export class I18nService {
     }
   }
 
-  t(key: string, params?: Record<string, string>): string {
+  /**
+   * Translate a key with optional parameters.
+   * Supports basic plural forms via `count` param.
+   * Translation value format: "one item|{{count}} items" (pipe-separated: singular|plural).
+   * Q10.1: Plural handling, Q10.4: Parameter substitution in any position.
+   */
+  t(key: string, params?: Record<string, string | number>): string {
     const current = this.loadedTranslations();
     let text = current[key] || en[key] || key;
+    // Q10.1: Handle plural forms — "singular|plural" separated by pipe
+    if (params && 'count' in params && text.includes('|')) {
+      const count = Number(params['count']);
+      const [singular, plural] = text.split('|', 2);
+      text = count === 1 ? singular : (plural ?? singular);
+    }
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+        text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v));
       });
     }
     return text;
@@ -204,7 +218,7 @@ export class I18nService {
     if (!this.isBrowser) return;
     // Remove all cached tiers for this locale
     for (const tier of ['public', 'viewer', 'dev', 'admin']) {
-      try { localStorage.removeItem(`${I18N_CACHE_PREFIX}${lang}-${tier}`); } catch {}
+      try { localStorage.removeItem(`${I18N_CACHE_PREFIX}${lang}-${tier}`); } catch { /* ignore storage errors */ }
     }
   }
 
@@ -218,6 +232,6 @@ export class I18nService {
 
   private setCachedJson(key: string, value: unknown): void {
     if (!this.isBrowser) return;
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore storage errors */ }
   }
 }

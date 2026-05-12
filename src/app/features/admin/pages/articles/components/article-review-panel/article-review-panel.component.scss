@@ -1,0 +1,72 @@
+// Styles inherited from parent article-form.component.scss via ::ng-deep or global styles
+// Review-specific styles kept minimal as they are scoped to the form-card context
+.review-feedback-form {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+    color: var(--text-secondary, #666);
+  }
+
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color, #6366f1);
+    }
+  }
+}
+
+.review-entry {
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid var(--border-color, #e5e7eb);
+
+  &--approved { border-left-color: var(--badge-success-text, #166534); }
+  &--changes { border-left-color: var(--badge-warning-text, #92400e); }
+  &--pending { border-left-color: var(--badge-info-text, #1e40af); }
+}
+
+.review-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.375rem;
+}
+
+.review-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.review-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #999);
+}
+
+.review-feedback {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary, #333);
+  margin: 0;
+}
+
+.review-empty {
+  text-align: center;
+  color: var(--text-secondary, #999);
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ThemeToggleComponent } from './theme-toggle.component';
 import { ThemeService } from '../../../core/services/theme.service';
 
@@ -25,7 +27,11 @@ describe('ThemeToggleComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ThemeToggleComponent],
-      providers: [ThemeService],
+      providers: [
+        ThemeService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ThemeToggleComponent);

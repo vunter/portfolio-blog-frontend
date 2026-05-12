@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, MonoTypeOperatorFunction, retry, timer, throwError, timeout } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { environment } from '../../../../environments/environment';
-import { PageResponse, UserResponse, ArticleResponse, TagResponse, CommentResponse, RoleUpgradeRequestResponse } from '../../../models';
+import { PageResponse, UserResponse, ArticleResponse, TagResponse, RoleUpgradeRequestResponse } from '../../../models';
 import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareResponse, ArticleReview, ArticleI18nResponse } from '../../../models/article.model';
 
 // ============================================
@@ -224,6 +224,24 @@ export class AdminApiService {
   private api = inject(ApiService);
   private http = inject(HttpClient);
 
+  /**
+   * Q6.3: Retry operator for direct HttpClient calls that bypass ApiService.
+   * Retries on network errors (status 0) and gateway errors (502/503/504).
+   */
+  private retryTransient<T>(count = 1): MonoTypeOperatorFunction<T> {
+    return retry({
+      count,
+      delay: (error, retryCount) => {
+        if (error instanceof HttpErrorResponse) {
+          if (error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504) {
+            return timer(retryCount * 1000);
+          }
+        }
+        return throwError(() => error);
+      },
+    });
+  }
+
   // ==================== DASHBOARD ====================
 
   getDashboardStats(): Observable<DashboardStats> {
@@ -323,7 +341,7 @@ export class AdminApiService {
     // INT-03: Use environment API URL instead of hardcoded '/api/v1'
     const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
     // I-07: Add withCredentials for cookie-based auth consistency
-    return this.http.get(`${baseUrl}/admin/newsletter/export`, { responseType: 'blob', withCredentials: true });
+    return this.http.get(`${baseUrl}/admin/newsletter/export`, { responseType: 'blob', withCredentials: true }).pipe(timeout(30000), this.retryTransient());
   }
 
   // ==================== USERS ====================
@@ -389,7 +407,7 @@ export class AdminApiService {
       `${baseUrl}/admin/media/upload?${params.toString()}`,
       formData,
       { withCredentials: true }
-    );
+    ).pipe(timeout(30000), this.retryTransient());
   }
 
   getMediaAssets(page = 0, size = 20, purpose?: string): Observable<MediaListResponse> {
@@ -429,12 +447,12 @@ export class AdminApiService {
 
   exportBlog(): Observable<Blob> {
     const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
-    return this.http.get(`${baseUrl}/admin/export`, { responseType: 'blob', withCredentials: true });
+    return this.http.get(`${baseUrl}/admin/export`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
   }
 
   exportBlogJson(): Observable<Blob> {
     const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
-    return this.http.get(`${baseUrl}/admin/export/json`, { responseType: 'blob', withCredentials: true });
+    return this.http.get(`${baseUrl}/admin/export/json`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
   }
 
   importBlog(file: File): Observable<{ message: string }> {
@@ -443,7 +461,7 @@ export class AdminApiService {
 
   exportArticlesMarkdown(): Observable<Blob> {
     const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
-    return this.http.get(`${baseUrl}/admin/export/markdown`, { responseType: 'blob', withCredentials: true });
+    return this.http.get(`${baseUrl}/admin/export/markdown`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
   }
 
   getExportStats(): Observable<Record<string, number>> {

@@ -9,6 +9,7 @@ import {
 } from '@angular/common/http/testing';
 import { ArticleService } from './article.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { CookieConsentService } from '../../../core/services/cookie-consent.service';
 import { signal } from '@angular/core';
 
 describe('ArticleService', () => {
@@ -25,12 +26,16 @@ describe('ArticleService', () => {
       language: langSignal,
     });
 
+    const consentSpy = jasmine.createSpyObj('CookieConsentService', ['hasConsent']);
+    consentSpy.hasConsent.and.returnValue(true);
+
     TestBed.configureTestingModule({
       providers: [
         ArticleService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: I18nService, useValue: i18nServiceMock },
+        { provide: CookieConsentService, useValue: consentSpy },
       ],
     });
 
@@ -147,7 +152,7 @@ describe('ArticleService', () => {
     it('should POST to track article view', () => {
       service.trackView('my-article').subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/articles/my-article/view`);
+      const req = httpMock.expectOne(`${baseUrl}/analytics/view/my-article`);
       expect(req.request.method).toBe('POST');
       req.flush(null);
     });

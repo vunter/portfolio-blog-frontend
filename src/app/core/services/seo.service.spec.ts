@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Meta, Title } from '@angular/platform-browser';
 import { DOCUMENT } from '@angular/common';
 import { SeoService, SeoConfig } from './seo.service';
@@ -11,7 +13,11 @@ describe('SeoService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SeoService],
+      providers: [
+        SeoService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
     });
 
     service = TestBed.inject(SeoService);

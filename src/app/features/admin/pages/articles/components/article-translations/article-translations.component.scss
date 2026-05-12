@@ -1,0 +1,126 @@
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+
+  h3 { margin: 0; }
+}
+
+.panel-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--text-secondary, #666);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s;
+
+    &.rotated { transform: rotate(180deg); }
+  }
+}
+
+.translation-content {
+  margin-top: 1rem;
+}
+
+.translate-action {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+    color: var(--text-secondary, #666);
+  }
+}
+
+.translate-row {
+  display: flex;
+  gap: 0.5rem;
+
+  select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: var(--card-bg, white);
+    color: var(--text-primary, #1a1a1a);
+  }
+}
+
+.translation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.translation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+
+  &:last-child { border-bottom: none; }
+}
+
+.translation-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.translation-locale {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+}
+
+.translation-title {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #666);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.translation-badges {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.translation-badge {
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+
+  &--auto {
+    background: var(--badge-info-bg, #dbeafe);
+    color: var(--badge-info-text, #1e40af);
+  }
+
+  &--reviewed {
+    background: var(--badge-success-bg, #dcfce7);
+    color: var(--badge-success-text, #166534);
+  }
+}
+
+.translation-date {
+  font-size: 0.75rem;
+  color: var(--text-muted, #9ca3af);
+}
+
+.translation-empty {
+  text-align: center;
+  color: var(--text-secondary, #999);
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}

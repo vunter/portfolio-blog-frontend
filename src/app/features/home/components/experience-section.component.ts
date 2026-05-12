@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
 import { I18nService } from '../../../core/services/i18n.service';
-import { ResumeProfile, ResumeProfileExperience } from '../../../models/resume-profile.model';
+import { ResumeProfile } from '../../../models/resume-profile.model';
 
 @Component({
   selector: 'app-experience-section',

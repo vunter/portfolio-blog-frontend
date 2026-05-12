@@ -6,6 +6,7 @@ export interface Notification {
   message: string;
   duration?: number;
   route?: string;
+  undoAction?: () => void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,6 +46,28 @@ export class NotificationService {
 
   info(message: string, duration?: number, route?: string): string {
     return this.show('info', message, duration, route);
+  }
+
+  /**
+   * Q7.7: Show success toast with an optional undo callback.
+   * The undo action is available for the notification's duration (default 5s).
+   */
+  successWithUndo(message: string, undoAction: () => void, duration = 5000): string {
+    const id = this.generateId();
+    const notification: Notification = { id, type: 'success', message, duration, undoAction };
+    this._notifications.update((current) => [...current, notification]);
+    if (duration > 0) {
+      setTimeout(() => this.dismiss(id), duration);
+    }
+    return id;
+  }
+
+  undo(id: string): void {
+    const notification = this._notifications().find(n => n.id === id);
+    if (notification?.undoAction) {
+      notification.undoAction();
+      this.dismiss(id);
+    }
   }
 
   dismiss(id: string): void {

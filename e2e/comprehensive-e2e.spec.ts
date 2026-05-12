@@ -197,7 +197,7 @@ test.describe('Article Lifecycle', () => {
 
   test('Edit an existing article', async ({ page }) => {
     // First create an article via API
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
     expect(loginRes.ok()).toBeTruthy();
@@ -340,7 +340,7 @@ test.describe('User Management', () => {
     const apiEmail = `e2e-api-user-${Date.now()}@test.com`;
 
     // Create user via API
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -399,7 +399,7 @@ test.describe('Tag Management', () => {
   });
 
   test('Create and delete a tag via API', async ({ page }) => {
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -435,7 +435,7 @@ test.describe('Comments', () => {
     await dismissCookieConsent(page);
 
     // Create and publish an article via API
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -499,7 +499,7 @@ test.describe('Resume Templates', () => {
   });
 
   test('Create, update, and delete resume template via API', async ({ page }) => {
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -653,22 +653,17 @@ test.describe('Role-Based Access', () => {
   });
 
   test('DEV can access most admin pages', async ({ page }) => {
-    // Login as dev via UI
-    await loginViaUI(page, DEV_CREDS.email, DEV_CREDS.password);
-    // Wait for redirect
-    await page.waitForTimeout(5000);
+    await loginAs(page, DEV_CREDS);
 
-    if (page.url().includes('/admin')) {
-      // DEV should access articles
-      await page.goto('/admin/articles');
-      await page.waitForLoadState('load');
-      await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
+    // DEV should access articles
+    await page.goto('/admin/articles');
+    await page.waitForLoadState('load');
+    await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
 
-      // DEV should access tags
-      await page.goto('/admin/tags');
-      await page.waitForLoadState('load');
-      await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
-    }
+    // DEV should access tags
+    await page.goto('/admin/tags');
+    await page.waitForLoadState('load');
+    await expect(page.locator('.admin-layout')).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -681,7 +676,7 @@ test.describe('Data Persistence', () => {
     await dismissCookieConsent(page);
 
     // Login via API to get cookie
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
     expect(loginRes.ok()).toBeTruthy();
@@ -722,7 +717,7 @@ test.describe('Data Persistence', () => {
   test('User profile update persists', async ({ page }) => {
     await dismissCookieConsent(page);
 
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -758,7 +753,7 @@ test.describe('Search', () => {
     await dismissCookieConsent(page);
 
     // First create a published article
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -802,7 +797,7 @@ test.describe('Search', () => {
 
 test.describe('Cleanup', () => {
   test('Remove test articles', async ({ page }) => {
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -824,7 +819,7 @@ test.describe('Cleanup', () => {
   });
 
   test('Remove test users', async ({ page }) => {
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 
@@ -844,7 +839,7 @@ test.describe('Cleanup', () => {
   });
 
   test('Remove test templates', async ({ page }) => {
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
 

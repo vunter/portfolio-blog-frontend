@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RecaptchaService } from './recaptcha.service';
 import { environment } from '../../../environments/environment';
 
@@ -18,6 +20,8 @@ describe('RecaptchaService', () => {
     TestBed.configureTestingModule({
       providers: [
         RecaptchaService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: PLATFORM_ID, useValue: platformId },
       ],
     });
@@ -75,10 +79,13 @@ describe('RecaptchaService', () => {
     it('should return token when grecaptcha is available', async () => {
       createService('browser', 'test-site-key');
 
-      // Mock grecaptcha on window
+      // Production reads window.grecaptcha.enterprise.* (Enterprise reCAPTCHA),
+      // not the legacy non-enterprise namespace.
       (window as any)['grecaptcha'] = {
-        ready: (cb: () => void) => cb(),
-        execute: (_siteKey: string, _opts: any) => Promise.resolve('mock-token-123'),
+        enterprise: {
+          ready: (cb: () => void) => cb(),
+          execute: (_siteKey: string, _opts: any) => Promise.resolve('mock-token-123'),
+        },
       };
 
       // Pre-mark script as loaded by adding a script tag
@@ -94,8 +101,10 @@ describe('RecaptchaService', () => {
       createService('browser', 'test-site-key');
 
       (window as any)['grecaptcha'] = {
-        ready: (cb: () => void) => cb(),
-        execute: () => Promise.reject(new Error('reCAPTCHA failed')),
+        enterprise: {
+          ready: (cb: () => void) => cb(),
+          execute: () => Promise.reject(new Error('reCAPTCHA failed')),
+        },
       };
 
       const script = document.createElement('script');
@@ -130,8 +139,10 @@ describe('RecaptchaService', () => {
       document.head.appendChild(existingScript);
 
       (window as any)['grecaptcha'] = {
-        ready: (cb: () => void) => cb(),
-        execute: () => Promise.resolve('cached-token'),
+        enterprise: {
+          ready: (cb: () => void) => cb(),
+          execute: () => Promise.resolve('cached-token'),
+        },
       };
 
       const token = await service.execute('action');

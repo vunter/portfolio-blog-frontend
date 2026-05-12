@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -32,22 +33,30 @@ export class CommentListComponent implements OnInit {
   statusFilter = '';
   searchQuery = signal('');
   selectedIds = signal<Set<string>>(new Set());
-  filteredComments = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
-    if (!q) return this.comments();
-    return this.comments().filter(c =>
-      c.authorName?.toLowerCase().includes(q) ||
-      c.content?.toLowerCase().includes(q) ||
-      c.articleTitle?.toLowerCase().includes(q)
-    );
-  });
   currentPage = signal(0);
   pageSize = signal(10);
   totalPages = signal(0);
   totalElements = signal(0);
 
+  // Q7.3: Debounced server-side search
+  private searchSubject = new Subject<string>();
+
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((query) => {
+      this.searchQuery.set(query);
+      this.currentPage.set(0);
+      this.loadComments();
+    });
+
     this.loadComments();
+  }
+
+  onSearchInput(query: string): void {
+    this.searchSubject.next(query);
   }
 
   loadComments(): void {
@@ -57,6 +66,8 @@ export class CommentListComponent implements OnInit {
       size: this.pageSize().toString(),
     };
     if (this.statusFilter) params['status'] = this.statusFilter;
+    const q = this.searchQuery().trim();
+    if (q) params['search'] = q;
 
     this.apiService.get<PageResponse<CommentResponse>>('/admin/comments', params).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
@@ -104,7 +115,13 @@ export class CommentListComponent implements OnInit {
 
     this.apiService.put(`/admin/comments/${comment.id}/reject`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(this.i18n.t('dev.comments.rejectSuccess'));
+        // Q7.7: Undo for comment rejection
+        this.notification.successWithUndo(this.i18n.t('dev.comments.rejectSuccess'), () => {
+          this.apiService.put(`/admin/comments/${comment.id}/approve`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => this.loadComments(),
+            error: () => this.notification.error(this.i18n.t('dev.comments.approveError')),
+          });
+        });
       },
       error: () => {
         this.comments.set(snapshot);
@@ -151,7 +168,7 @@ export class CommentListComponent implements OnInit {
     if (this.isAllSelected()) {
       this.selectedIds.set(new Set());
     } else {
-      this.selectedIds.set(new Set(this.filteredComments().map(c => c.id)));
+      this.selectedIds.set(new Set(this.comments().map(c => c.id)));
     }
   }
 
@@ -160,7 +177,7 @@ export class CommentListComponent implements OnInit {
   }
 
   isAllSelected(): boolean {
-    const comments = this.filteredComments();
+    const comments = this.comments();
     return comments.length > 0 && this.selectedIds().size === comments.length;
   }
 

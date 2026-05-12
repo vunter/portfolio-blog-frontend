@@ -179,10 +179,100 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  /**
+   * Q7.9: Validate imported JSON structure and sanitize HTML content
+   * to prevent XSS and malformed data from reaching the backend.
+   */
+  private validateImportData(data: unknown): { valid: boolean; error?: string } {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      return { valid: false, error: 'Import file must contain a JSON object' };
+    }
+
+    const obj = data as Record<string, unknown>;
+
+    // Validate expected top-level structure
+    const allowedKeys = new Set([
+      'articles', 'tags', 'comments', 'settings', 'subscribers',
+      'users', 'metadata', 'version', 'exportedAt',
+    ]);
+    const unknownKeys = Object.keys(obj).filter(k => !allowedKeys.has(k));
+    if (unknownKeys.length > 0) {
+      return { valid: false, error: `Unknown keys in import: ${unknownKeys.join(', ')}` };
+    }
+
+    // Validate articles array structure if present
+    if (obj['articles'] !== undefined) {
+      if (!Array.isArray(obj['articles'])) {
+        return { valid: false, error: '"articles" must be an array' };
+      }
+      for (const article of obj['articles'] as unknown[]) {
+        if (!article || typeof article !== 'object') {
+          return { valid: false, error: 'Each article must be an object' };
+        }
+        const a = article as Record<string, unknown>;
+        if (typeof a['title'] !== 'string' || !a['title']) {
+          return { valid: false, error: 'Each article must have a non-empty title' };
+        }
+      }
+    }
+
+    return { valid: true };
+  }
+
+  /** Q7.9: Strip dangerous HTML patterns from string values */
+  private sanitizeImportStrings(data: unknown): unknown {
+    if (typeof data === 'string') {
+      // Remove script tags, event handlers, and javascript: URIs
+      return data
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
+        .replace(/javascript\s*:/gi, '');
+    }
+    if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeImportStrings(item));
+    }
+    if (data && typeof data === 'object') {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+        result[key] = this.sanitizeImportStrings(value);
+      }
+      return result;
+    }
+    return data;
+  }
+
   async onImportFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+
+    // Q7.9: Size limit (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      this.notification.error(this.i18n.t('admin.settings.importFileTooLarge'));
+      input.value = '';
+      return;
+    }
+
+    // Q7.9: Pre-parse and validate JSON structure before confirming
+    let parsedData: unknown;
+    try {
+      const text = await file.text();
+      parsedData = JSON.parse(text);
+    } catch {
+      this.notification.error(this.i18n.t('admin.settings.importInvalidJson'));
+      input.value = '';
+      return;
+    }
+
+    const validation = this.validateImportData(parsedData);
+    if (!validation.valid) {
+      this.notification.error(validation.error || this.i18n.t('admin.settings.importInvalidStructure'));
+      input.value = '';
+      return;
+    }
+
+    // Q7.9: Sanitize string content to prevent XSS
+    const sanitizedData = this.sanitizeImportStrings(parsedData);
 
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.t('admin.settings.importConfirmTitle'),
@@ -198,8 +288,12 @@ export class SettingsComponent implements OnInit {
     }
 
     this.importing.set(true);
-    this.adminApi.importBlog(file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
+    // Send sanitized data as a new Blob/File
+    const sanitizedBlob = new Blob([JSON.stringify(sanitizedData)], { type: 'application/json' });
+    const sanitizedFile = new File([sanitizedBlob], file.name, { type: 'application/json' });
+
+    this.adminApi.importBlog(sanitizedFile).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
         this.notification.success(this.i18n.t('admin.settings.importSuccess'));
         this.importing.set(false);
         input.value = '';

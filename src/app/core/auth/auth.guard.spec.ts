@@ -1,5 +1,7 @@
 ﻿import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthStore } from './auth.store';
 import { StorageService } from '../services/storage.service';
 import { AuthService } from './auth.service';
@@ -13,7 +15,7 @@ describe('Auth Guards', () => {
 
   const mockRoute = {} as ActivatedRouteSnapshot;
   const mockState = { url: '/admin/dashboard' } as RouterStateSnapshot;
-  const mockRootState = { url: '/' } as RouterStateSnapshot;
+  const _mockRootState = { url: '/' } as RouterStateSnapshot;
 
   const createUser = (role: 'ADMIN' | 'DEV' | 'VIEWER'): UserResponse => ({
     id: '1840234567890123456',
@@ -29,15 +31,19 @@ describe('Auth Guards', () => {
   beforeEach(() => {
     router = jasmine.createSpyObj('Router', ['navigate']);
     const storageSpy = jasmine.createSpyObj('StorageService', [
+      'get', 'set', 'remove',
       'getSession', 'setSession', 'removeSession',
     ]);
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['logout', 'refreshToken']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['logout', 'refreshToken', 'getCurrentUser']);
     authServiceSpy.logout.and.returnValue(of(undefined));
-    authServiceSpy.refreshToken.and.returnValue(of({ expiresIn: 3600 }));
+    authServiceSpy.refreshToken.and.returnValue(of({ tokenType: 'Bearer' as const, expiresIn: 3600, email: 'test@test.com', name: 'Test' }));
+    authServiceSpy.getCurrentUser.and.returnValue(of(createUser('ADMIN')));
 
     TestBed.configureTestingModule({
       providers: [
         AuthStore,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: Router, useValue: router },
         { provide: StorageService, useValue: storageSpy },
         { provide: AuthService, useValue: authServiceSpy },

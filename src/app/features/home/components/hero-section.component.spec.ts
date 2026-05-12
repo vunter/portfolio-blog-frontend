@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { HeroSectionComponent } from './hero-section.component';
 import { I18nService } from '../../../core/services/i18n.service';
@@ -43,6 +45,8 @@ describe('HeroSectionComponent', () => {
     await TestBed.configureTestingModule({
       imports: [HeroSectionComponent],
       providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: I18nService, useValue: mockI18n },
       ],
     }).compileComponents();

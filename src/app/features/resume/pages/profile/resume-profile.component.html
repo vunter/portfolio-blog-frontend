@@ -263,7 +263,7 @@
  </button>
  </div>
  @if (!collapsedSections()['education']) {
- @for (edu of profile.educations; track $index) {
+ @for (edu of profile.educations; track edu.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('educations', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -322,7 +322,7 @@
  </button>
  </div>
  @if (!collapsedSections()['languages']) {
- @for (lang of profile.languages; track $index) {
+ @for (lang of profile.languages; track lang.id ?? $index) {
  <div class="entry-card entry-card--inline" [class.entry-card--error]="hasEntryError('languages', $index)">
  <div class="form-grid cols-3">
  <div class="form-group">
@@ -360,7 +360,7 @@
  </button>
  </div>
  @if (!collapsedSections()['skills']) {
- @for (skill of profile.skills; track $index) {
+ @for (skill of profile.skills; track skill.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('skills', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -423,7 +423,7 @@
  </button>
  </div>
  @if (!collapsedSections()['experience']) {
- @for (exp of profile.experiences; track $index) {
+ @for (exp of profile.experiences; track exp.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('experiences', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -479,7 +479,7 @@
  </button>
  </div>
  @if (!collapsedSections()['certifications']) {
- @for (cert of profile.certifications; track $index) {
+ @for (cert of profile.certifications; track cert.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('certifications', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -530,7 +530,7 @@
  </button>
  </div>
  @if (!collapsedSections()['additionalInfo']) {
- @for (info of profile.additionalInfo; track $index) {
+ @for (info of profile.additionalInfo; track info.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('additionalInfo', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -569,7 +569,7 @@
  </button>
  </div>
  @if (!collapsedSections()['testimonials']) {
- @for (t of profile.testimonials; track $index) {
+ @for (t of profile.testimonials; track t.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('testimonials', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -645,7 +645,7 @@
  </button>
  </div>
  @if (!collapsedSections()['proficiencies']) {
- @for (p of profile.proficiencies; track $index) {
+ @for (p of profile.proficiencies; track p.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('proficiencies', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -691,7 +691,7 @@
  <div class="picker-modal" (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
  <span class="icon-picker-title">Choose Icon</span>
- <button type="button" class="btn-close-picker" (click)="closeIconPicker()"></button>
+ <button type="button" class="btn-close-picker" (click)="closeIconPicker()" aria-label="Close">&times;</button>
  </div>
  @if (p.icon) {
  <div class="icon-picker-selected">
@@ -736,7 +736,7 @@
  </button>
  </div>
  @if (!collapsedSections()['projects']) {
- @for (proj of profile.projects; track $index) {
+ @for (proj of profile.projects; track proj.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('projects', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -797,7 +797,7 @@
  </button>
  </div>
  @if (!collapsedSections()['learningTopics']) {
- @for (lt of profile.learningTopics; track $index) {
+ @for (lt of profile.learningTopics; track lt.id ?? $index) {
  <div class="entry-card" [class.entry-card--error]="hasEntryError('learningTopics', $index)">
  <div class="entry-header">
  <span class="entry-number">#{{ $index + 1 }}</span>
@@ -835,7 +835,7 @@
  <div class="picker-modal picker-modal-lg" (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
  <span class="icon-picker-title">Choose Icon / Emoji</span>
- <button type="button" class="btn-close-picker" (click)="closeEmojiPicker()"></button>
+ <button type="button" class="btn-close-picker" (click)="closeEmojiPicker()" aria-label="Close">&times;</button>
  </div>
  @if (lt.emoji) {
  <div class="icon-picker-selected">

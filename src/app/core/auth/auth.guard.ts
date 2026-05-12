@@ -52,14 +52,14 @@ function verifyAuth(state: { url: string }) {
 }
 
 /**
- * Auth Guard - Protege rotas que requerem autenticação
+ * Auth Guard - Protects routes that require authentication
  */
 export const authGuard: CanActivateFn = (_route, state) => {
   return verifyAuth(state);
 };
 
 /**
- * Guest Guard - Protege rotas acessíveis apenas para não autenticados
+ * Guest Guard - Protects routes accessible only to unauthenticated users
  */
 export const guestGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);

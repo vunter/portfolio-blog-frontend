@@ -205,7 +205,7 @@ test.describe('User Management - Security', () => {
   test('Non-admin cannot access /admin/users via URL', async ({ page }) => {
     await dismissCookieConsent(page);
     // Seed a DEV user via API
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
     if (loginRes.ok()) {
@@ -215,7 +215,7 @@ test.describe('User Management - Security', () => {
     }
 
     // Login as DEV and accept terms
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: `secdev-${timestamp}@test.com`, password: 'SecDevPass123!@#' },
     });
     await page.request.put(`${API_BASE}/admin/users/me`, {
@@ -245,7 +245,7 @@ test.describe('User Management - Security', () => {
   test('Admin sidebar hides Users link for DEV role', async ({ page }) => {
     await dismissCookieConsent(page);
     // Login as ADMIN to create a DEV user
-    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
     if (loginRes.ok()) {
@@ -255,7 +255,7 @@ test.describe('User Management - Security', () => {
     }
 
     // Login as DEV user via API and accept terms
-    await page.request.post(`${API_BASE}/admin/auth/login/v2`, {
+    await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: `sidedev-${timestamp}@test.com`, password: 'SideDevPass123!@#' },
     });
     await page.request.put(`${API_BASE}/admin/users/me`, {

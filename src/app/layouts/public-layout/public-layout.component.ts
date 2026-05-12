@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, PLATFORM_ID, OnInit, DestroyRef, HostListener } from '@angular/core';
-import { isPlatformBrowser, NgOptimizedImage } from '@angular/common';
+import { isPlatformBrowser, NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent, throttleTime, filter } from 'rxjs';
@@ -13,7 +13,7 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme
 
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ThemeToggleComponent, NgOptimizedImage],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +66,9 @@ export class PublicLayoutComponent implements OnInit {
         this.showScrollTop.set(window.scrollY > 400);
       });
     }
+
+    // Q13.4: Collect Core Web Vitals once per session
+    this.analytics.trackWebVitals();
 
     // Track page views for non-article pages
     this.router.events.pipe(

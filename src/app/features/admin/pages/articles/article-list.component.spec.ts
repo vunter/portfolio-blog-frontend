@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { ArticleListComponent } from './article-list.component';
@@ -66,6 +68,8 @@ describe('ArticleListComponent', () => {
       imports: [ArticleListComponent],
       providers: [
         provideRouter([]),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: ApiService, useValue: mockApiService },
         { provide: I18nService, useValue: mockI18n },
         { provide: NotificationService, useValue: mockNotification },

@@ -18,6 +18,8 @@ select {
   box-shadow: var(--card-shadow);
   border: 1px solid var(--border-color);
   overflow: hidden;
+  overflow-x: auto; // Q11.4: Horizontal scroll on small screens
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {

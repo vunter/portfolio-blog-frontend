@@ -145,6 +145,52 @@ describe('NotificationService', () => {
     });
   });
 
+  // Q7.7: Undo action support
+  describe('successWithUndo', () => {
+    it('should add a success notification with undo action', () => {
+      const undoFn = jasmine.createSpy('undoAction');
+      service.successWithUndo('Article deleted', undoFn);
+
+      expect(service.notifications().length).toBe(1);
+      const notification = service.notifications()[0];
+      expect(notification.type).toBe('success');
+      expect(notification.message).toBe('Article deleted');
+      expect(notification.undoAction).toBe(undoFn);
+    });
+
+    it('should auto-dismiss after default duration', fakeAsync(() => {
+      const undoFn = jasmine.createSpy('undoAction');
+      service.successWithUndo('Deleted', undoFn);
+
+      tick(4999);
+      expect(service.notifications().length).toBe(1);
+
+      tick(1);
+      expect(service.notifications().length).toBe(0);
+    }));
+  });
+
+  describe('undo', () => {
+    it('should execute undo action and dismiss the notification', () => {
+      const undoFn = jasmine.createSpy('undoAction');
+      const id = service.successWithUndo('Deleted', undoFn);
+
+      service.undo(id);
+
+      expect(undoFn).toHaveBeenCalledTimes(1);
+      expect(service.notifications().find(n => n.id === id)).toBeUndefined();
+    });
+
+    it('should do nothing for notifications without undo action', () => {
+      const id = service.success('No undo');
+
+      service.undo(id);
+
+      // Should not throw, notification remains (undo is a no-op without undoAction)
+      expect(service.notifications().find(n => n.id === id)).toBeDefined();
+    });
+  });
+
   describe('persistent notification (duration 0)', () => {
     it('should not auto-dismiss when duration is 0', fakeAsync(() => {
       service.success('I will persist forever', 0);

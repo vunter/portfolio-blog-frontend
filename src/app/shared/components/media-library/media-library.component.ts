@@ -20,7 +20,6 @@ import { DatePipe, NgOptimizedImage } from '@angular/common';
  */
 @Component({
   selector: 'app-media-library',
-  standalone: true,
   imports: [MediaUploadComponent, DatePipe, NgOptimizedImage],
   templateUrl: './media-library.component.html',
   styleUrl: './media-library.component.scss',

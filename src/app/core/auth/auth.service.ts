@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, shareReplay } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   LoginRequest,
@@ -21,7 +21,7 @@ export class AuthService {
     if (!this.oauthProviders$) {
       this.oauthProviders$ = this.http
         .get<Record<string, boolean>>(`${this.baseUrl}/admin/auth/oauth2/providers`)
-        .pipe(shareReplay(1));
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
     }
     return this.oauthProviders$;
   }

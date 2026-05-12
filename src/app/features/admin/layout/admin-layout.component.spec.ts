@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { Component, signal } from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Component, Input, signal } from '@angular/core';
 import { AdminLayoutComponent } from './admin-layout.component';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -10,11 +12,16 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
 import { BreadcrumbsComponent } from '../../../shared/components/breadcrumbs/breadcrumbs.component';
 
 // Stub child components to avoid importing their full dependency trees
-@Component({ selector: 'app-theme-toggle', template: '', inputs: ['variant', 'showLabel'] })
-class ThemeToggleStubComponent {}
+@Component({ selector: 'app-theme-toggle', template: '' })
+class ThemeToggleStubComponent {
+  @Input() variant?: string;
+  @Input() showLabel?: boolean;
+}
 
-@Component({ selector: 'app-breadcrumbs', template: '', inputs: ['items'] })
-class BreadcrumbsStubComponent {}
+@Component({ selector: 'app-breadcrumbs', template: '' })
+class BreadcrumbsStubComponent {
+  @Input() items?: any[];
+}
 
 describe('AdminLayoutComponent', () => {
   let component: AdminLayoutComponent;
@@ -47,6 +54,9 @@ describe('AdminLayoutComponent', () => {
       'disconnect',
     ], {
       connectionLost: signal(false),
+      hasUnread: signal(false),
+      unreadCount: signal(0),
+      notifications: signal([]),
     });
 
     const mockI18n = {
@@ -69,6 +79,8 @@ describe('AdminLayoutComponent', () => {
       ],
       providers: [
         provideRouter([]),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
         { provide: AuthStore, useValue: mockAuthStore },
         { provide: ThemeService, useValue: mockTheme },
         { provide: I18nService, useValue: mockI18n },
@@ -143,7 +155,7 @@ describe('AdminLayoutComponent', () => {
 
   it('should have correct number of menu items', () => {
     const items = component.menuItems();
-    expect(items.length).toBe(10);
+    expect(items.length).toBe(15);
   });
 
   it('should call authStore.logout and navigate on logout', () => {

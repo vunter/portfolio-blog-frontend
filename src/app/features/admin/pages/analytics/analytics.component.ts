@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AdminApiService, AnalyticsSummary, SearchAnalytics, AnalyticsComparison } from '../../services/admin-api.service';
+import { AdminApiService, SearchAnalytics, AnalyticsComparison } from '../../services/admin-api.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';

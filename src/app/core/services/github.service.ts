@@ -30,7 +30,7 @@ export class GitHubService {
   /** Extract GitHub username from profile URL, fallback to empty string */
   private readonly username = computed(() => {
     const githubUrl = this.profileService.profile()?.github || '';
-    const match = githubUrl.match(/github\.com\/([^\/\?\#]+)/);
+    const match = githubUrl.match(/github\.com\/([^/?#]+)/);
     return match ? match[1] : '';
   });
 

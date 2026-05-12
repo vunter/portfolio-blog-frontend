@@ -119,10 +119,20 @@ export class ArticleListComponent implements OnInit {
 
     this.apiService.patch(endpoint, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.notification.success(
+        // Q7.7: Undo for publish/unpublish
+        const reverseEndpoint = isPublished
+          ? `/admin/articles/${article.id}/publish`
+          : `/admin/articles/${article.id}/unpublish`;
+        this.notification.successWithUndo(
           isPublished
             ? this.i18n.t('dev.articles.unpublishSuccess')
-            : this.i18n.t('dev.articles.publishSuccess')
+            : this.i18n.t('dev.articles.publishSuccess'),
+          () => {
+            this.apiService.patch(reverseEndpoint, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+              next: () => this.loadArticles(),
+              error: () => this.notification.error(this.i18n.t('dev.error.loadArticles')),
+            });
+          }
         );
       },
       error: () => {

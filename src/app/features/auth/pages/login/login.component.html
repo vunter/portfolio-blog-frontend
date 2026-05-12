@@ -1,26 +1,13 @@
 <div class="auth-page">
  <app-theme-toggle variant="floating" />
  <div class="auth-lang-toggle">
+ @for (lang of i18n.supportedLanguages(); track lang.code) {
  <button
  class="auth-lang-btn"
- [class.active]="i18n.language() === 'en'"
- (click)="i18n.setLanguage('en')"
- >EN</button>
- <button
- class="auth-lang-btn"
- [class.active]="i18n.language() === 'pt'"
- (click)="i18n.setLanguage('pt')"
- >PT</button>
- <button
- class="auth-lang-btn"
- [class.active]="i18n.language() === 'es'"
- (click)="i18n.setLanguage('es')"
- >ES</button>
- <button
- class="auth-lang-btn"
- [class.active]="i18n.language() === 'it'"
- (click)="i18n.setLanguage('it')"
- >IT</button>
+ [class.active]="i18n.language() === lang.code"
+ (click)="i18n.setLanguage(lang.code)"
+ >{{ lang.code | uppercase }}</button>
+ }
  </div>
  <div class="auth-card">
  <a routerLink="/" class="back-link" style="margin-bottom: 1.5rem">{{ i18n.t('auth.backToHome') }}</a>

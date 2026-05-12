@@ -7,11 +7,12 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 import { TagResponse } from '../../../../models';
 
 @Component({
   selector: 'app-tag-list',
-  imports: [FormsModule, SkeletonComponent],
+  imports: [FormsModule, SkeletonComponent, AccessibleModalDirective],
   templateUrl: './tag-list.component.html',
   styleUrl: './tag-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

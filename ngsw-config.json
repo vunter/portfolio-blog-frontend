@@ -17,7 +17,7 @@
     {
       "name": "app-js",
       "installMode": "lazy",
-      "updateMode": "lazy",
+      "updateMode": "prefetch",
       "resources": {
         "files": [
           "/*.js"
@@ -73,6 +73,29 @@
         "maxSize": 5,
         "maxAge": "10m",
         "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-i18n",
+      "urls": [
+        "/api/v1/i18n/*"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 10,
+        "maxAge": "1h"
+      }
+    },
+    {
+      "name": "api-search",
+      "urls": [
+        "/api/v1/articles/search*"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 0,
+        "maxAge": "0u",
+        "timeout": "0u"
       }
     },
     {

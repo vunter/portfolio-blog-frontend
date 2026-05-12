@@ -41,6 +41,11 @@
  }
  </div>
  <span class="toast__message">{{ notification.message }}</span>
+ @if (notification.undoAction) {
+ <button class="toast__undo" (click)="undo(notification.id); $event.stopPropagation()">
+ {{ i18n.t('common.undo') }}
+ </button>
+ }
  <button
  class="toast__close"
  (click)="dismiss(notification.id); $event.stopPropagation()"

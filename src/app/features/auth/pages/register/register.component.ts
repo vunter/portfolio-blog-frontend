@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
@@ -14,7 +14,7 @@ import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -43,6 +43,9 @@
  </label>
  </div>
  <p class="category-desc">{{ i18n.t('cookie.category.functionalDesc') }}</p>
+ @if (!functionalEnabled()) {
+ <p class="category-impact">{{ i18n.t('cookie.degradation.functional') }}</p>
+ }
  </div>
 
  <!-- Analytics -->
@@ -57,6 +60,9 @@
  </label>
  </div>
  <p class="category-desc">{{ i18n.t('cookie.category.analyticsDesc') }}</p>
+ @if (!analyticsEnabled()) {
+ <p class="category-impact">{{ i18n.t('cookie.degradation.analytics') }}</p>
+ }
  </div>
  </div>
  }

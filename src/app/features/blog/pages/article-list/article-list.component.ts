@@ -145,12 +145,12 @@ export class ArticleListComponent implements OnInit {
 
   onDateFromChange(event: Event): void {
     this.dateFrom.set((event.target as HTMLInputElement).value);
-    this.loadArticles(0);
+    this.scheduleFilterReload();
   }
 
   onDateToChange(event: Event): void {
     this.dateTo.set((event.target as HTMLInputElement).value);
-    this.loadArticles(0);
+    this.scheduleFilterReload();
   }
 
   clearDateFilter(): void {
@@ -162,6 +162,15 @@ export class ArticleListComponent implements OnInit {
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery.set(value);
+    this.scheduleFilterReload();
+  }
+
+  /**
+   * Browsers fire input events on partial date entries (e.g. while the user
+   * is still typing the year), so debounce all filter changes through one
+   * timer rather than firing a request per keystroke.
+   */
+  private scheduleFilterReload(): void {
     if (this.searchTimeout) clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => this.loadArticles(0), 400);
   }

@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit, OnDestroy, ElementRef, Aft
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, timer } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ResumeService } from '../../services/resume.service';
 import { ResumeProfileService } from '../../services/resume-profile.service';
@@ -12,6 +12,8 @@ import { ThemeService } from '../../../../core/services/theme.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { MonacoLoaderService } from '../../../../core/services/monaco-loader.service';
 import { ResumeTemplate, ResumeTemplateStatus, PaperSize } from '../../../../models';
+import { getDefaultHtmlTemplate, getDefaultCssTemplate } from './utils/template-defaults.util';
+import { getSnippet } from './utils/template-snippets.util';
 
 // Monaco type declarations provided by shared/types/monaco.d.ts
 
@@ -168,110 +170,22 @@ export class TemplateEditorComponent implements OnInit, OnDestroy, AfterViewInit
         if (this.cssModel) this.cssModel.setValue(this.cssContent);
         this.updatePreview();
       },
-      error: (err) => {
+      error: (_err) => {
         this.notification.error(this.i18n.t('resume.editor.loadError'));
       }
     });
   }
 
   loadDefaultTemplate(): void {
-    // M-13: Use i18n keys instead of hardcoded Portuguese
-    const lang = this.i18n.language() === 'en' ? 'en' : this.i18n.language();
-    const htmlLang = lang === 'pt' ? 'pt-BR' : lang;
-    this.htmlContent = `<!DOCTYPE html>
-<html lang="${htmlLang}">
-<head>
-  <meta charset="UTF-8">
-  <title>${this.i18n.t('resume.editor.defaultTitle')} - {{name}}</title>
-</head>
-<body>
-  <header class="header">
-    <h1>{{name}}</h1>
-    <p class="subtitle">{{title}}</p>
-    <div class="contact-info">
-      <span>{{email}}</span>
-      <span>{{phone}}</span>
-      <span>{{location}}</span>
-    </div>
-  </header>
-
-  <section class="summary">
-    <h2>${this.i18n.t('resume.editor.defaultSummary')}</h2>
-    <p>{{summary}}</p>
-  </section>
-
-  <section class="experience">
-    <h2>${this.i18n.t('resume.editor.defaultExperience')}</h2>
-  </section>
-
-  <section class="education">
-    <h2>${this.i18n.t('resume.editor.defaultEducation')}</h2>
-  </section>
-
-  <section class="skills">
-    <h2>${this.i18n.t('resume.editor.defaultSkills')}</h2>
-  </section>
-</body>
-</html>`;
-
-    this.cssContent = `/* ${this.i18n.t('resume.editor.defaultCssComment')} */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #3b82f6;
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  color: #1e40af;
-  margin-bottom: 0.25rem;
-}
-
-.subtitle {
-  font-size: 1.25rem;
-  color: #6b7280;
-  margin-bottom: 1rem;
-}
-
-.contact-info {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-section { margin-bottom: 1.5rem; }
-
-h2 {
-  color: #1e40af;
-  font-size: 1.25rem;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.summary p { text-align: justify; }`;
-
+    this.htmlContent = getDefaultHtmlTemplate(this.i18n);
+    this.cssContent = getDefaultCssTemplate(this.i18n);
     this.originalContent = { html: this.htmlContent, css: this.cssContent };
-    setTimeout(() => {
+    // Q7.2: Use RxJS timer with takeUntilDestroyed instead of raw setTimeout
+    timer(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.htmlModel) this.htmlModel.setValue(this.htmlContent);
       if (this.cssModel) this.cssModel.setValue(this.cssContent);
       this.updatePreview();
-    }, 1000);
+    });
   }
 
   updatePreview(): void {
@@ -296,60 +210,10 @@ h2 {
   zoomOut(): void { if (this.zoomLevel() > 30) this.zoomLevel.update(z => z - 10); }
 
   insertSnippet(type: string): void {
-    const lang = this.i18n.language();
-    const localeTexts: Record<string, Record<string, string>> = {
-      en: { sectionTitle: 'Section Title', content: 'Content here...', jobTitle: 'Job Title', company: 'Company', period: 'Jan 2020 - Present', achievement: 'Achievement or responsibility', courseName: 'Course Name', institution: 'Educational Institution', category: 'Category', skill1: 'Skill 1', skill2: 'Skill 2' },
-      pt: { sectionTitle: 'Título da Seção', content: 'Conteúdo aqui...', jobTitle: 'Cargo', company: 'Empresa', period: 'Jan 2020 - Presente', achievement: 'Responsabilidade ou conquista', courseName: 'Nome do Curso', institution: 'Instituição de Ensino', category: 'Categoria', skill1: 'Habilidade 1', skill2: 'Habilidade 2' },
-      es: { sectionTitle: 'Título de Sección', content: 'Contenido aquí...', jobTitle: 'Puesto', company: 'Empresa', period: 'Ene 2020 - Presente', achievement: 'Logro o responsabilidad', courseName: 'Nombre del Curso', institution: 'Institución Educativa', category: 'Categoría', skill1: 'Habilidad 1', skill2: 'Habilidad 2' },
-      it: { sectionTitle: 'Titolo della Sezione', content: 'Contenuto qui...', jobTitle: 'Posizione', company: 'Azienda', period: 'Gen 2020 - Presente', achievement: 'Responsabilità o risultato', courseName: 'Nome del Corso', institution: 'Istituto di Formazione', category: 'Categoria', skill1: 'Competenza 1', skill2: 'Competenza 2' },
-    };
-    const txt = localeTexts[lang] || localeTexts['en'];
-
-    const snippets: Record<string, string> = {
-      header: `<header class="header">
-  <h1>{{name}}</h1>
-  <p class="subtitle">{{title}}</p>
-  <div class="contact-info">
-    <span>{{email}}</span>
-    <span>{{phone}}</span>
-    <span>{{location}}</span>
-  </div>
-</header>`,
-      section: `<section class="section">
-  <h2>${txt['sectionTitle']}</h2>
-  <p>${txt['content']}</p>
-</section>`,
-      experience: `<div class="experience-item">
-  <div class="job-header">
-    <h3>${txt['jobTitle']}</h3>
-    <span class="company">${txt['company']}</span>
-    <span class="period">${txt['period']}</span>
-  </div>
-  <ul>
-    <li>${txt['achievement']}</li>
-  </ul>
-</div>`,
-      education: `<div class="education-item">
-  <h3>${txt['courseName']}</h3>
-  <span class="institution">${txt['institution']}</span>
-  <span class="year">2020</span>
-</div>`,
-      skills: `<div class="skills-grid">
-  <div class="skill-category">
-    <h4>${txt['category']}</h4>
-    <ul>
-      <li>${txt['skill1']}</li>
-      <li>${txt['skill2']}</li>
-    </ul>
-  </div>
-</div>`,
-    };
-
-    const snippet = snippets[type];
+    const snippet = getSnippet(type, this.i18n.language());
     if (snippet && this.editor) {
       const selection = this.editor.getSelection();
-      const id = { major: 1, minor: 1 };
-      const op = { identifier: id, range: selection, text: snippet, forceMoveMarkers: true };
+      const op = { identifier: { major: 1, minor: 1 }, range: selection, text: snippet, forceMoveMarkers: true };
       this.editor.executeEdits('snippet', [op]);
       this.editor.focus();
     }
@@ -399,7 +263,7 @@ h2 {
         }
         this.saving.set(false);
       },
-      error: (err) => {
+      error: (_err) => {
         this.notification.error(this.i18n.t('resume.editor.saveError'));
         this.saving.set(false);
       },
@@ -439,7 +303,7 @@ h2 {
         this.generatingPdf.set(false);
         this.notification.success(this.i18n.t('resume.editor.pdfSuccess'));
       },
-      error: (err) => {
+      error: (_err) => {
         this.notification.error(this.i18n.t('resume.editor.pdfError'));
         this.generatingPdf.set(false);
       },

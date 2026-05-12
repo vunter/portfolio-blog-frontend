@@ -1,4 +1,5 @@
-﻿import { Component, inject, OnInit, OnDestroy, signal, computed, input, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+﻿import { Component, inject, OnInit, OnDestroy, signal, computed, input, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import 'emoji-picker-element';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -6,17 +7,8 @@ import { ResumeProfileService } from '../../services/resume-profile.service';
 import {
   ResumeProfile,
   ResumeProfileRequest,
-  ResumeProfileEducation,
   ResumeProfileExperience,
-  ResumeProfileSkill,
-  ResumeProfileLanguage,
-  ResumeProfileCertification,
-  ResumeProfileAdditionalInfo,
-  ResumeProfileHomeCustomization,
-  ResumeProfileTestimonial,
-  ResumeProfileProficiency,
   ResumeProfileProject,
-  ResumeProfileLearningTopic,
 } from '../../../../models';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -68,6 +60,7 @@ const EMPTY_PROFILE: ProfileForm = {
 export class ResumeProfileComponent implements OnInit, OnDestroy {
   private readonly profileService = inject(ResumeProfileService);
   private readonly notification = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly i18n = inject(I18nService);
 
   // Expose Object to template for Object.keys/entries
@@ -140,7 +133,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   }
 
   private checkTranslationStatus(): void {
-    this.profileService.getTranslationStatus().subscribe({
+    this.profileService.getTranslationStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (status) => this.translationAvailable.set(status.available),
       error: () => this.translationAvailable.set(false),
     });
@@ -153,7 +146,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
     this.translateError.set(false);
 
     const sourceLang = this.translateSourceLocale || this.currentLocale;
-    this.profileService.translateProfile(this.targetLang, sourceLang).subscribe({
+    this.profileService.translateProfile(this.targetLang, sourceLang).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (translated) => {
         // Switch to the target locale and fill form with translated content
         // The user must click "Salvar" to persist the translation
@@ -212,7 +205,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
 
   loadProfile(): void {
     this.loading.set(true);
-    this.profileService.getProfile(this.currentLocale).subscribe({
+    this.profileService.getProfile(this.currentLocale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.profile = {
           ...data,
@@ -245,7 +238,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadAvailableLocales(): void {
-    this.profileService.listLocales().subscribe({
+    this.profileService.listLocales().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (locales) => this.availableLocales.set(locales),
       error: () => this.availableLocales.set([]),
     });
@@ -340,7 +333,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
         learningTopics: (this.profile.learningTopics || []).map((lt, i) => ({ ...lt, sortOrder: i })),
       };
 
-      this.profileService.saveProfile(request, this.currentLocale).subscribe({
+      this.profileService.saveProfile(request, this.currentLocale).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (saved) => {
           this.profile = {
             ...saved,
@@ -392,7 +385,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   // === LinkedIn Import ===
 
   private checkLinkedInImportStatus(): void {
-    this.linkedinImportService.getImportStatus().subscribe({
+    this.linkedinImportService.getImportStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (status) => this.linkedinImportEnabled.set(status.enabled),
       error: () => this.linkedinImportEnabled.set(false),
     });
@@ -412,7 +405,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
 
     if (importKey) {
       this.linkedinImporting.set(true);
-      this.linkedinImportService.getImportResult(importKey).subscribe({
+      this.linkedinImportService.getImportResult(importKey).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (imported) => {
           this.linkedinImportPreview.set(imported);
           this.linkedinImporting.set(false);

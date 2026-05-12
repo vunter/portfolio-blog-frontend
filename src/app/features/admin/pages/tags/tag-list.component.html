@@ -73,9 +73,10 @@
 
  <!-- Modal -->
  @if (showModal()) {
- <div class="modal-overlay" (click)="closeModal()">
+ <div class="modal-overlay" appAccessibleModal ariaLabelledBy="tag-modal-title"
+      (close)="closeModal()" (click)="closeModal()">
  <div class="modal" (click)="$event.stopPropagation()">
- <h2>{{ editingTag() ? i18n.t('dev.tags.editTag') : i18n.t('dev.tags.newTag') }}</h2>
+ <h2 id="tag-modal-title">{{ editingTag() ? i18n.t('dev.tags.editTag') : i18n.t('dev.tags.newTag') }}</h2>
  <form (ngSubmit)="saveTag()">
  <div class="form-group">
  <label for="name">{{ i18n.t('dev.tags.nameLabel') }} <span class="required">*</span></label>

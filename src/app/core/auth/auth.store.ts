@@ -221,16 +221,21 @@ export const AuthStore = signalStore(
               storage.set(STORAGE_KEYS.IS_AUTHENTICATED, true);
             }),
             catchError((err) => {
-              // Only clear session on explicit auth rejection (401).
-              // Network errors or server downtime should preserve the cached session
-              // so the user isn't logged out just because the backend is temporarily unavailable.
-              // Both auth rejection (401) and backend unreachable (network error / 5xx)
-              // clear the session. This is the safer default: a stale cached auth flag
-              // must not grant access when the server cannot confirm the session.
-              patchState(store, { user: null, isAuthenticated: false, isLoading: false });
-              storage.remove(STORAGE_KEYS.USER);
-              storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
-              storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+              if (err instanceof HttpErrorResponse && err.status === 401) {
+                // Explicit auth rejection — clear session
+                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+                storage.remove(STORAGE_KEYS.USER);
+                storage.remove(STORAGE_KEYS.IS_AUTHENTICATED);
+                storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+              } else {
+                // Network error / 5xx — refuse to grant access we cannot verify with the
+                // server. A previously cached `user` blob (especially with role=ADMIN) must
+                // not be trusted while the backend is unreachable, since server-side
+                // revocation cannot be observed during an outage. Force a re-login.
+                patchState(store, { user: null, isAuthenticated: false, isLoading: false });
+                // Mark token as expired so the next successful contact triggers a refresh.
+                storage.set(STORAGE_KEYS.TOKEN_EXPIRES_AT, Date.now() - 1);
+              }
               return of(null);
             }),
             map(() => void 0)

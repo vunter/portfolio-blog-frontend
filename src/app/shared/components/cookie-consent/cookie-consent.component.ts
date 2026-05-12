@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieConsentService } from '../../../core/services/cookie-consent.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
 @Component({
@@ -11,6 +12,7 @@ import { I18nService } from '../../../core/services/i18n.service';
 })
 export class CookieConsentComponent {
   private consentService = inject(CookieConsentService);
+  private notification = inject(NotificationService);
   private router = inject(Router);
   i18n = inject(I18nService);
 
@@ -27,6 +29,8 @@ export class CookieConsentComponent {
 
   rejectOptional(): void {
     this.consentService.rejectOptional();
+    // Q14.4: Inform user what features are degraded
+    this.notification.info(this.i18n.t('cookie.degradation.rejected'));
   }
 
   toggleSettings(): void {
@@ -42,6 +46,13 @@ export class CookieConsentComponent {
 
   savePreferences(): void {
     this.consentService.savePreferences(this.functionalEnabled(), this.analyticsEnabled());
+    // Q14.4: Show degradation info if any category was denied
+    if (!this.functionalEnabled() || !this.analyticsEnabled()) {
+      const parts: string[] = [];
+      if (!this.functionalEnabled()) parts.push(this.i18n.t('cookie.degradation.functional'));
+      if (!this.analyticsEnabled()) parts.push(this.i18n.t('cookie.degradation.analytics'));
+      this.notification.info(parts.join(' '));
+    }
   }
 
   goToPrivacy(): void {

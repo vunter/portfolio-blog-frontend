@@ -7,11 +7,12 @@ import { ResumeService } from '../../services/resume.service';
 import { DownloadService } from '../../../../core/services/download.service';
 import { ResumeTemplate } from '../../../../models';
 import { I18nService, Language } from '../../../../core/services/i18n.service';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 
 
 @Component({
   selector: 'app-resume-generate',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, AccessibleModalDirective],
   templateUrl: './resume-generate.component.html',
   styleUrl: './resume-generate.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -164,7 +165,7 @@ export class ResumeGenerateComponent implements OnInit {
     // Separate CSS from HTML for the template
     const fullHtml = this.htmlContent();
     let cssContent = '';
-    let htmlBody = fullHtml;
+    const _htmlBody = fullHtml;
 
     const styleMatch = fullHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
     if (styleMatch) {

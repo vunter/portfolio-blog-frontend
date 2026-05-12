@@ -310,7 +310,7 @@ export class SecuritySettingsComponent implements OnInit {
     a.href = url;
     a.download = 'backup-codes.txt';
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   loadSessions(): void {
@@ -401,13 +401,20 @@ export class SecuritySettingsComponent implements OnInit {
   }
 
   deleteLinkedInData(): void {
+    // Guard against double-click while the confirm dialog is open. The button's
+    // [disabled] binding only flips after the dialog resolves, so without this
+    // synchronous flag a fast second click would queue a second confirm + DELETE.
+    if (this.deletingLinkedin()) return;
+    this.deletingLinkedin.set(true);
     this.confirmDialog.confirm({
       title: this.i18n.t('account.security.deleteLinkedinData'),
       message: this.i18n.t('account.security.deleteLinkedinConfirm'),
       type: 'danger',
     }).then((confirmed) => {
-      if (!confirmed) return;
-      this.deletingLinkedin.set(true);
+      if (!confirmed) {
+        this.deletingLinkedin.set(false);
+        return;
+      }
       this.api.delete('/resume/profile/linkedin-data').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success(this.i18n.t('account.security.linkedinDataDeleted'));

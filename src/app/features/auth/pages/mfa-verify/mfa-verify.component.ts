@@ -39,18 +39,40 @@ export class MfaVerifyComponent implements OnInit {
 
   private mfaToken = '';
   private email = '';
+  // Q9.1: Short TTL for MFA token in sessionStorage (2 minutes)
+  private static readonly MFA_STORAGE_KEY = 'mfa_challenge';
+  private static readonly MFA_TTL_MS = 2 * 60 * 1000;
 
   ngOnInit(): void {
-    // Get MFA token and method from navigation state only.
-    // Do NOT fall back to history.state — on page refresh, redirect to login
-    // instead of exposing stale MFA tokens from browser history.
+    // Get MFA token from navigation state (primary source)
     const nav = this.router.getCurrentNavigation()?.extras?.state;
     this.mfaToken = nav?.['mfaToken'] ?? '';
     this.email = nav?.['email'] ?? '';
     const preferredMethod = nav?.['method'] ?? 'TOTP';
     this.method.set(preferredMethod);
 
+    // Q9.1: If navigation state is present, persist to sessionStorage with TTL
+    if (this.mfaToken) {
+      sessionStorage.setItem(MfaVerifyComponent.MFA_STORAGE_KEY, JSON.stringify({
+        mfaToken: this.mfaToken,
+        email: this.email,
+        method: preferredMethod,
+        expiresAt: Date.now() + MfaVerifyComponent.MFA_TTL_MS,
+      }));
+    } else {
+      // Recover from sessionStorage on page refresh
+      try {
+        const stored = JSON.parse(sessionStorage.getItem(MfaVerifyComponent.MFA_STORAGE_KEY) || '');
+        if (stored && stored.expiresAt > Date.now()) {
+          this.mfaToken = stored.mfaToken;
+          this.email = stored.email;
+          this.method.set(stored.method ?? 'TOTP');
+        }
+      } catch { /* invalid or missing — redirect below */ }
+    }
+
     if (!this.mfaToken) {
+      sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
       this.router.navigate(['/auth/login']);
     }
   }
@@ -81,6 +103,7 @@ export class MfaVerifyComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (user) => {
+        sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
         this.authStore.login(user);
         this.notification.success(this.i18n.t('auth.login.success'));
         const defaultRoute = user.role === 'VIEWER' ? '/profile' : '/admin';

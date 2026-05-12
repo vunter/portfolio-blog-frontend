@@ -33,7 +33,7 @@
  />
  </div>
 
- <div class="table-container">
+ <div class="table-container table-responsive">
  <table class="data-table" aria-label="Users">
  <thead>
  <tr>
@@ -48,25 +48,25 @@
  <tbody>
  @for (user of users(); track user.id) {
  <tr>
- <td>
+ <td data-label="User">
  <div class="user-info">
  <div class="avatar">{{ user.name.charAt(0) || 'U' }}</div>
  <span>{{ user.name }}</span>
  </div>
  </td>
- <td>{{ user.email }}</td>
- <td>
+ <td data-label="Email">{{ user.email }}</td>
+ <td data-label="Role">
  <span class="role-badge" [class]="'role-badge--' + user.role.toLowerCase()">
  {{ getRoleLabel(user.role) }}
  </span>
  </td>
- <td>
+ <td data-label="Status">
  <span class="status-indicator" [class.active]="user.active">
  {{ user.active ? i18n.t('common.active') : i18n.t('common.inactive') }}
  </span>
  </td>
- <td>{{ formatDate(user.createdAt) }}</td>
- <td>
+ <td data-label="Created">{{ formatDate(user.createdAt) }}</td>
+ <td data-label="Actions">
  <div class="actions">
  <button class="action-btn" (click)="editUser(user)" [title]="i18n.t('common.edit')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -130,9 +130,10 @@
 
  <!-- Modal -->
  @if (showModal()) {
- <div class="modal-overlay" (click)="closeModal()">
+ <div class="modal-overlay" appAccessibleModal ariaLabelledBy="user-modal-title"
+      (close)="closeModal()" (click)="closeModal()">
  <div class="modal" (click)="$event.stopPropagation()">
- <h2>{{ editingUser() ? i18n.t('admin.users.editUser') : i18n.t('admin.users.newUser') }}</h2>
+ <h2 id="user-modal-title">{{ editingUser() ? i18n.t('admin.users.editUser') : i18n.t('admin.users.newUser') }}</h2>
  <form (ngSubmit)="saveUser()">
  <div class="form-group">
  <label for="name">{{ i18n.t('admin.users.nameLabel') }} <span class="required">*</span></label>
@@ -147,7 +148,7 @@
  <label for="password">{{ i18n.t('admin.users.passwordLabel') }} <span class="required">*</span></label>
  <input id="password" type="password" [(ngModel)]="formData.password" name="password" required
  minlength="12" />
- <small class="form-hint">{{ i18n.t('admin.users.passwordHint') }}</small>
+ <small class="form-hint">{{ i18n.t('admin.users.passwordHint') }} (A-Z, a-z, 0-9, special char)</small>
  </div>
  }
  <div class="form-group">
@@ -171,11 +172,12 @@
 
  <!-- Activity Modal -->
  @if (showActivityModal()) {
- <div class="modal-overlay" (click)="closeActivityModal()">
+ <div class="modal-overlay" appAccessibleModal ariaLabelledBy="user-activity-title"
+      (close)="closeActivityModal()" (click)="closeActivityModal()">
  <div class="modal activity-modal" (click)="$event.stopPropagation()">
  <div class="modal__header">
- <h2>{{ i18n.t('admin.users.activity.title') }}</h2>
- <button class="modal__close" (click)="closeActivityModal()">✕</button>
+ <h2 id="user-activity-title">{{ i18n.t('admin.users.activity.title') }}</h2>
+ <button class="modal__close" (click)="closeActivityModal()" [attr.aria-label]="i18n.t('common.close')">✕</button>
  </div>
  <div class="modal__body">
  @if (loadingActivity()) {

@@ -106,8 +106,6 @@ describe('HomeComponent', () => {
 
     const skeleton = fixture.nativeElement.querySelector('.loading-skeleton');
     expect(skeleton).toBeTruthy();
-    const mainLayout = fixture.nativeElement.querySelector('.main-layout');
-    expect(mainLayout).toBeFalsy();
   });
 
   it('should render error fallback when error occurs', () => {

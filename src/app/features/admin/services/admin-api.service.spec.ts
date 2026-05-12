@@ -43,11 +43,14 @@ describe('AdminApiService', () => {
     it('should GET /admin/dashboard/stats', () => {
       const mockStats: DashboardStats = {
         totalArticles: 25,
+        publishedArticles: 20,
+        draftArticles: 5,
         totalViews: 5000,
         totalComments: 120,
-        totalSubscribers: 50,
-        recentArticles: 3,
         pendingComments: 5,
+        totalUsers: 10,
+        totalTags: 8,
+        newsletterSubscribers: 50,
       };
 
       service.getDashboardStats().subscribe((stats) => {
@@ -63,7 +66,7 @@ describe('AdminApiService', () => {
   describe('getDashboardActivity', () => {
     it('should GET /admin/dashboard/activity', () => {
       const mockActivity = [
-        { type: 'article', description: 'New article created', timestamp: '2026-02-10T10:00:00Z' },
+        { id: 1, type: 'article', action: 'created', title: 'New article', description: 'New article created', createdAt: '2026-02-10T10:00:00Z' },
       ];
 
       service.getDashboardActivity().subscribe((activity) => {

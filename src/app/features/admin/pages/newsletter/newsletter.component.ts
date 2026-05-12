@@ -11,7 +11,6 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { NewsletterSubscriber, PageResponse } from '../../../../models';
-import { environment } from '../../../../../environments/environment';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({

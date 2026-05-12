@@ -21,6 +21,7 @@ import localePt from '@angular/common/locales/pt';
 import localeEs from '@angular/common/locales/es';
 import localeIt from '@angular/common/locales/it';
 
+import * as Sentry from '@sentry/angular';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
@@ -71,6 +72,11 @@ export const appConfig: ApplicationConfig = {
     })),
     provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    // Q13.1: Sentry performance tracing via Angular Router
+    {
+      provide: Sentry.TraceService,
+      deps: [],
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,

@@ -18,6 +18,10 @@ export class ToastComponent {
     this.notificationService.dismiss(id);
   }
 
+  undo(id: string): void {
+    this.notificationService.undo(id);
+  }
+
   onToastClick(notification: Notification): void {
     if (notification.route) {
       this.router.navigateByUrl(notification.route);

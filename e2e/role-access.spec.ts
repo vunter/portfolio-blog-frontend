@@ -77,7 +77,7 @@ test.describe('Role-Based Access Control', () => {
     test('VIEWER should not access admin area', async ({ page }) => {
       // Use API login for VIEWER to avoid rate limiting on UI login
       await dismissCookieConsent(page);
-      await page.request.post('http://localhost:4200/api/v1/admin/auth/login/v2', {
+      await page.request.post('http://localhost:4200/api/v1/admin/auth/login', {
         data: { email: VIEWER_CREDS.email, password: VIEWER_CREDS.password },
       });
       await page.request.put('http://localhost:4200/api/v1/admin/users/me', {

@@ -10,7 +10,7 @@
           [style.background-color]="tag.color || '#6366f1'"
         >
           {{ tag.name }}
-          @if (showCount() && tag.articleCount != null) {
+          @if (showCount() && tag.articleCount !== null && tag.articleCount !== undefined) {
             <span class="tag-chip__count">{{ tag.articleCount }}</span>
           }
         </a>

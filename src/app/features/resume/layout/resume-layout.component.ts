@@ -1,16 +1,10 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ThemeService } from '../../../core/services/theme.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
-
-interface MenuItem {
-  label: string;
-  icon: SafeHtml;
-  route: string;
-}
 
 @Component({
   selector: 'app-resume-layout',

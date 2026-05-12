@@ -17,6 +17,8 @@
   border-radius: 12px;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
   overflow: hidden;
+  overflow-x: auto; // Q11.4: Horizontal scroll on small screens
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 1.5rem;
 }
 

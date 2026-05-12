@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, viewChild, ElementRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -36,6 +37,7 @@ export class ViewerProfileComponent implements OnInit {
   private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private viewportScroller = inject(ViewportScroller);
+  private destroyRef = inject(DestroyRef);
   i18n = inject(I18nService);
 
   avatarInput = viewChild<ElementRef<HTMLInputElement>>('avatarFileInput');
@@ -85,7 +87,7 @@ export class ViewerProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe({
+    this.authService.getCurrentUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (user) => {
         this.user.set(user);
         this.form.name = user.name || '';
@@ -104,7 +106,7 @@ export class ViewerProfileComponent implements OnInit {
     });
 
     // Load existing role upgrade request
-    this.api.get<RoleUpgradeRequestResponse>('/admin/users/me/role-request').subscribe({
+    this.api.get<RoleUpgradeRequestResponse>('/admin/users/me/role-request').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (req) => this.roleRequest.set(req),
       error: () => {}, // 204 No Content or error — no pending request
     });
@@ -162,7 +164,7 @@ export class ViewerProfileComponent implements OnInit {
     }
 
     this.uploadingAvatar.set(true);
-    this.adminApi.uploadMedia(file, 'AVATAR').subscribe({
+    this.adminApi.uploadMedia(file, 'AVATAR').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (asset) => {
         this.uploadingAvatar.set(false);
         this.form.avatarUrl = asset.url;
@@ -234,7 +236,7 @@ export class ViewerProfileComponent implements OnInit {
       payload['newPassword'] = this.form.newPassword;
     }
 
-    this.api.put<UserResponse>('/admin/users/me', payload).subscribe({
+    this.api.put<UserResponse>('/admin/users/me', payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         this.saving.set(false);
         this.user.set(updated);
@@ -281,7 +283,7 @@ export class ViewerProfileComponent implements OnInit {
       reason: this.roleRequestReason || null,
     };
 
-    this.api.post<RoleUpgradeRequestResponse>('/admin/users/me/role-request', body).subscribe({
+    this.api.post<RoleUpgradeRequestResponse>('/admin/users/me/role-request', body).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (resp) => {
         this.submittingRoleRequest.set(false);
         this.roleRequest.set(resp);

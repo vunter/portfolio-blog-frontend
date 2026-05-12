@@ -4,7 +4,7 @@
  */
 import { Renderer2 } from '@angular/core';
 
-function createSvg(renderer: Renderer2, children: Array<{tag: string; attrs: Record<string, string>}>): SVGElement {
+function createSvg(renderer: Renderer2, children: {tag: string; attrs: Record<string, string>}[]): SVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   renderer.setAttribute(svg, 'width', '14');
   renderer.setAttribute(svg, 'height', '14');

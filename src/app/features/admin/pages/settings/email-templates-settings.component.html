@@ -37,24 +37,28 @@
 
 <!-- Template Preview Modal -->
 @if (previewingTemplate()) {
-  <div class="template-preview-overlay" (click)="closePreview()">
+  <div class="template-preview-overlay"
+       appAccessibleModal ariaLabelledBy="email-tpl-preview-title"
+       (close)="closePreview()" (click)="closePreview()">
     <div class="template-preview-modal" (click)="$event.stopPropagation()">
       <div class="template-preview-header">
-        <h3>{{ previewingTemplate()!.name }}</h3>
-        <button class="close-btn" (click)="closePreview()">&#x2715;</button>
+        <h3 id="email-tpl-preview-title">{{ previewingTemplate()!.name }}</h3>
+        <button class="close-btn" (click)="closePreview()" [attr.aria-label]="'Close preview'">&#x2715;</button>
       </div>
-      <iframe class="template-preview-iframe" [srcdoc]="previewHtml()" sandbox=""></iframe>
+      <iframe class="template-preview-iframe" [srcdoc]="previewHtml()" sandbox="" title="Email template preview"></iframe>
     </div>
   </div>
 }
 
 <!-- Template Editor Modal -->
 @if (editingTemplate()) {
-  <div class="template-editor-overlay">
-    <div class="template-editor-modal">
+  <div class="template-editor-overlay"
+       appAccessibleModal ariaLabelledBy="email-tpl-editor-title"
+       (close)="closeEditor()" (click)="closeEditor()">
+    <div class="template-editor-modal" (click)="$event.stopPropagation()">
       <div class="template-editor-header">
         <div class="template-editor-title">
-          <h3>{{ editingTemplate()!.name }}</h3>
+          <h3 id="email-tpl-editor-title">{{ editingTemplate()!.name }}</h3>
           @if (editorIsOverride()) {
             <span class="template-badge">Customized</span>
           } @else {

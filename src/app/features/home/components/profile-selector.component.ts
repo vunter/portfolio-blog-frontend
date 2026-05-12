@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { PublicProfileService, PublicProfileSummary } from '../../../core/services/public-profile.service';
+import { PublicProfileService } from '../../../core/services/public-profile.service';
 import { I18nService } from '../../../core/services/i18n.service';
 
 /**

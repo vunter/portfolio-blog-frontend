@@ -8,7 +8,7 @@ describe('unsavedChangesGuard', () => {
   let i18nSpy: jasmine.SpyObj<I18nService>;
   let confirmDialogService: ConfirmDialogService;
 
-  const mockRoute = {} as ActivatedRouteSnapshot;
+  const _mockRoute = {} as ActivatedRouteSnapshot;
   const mockState = { url: '/admin/articles/new' } as RouterStateSnapshot;
 
   beforeEach(() => {

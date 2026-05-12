@@ -151,10 +151,9 @@
  }
  <div class="mobile-actions">
  <div class="mobile-lang-selector">
- <button class="mobile-lang-btn" [class.active]="i18n.language() === 'en'" (click)="i18n.setLanguage('en')">EN</button>
- <button class="mobile-lang-btn" [class.active]="i18n.language() === 'pt'" (click)="i18n.setLanguage('pt')">PT</button>
- <button class="mobile-lang-btn" [class.active]="i18n.language() === 'es'" (click)="i18n.setLanguage('es')">ES</button>
- <button class="mobile-lang-btn" [class.active]="i18n.language() === 'it'" (click)="i18n.setLanguage('it')">IT</button>
+ @for (lang of i18n.supportedLanguages(); track lang.code) {
+ <button class="mobile-lang-btn" [class.active]="i18n.language() === lang.code" (click)="i18n.setLanguage(lang.code)">{{ lang.code | uppercase }}</button>
+ }
  </div>
  <app-theme-toggle variant="segmented" />
  </div>

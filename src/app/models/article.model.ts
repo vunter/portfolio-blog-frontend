@@ -96,7 +96,7 @@ export interface ArticleVersion {
   createdAt: string;
 }
 
-export interface ArticleVersionResponse extends ArticleVersion {}
+export type ArticleVersionResponse = ArticleVersion;
 
 export interface ArticleVersionListResponse {
   articleId: string;

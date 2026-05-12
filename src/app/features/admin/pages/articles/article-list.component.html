@@ -59,7 +59,7 @@
  }
 
  <!-- Table -->
- <div class="table-container">
+ <div class="table-container table-responsive">
  <table class="data-table" aria-label="Articles">
  <thead>
  <tr>
@@ -75,8 +75,8 @@
  <tbody>
  @for (article of articles(); track article.id) {
  <tr>
- <td class="col-check"><input type="checkbox" [checked]="isSelected(article.id)" (change)="toggleSelect(article.id)" [attr.aria-label]="i18n.t('dev.articles.selectArticle')" /></td>
- <td>
+ <td class="col-check" data-label=""><input type="checkbox" [checked]="isSelected(article.id)" (change)="toggleSelect(article.id)" [attr.aria-label]="i18n.t('dev.articles.selectArticle')" /></td>
+ <td data-label="Title">
  <div class="article-info">
  @if (article.coverImageUrl) {
  <img [ngSrc]="article.coverImageUrl" [alt]="article.title" class="article-thumb" width="80" height="48" />
@@ -97,15 +97,15 @@
  </div>
  </div>
  </td>
- <td>
+ <td data-label="Status">
  <span class="status-badge" [class]="'status-badge--' + article.status.toLowerCase()">
  {{ getStatusLabel(article.status) }}
  </span>
  </td>
- <td>{{ article.viewCount }}</td>
- <td>{{ article.commentCount }}</td>
- <td>{{ article.publishedAt ? formatDate(article.publishedAt) : '-' }}</td>
- <td>
+ <td data-label="Views">{{ article.viewCount }}</td>
+ <td data-label="Comments">{{ article.commentCount }}</td>
+ <td data-label="Published">{{ article.publishedAt ? formatDate(article.publishedAt) : '-' }}</td>
+ <td data-label="Actions">
  <div class="actions">
  <a [routerLink]="['/admin/articles', article.id, 'edit']" class="action-btn" [title]="i18n.t('common.edit')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">

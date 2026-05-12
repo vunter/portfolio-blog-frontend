@@ -1,5 +1,4 @@
 import { inject, Injector } from '@angular/core';
-import { Router } from '@angular/router';
 import {
   HttpInterceptorFn,
   HttpRequest,
@@ -20,7 +19,6 @@ export const errorInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ) => {
   const notification = inject(NotificationService);
-  const router = inject(Router);
   const injector = inject(Injector);
 
   return next(req).pipe(
@@ -68,8 +66,15 @@ export const errorInterceptor: HttpInterceptorFn = (
           break;
       }
 
-      // Don't show notification for some endpoints
-      const silentEndpoints = ['/auth/login', '/auth/refresh'];
+      // Don't show notification for endpoints whose components own user-facing
+      // error display (avoids duplicate toasts for field-level form errors).
+      const silentEndpoints = [
+        '/auth/login',
+        '/auth/refresh',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+      ];
       const isSilent = silentEndpoints.some((endpoint) =>
         req.url.includes(endpoint)
       );

@@ -16,4 +16,7 @@ export const environment = {
   recaptchaEnabled: true,
   // Q8.11: Configurable scroll depth tracking thresholds (percentage points)
   scrollDepthThresholds: [25, 50, 75, 100] as readonly number[],
+  // Q13.1: Sentry DSN — inject via CI/CD build-time replacement
+  sentryDsn: '',
+  sentryEnabled: true,
 } as const;

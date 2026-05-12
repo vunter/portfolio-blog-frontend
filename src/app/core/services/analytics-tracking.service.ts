@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieConsentService } from './cookie-consent.service';
 import { AnalyticsSecurityService } from './analytics-security.service';
 import { RecaptchaService } from './recaptcha.service';
-import { EMPTY, Observable, catchError, from, switchMap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, from, mergeMap, switchMap } from 'rxjs';
 
 export interface AnalyticsEvent {
   articleId?: number;
@@ -27,6 +27,9 @@ export class AnalyticsTrackingService {
   private security = inject(AnalyticsSecurityService);
   private recaptcha = inject(RecaptchaService);
   private destroyRef = inject(DestroyRef);
+
+  // Back-pressure: queue analytics events through a Subject with bounded concurrency
+  private readonly trackQueue$ = new Subject<AnalyticsEvent>();
 
   // Time-on-page tracking state
   private pageEntryTime = 0;
@@ -56,18 +59,7 @@ export class AnalyticsTrackingService {
   track(event: AnalyticsEvent): void {
     if (!this.hasConsent()) return;
     this.initSecurity();
-
-    from(this.buildSecuredRequest(event)).pipe(
-      switchMap(({ payload, headers }) =>
-        this.http.post<void>('/api/v1/analytics/event', payload, { headers })
-      ),
-      catchError((err) => {
-        if (isDevMode()) {
-          console.warn('[Analytics] Error:', err);
-        }
-        return EMPTY;
-      })
-    ).subscribe();
+    this.trackQueue$.next(event);
   }
 
   /** Track an article view by slug. Consent-gated. Simplified path (no PoW/token). */
@@ -96,6 +88,65 @@ export class AnalyticsTrackingService {
     });
   }
 
+  /**
+   * Q13.4: Collect Core Web Vitals (LCP, CLS, INP) via PerformanceObserver.
+   * Reports once per page load. Consent-gated.
+   */
+  trackWebVitals(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.hasConsent()) return;
+    if (typeof PerformanceObserver === 'undefined') return;
+
+    // LCP — Largest Contentful Paint
+    try {
+      const lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const last = entries[entries.length - 1] as PerformanceEntry & { startTime: number };
+        if (last) {
+          this.track({ eventType: 'WEB_VITAL', metadata: { metric: 'LCP', value: Math.round(last.startTime) } });
+        }
+        lcpObserver.disconnect();
+      });
+      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch { /* unsupported */ }
+
+    // CLS — Cumulative Layout Shift
+    try {
+      let clsValue = 0;
+      const clsObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { hadRecentInput: boolean; value: number })[]) {
+          if (!entry.hadRecentInput) {
+            clsValue += entry.value;
+          }
+        }
+      });
+      clsObserver.observe({ type: 'layout-shift', buffered: true });
+      // Report CLS on page hide
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && clsValue > 0) {
+          this.trackBeacon({ eventType: 'WEB_VITAL', metadata: { metric: 'CLS', value: Math.round(clsValue * 1000) } });
+          clsObserver.disconnect();
+        }
+      }, { once: true });
+    } catch { /* unsupported */ }
+
+    // INP — Interaction to Next Paint (replaces FID)
+    try {
+      let maxInp = 0;
+      const inpObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & { duration: number })[]) {
+          if (entry.duration > maxInp) maxInp = entry.duration;
+        }
+      });
+      inpObserver.observe({ type: 'event', buffered: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && maxInp > 0) {
+          this.trackBeacon({ eventType: 'WEB_VITAL', metadata: { metric: 'INP', value: maxInp } });
+          inpObserver.disconnect();
+        }
+      }, { once: true });
+    } catch { /* unsupported */ }
+  }
+
   /** Track file downloads. */
   trackDownload(fileName: string, fileType: string): void {
     if (!this.hasConsent()) return;
@@ -118,6 +169,13 @@ export class AnalyticsTrackingService {
   /** Start time-on-page tracking with visibility-aware timer. */
   startTimeTracking(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+
+    // Clean up previous listener before registering a new one (prevents accumulation on re-navigation)
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
+    }
+
     this.pageEntryTime = Date.now();
     this.accumulatedTime = 0;
     this.isPageVisible = true;
@@ -132,13 +190,34 @@ export class AnalyticsTrackingService {
       }
     };
     document.addEventListener('visibilitychange', this.visibilityHandler);
+  }
 
-    // Safety: clean up listener if service is destroyed
+  constructor() {
+    // Process analytics events with bounded concurrency (max 3 in-flight requests)
+    this.trackQueue$.pipe(
+      mergeMap(event =>
+        from(this.buildSecuredRequest(event)).pipe(
+          switchMap(({ payload, headers }) =>
+            this.http.post<void>('/api/v1/analytics/event', payload, { headers })
+          ),
+          catchError((err) => {
+            if (isDevMode()) {
+              console.warn('[Analytics] Error:', err);
+            }
+            return EMPTY;
+          }),
+        ),
+        3, // max 3 concurrent HTTP requests
+      ),
+    ).subscribe();
+
+    // Single cleanup registration: remove listener when the service's injector is destroyed
     this.destroyRef.onDestroy(() => {
       if (this.visibilityHandler) {
         document.removeEventListener('visibilitychange', this.visibilityHandler);
         this.visibilityHandler = null;
       }
+      this.trackQueue$.complete();
     });
   }
 

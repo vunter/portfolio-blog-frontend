@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage, UpperCasePipe } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { from, switchMap, tap } from 'rxjs';
@@ -14,7 +14,7 @@ import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,7 +43,20 @@ export class LoginComponent {
   githubEnabled = signal(false);
   linkedinEnabled = signal(false);
 
+  // Q9.5: Client-side rate limiting UI
+  failureCount = signal(0);
+  lockedUntil = signal<number | null>(null);
+  cooldownSeconds = signal(0);
+  private cooldownInterval: ReturnType<typeof setInterval> | null = null;
+  private static readonly MAX_FAILURES = 3;
+  private static readonly COOLDOWN_SECONDS = 30;
+
   constructor() {
+    // Q7.2: Clean up cooldown interval on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.cooldownInterval) clearInterval(this.cooldownInterval);
+    });
+
     this.authService.getOAuthProviders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(providers => {
       this.googleEnabled.set(!!providers['google']);
       this.githubEnabled.set(!!providers['github']);
@@ -63,7 +76,18 @@ export class LoginComponent {
     window.location.href = `${environment.apiUrl}/${environment.apiVersion}/admin/auth/oauth2/authorize/linkedin`;
   }
 
+  get isLockedOut(): boolean {
+    const until = this.lockedUntil();
+    return until !== null && Date.now() < until;
+  }
+
   onSubmit(): void {
+    // Q9.5: Enforce client-side cooldown
+    if (this.isLockedOut) {
+      this.error.set(this.i18n.t('auth.login.tooManyAttempts') + ` (${this.cooldownSeconds()}s)`);
+      return;
+    }
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       this.error.set(this.i18n.t('auth.login.fillAllFields'));
@@ -118,22 +142,79 @@ export class LoginComponent {
           const defaultRoute = '/';
           const returnUrl =
             this.route.snapshot.queryParams['returnUrl'] || defaultRoute;
-          // Prevent open redirect: only allow relative URLs starting with /
-          const safeUrl = returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : defaultRoute;
+          // Q9.2: Robust open redirect validation using URL parser
+          const safeUrl = this.isSafeRedirectUrl(returnUrl) ? returnUrl : defaultRoute;
           this.router.navigateByUrl(safeUrl);
         },
         error: (err) => {
           this.loading.set(false);
           if (err.status === 401) {
             this.error.set(this.i18n.t('auth.login.invalidCredentials'));
+            this.onLoginFailure();
           } else if (err.status === 429) {
-            this.error.set(
-              this.i18n.t('auth.login.tooManyAttempts')
-            );
+            this.error.set(this.i18n.t('auth.login.tooManyAttempts'));
+            this.startCooldown(LoginComponent.COOLDOWN_SECONDS);
           } else {
             this.error.set(this.i18n.t('auth.login.genericError'));
           }
         },
       });
+  }
+
+  private onLoginFailure(): void {
+    this.failureCount.update(c => c + 1);
+    if (this.failureCount() >= LoginComponent.MAX_FAILURES) {
+      this.startCooldown(LoginComponent.COOLDOWN_SECONDS);
+    }
+  }
+
+  private startCooldown(seconds: number): void {
+    this.lockedUntil.set(Date.now() + seconds * 1000);
+    this.cooldownSeconds.set(seconds);
+    if (this.cooldownInterval) clearInterval(this.cooldownInterval);
+    this.cooldownInterval = setInterval(() => {
+      const remaining = Math.ceil(((this.lockedUntil() ?? 0) - Date.now()) / 1000);
+      if (remaining <= 0) {
+        this.cooldownSeconds.set(0);
+        this.lockedUntil.set(null);
+        this.failureCount.set(0);
+        if (this.cooldownInterval) {
+          clearInterval(this.cooldownInterval);
+          this.cooldownInterval = null;
+        }
+      } else {
+        this.cooldownSeconds.set(remaining);
+      }
+    }, 1000);
+  }
+
+  /**
+   * Q9.2: Robust open redirect prevention.
+   * Validates that the URL is a same-origin relative path.
+   * Blocks: //, /\, protocol-relative, encoded slashes, @ authority.
+   */
+  private isSafeRedirectUrl(url: string): boolean {
+    if (!url || !url.startsWith('/')) return false;
+    // Block protocol-relative and backslash variants
+    if (url.startsWith('//') || url.startsWith('/\\')) return false;
+    // Decode and re-check for encoded bypass attempts
+    try {
+      const decoded = decodeURIComponent(url);
+      if (decoded.startsWith('//') || decoded.startsWith('/\\')) return false;
+      // Block authority confusion (e.g. /path@evil.com)
+      if (decoded.includes('@')) return false;
+    } catch {
+      return false; // malformed encoding
+    }
+    // Parse with a dummy base — if the resulting origin differs, it's an open redirect
+    try {
+      const base = window.location.origin;
+      const parsed = new URL(url, base);
+      if (parsed.origin !== base) return false;
+      if (parsed.username || parsed.password) return false;
+    } catch {
+      return false;
+    }
+    return true;
   }
 }

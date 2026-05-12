@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -6,7 +6,7 @@ import { AuthStore } from '../../../../core/auth/auth.store';
 
 @Component({
   selector: 'app-oauth-callback',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div style="display:flex;justify-content:center;align-items:center;height:100vh;">
       <p>Completing login...</p>

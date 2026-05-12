@@ -94,7 +94,7 @@ export class VerifyEmailChangeComponent implements OnInit {
     }
 
     this.api.get<{ message: string; email: string }>('/admin/auth/verify-email-change', { token }).subscribe({
-      next: (res) => {
+      next: (_res) => {
         this.loading.set(false);
         this.success.set(true);
         this.successMessage.set(this.i18n.t('auth.verifyEmailChange.successMessage'));
