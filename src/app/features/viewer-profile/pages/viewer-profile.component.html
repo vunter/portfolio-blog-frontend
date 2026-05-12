@@ -16,7 +16,7 @@
  <!-- Avatar / User Info Card -->
  <div class="form-card avatar-card">
  <div class="avatar-section">
- <div class="avatar-upload-wrapper" (click)="triggerAvatarUpload()" [class.uploading]="uploadingAvatar()">
+ <button type="button" class="avatar-upload-wrapper" (click)="triggerAvatarUpload()" [class.uploading]="uploadingAvatar()" [attr.aria-label]="i18n.t('account.profile.changeAvatar')">
  @if (form.avatarUrl && !uploadingAvatar()) {
  <img [src]="form.avatarUrl" [alt]="form.name" class="avatar-preview" />
  } @else if (uploadingAvatar()) {
@@ -38,7 +38,7 @@
  </svg>
  <span>{{ i18n.t('account.profile.changeAvatar') }}</span>
  </div>
- </div>
+ </button>
  <input
  #avatarFileInput
  type="file"

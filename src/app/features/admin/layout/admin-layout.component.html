@@ -33,7 +33,9 @@
  <a
  [routerLink]="item.route"
  routerLinkActive="active"
+ #rla="routerLinkActive"
  [routerLinkActiveOptions]="{ exact: item.route === '/admin/dashboard' }"
+ [attr.aria-current]="rla.isActive ? 'page' : null"
  class="nav-item"
  [title]="item.label"
  >

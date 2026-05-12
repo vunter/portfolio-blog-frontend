@@ -439,6 +439,8 @@
     'common.confirm': 'Confirm',
     'common.undo': 'Undo',
     'common.closeNotification': 'Dismiss notification',
+    'common.remove': 'Remove',
+    'common.toggle': 'Toggle',
     'common.refresh': 'Refresh',
     'common.yes': 'Yes',
     'common.no': 'No',

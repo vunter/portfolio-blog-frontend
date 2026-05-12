@@ -1,10 +1,16 @@
 ﻿@if (notificationService.hasNotifications()) {
- <div class="toast-container" role="alert" aria-live="polite">
+ <!--
+   The container is a passive positioned region — no role/aria-live here.
+   Each individual toast owns its own live-region semantics so the
+   priority (polite vs assertive) is honoured per message instead of
+   being shadowed by an outer 'polite'.
+ -->
+ <div class="toast-container">
  @for (notification of notificationService.notifications(); track notification.id) {
  <div
  class="toast toast--{{ notification.type }}"
  [class.toast--clickable]="notification.route"
- role="alert"
+ [attr.role]="notification.type === 'error' ? 'alert' : 'status'"
  [attr.aria-live]="notification.type === 'error' ? 'assertive' : 'polite'"
  [attr.aria-label]="notification.message"
  (click)="onToastClick(notification)"

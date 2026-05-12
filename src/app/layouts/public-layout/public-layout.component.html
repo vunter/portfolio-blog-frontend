@@ -8,11 +8,11 @@
  <img ngSrc="images/logo-simplified.svg" alt="Catananti" class="header__logo-img" width="36" height="36" priority>
  </a>
  <nav class="header__nav" aria-label="Main navigation">
- <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ i18n.t('nav.home') }}</a>
- <a routerLink="/blog" routerLinkActive="active">{{ i18n.t('nav.blog') }}</a>
- <a routerLink="/tags" routerLinkActive="active">{{ i18n.t('nav.tags') }}</a>
- <a routerLink="/about" routerLinkActive="active">{{ i18n.t('nav.about') }}</a>
- <a routerLink="/search" routerLinkActive="active">{{ i18n.t('nav.search') }}</a>
+ <a routerLink="/" routerLinkActive="active" #rlaHome="routerLinkActive" [routerLinkActiveOptions]="{exact: true}" [attr.aria-current]="rlaHome.isActive ? 'page' : null">{{ i18n.t('nav.home') }}</a>
+ <a routerLink="/blog" routerLinkActive="active" #rlaBlog="routerLinkActive" [attr.aria-current]="rlaBlog.isActive ? 'page' : null">{{ i18n.t('nav.blog') }}</a>
+ <a routerLink="/tags" routerLinkActive="active" #rlaTags="routerLinkActive" [attr.aria-current]="rlaTags.isActive ? 'page' : null">{{ i18n.t('nav.tags') }}</a>
+ <a routerLink="/about" routerLinkActive="active" #rlaAbout="routerLinkActive" [attr.aria-current]="rlaAbout.isActive ? 'page' : null">{{ i18n.t('nav.about') }}</a>
+ <a routerLink="/search" routerLinkActive="active" #rlaSearch="routerLinkActive" [attr.aria-current]="rlaSearch.isActive ? 'page' : null">{{ i18n.t('nav.search') }}</a>
  </nav>
  <div class="header__actions">
  <div class="lang-dropdown">
@@ -105,11 +105,11 @@
  </svg>
  </button>
  <nav class="mobile-nav" aria-label="Mobile navigation">
- <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">{{ i18n.t('nav.home') }}</a>
- <a routerLink="/blog" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.blog') }}</a>
- <a routerLink="/tags" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.tags') }}</a>
- <a routerLink="/about" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.about') }}</a>
- <a routerLink="/search" routerLinkActive="active" (click)="closeMobileMenu()">{{ i18n.t('nav.search') }}</a>
+ <a routerLink="/" routerLinkActive="active" #mrlaHome="routerLinkActive" [routerLinkActiveOptions]="{exact: true}" [attr.aria-current]="mrlaHome.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.home') }}</a>
+ <a routerLink="/blog" routerLinkActive="active" #mrlaBlog="routerLinkActive" [attr.aria-current]="mrlaBlog.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.blog') }}</a>
+ <a routerLink="/tags" routerLinkActive="active" #mrlaTags="routerLinkActive" [attr.aria-current]="mrlaTags.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.tags') }}</a>
+ <a routerLink="/about" routerLinkActive="active" #mrlaAbout="routerLinkActive" [attr.aria-current]="mrlaAbout.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.about') }}</a>
+ <a routerLink="/search" routerLinkActive="active" #mrlaSearch="routerLinkActive" [attr.aria-current]="mrlaSearch.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.search') }}</a>
  </nav>
  @if (authStore.isAuthenticated()) {
  <div class="mobile-auth">

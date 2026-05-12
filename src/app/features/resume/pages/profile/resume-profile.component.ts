@@ -14,6 +14,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { getLocaleName } from '../../../../shared/utils/locale.utils';
 import { LinkedInImportService } from '../../services/linkedin-import.service';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 
 interface ExperienceFormEntry extends ResumeProfileExperience {
   _bulletsText?: string;
@@ -45,7 +46,7 @@ const EMPTY_PROFILE: ProfileForm = {
 
 @Component({
   selector: 'app-resume-profile',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, AccessibleModalDirective],
   // M-14: CUSTOM_ELEMENTS_SCHEMA is required because this component uses
   // <emoji-picker> from the 'emoji-picker-element' Web Component library.
   // Angular would otherwise reject the unknown HTML element.

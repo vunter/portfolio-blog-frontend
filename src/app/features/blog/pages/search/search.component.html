@@ -1,21 +1,24 @@
 ﻿<div class="search-page">
- <header class="search-header">
- <h1>{{ i18n.t('search.title') }}</h1>
+ <header class="search-header" role="search">
+ <h1 id="search-title">{{ i18n.t('search.title') }}</h1>
  <div class="search-box">
  <svg
  class="search-icon"
  viewBox="0 0 24 24"
  fill="none"
  stroke="currentColor"
+ aria-hidden="true"
  >
  <circle cx="11" cy="11" r="8" />
  <path d="m21 21-4.35-4.35" />
  </svg>
  <input
- type="text"
+ type="search"
  [ngModel]="searchQuery()"
  (ngModelChange)="searchQuery.set($event); onSearchChange($event)"
  [placeholder]="i18n.t('search.placeholder')"
+ [attr.aria-label]="i18n.t('search.placeholder')"
+ aria-labelledby="search-title"
  class="search-input"
  autocomplete="off"
  />
@@ -31,13 +34,18 @@
  }
 
  @if (showSuggestions() && suggestions().length > 0) {
+ <!--
+   aria-selected omitted from each option intentionally: this list has no
+   highlight model, so hardcoding "false" was misleading. When a keyboard
+   navigation model is added, bind aria-selected to the actively highlighted
+   option's index.
+ -->
  <div class="suggestions" role="listbox" [attr.aria-label]="i18n.t('search.suggestions')">
  @for (suggestion of suggestions(); track suggestion.text) {
  <button
  type="button"
  class="suggestion-item"
  role="option"
- [attr.aria-selected]="false"
  (click)="selectSuggestion(suggestion)"
  >
  <span class="suggestion-type">{{ suggestion.type }}</span>

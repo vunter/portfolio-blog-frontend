@@ -5,10 +5,10 @@
  @if (crumb.route && !last) {
  <a [routerLink]="crumb.route">{{ crumb.label }}</a>
  } @else {
- <span>{{ crumb.label }}</span>
+ <span [attr.aria-current]="last ? 'page' : null">{{ crumb.label }}</span>
  }
  @if (!last) {
- <span class="separator">/</span>
+ <span class="separator" aria-hidden="true">/</span>
  }
  </li>
  }

@@ -46,6 +46,14 @@ export class MultiSelectComponent {
   readonly dropdownOpen = signal(false);
   readonly highlightedIndex = signal(0);
 
+  /**
+   * Stable, instance-scoped id used to wire the combobox <input> to its
+   * <listbox> via aria-controls and aria-activedescendant. Uses a counter
+   * so multiple instances on the same page don't collide.
+   */
+  private static idCounter = 0;
+  readonly dropdownId = `multi-select-${++MultiSelectComponent.idCounter}`;
+
   private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   private readonly containerRef = viewChild<ElementRef<HTMLDivElement>>('container');
   readonly selectedValues = computed(() => {
