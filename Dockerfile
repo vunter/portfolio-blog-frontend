@@ -1,3 +1,11 @@
+# SUPPLY CHAIN: pin both base images by digest before release. Lookup with:
+#   docker buildx imagetools inspect node:22-alpine
+#   docker buildx imagetools inspect nginx:1.27-alpine
+# Then change the FROM lines to:
+#   FROM node:22-alpine@sha256:<digest> AS build
+#   FROM nginx:1.27-alpine@sha256:<digest> AS runtime
+# Dependabot's docker ecosystem will keep the digest fresh once pinned.
+
 FROM node:22-alpine AS build
 WORKDIR /app
 
