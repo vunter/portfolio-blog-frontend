@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, effect, untracked, DestroyRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Subject, switchMap, EMPTY, tap, catchError } from 'rxjs';
+import { Subject, Subscription, switchMap, EMPTY, tap, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ResumeProfile } from '../../models/resume-profile.model';
 import { I18nService } from './i18n.service';
@@ -38,7 +38,7 @@ export class PublicProfileService {
 
   // CQ-10: Subject + switchMap for automatic cancellation of rapid language/alias changes
   private readonly fetchTrigger$ = new Subject<{ lang: string; alias: string }>();
-  private profilesFetch: import('rxjs').Subscription | null = null;
+  private profilesFetch: Subscription | null = null;
 
   // I-05: Locale-based cache — avoids re-fetching previously loaded profiles
   // Key format: "alias:locale" (e.g., "leonardo-catananti:en")
@@ -125,10 +125,15 @@ export class PublicProfileService {
     const normalizedLang = this.i18n.language() === 'pt' ? 'pt-br' : this.i18n.language();
     const url = `${environment.apiUrl}/${environment.apiVersion}/public/resume/profiles?lang=${normalizedLang}`;
 
-    this.profilesFetch = this.http.get<PublicProfileSummary[]>(url, { withCredentials: true }).subscribe({
-      next: (profiles) => this.availableProfiles.set(profiles),
-      error: () => this.availableProfiles.set([]),
-    });
+    // Tie the lifetime to the root DestroyRef so the subscription is reliably
+    // released on app teardown (tests + SSR request cleanup), in addition to
+    // the per-call cancel pattern above.
+    this.profilesFetch = this.http.get<PublicProfileSummary[]>(url, { withCredentials: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (profiles) => this.availableProfiles.set(profiles),
+        error: () => this.availableProfiles.set([]),
+      });
   }
 
   private fetchProfile(lang: string, alias: string): void {

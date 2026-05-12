@@ -141,7 +141,10 @@ export class ViewerProfileComponent implements OnInit {
   }
 
   scrollToRoleUpgrade(): void {
-    document.getElementById('role-upgrade')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Use Angular's ViewportScroller (already injected) rather than touching
+    // `document` directly. This stays SSR-safe and matches the abstraction
+    // the rest of the page uses for navigation jumps.
+    this.viewportScroller.scrollToAnchor('role-upgrade');
   }
 
   triggerAvatarUpload(): void {

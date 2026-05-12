@@ -1,6 +1,8 @@
-﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID } from '@angular/core';
+﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpBackend } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { en } from './i18n/en';
 import { CookieConsentService } from './cookie-consent.service';
 import { LANG_STORAGE_KEY } from './locale.constants';
@@ -45,8 +47,16 @@ export class I18nService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly consent = inject(CookieConsentService);
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   // Bypasses interceptor chain to avoid circular dependency during construction
   private readonly directHttp = new HttpClient(inject(HttpBackend));
+
+  // Track in-flight HTTP subscriptions so a fast language switch can cancel
+  // a slow previous request; otherwise the slow response would arrive after
+  // the user has already moved to a new locale and overwrite the new
+  // translations with the stale ones.
+  private fetchTranslationsSub: Subscription | null = null;
+  private fetchLanguagesSub: Subscription | null = null;
 
   private readonly loadedTranslations = signal<Translations>(en);
   private currentTier = 'public';
@@ -138,15 +148,18 @@ export class I18nService {
       this.supportedLanguages.set(cached.data);
     }
 
-    this.directHttp.get<LanguageOption[]>('/api/v1/languages').subscribe({
-      next: (langs) => {
-        if (langs?.length) {
-          this.supportedLanguages.set(langs);
-          this.setCachedJson(LANG_CACHE_KEY, { data: langs, ts: Date.now() });
-        }
-      },
-      error: () => { /* keep defaults/cached */ },
-    });
+    this.fetchLanguagesSub?.unsubscribe();
+    this.fetchLanguagesSub = this.directHttp.get<LanguageOption[]>('/api/v1/languages')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (langs) => {
+          if (langs?.length) {
+            this.supportedLanguages.set(langs);
+            this.setCachedJson(LANG_CACHE_KEY, { data: langs, ts: Date.now() });
+          }
+        },
+        error: () => { /* keep defaults/cached */ },
+      });
   }
 
   private getInitialLanguage(): Language {
@@ -194,24 +207,32 @@ export class I18nService {
   }
 
   private fetchFromApi(lang: string, cacheKey: string, isBackground: boolean): void {
-    this.http.get<Translations>(`/api/v1/i18n/${lang}`).subscribe({
-      next: (translations) => {
-        if (translations && Object.keys(translations).length > 0) {
-          this.setCachedJson(cacheKey, { data: translations, ts: Date.now() });
-          this.loadedTranslations.set({ ...en, ...translations });
-        }
-        this.translationsReady.set(true);
-        this.translationsLoading.set(false);
-      },
-      error: () => {
-        // Fallback to English if API is down
-        if (!isBackground) {
-          this.loadedTranslations.set(en);
+    // Cancel any in-flight translation fetch — a fast language switch must
+    // not let the slow previous response overwrite the freshly-applied locale.
+    this.fetchTranslationsSub?.unsubscribe();
+    this.fetchTranslationsSub = this.http.get<Translations>(`/api/v1/i18n/${lang}`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (translations) => {
+          // Discard the response if the user switched language mid-flight.
+          if (lang !== this.language()) {
+            return;
+          }
+          if (translations && Object.keys(translations).length > 0) {
+            this.setCachedJson(cacheKey, { data: translations, ts: Date.now() });
+            this.loadedTranslations.set({ ...en, ...translations });
+          }
           this.translationsReady.set(true);
           this.translationsLoading.set(false);
-        }
-      },
-    });
+        },
+        error: () => {
+          if (!isBackground) {
+            this.loadedTranslations.set(en);
+            this.translationsReady.set(true);
+            this.translationsLoading.set(false);
+          }
+        },
+      });
   }
 
   private clearI18nCache(lang: string): void {

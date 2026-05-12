@@ -1,12 +1,14 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  DestroyRef,
   inject,
   signal,
   computed,
   ElementRef,
   effect,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/auth/auth.store';
@@ -27,6 +29,7 @@ export class TermsAcceptanceModalComponent {
   private readonly api = inject(ApiService);
   private readonly notification = inject(NotificationService);
   private readonly elementRef = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   readonly i18n = inject(I18nService);
 
   readonly termsChecked = signal(false);
@@ -73,6 +76,11 @@ export class TermsAcceptanceModalComponent {
 
     this.api
       .putResponse<UserResponse>('/admin/users/me', { termsAccepted: true })
+      // The modal can open and close multiple times in one session (after
+      // login, after navigation, etc.). Tying the request lifetime to the
+      // component's DestroyRef means a pending PUT is cancelled if the user
+      // navigates away mid-flight, instead of leaking a subscription.
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           const updated = res.body;
