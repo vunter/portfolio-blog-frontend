@@ -449,14 +449,17 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
       educations: preview.educations?.length ? preview.educations : this.profile.educations,
       experiences: (preview.experiences?.length ? preview.experiences : this.profile.experiences).map((exp) => ({
         ...exp,
-        _bulletsText: ((exp as any).bullets || []).join('\n'),
+        // `bullets` is part of the LinkedIn import payload but not the
+        // canonical ResumeProfileExperience type, so narrow via a tiny
+        // structural cast instead of `any`.
+        _bulletsText: ((exp as { bullets?: string[] }).bullets || []).join('\n'),
       })),
       skills: preview.skills?.length ? preview.skills : this.profile.skills,
       languages: preview.languages?.length ? preview.languages : this.profile.languages,
       certifications: preview.certifications?.length ? preview.certifications : this.profile.certifications,
       projects: (preview.projects?.length ? preview.projects : this.profile.projects).map((proj) => ({
         ...proj,
-        _techTagsText: ((proj as any).techTags || []).join(', '),
+        _techTagsText: ((proj as { techTags?: string[] }).techTags || []).join(', '),
       })),
     };
 

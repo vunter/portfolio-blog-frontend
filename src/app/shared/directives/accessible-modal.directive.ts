@@ -18,7 +18,7 @@ import {
  *
  *   <div appAccessibleModal
  *        ariaLabelledBy="my-modal-title"
- *        (close)="closeModal()">
+ *        (closed)="closeModal()">
  *     ...
  *   </div>
  *
@@ -36,9 +36,11 @@ export class AccessibleModalDirective implements OnInit, OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** id of the element that names the dialog (usually the heading). */
-  @Input('ariaLabelledBy') ariaLabelledBy?: string;
-  @Input('ariaLabel') ariaLabel?: string;
-  @Output() close = new EventEmitter<void>();
+  @Input() ariaLabelledBy?: string;
+  @Input() ariaLabel?: string;
+  // Renamed from 'close' to avoid the @angular-eslint/no-output-native rule
+  // (native DOM 'close' event on <dialog>). Consumers use (closed)="...".
+  @Output() closed = new EventEmitter<void>();
 
   @HostBinding('attr.role') readonly role = 'dialog';
   @HostBinding('attr.aria-modal') readonly ariaModal = 'true';
@@ -67,7 +69,7 @@ export class AccessibleModalDirective implements OnInit, OnDestroy {
   @HostListener('keydown.escape', ['$event'])
   onEscape(event: Event): void {
     event.stopPropagation();
-    this.close.emit();
+    this.closed.emit();
   }
 
   @HostListener('keydown.tab', ['$event'])

@@ -42,9 +42,9 @@ export class TemplateEditorComponent implements OnInit, OnDestroy, AfterViewInit
 
   private readonly destroyRef = inject(DestroyRef);
   private contentChange$ = new Subject<void>();
-  private editor: any = null;
-  private htmlModel: any = null;
-  private cssModel: any = null;
+  private editor: import('../../../../shared/types/monaco').MonacoStandaloneEditor | null = null;
+  private htmlModel: import('../../../../shared/types/monaco').MonacoTextModel | null = null;
+  private cssModel: import('../../../../shared/types/monaco').MonacoTextModel | null = null;
 
   templateId: string | null = null;
   templateName = this.i18n.t('resume.editor.newResume');
@@ -137,12 +137,15 @@ export class TemplateEditorComponent implements OnInit, OnDestroy, AfterViewInit
     });
 
     this.htmlModel.onDidChangeContent(() => {
-      this.htmlContent = this.htmlModel.getValue();
+      // Models are non-null inside this closure (they were created just above)
+      // but TS can't prove it after the closure boundary; assert with ! since
+      // we never null them out before dispose.
+      this.htmlContent = this.htmlModel!.getValue();
       this.contentChange$.next();
     });
 
     this.cssModel.onDidChangeContent(() => {
-      this.cssContent = this.cssModel.getValue();
+      this.cssContent = this.cssModel!.getValue();
       this.contentChange$.next();
     });
 

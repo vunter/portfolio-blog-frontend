@@ -78,7 +78,10 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   scheduledAtControl = new FormControl('');
   showReviewPanel = signal(false);
 
-  private monacoEditor: any = null;
+  // Typed via the ambient declaration in shared/types/monaco.d.ts so the
+  // Monaco surface is explicit instead of `any`. The full namespace is
+  // loaded on demand from /assets/monaco-editor.
+  private monacoEditor: import('../../../../shared/types/monaco').MonacoStandaloneEditor | null = null;
   private monacoLoaded = false;
   private pendingContent: string | null = null;
 
@@ -279,9 +282,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pendingContent = null;
 
-    // Sync Monaco -> form control
+    // Sync Monaco -> form control. The editor field is non-null inside this
+    // closure (it was just assigned above) but TS narrows it back to nullable
+    // after a closure boundary; assert with ! — we never null it before dispose.
     this.monacoEditor.onDidChangeModelContent(() => {
-      const value = this.monacoEditor.getValue();
+      const value = this.monacoEditor!.getValue();
       this.form.controls.content.setValue(value, { emitEvent: true });
     });
   }
@@ -314,7 +319,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.monacoEditor) return;
 
     const selection = this.monacoEditor.getSelection();
-    const selectedText = this.monacoEditor.getModel().getValueInRange(selection) || '';
+    const model = this.monacoEditor.getModel();
+    const selectedText = selection && model ? model.getValueInRange(selection) || '' : '';
     const { text, cursorOffset } = getMarkdownInsert(type, selectedText);
 
     this.monacoEditor.executeEdits('markdown-toolbar', [{
@@ -326,10 +332,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (cursorOffset) {
       const pos = this.monacoEditor.getPosition();
-      this.monacoEditor.setPosition({
-        lineNumber: pos.lineNumber,
-        column: pos.column + cursorOffset,
-      });
+      if (pos) {
+        this.monacoEditor.setPosition({
+          lineNumber: pos.lineNumber,
+          column: pos.column + cursorOffset,
+        });
+      }
     }
 
     this.monacoEditor.focus();

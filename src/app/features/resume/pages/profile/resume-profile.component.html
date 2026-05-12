@@ -103,7 +103,7 @@
  <div class="linkedin-consent-dialog"
       appAccessibleModal
       ariaLabelledBy="linkedin-consent-title"
-      (close)="cancelLinkedInConsentDialog()"
+      (closed)="cancelLinkedInConsentDialog()"
       (click)="$event.stopPropagation()">
  <h3 id="linkedin-consent-title">{{ i18n.t('linkedin.import.title') }}</h3>
  <p>{{ i18n.t('linkedin.import.description') }}</p>
@@ -695,7 +695,7 @@
  <div class="picker-modal"
       appAccessibleModal
       ariaLabelledBy="icon-picker-title"
-      (close)="closeIconPicker()"
+      (closed)="closeIconPicker()"
       (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
  <span class="icon-picker-title" id="icon-picker-title">Choose Icon</span>
@@ -843,7 +843,7 @@
  <div class="picker-modal picker-modal-lg"
       appAccessibleModal
       ariaLabelledBy="emoji-picker-title"
-      (close)="closeEmojiPicker()"
+      (closed)="closeEmojiPicker()"
       (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
  <span class="icon-picker-title" id="emoji-picker-title">Choose Icon / Emoji</span>

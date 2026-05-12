@@ -1,12 +1,9 @@
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-declare global {
-  interface Window {
-    monaco?: any;
-    require?: any;
-  }
-}
+// Global Window augmentation lives in src/app/shared/types/monaco.d.ts.
+// That declaration is loaded ambiently and types `window.monaco` /
+// `window.require` to the structural shapes Monaco exposes.
 
 @Injectable({ providedIn: 'root' })
 export class MonacoLoaderService {

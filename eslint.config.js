@@ -38,7 +38,7 @@ module.exports = defineConfig([
         caughtErrorsIgnorePattern: "^_",
         ignoreRestSiblings: true,
       }],
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "warn",
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-inferrable-types": "off",

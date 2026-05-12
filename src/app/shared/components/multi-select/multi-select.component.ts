@@ -121,8 +121,8 @@ export class MultiSelectComponent {
     this.highlightedIndex.set(0);
   }
 
-  selectOption(opt: MultiSelectOption, event: MouseEvent): void {
-    event.preventDefault(); // Prevent blur on the input
+  selectOption(opt: MultiSelectOption, event: Event): void {
+    event.preventDefault(); // Prevent blur on the input (works for mouse + keyboard)
     const selected = [...this.selectedValues()];
     const idx = selected.indexOf(opt.value);
     if (idx >= 0) {
@@ -159,7 +159,7 @@ export class MultiSelectComponent {
       case 'Enter':
         event.preventDefault();
         if (this.dropdownOpen() && filtered[this.highlightedIndex()]) {
-          this.selectOption(filtered[this.highlightedIndex()], event as any);
+          this.selectOption(filtered[this.highlightedIndex()], event);
         }
         break;
       case 'Escape':
