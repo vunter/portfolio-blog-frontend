@@ -39,7 +39,7 @@
 @if (previewingTemplate()) {
   <div class="template-preview-overlay"
        appAccessibleModal ariaLabelledBy="email-tpl-preview-title"
-       (close)="closePreview()" (click)="closePreview()">
+       (closed)="closePreview()" (click)="closePreview()">
     <div class="template-preview-modal" (click)="$event.stopPropagation()">
       <div class="template-preview-header">
         <h3 id="email-tpl-preview-title">{{ previewingTemplate()!.name }}</h3>
@@ -54,7 +54,7 @@
 @if (editingTemplate()) {
   <div class="template-editor-overlay"
        appAccessibleModal ariaLabelledBy="email-tpl-editor-title"
-       (close)="closeEditor()" (click)="closeEditor()">
+       (closed)="closeEditor()" (click)="closeEditor()">
     <div class="template-editor-modal" (click)="$event.stopPropagation()">
       <div class="template-editor-header">
         <div class="template-editor-title">

@@ -74,7 +74,7 @@
  <!-- Modal -->
  @if (showModal()) {
  <div class="modal-overlay" appAccessibleModal ariaLabelledBy="tag-modal-title"
-      (close)="closeModal()" (click)="closeModal()">
+      (closed)="closeModal()" (click)="closeModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <h2 id="tag-modal-title">{{ editingTag() ? i18n.t('dev.tags.editTag') : i18n.t('dev.tags.newTag') }}</h2>
  <form (ngSubmit)="saveTag()">

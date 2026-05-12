@@ -94,7 +94,7 @@
  <!-- Save as Template Modal -->
  @if (showSaveModal()) {
  <div class="modal-overlay" appAccessibleModal ariaLabelledBy="resume-save-title"
-      (close)="closeSaveModal()" (click)="closeSaveModal()">
+      (closed)="closeSaveModal()" (click)="closeSaveModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <div class="modal-header">
  <h2 id="resume-save-title">{{ i18n.t('resume.generate.templateModalTitle') }}</h2>
@@ -137,7 +137,7 @@
  <!-- Update Existing Template Modal -->
  @if (showUpdateModal()) {
  <div class="modal-overlay" appAccessibleModal ariaLabelledBy="resume-update-title"
-      (close)="closeUpdateModal()" (click)="closeUpdateModal()">
+      (closed)="closeUpdateModal()" (click)="closeUpdateModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <div class="modal-header">
  <h2 id="resume-update-title">{{ i18n.t('resume.generate.updateTemplateTitle') }}</h2>

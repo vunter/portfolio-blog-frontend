@@ -131,7 +131,7 @@
  <!-- Modal -->
  @if (showModal()) {
  <div class="modal-overlay" appAccessibleModal ariaLabelledBy="user-modal-title"
-      (close)="closeModal()" (click)="closeModal()">
+      (closed)="closeModal()" (click)="closeModal()">
  <div class="modal" (click)="$event.stopPropagation()">
  <h2 id="user-modal-title">{{ editingUser() ? i18n.t('admin.users.editUser') : i18n.t('admin.users.newUser') }}</h2>
  <form (ngSubmit)="saveUser()">
@@ -173,7 +173,7 @@
  <!-- Activity Modal -->
  @if (showActivityModal()) {
  <div class="modal-overlay" appAccessibleModal ariaLabelledBy="user-activity-title"
-      (close)="closeActivityModal()" (click)="closeActivityModal()">
+      (closed)="closeActivityModal()" (click)="closeActivityModal()">
  <div class="modal activity-modal" (click)="$event.stopPropagation()">
  <div class="modal__header">
  <h2 id="user-activity-title">{{ i18n.t('admin.users.activity.title') }}</h2>
