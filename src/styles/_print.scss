@@ -1,5 +1,11 @@
 /* --------------------------------------------------------------------------
-   Print Styles — CSS-10: Preserve code block backgrounds
+   Print Styles
+   - CSS-10: Preserve code block backgrounds.
+   - Hide every UI chrome element that doesn't belong on a printed page.
+     A printed copy of this site is typically a résumé / blog article;
+     readers don't need the nav header, footer, cookie banner, reading
+     progress bar, toast container, share buttons, comment section, or
+     pagination.
    -------------------------------------------------------------------------- */
 @media print {
   * {
@@ -22,7 +28,34 @@
     text-decoration: underline;
   }
 
+  /* Generic opt-out marker for any element a component author wants hidden. */
   .no-print {
+    display: none !important;
+  }
+
+  /* App-chrome: hide everything the visitor sees but a reader of a printed
+     copy does not need. Listed by tag selector first (most stable) and the
+     known class names used by the layouts and shared components. */
+  app-toast,
+  app-cookie-consent,
+  app-newsletter-subscribe,
+  app-pagination,
+  app-theme-toggle,
+  .header,
+  .header__nav,
+  .header__actions,
+  .footer,
+  .toast-container,
+  .cookie-banner,
+  .cookie-backdrop,
+  .reading-progress-bar,
+  .article-actions,
+  .social-sharing,
+  .comments-section,
+  .mobile-menu-btn,
+  .mobile-menu,
+  .mobile-menu-overlay,
+  .skip-link {
     display: none !important;
   }
 }

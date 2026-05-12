@@ -9,26 +9,35 @@
  <h1>{{ i18n.t('resume.generate.title') }}</h1>
  <p class="subtitle">{{ i18n.t('resume.generate.subtitle') }}</p>
  <div class="actions">
- <div class="lang-selector" [title]="i18n.t('resume.generate.resumeLang')">
- <label class="lang-label"></label>
+ <div class="lang-selector"
+      role="group"
+      [attr.aria-label]="i18n.t('resume.generate.resumeLang')">
  <button
  class="lang-btn"
+ type="button"
  [class.active]="resumeLang() === 'en'"
+ [attr.aria-pressed]="resumeLang() === 'en'"
  (click)="setResumeLang('en')"
  >EN</button>
  <button
  class="lang-btn"
+ type="button"
  [class.active]="resumeLang() === 'pt'"
+ [attr.aria-pressed]="resumeLang() === 'pt'"
  (click)="setResumeLang('pt')"
  >PT</button>
  <button
  class="lang-btn"
+ type="button"
  [class.active]="resumeLang() === 'es'"
+ [attr.aria-pressed]="resumeLang() === 'es'"
  (click)="setResumeLang('es')"
  >ES</button>
  <button
  class="lang-btn"
+ type="button"
  [class.active]="resumeLang() === 'it'"
+ [attr.aria-pressed]="resumeLang() === 'it'"
  (click)="setResumeLang('it')"
  >IT</button>
  </div>

@@ -7,7 +7,7 @@
  }
 
  @if (loading()) {
- <div class="loading">{{ i18n.t('resume.profile.loading') }}</div>
+ <div class="loading" role="status" aria-live="polite">{{ i18n.t('resume.profile.loading') }}</div>
  } @else {
  <!-- Locale Selector -->
  @if (availableLocales().length > 0) {
