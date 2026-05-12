@@ -67,6 +67,7 @@ export const AuthStore = signalStore(
     const storage = inject(StorageService);
     const authService = inject(AuthService);
     const i18n = inject(I18nService);
+    const isBrowser = typeof window !== 'undefined';
 
     function roleToTier(role?: string): string {
       switch (role) {
@@ -134,6 +135,32 @@ export const AuthStore = signalStore(
       updateUser(user: UserResponse) {
         patchState(store, { user });
         storage.set(STORAGE_KEYS.USER, user);
+      },
+
+      /**
+       * Listen to localStorage 'storage' events so a logout in another tab
+       * propagates immediately to this one. Without this, tab B keeps
+       * showing the user as authenticated until the next 401 cycles through
+       * the refresh interceptor — long enough to render admin chrome
+       * briefly with a revoked cookie.
+       *
+       * 'storage' events only fire in OTHER tabs (not the one that wrote),
+       * so this is safe to call alongside the regular login/logout flow.
+       */
+      subscribeToCrossTabAuthChanges(): void {
+        if (!isBrowser) return;
+        window.addEventListener('storage', (event: StorageEvent) => {
+          if (event.key !== STORAGE_KEYS.IS_AUTHENTICATED) return;
+          // Another tab removed the auth flag (logout) — mirror the local
+          // state. We don't call authService.logout() because the originating
+          // tab already revoked the cookie server-side.
+          if (event.newValue == null && store.isAuthenticated()) {
+            patchState(store, { ...initialState });
+            storage.remove(STORAGE_KEYS.USER);
+            storage.remove(STORAGE_KEYS.TOKEN_EXPIRES_AT);
+            i18n.setAuthTier('public');
+          }
+        });
       },
 
       initFromStorage(): Promise<void> {

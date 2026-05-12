@@ -8,10 +8,10 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
-import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
+import { PreloadAllModules, provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions } from '@angular/router';
 // provideClientHydration re-enabled — progress interceptor now skips on server
 // to avoid TransferCacheInterceptorFn conflict (see progress.interceptor.ts)
-import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideMarkdown } from 'ngx-markdown';
@@ -36,7 +36,12 @@ registerLocaleData(localeIt);
 
 function initializeAuth(): () => Promise<void> {
   const authStore = inject(AuthStore);
-  return () => authStore.initFromStorage();
+  return () => {
+    // Subscribe before initFromStorage so any storage event arriving
+    // between bootstrap and the first auth-resolved tick is observed.
+    authStore.subscribeToCrossTabAuthChanges();
+    return authStore.initFromStorage();
+  };
 }
 
 function initializeBookmarks(): () => void {
@@ -48,7 +53,14 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
+    provideRouter(
+      routes,
+      withViewTransitions(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
+      // Preload all lazy-loaded routes after the first navigation completes
+      // so subsequent in-app transitions don't wait for a chunk fetch.
+      withPreloading(PreloadAllModules),
+    ),
     provideHttpClient(
       withFetch(),
       withInterceptors([
@@ -67,9 +79,15 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideAnimationsAsync(),
-    provideClientHydration(withHttpTransferCacheOptions({
-      includePostRequests: false,
-    })),
+    provideClientHydration(
+      // Replay clicks / form input / scrolls that happened between the SSR
+      // paint and Angular finishing hydration. Without this, fast users on
+      // slow networks tap a CTA and nothing happens.
+      withEventReplay(),
+      withHttpTransferCacheOptions({
+        includePostRequests: false,
+      }),
+    ),
     provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     // Q13.1: Sentry performance tracing via Angular Router
