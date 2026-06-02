@@ -258,13 +258,27 @@ export class AnalyticsTrackingService {
         if (val) headerRecord[key] = val;
       });
 
+      // This raw fetch() bypasses Angular's HttpClient XSRF interceptor, so attach
+      // the X-XSRF-TOKEN header manually to keep the beacon endpoint behind the same
+      // CSRF protection as every other mutation request.
+      const xsrf = this.readXsrfToken();
+      if (xsrf) headerRecord['X-XSRF-TOKEN'] = xsrf;
+
       fetch(url, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: headerRecord,
         keepalive: true,
+        credentials: 'same-origin',
       }).catch(() => {});
     }).catch(() => {});
+  }
+
+  /** Read the Angular/Spring XSRF-TOKEN cookie value (browser-only). */
+  private readXsrfToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   /**

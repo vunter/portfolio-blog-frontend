@@ -18,6 +18,8 @@ import {
 import { DatePipe, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 import { MarkdownModule } from 'ngx-markdown';
 // PERF-F-02: PrismJS is lazy-loaded only when article content is rendered,
 // instead of being included in global scripts (which blocked initial page load).
@@ -185,13 +187,36 @@ export class ArticleDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const slug = params.get('slug');
-      if (slug) {
-        this.currentSlug = slug;
-        this.loadArticle(slug);
+    // Drive loading off the route param with switchMap so navigating between
+    // articles (same component instance) cancels the in-flight request for the
+    // previous slug — otherwise a slow earlier response could "win" and overwrite
+    // the article the user actually navigated to (stale-response race).
+    this.route.paramMap.pipe(
+      map((params) => params.get('slug')),
+      filter((slug): slug is string => !!slug),
+      distinctUntilChanged(),
+      tap((slug) => this.beginLoad(slug)),
+      switchMap((slug) =>
+        this.articleService.getArticleBySlug(slug).pipe(
+          map((article) => ({ slug, article } as { slug: string; article: ArticleResponse | null })),
+          catchError(() => of({ slug, article: null as ArticleResponse | null })),
+        ),
+      ),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(({ slug, article }) => {
+      if (article) {
+        this.applyLoadedArticle(slug, article);
+      } else {
+        this.handleLoadError();
       }
     });
+  }
+
+  private beginLoad(slug: string): void {
+    this.currentSlug = slug;
+    this.loading.set(true);
+    this.headingsProcessed = false;
+    this.codeBlocksProcessed = false;
   }
 
   // Q7.1: DOM processing delegated to ContentProcessorService
@@ -266,37 +291,42 @@ export class ArticleDetailComponent implements OnInit {
     this.progressObserver.observe(contentEl);
   }
 
+  // Imperative load path used by the retry button. Navigation between articles
+  // goes through ngOnInit's switchMap pipeline (which cancels superseded requests);
+  // a manual retry is a single explicit action, so a plain subscribe is fine here.
   loadArticle(slug: string): void {
-    this.loading.set(true);
-    this.headingsProcessed = false;
-    this.codeBlocksProcessed = false;
+    this.beginLoad(slug);
     this.articleService.getArticleBySlug(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (article) => {
-        this.article.set(article);
-        this.loading.set(false);
-        this.seo.update({
-          title: article.seoTitle || article.metaTitle || article.title,
-          description: article.seoDescription || article.metaDescription || article.excerpt || '',
-          url: `/blog/${article.slug}`,
-          image: article.coverImageUrl,
-          type: 'article',
-          publishedTime: article.publishedAt,
-          modifiedTime: article.updatedAt,
-          author: article.author?.name,
-          tags: article.tags?.map(t => t.name),
-        });
-        if (!this.isLanguageReload) {
-          this.trackView(slug);
-        }
-        this.isLanguageReload = false;
-        this.loadRelatedArticles(slug);
-        this.loadLikeStatus(slug);
-      },
-      error: () => {
-        this.article.set(null);
-        this.loading.set(false);
-      },
+      next: (article) => this.applyLoadedArticle(slug, article),
+      error: () => this.handleLoadError(),
     });
+  }
+
+  private applyLoadedArticle(slug: string, article: ArticleResponse): void {
+    this.article.set(article);
+    this.loading.set(false);
+    this.seo.update({
+      title: article.seoTitle || article.metaTitle || article.title,
+      description: article.seoDescription || article.metaDescription || article.excerpt || '',
+      url: `/blog/${article.slug}`,
+      image: article.coverImageUrl,
+      type: 'article',
+      publishedTime: article.publishedAt,
+      modifiedTime: article.updatedAt,
+      author: article.author?.name,
+      tags: article.tags?.map(t => t.name),
+    });
+    if (!this.isLanguageReload) {
+      this.trackView(slug);
+    }
+    this.isLanguageReload = false;
+    this.loadRelatedArticles(slug);
+    this.loadLikeStatus(slug);
+  }
+
+  private handleLoadError(): void {
+    this.article.set(null);
+    this.loading.set(false);
   }
 
   retryLoadArticle(): void {
