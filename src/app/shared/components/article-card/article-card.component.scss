@@ -1,4 +1,5 @@
 .article-card {
+  position: relative; // containing block for the stretched title-link overlay
   display: flex;
   flex-direction: column;
   background: var(--card-bg, #fff);
@@ -11,12 +12,6 @@
   &:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
-  }
-
-  // Q13.1: WCAG 2.4.7 — visible focus indicator for keyboard navigation
-  &:focus-visible {
-    outline: 2px solid var(--accent-color, #6366f1);
-    outline-offset: 2px;
   }
 
   &__image {
@@ -95,6 +90,28 @@
         color: var(--primary-color, #6366f1);
       }
     }
+  }
+
+  // Stretched-link: the title anchor covers the whole card so any click on the
+  // card navigates, while remaining a single, properly-announced interactive control.
+  &__title-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  // WCAG 2.4.7 — the visible focus indicator now lives on the title link.
+  &__title-link:focus-visible {
+    outline: 2px solid var(--accent-color, #6366f1);
+    outline-offset: 2px;
+  }
+
+  // Keep the genuinely-interactive children clickable above the stretched overlay.
+  &__tag,
+  .bookmark-btn {
+    position: relative;
+    z-index: 2;
   }
 
   &__excerpt {

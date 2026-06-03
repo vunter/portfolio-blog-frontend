@@ -1,4 +1,8 @@
-<article class="article-card" (click)="navigateToArticle()" (keydown.enter)="navigateToArticle()" role="button" tabindex="0" [attr.aria-label]="'Read article: ' + article().title">
+<!-- a11y: the card is a non-interactive container. The title link is the single
+     primary control and is stretched over the whole card via CSS (::after overlay),
+     so the whole card is clickable WITHOUT nesting interactive controls inside a
+     role="button" (which violates WCAG and double-announces the navigation). -->
+<article class="article-card">
  @if (article().coverImageUrl) {
  <div class="article-card__image">
  <img
@@ -32,7 +36,7 @@
  </div>
 
  <h2 class="article-card__title">
- <a [routerLink]="['/blog', article().slug]" (click)="$event.stopPropagation()">
+ <a [routerLink]="['/blog', article().slug]" class="article-card__title-link">
  {{ article().title }}
  </a>
  <button
