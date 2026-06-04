@@ -61,7 +61,7 @@
  <span class="asset-name" [title]="asset.originalFilename">{{ asset.originalFilename }}</span>
  <span class="asset-meta">{{ formatFileSize(asset.fileSize) }} · {{ asset.createdAt | date:'shortDate' }}</span>
  </div>
- <button class="btn-delete" (click)="deleteAsset(asset, $event)" title="Delete">
+ <button class="btn-delete" (click)="deleteAsset(asset, $event)" title="Delete" [attr.aria-label]="i18n.t('common.delete')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <polyline points="3 6 5 6 21 6"/>
  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -74,9 +74,9 @@
  <!-- Pagination -->
  @if (totalPages > 1) {
  <div class="pagination">
- <button [disabled]="currentPage() === 0" (click)="prevPage()">←</button>
+ <button [disabled]="currentPage() === 0" (click)="prevPage()" [attr.aria-label]="i18n.t('pagination.previous')">←</button>
  <span>{{ currentPage() + 1 }} / {{ totalPages }}</span>
- <button [disabled]="currentPage() >= totalPages - 1" (click)="nextPage()">→</button>
+ <button [disabled]="currentPage() >= totalPages - 1" (click)="nextPage()" [attr.aria-label]="i18n.t('pagination.next')">→</button>
  </div>
  }
  }

@@ -81,6 +81,7 @@
  class="action-btn action-btn--primary"
  (click)="markAsRead(msg)"
  [title]="i18n.t('admin.contacts.markRead')"
+ [attr.aria-label]="i18n.t('admin.contacts.markRead')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <polyline points="20 6 9 17 4 12"/>
@@ -91,6 +92,7 @@
  class="action-btn action-btn--danger"
  (click)="deleteMessage(msg)"
  [title]="i18n.t('admin.contacts.delete')"
+ [attr.aria-label]="i18n.t('admin.contacts.delete')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <polyline points="3 6 5 6 21 6"/>

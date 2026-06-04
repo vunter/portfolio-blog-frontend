@@ -2,7 +2,7 @@
  <!-- Header -->
  <header class="editor-header">
  <div class="header-left">
- <a routerLink="/resume/templates" class="back-btn" [title]="i18n.t('resume.editor.backToTemplates')">
+ <a routerLink="/resume/templates" class="back-btn" [title]="i18n.t('resume.editor.backToTemplates')" [attr.aria-label]="i18n.t('resume.editor.backToTemplates')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <polyline points="15 18 9 12 15 6"/>
  </svg>
@@ -12,13 +12,13 @@
  </div>
  <div class="header-actions">
  <div class="view-toggle">
- <button [class.active]="viewMode() === 'split'" (click)="viewMode.set('split')" [title]="i18n.t('resume.editor.viewSplit')">
+ <button [class.active]="viewMode() === 'split'" (click)="viewMode.set('split')" [title]="i18n.t('resume.editor.viewSplit')" [attr.aria-label]="i18n.t('resume.editor.viewSplit')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
  </button>
- <button [class.active]="viewMode() === 'code'" (click)="viewMode.set('code')" [title]="i18n.t('resume.editor.viewCode')">
+ <button [class.active]="viewMode() === 'code'" (click)="viewMode.set('code')" [title]="i18n.t('resume.editor.viewCode')" [attr.aria-label]="i18n.t('resume.editor.viewCode')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
  </button>
- <button [class.active]="viewMode() === 'preview'" (click)="viewMode.set('preview')" [title]="i18n.t('resume.editor.viewPreview')">
+ <button [class.active]="viewMode() === 'preview'" (click)="viewMode.set('preview')" [title]="i18n.t('resume.editor.viewPreview')" [attr.aria-label]="i18n.t('resume.editor.viewPreview')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
  </button>
  </div>
@@ -128,14 +128,14 @@
  <div class="preview-header">
  <span>{{ i18n.t('resume.editor.livePreview') }}</span>
  <div class="preview-actions">
- <button class="icon-btn" (click)="zoomOut()" [title]="i18n.t('resume.editor.zoomOut')">
+ <button class="icon-btn" (click)="zoomOut()" [title]="i18n.t('resume.editor.zoomOut')" [attr.aria-label]="i18n.t('resume.editor.zoomOut')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
  </button>
  <span class="zoom-level">{{ zoomLevel() }}%</span>
- <button class="icon-btn" (click)="zoomIn()" [title]="i18n.t('resume.editor.zoomIn')">
+ <button class="icon-btn" (click)="zoomIn()" [title]="i18n.t('resume.editor.zoomIn')" [attr.aria-label]="i18n.t('resume.editor.zoomIn')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
  </button>
- <button class="icon-btn" (click)="refreshPreview()" [title]="i18n.t('resume.editor.refreshPreview')">
+ <button class="icon-btn" (click)="refreshPreview()" [title]="i18n.t('resume.editor.refreshPreview')" [attr.aria-label]="i18n.t('resume.editor.refreshPreview')">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
  </button>
  </div>

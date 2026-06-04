@@ -38,6 +38,7 @@
  [attr.aria-current]="rla.isActive ? 'page' : null"
  class="nav-item"
  [title]="item.label"
+ [attr.aria-label]="item.label"
  >
  <span class="nav-item__icon" [innerHTML]="item.icon | safeIcon"></span>
  @if (!sidebarCollapsed()) {
@@ -90,7 +91,7 @@
  title="Italiano"
  >IT</button>
  </div>
- <a routerLink="/" class="nav-item back-link" [title]="i18n.t('account.sidebar.backToSite')">
+ <a routerLink="/" class="nav-item back-link" [title]="i18n.t('account.sidebar.backToSite')" [attr.aria-label]="i18n.t('account.sidebar.backToSite')">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -101,7 +102,7 @@
  <span class="nav-item__label">{{ i18n.t('account.sidebar.backToSite') }}</span>
  }
  </a>
- <a routerLink="/admin/profile" class="nav-item" routerLinkActive="active" [title]="i18n.t('account.profile.title')">
+ <a routerLink="/admin/profile" class="nav-item" routerLinkActive="active" [title]="i18n.t('account.profile.title')" [attr.aria-label]="i18n.t('account.profile.title')">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -112,7 +113,7 @@
  <span class="nav-item__label">{{ i18n.t('account.profile.title') }}</span>
  }
  </a>
- <button class="nav-item logout-link" [title]="i18n.t('account.sidebar.logout')" (click)="logout()">
+ <button class="nav-item logout-link" [title]="i18n.t('account.sidebar.logout')" [attr.aria-label]="i18n.t('account.sidebar.logout')" (click)="logout()">
  <span class="nav-item__icon">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

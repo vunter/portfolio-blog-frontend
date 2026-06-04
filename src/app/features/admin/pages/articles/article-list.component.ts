@@ -13,12 +13,13 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 import { ArticleResponse, PageResponse } from '../../../../models';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-admin-article-list',
-  imports: [RouterLink, FormsModule, NgOptimizedImage, PaginationComponent, MarkdownModule, SkeletonComponent],
+  imports: [RouterLink, FormsModule, NgOptimizedImage, PaginationComponent, MarkdownModule, SkeletonComponent, AccessibleModalDirective],
   templateUrl: './article-list.component.html',
   styleUrl: './article-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

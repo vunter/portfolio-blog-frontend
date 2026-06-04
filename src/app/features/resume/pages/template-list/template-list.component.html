@@ -50,6 +50,7 @@
  [routerLink]="['/resume/editor', template.id]"
  class="action-btn"
  [title]="i18n.t('common.edit')"
+ [attr.aria-label]="i18n.t('common.edit')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -60,6 +61,7 @@
  [routerLink]="['/resume/preview', template.id]"
  class="action-btn"
  [title]="i18n.t('resume.templates.preview')"
+ [attr.aria-label]="i18n.t('resume.templates.preview')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -70,6 +72,7 @@
  class="action-btn"
  (click)="generatePdf(template)"
  [title]="i18n.t('resume.templates.generatePdf')"
+ [attr.aria-label]="i18n.t('resume.templates.generatePdf')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -81,6 +84,7 @@
  class="action-btn"
  (click)="duplicateTemplate(template)"
  [title]="i18n.t('resume.templates.duplicate')"
+ [attr.aria-label]="i18n.t('resume.templates.duplicate')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -92,6 +96,7 @@
  class="action-btn action-btn--danger"
  (click)="deleteTemplate(template)"
  [title]="i18n.t('common.delete')"
+ [attr.aria-label]="i18n.t('common.delete')"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <polyline points="3 6 5 6 21 6"/>

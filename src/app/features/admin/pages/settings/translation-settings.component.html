@@ -81,11 +81,11 @@
               <td class="col-vis"><span class="trans-vis-badge trans-vis--{{ item.visibility }}">{{ item.visibility }}</span></td>
               <td class="col-actions">
                 @if (transEditId() === item.id) {
-                  <button class="btn-icon" (click)="saveTranslation()" [disabled]="transSaving()" title="Save">&#x2713;</button>
-                  <button class="btn-icon" (click)="cancelEditTranslation()" title="Cancel">&#x2715;</button>
+                  <button class="btn-icon" (click)="saveTranslation()" [disabled]="transSaving()" title="Save" aria-label="Save">&#x2713;</button>
+                  <button class="btn-icon" (click)="cancelEditTranslation()" title="Cancel" aria-label="Cancel">&#x2715;</button>
                 } @else {
-                  <button class="btn-icon" (click)="startEditTranslation(item)" title="Edit">&#x270E;</button>
-                  <button class="btn-icon btn-icon--danger" (click)="deleteTrans(item)" title="Delete">&#x1F5D1;</button>
+                  <button class="btn-icon" (click)="startEditTranslation(item)" title="Edit" aria-label="Edit">&#x270E;</button>
+                  <button class="btn-icon btn-icon--danger" (click)="deleteTrans(item)" title="Delete" aria-label="Delete">&#x1F5D1;</button>
                 }
               </td>
             </tr>
