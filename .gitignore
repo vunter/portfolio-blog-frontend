@@ -18,6 +18,7 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 .vscode/
+.worktrees
 .worktrees/
 
 # === Angular cache ===
