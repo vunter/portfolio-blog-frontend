@@ -180,7 +180,7 @@
  <span class="section-icon"></span>
  {{ i18n.t('resume.profile.personalInfo') }}
  </h2>
- <button type="button" class="collapse-toggle" (click)="toggleSection('personalInfo')" [attr.aria-expanded]="!collapsedSections()['personalInfo']" [attr.aria-controls]="'section-personalInfo'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('personalInfo')" [attr.aria-expanded]="!collapsedSections()['personalInfo']" [attr.aria-controls]="'section-personalInfo'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['personalInfo']">▾</span>
  </button>
  </div>
@@ -242,7 +242,7 @@
  <span class="section-icon"></span>
  {{ i18n.t('resume.profile.professionalSummary') }}
  </h2>
- <button type="button" class="collapse-toggle" (click)="toggleSection('summary')" [attr.aria-expanded]="!collapsedSections()['summary']" [attr.aria-controls]="'section-summary'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('summary')" [attr.aria-expanded]="!collapsedSections()['summary']" [attr.aria-controls]="'section-summary'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['summary']">▾</span>
  </button>
  </div>
@@ -262,7 +262,7 @@
  {{ i18n.t('resume.profile.education') }}
  </h2>
  <button type="button" class="btn-add" (click)="addEducation()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('education')" [attr.aria-expanded]="!collapsedSections()['education']" [attr.aria-controls]="'section-education'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('education')" [attr.aria-expanded]="!collapsedSections()['education']" [attr.aria-controls]="'section-education'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['education']">▾</span>
  </button>
  </div>
@@ -321,7 +321,7 @@
  {{ i18n.t('resume.profile.languages') }}
  </h2>
  <button type="button" class="btn-add" (click)="addLanguage()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('languages')" [attr.aria-expanded]="!collapsedSections()['languages']" [attr.aria-controls]="'section-languages'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('languages')" [attr.aria-expanded]="!collapsedSections()['languages']" [attr.aria-controls]="'section-languages'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['languages']">▾</span>
  </button>
  </div>
@@ -359,7 +359,7 @@
  {{ i18n.t('resume.profile.technicalSkills') }}
  </h2>
  <button type="button" class="btn-add" (click)="addSkill()">{{ i18n.t('resume.profile.addCategory') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('skills')" [attr.aria-expanded]="!collapsedSections()['skills']" [attr.aria-controls]="'section-skills'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('skills')" [attr.aria-expanded]="!collapsedSections()['skills']" [attr.aria-controls]="'section-skills'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['skills']">▾</span>
  </button>
  </div>
@@ -402,7 +402,7 @@
  <span class="section-icon"></span>
  {{ i18n.t('resume.profile.interests') }}
  </h2>
- <button type="button" class="collapse-toggle" (click)="toggleSection('interests')" [attr.aria-expanded]="!collapsedSections()['interests']" [attr.aria-controls]="'section-interests'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('interests')" [attr.aria-expanded]="!collapsedSections()['interests']" [attr.aria-controls]="'section-interests'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['interests']">▾</span>
  </button>
  </div>
@@ -422,7 +422,7 @@
  {{ i18n.t('resume.profile.experience') }}
  </h2>
  <button type="button" class="btn-add" (click)="addExperience()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('experience')" [attr.aria-expanded]="!collapsedSections()['experience']" [attr.aria-controls]="'section-experience'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('experience')" [attr.aria-expanded]="!collapsedSections()['experience']" [attr.aria-controls]="'section-experience'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['experience']">▾</span>
  </button>
  </div>
@@ -478,7 +478,7 @@
  {{ i18n.t('resume.profile.certifications') }}
  </h2>
  <button type="button" class="btn-add" (click)="addCertification()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('certifications')" [attr.aria-expanded]="!collapsedSections()['certifications']" [attr.aria-controls]="'section-certifications'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('certifications')" [attr.aria-expanded]="!collapsedSections()['certifications']" [attr.aria-controls]="'section-certifications'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['certifications']">▾</span>
  </button>
  </div>
@@ -529,7 +529,7 @@
  {{ i18n.t('resume.profile.additionalInfo') }}
  </h2>
  <button type="button" class="btn-add" (click)="addAdditionalInfo()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('additionalInfo')" [attr.aria-expanded]="!collapsedSections()['additionalInfo']" [attr.aria-controls]="'section-additionalInfo'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('additionalInfo')" [attr.aria-expanded]="!collapsedSections()['additionalInfo']" [attr.aria-controls]="'section-additionalInfo'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['additionalInfo']">▾</span>
  </button>
  </div>
@@ -568,7 +568,7 @@
  {{ i18n.t('resume.profile.testimonials') }}
  </h2>
  <button type="button" class="btn-add" (click)="addTestimonial()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('testimonials')" [attr.aria-expanded]="!collapsedSections()['testimonials']" [attr.aria-controls]="'section-testimonials'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('testimonials')" [attr.aria-expanded]="!collapsedSections()['testimonials']" [attr.aria-controls]="'section-testimonials'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['testimonials']">▾</span>
  </button>
  </div>
@@ -644,7 +644,7 @@
  {{ i18n.t('resume.profile.proficiencies') }}
  </h2>
  <button type="button" class="btn-add" (click)="addProficiency()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('proficiencies')" [attr.aria-expanded]="!collapsedSections()['proficiencies']" [attr.aria-controls]="'section-proficiencies'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('proficiencies')" [attr.aria-expanded]="!collapsedSections()['proficiencies']" [attr.aria-controls]="'section-proficiencies'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['proficiencies']">▾</span>
  </button>
  </div>
@@ -688,7 +688,7 @@
  @if (p.icon) {
  <span class="icon-preview"><i [class]="p.icon"></i></span>
  }
- <button type="button" class="btn-icon-picker" (click)="openIconPicker($index)" title="Browse icons"></button>
+ <button type="button" class="btn-icon-picker" (click)="openIconPicker($index)" [title]="i18n.t('resume.profile.picker.browseIcons')" [attr.aria-label]="i18n.t('resume.profile.picker.browseIcons')"></button>
  @if (iconPickerIndex() === $index) {
  <div class="picker-backdrop" (click)="closeIconPicker()"></div>
  <div class="picker-modal-container" (click)="closeIconPicker()">
@@ -698,19 +698,19 @@
       (closed)="closeIconPicker()"
       (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
- <span class="icon-picker-title" id="icon-picker-title">Choose Icon</span>
- <button type="button" class="btn-close-picker" (click)="closeIconPicker()" aria-label="Close">&times;</button>
+ <span class="icon-picker-title" id="icon-picker-title">{{ i18n.t('resume.profile.picker.chooseIcon') }}</span>
+ <button type="button" class="btn-close-picker" (click)="closeIconPicker()" [attr.aria-label]="i18n.t('resume.profile.picker.close')">&times;</button>
  </div>
  @if (p.icon) {
  <div class="icon-picker-selected">
- <span>Selected:</span>
+ <span>{{ i18n.t('resume.profile.picker.selected') }}</span>
  <i [class]="p.icon"></i>
  <code>{{ p.icon }}</code>
  </div>
  }
- <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'icon_search_' + $index" placeholder="Search icons..." (ngModelChange)="filterIcons()">
+ <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'icon_search_' + $index" [attr.placeholder]="i18n.t('resume.profile.picker.searchIcons')" (ngModelChange)="filterIcons()">
  @if (faIconsLoading()) {
- <div class="picker-loading">Loading icons...</div>
+ <div class="picker-loading">{{ i18n.t('resume.profile.picker.loadingIcons') }}</div>
  }
  <div class="icon-grid">
  @for (ic of filteredIcons(); track $index) {
@@ -739,7 +739,7 @@
  {{ i18n.t('resume.profile.projects') }}
  </h2>
  <button type="button" class="btn-add" (click)="addProject()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('projects')" [attr.aria-expanded]="!collapsedSections()['projects']" [attr.aria-controls]="'section-projects'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('projects')" [attr.aria-expanded]="!collapsedSections()['projects']" [attr.aria-controls]="'section-projects'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['projects']">▾</span>
  </button>
  </div>
@@ -800,7 +800,7 @@
  {{ i18n.t('resume.profile.learningTopics') }}
  </h2>
  <button type="button" class="btn-add" (click)="addLearningTopic()">{{ i18n.t('resume.profile.add') }}</button>
- <button type="button" class="collapse-toggle" (click)="toggleSection('learningTopics')" [attr.aria-expanded]="!collapsedSections()['learningTopics']" [attr.aria-controls]="'section-learningTopics'" title="Collapse/Expand">
+ <button type="button" class="collapse-toggle" (click)="toggleSection('learningTopics')" [attr.aria-expanded]="!collapsedSections()['learningTopics']" [attr.aria-controls]="'section-learningTopics'" title="Collapse/Expand" [attr.aria-label]="i18n.t('resume.profile.picker.collapseExpand')">
  <span class="chevron-icon" [class.collapsed]="collapsedSections()['learningTopics']">▾</span>
  </button>
  </div>
@@ -836,7 +836,7 @@
  }
  </span>
  }
- <button type="button" class="btn-icon-picker" (click)="toggleEmojiPicker($index)" title="Browse icons" [attr.aria-expanded]="emojiPickerIndex() === $index" aria-haspopup="dialog"></button>
+ <button type="button" class="btn-icon-picker" (click)="toggleEmojiPicker($index)" [title]="i18n.t('resume.profile.picker.browseIcons')" [attr.aria-label]="i18n.t('resume.profile.picker.browseIcons')" [attr.aria-expanded]="emojiPickerIndex() === $index" aria-haspopup="dialog"></button>
  @if (emojiPickerIndex() === $index) {
  <div class="picker-backdrop" (click)="closeEmojiPicker()"></div>
  <div class="picker-modal-container" (click)="closeEmojiPicker()">
@@ -846,12 +846,12 @@
       (closed)="closeEmojiPicker()"
       (click)="$event.stopPropagation()">
  <div class="icon-picker-header">
- <span class="icon-picker-title" id="emoji-picker-title">Choose Icon / Emoji</span>
- <button type="button" class="btn-close-picker" (click)="closeEmojiPicker()" aria-label="Close">&times;</button>
+ <span class="icon-picker-title" id="emoji-picker-title">{{ i18n.t('resume.profile.picker.chooseIconEmoji') }}</span>
+ <button type="button" class="btn-close-picker" (click)="closeEmojiPicker()" [attr.aria-label]="i18n.t('resume.profile.picker.close')">&times;</button>
  </div>
  @if (lt.emoji) {
  <div class="icon-picker-selected">
- <span>Selected:</span>
+ <span>{{ i18n.t('resume.profile.picker.selected') }}</span>
  @if (lt.emoji.startsWith('fa')) {
  <i [class]="lt.emoji"></i>
  } @else if (lt.emoji.startsWith('http')) {
@@ -863,14 +863,14 @@
  </div>
  }
  <div class="picker-tabs">
- <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'icons'" (click)="topicPickerTab.set('icons')">Icons</button>
- <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'emojis'" (click)="topicPickerTab.set('emojis')">Emojis</button>
- <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'url'" (click)="topicPickerTab.set('url')">Image URL</button>
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'icons'" (click)="topicPickerTab.set('icons')">{{ i18n.t('resume.profile.picker.tabIcons') }}</button>
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'emojis'" (click)="topicPickerTab.set('emojis')">{{ i18n.t('resume.profile.picker.tabEmojis') }}</button>
+ <button type="button" class="picker-tab" [class.active]="topicPickerTab() === 'url'" (click)="topicPickerTab.set('url')">{{ i18n.t('resume.profile.picker.tabImageUrl') }}</button>
  </div>
  @if (topicPickerTab() === 'icons') {
- <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'lt_icon_search_' + $index" placeholder="Search icons..." (ngModelChange)="filterIcons()">
+ <input type="text" class="icon-search" [(ngModel)]="iconSearchQuery" [name]="'lt_icon_search_' + $index" [attr.placeholder]="i18n.t('resume.profile.picker.searchIcons')" (ngModelChange)="filterIcons()">
  @if (faIconsLoading()) {
- <div class="picker-loading">Loading icons from CDN...</div>
+ <div class="picker-loading">{{ i18n.t('resume.profile.picker.loadingIconsCdn') }}</div>
  }
  <div class="icon-grid">
  @for (ic of filteredIcons(); track $index) {
@@ -886,14 +886,14 @@
  }
  @if (topicPickerTab() === 'url') {
  <div class="url-input-section">
- <label>Paste image URL:</label>
+ <label>{{ i18n.t('resume.profile.picker.pasteImageUrl') }}</label>
  <input type="text" [(ngModel)]="customIconUrl" [name]="'lt_url_' + $index" placeholder="https://example.com/icon.svg" class="icon-search">
  @if (customIconUrl) {
  <div class="url-preview">
  <img [src]="customIconUrl" alt="preview" class="url-preview-img">
  </div>
  }
- <button type="button" class="btn-apply-url" [disabled]="!customIconUrl" (click)="selectEmoji(customIconUrl)">Apply</button>
+ <button type="button" class="btn-apply-url" [disabled]="!customIconUrl" (click)="selectEmoji(customIconUrl)">{{ i18n.t('resume.profile.picker.apply') }}</button>
  </div>
  }
  </div>

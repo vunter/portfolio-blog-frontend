@@ -1444,6 +1444,22 @@
     'resume.profile.emoji': 'Emoji',
     'resume.profile.colorTheme': 'Color Theme',
 
+    // Resume Icon / Emoji Picker
+    'resume.profile.picker.browseIcons': 'Browse icons',
+    'resume.profile.picker.chooseIcon': 'Choose Icon',
+    'resume.profile.picker.chooseIconEmoji': 'Choose Icon / Emoji',
+    'resume.profile.picker.close': 'Close',
+    'resume.profile.picker.searchIcons': 'Search icons...',
+    'resume.profile.picker.loadingIcons': 'Loading icons...',
+    'resume.profile.picker.loadingIconsCdn': 'Loading icons from CDN...',
+    'resume.profile.picker.selected': 'Selected:',
+    'resume.profile.picker.tabIcons': 'Icons',
+    'resume.profile.picker.tabEmojis': 'Emojis',
+    'resume.profile.picker.tabImageUrl': 'Image URL',
+    'resume.profile.picker.pasteImageUrl': 'Paste image URL:',
+    'resume.profile.picker.apply': 'Apply',
+    'resume.profile.picker.collapseExpand': 'Collapse/Expand',
+
     // Home Page Customization
     'resume.profile.homeCustomization': 'Home Page Customization',
     'resume.profile.homeCustomizationHint': 'These fields control content displayed on the public home page. They are stored as well-known additionalInfo labels.',

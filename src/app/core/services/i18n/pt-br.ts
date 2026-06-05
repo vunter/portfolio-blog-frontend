@@ -1442,6 +1442,22 @@ export const ptBr: Record<string, string> = {
     'resume.profile.emoji': 'Emoji',
     'resume.profile.colorTheme': 'Tema de Cores',
 
+    // Resume Icon / Emoji Picker
+    'resume.profile.picker.browseIcons': 'Procurar ícones',
+    'resume.profile.picker.chooseIcon': 'Escolher Ícone',
+    'resume.profile.picker.chooseIconEmoji': 'Escolher Ícone / Emoji',
+    'resume.profile.picker.close': 'Fechar',
+    'resume.profile.picker.searchIcons': 'Buscar ícones...',
+    'resume.profile.picker.loadingIcons': 'Carregando ícones...',
+    'resume.profile.picker.loadingIconsCdn': 'Carregando ícones do CDN...',
+    'resume.profile.picker.selected': 'Selecionado:',
+    'resume.profile.picker.tabIcons': 'Ícones',
+    'resume.profile.picker.tabEmojis': 'Emojis',
+    'resume.profile.picker.tabImageUrl': 'URL da Imagem',
+    'resume.profile.picker.pasteImageUrl': 'Cole a URL da imagem:',
+    'resume.profile.picker.apply': 'Aplicar',
+    'resume.profile.picker.collapseExpand': 'Recolher/Expandir',
+
     // Home Page Customization
     'resume.profile.homeCustomization': 'Personalização da Página Inicial',
     'resume.profile.homeCustomizationHint': 'Estes campos controlam o conteúdo exibido na página inicial pública. Eles são armazenados como rótulos de additionalInfo conhecidos.',

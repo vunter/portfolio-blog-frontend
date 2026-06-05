@@ -1505,6 +1505,22 @@ export const es: Record<string, string> = {
     'resume.profile.tz.utcP11': 'UTC+11 (Islas Salomón)',
     'resume.profile.tz.utcP12': 'UTC+12 (Nueva Zelanda)',
 
+    // Resume Icon / Emoji Picker
+    'resume.profile.picker.browseIcons': 'Explorar iconos',
+    'resume.profile.picker.chooseIcon': 'Elegir icono',
+    'resume.profile.picker.chooseIconEmoji': 'Elegir icono / emoji',
+    'resume.profile.picker.close': 'Cerrar',
+    'resume.profile.picker.searchIcons': 'Buscar iconos...',
+    'resume.profile.picker.loadingIcons': 'Cargando iconos...',
+    'resume.profile.picker.loadingIconsCdn': 'Cargando iconos desde CDN...',
+    'resume.profile.picker.selected': 'Seleccionado:',
+    'resume.profile.picker.tabIcons': 'Iconos',
+    'resume.profile.picker.tabEmojis': 'Emojis',
+    'resume.profile.picker.tabImageUrl': 'URL de imagen',
+    'resume.profile.picker.pasteImageUrl': 'Pegar URL de imagen:',
+    'resume.profile.picker.apply': 'Aplicar',
+    'resume.profile.picker.collapseExpand': 'Contraer/Expandir',
+
     // Resume Preview
     'resume.preview.title': 'Vista previa de la página de inicio',
     'resume.preview.livePreview': 'Vista previa en vivo',
