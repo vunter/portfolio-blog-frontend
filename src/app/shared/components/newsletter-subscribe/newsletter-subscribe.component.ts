@@ -47,6 +47,7 @@ export class NewsletterSubscribeComponent {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
+            this.submitting.set(false);
             this.subscribed.set(true);
             this.notification.success(this.i18n.t('newsletter.subscribe.success'));
           },

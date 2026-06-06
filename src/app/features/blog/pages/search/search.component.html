@@ -46,6 +46,7 @@
  type="button"
  class="suggestion-item"
  role="option"
+ [attr.aria-selected]="false"
  (click)="selectSuggestion(suggestion)"
  >
  <span class="suggestion-type">{{ suggestion.type }}</span>
