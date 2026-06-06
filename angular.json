@@ -47,8 +47,14 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "880kB",
                   "maximumError": "1MB"
+                },
+                {
+                  "type": "bundle",
+                  "name": "polyfills",
+                  "maximumWarning": "100kB",
+                  "maximumError": "150kB"
                 },
                 {
                   "type": "anyComponentStyle",

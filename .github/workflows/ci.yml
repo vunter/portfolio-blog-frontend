@@ -41,6 +41,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Dependency vulnerability gate — parity with the backend's OWASP
+      # Dependency-Check. Fails the build on HIGH/CRITICAL advisories in
+      # production dependencies (dev-only advisories are reported, not gating).
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high --omit=dev
+
       - name: Lint (Q12.5)
         run: npx ng lint
 
@@ -137,6 +143,25 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: portfolio-blog-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Image vulnerability scan — parity with the backend pipeline. Fails on
+      # fixable CRITICAL/HIGH findings and uploads results to GitHub Security.
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: portfolio-blog-frontend:${{ github.sha }}
+          format: sarif
+          output: trivy-frontend.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-frontend.sarif
