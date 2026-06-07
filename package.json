@@ -51,7 +51,7 @@
     "@angular/build": "^20.2.0",
     "@angular/cli": "^20.2.0",
     "@angular/compiler-cli": "^20.2.0",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.60.0",
     "@types/express": "^5.0.6",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^22.19.10",
