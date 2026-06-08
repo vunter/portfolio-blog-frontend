@@ -151,7 +151,7 @@ jobs:
       # Image vulnerability scan — parity with the backend pipeline. Fails on
       # fixable CRITICAL/HIGH findings and uploads results to GitHub Security.
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: portfolio-blog-frontend:${{ github.sha }}
           format: sarif
