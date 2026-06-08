@@ -20,6 +20,10 @@ RUN npx ng build --configuration=production
 # Runtime: nginx:alpine (~40MB)
 FROM nginx:1.27-alpine AS runtime
 
+# Patch all OS packages to the latest in the base image's Alpine branch so
+# Trivy's fixable CRITICAL/HIGH findings are cleared at build time.
+RUN apk upgrade --no-cache
+
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

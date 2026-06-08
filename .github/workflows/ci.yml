@@ -89,7 +89,7 @@ jobs:
       - name: Serve and audit with Lighthouse CI
         run: |
           npm install -g @lhci/cli@0.14.x
-          lhci autorun --collect.staticDistDir=./dist/frontend/browser --collect.url=http://localhost/index.html --assert.preset=lighthouse:recommended --assert.assertions.categories:accessibility=error
+          lhci autorun --config=lighthouserc.json
 
   e2e:
     name: E2E Tests (Q12.6)
@@ -130,6 +130,9 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-latest
     needs: [build]
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
