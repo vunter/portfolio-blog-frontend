@@ -1,0 +1,26 @@
+# gitleaks configuration — extends the bundled default ruleset.
+#
+# The CI "Secret Scan" job runs `gitleaks detect` over the FULL git history
+# (actions/checkout fetch-depth: 0). The allowlists below cover known-safe
+# matches that are NOT real credentials:
+#   - i18n catalogs: the `linkedin-client-id` rule false-matches the word
+#     "LinkedIn" sitting next to a 14-character translated word.
+#   - the Google reCAPTCHA v3 *site* key, which is public by design
+#     (domain-restricted) and documented as safe to commit in src/environments.
+#
+# Real secrets (API tokens, DSNs) are injected at build time and never committed.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "i18n message catalogs — translation strings, no secrets (linkedin-client-id false positives)"
+paths = [
+  '''src/app/core/services/i18n/.*\.(ts|json)''',
+]
+
+[[allowlists]]
+description = "Google reCAPTCHA v3 public site key (domain-restricted, safe to commit; see src/environments)"
+regexes = [
+  '''6LcCNGgsAAAAADA_ubUZ2dj68W7Lin6h0RbPSqJi''',
+]

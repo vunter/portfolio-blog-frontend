@@ -22,7 +22,7 @@ jobs:
         run: |
           curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar -xz -C /tmp gitleaks
-          /tmp/gitleaks detect --source . --redact --verbose --no-banner --exit-code 1
+          /tmp/gitleaks detect --source . --config .gitleaks.toml --redact --verbose --no-banner --exit-code 1
 
   build:
     name: Build & Lint
