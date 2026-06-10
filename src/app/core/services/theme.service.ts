@@ -1,6 +1,5 @@
 import { Injectable, signal, computed, effect, PLATFORM_ID, inject, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CookieConsentService } from './cookie-consent.service';
 
 export type Theme = 'light' | 'dark';
 export type ThemePreference = 'light' | 'dark' | 'auto';
@@ -11,7 +10,6 @@ export type ThemePreference = 'light' | 'dark' | 'auto';
 export class ThemeService {
   private readonly STORAGE_KEY = 'app-theme';
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly consent = inject(CookieConsentService);
   private readonly destroyRef = inject(DestroyRef);
   private mediaQuery: MediaQueryList | null = null;
   private mediaListener: ((e: MediaQueryListEvent) => void) | null = null;
@@ -44,8 +42,14 @@ export class ThemeService {
 
     effect(() => {
       const pref = this.preference();
-      if (isPlatformBrowser(this.platformId) && this.consent.hasConsent('functional')) {
-        localStorage.setItem(this.STORAGE_KEY, pref);
+      // Theme is a strictly-necessary UI preference (set by explicit user action),
+      // so it persists regardless of optional functional-cookie consent.
+      if (isPlatformBrowser(this.platformId)) {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, pref);
+        } catch {
+          /* storage unavailable (private mode / blocked) — ignore */
+        }
       }
       this.theme.set(this.resolveTheme(pref));
     });

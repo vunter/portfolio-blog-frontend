@@ -44,8 +44,10 @@
  <script>
    (function () {
      try {
-       var stored = localStorage.getItem('app-theme');
-       var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+       var pref = localStorage.getItem('app-theme') || 'auto';
+       var theme = (pref === 'light' || pref === 'dark')
+         ? pref
+         : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
        document.documentElement.setAttribute('data-theme', theme);
      } catch (_) {
        /* localStorage may be blocked (private mode) — leave whatever SSR emitted */

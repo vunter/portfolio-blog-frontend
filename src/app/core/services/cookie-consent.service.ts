@@ -120,7 +120,7 @@ export class CookieConsentService {
    * We only clear known preference keys — we never touch auth-related items.
    */
   private clearFunctionalStorage(): void {
-    const functionalKeys = ['theme', 'preferred_locale', 'sidebar_collapsed'];
+    const functionalKeys = ['preferred_locale', 'sidebar_collapsed'];
     for (const key of functionalKeys) {
       try {
         localStorage.removeItem(key);
