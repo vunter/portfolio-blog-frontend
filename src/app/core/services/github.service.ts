@@ -1,8 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, tap, shareReplay } from 'rxjs';
-import { PublicProfileService } from './public-profile.service';
 import { I18nService } from './i18n.service';
+import { environment } from '../../../environments/environment';
 
 export interface GitHubRepo {
   id: number;
@@ -23,16 +23,11 @@ export interface GitHubRepo {
 @Injectable({ providedIn: 'root' })
 export class GitHubService {
   private readonly http = inject(HttpClient);
-  private readonly profileService = inject(PublicProfileService);
   private readonly i18n = inject(I18nService);
-  private readonly API_BASE = 'https://api.github.com';
-
-  /** Extract GitHub username from profile URL, fallback to empty string */
-  private readonly username = computed(() => {
-    const githubUrl = this.profileService.profile()?.github || '';
-    const match = githubUrl.match(/github\.com\/([^/?#]+)/);
-    return match ? match[1] : '';
-  });
+  // Same-origin backend proxy (server-side fetch + Redis cache) instead of
+  // calling api.github.com from the browser — avoids CORS, the per-visitor
+  // GitHub rate limit, and transient GitHub 5xx surfacing as console errors.
+  private readonly reposUrl = `${environment.apiUrl}/${environment.apiVersion}/github/repos`;
 
   // Cache for repos
   private reposCache$: Observable<GitHubRepo[]> | null = null;
@@ -46,16 +41,10 @@ export class GitHubService {
    * Get public repositories sorted by recent activity
    */
   getRepos(limit = 6): Observable<GitHubRepo[]> {
-    const user = this.username();
-    if (!user) {
-      return of([]);
-    }
     if (!this.reposCache$) {
       this.loading.set(true);
       this.reposCache$ = this.http
-        .get<GitHubRepo[]>(
-          `${this.API_BASE}/users/${user}/repos?sort=pushed&direction=desc&per_page=${limit}`
-        )
+        .get<GitHubRepo[]>(`${this.reposUrl}?limit=${limit}`)
         .pipe(
           tap((repos) => {
             this.repos.set(repos);
