@@ -1,6 +1,7 @@
 ﻿import { Component, inject, OnInit, OnDestroy, signal, computed, input, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import 'emoji-picker-element';
+// PERF: 'emoji-picker-element' is dynamically imported on first use (see ensureEmojiPickerLoaded)
+// rather than eagerly, to keep its large emoji dataset out of the default /admin/profile chunk.
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ResumeProfileService } from '../../services/resume-profile.service';
@@ -655,7 +656,18 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
       this.customIconUrl = '';
       this.iconSearchQuery = '';
       this.loadFaIcons();
+      void this.ensureEmojiPickerLoaded();
     }
+  }
+
+  // PERF: load the emoji-picker-element web component lazily the first time the
+  // picker opens, so its emoji dataset is fetched on demand instead of being
+  // bundled into the eagerly-loaded /admin/profile chunk.
+  private emojiPickerModuleLoaded = false;
+  private async ensureEmojiPickerLoaded(): Promise<void> {
+    if (this.emojiPickerModuleLoaded) return;
+    await import('emoji-picker-element');
+    this.emojiPickerModuleLoaded = true;
   }
 
   closeEmojiPicker(): void {

@@ -21,9 +21,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 import { MarkdownModule } from 'ngx-markdown';
-// PERF-F-02: PrismJS is lazy-loaded only when article content is rendered,
-// instead of being included in global scripts (which blocked initial page load).
-// ngx-markdown auto-detects window.Prism for syntax highlighting.
+// PERF-5: PrismJS syntax highlighting is NOT active — the prismjs JS is never
+// imported anywhere in src, so window.Prism is never set and ngx-markdown's
+// highlighting hook never runs. Code blocks rely on the static styling in
+// styles/_content.scss instead. (The unused prism-tomorrow.css global style
+// was removed from angular.json.) To enable real highlighting later, lazy-load
+// prismjs core + the desired language grammars so window.Prism is defined.
 import { ScrollDepthTrackerService } from './services/scroll-depth-tracker.service';
 import { ArticleService } from '../../services/article.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -306,8 +309,8 @@ export class ArticleDetailComponent implements OnInit {
     this.article.set(article);
     this.loading.set(false);
     this.seo.update({
-      title: article.seoTitle || article.metaTitle || article.title,
-      description: article.seoDescription || article.metaDescription || article.excerpt || '',
+      title: article.seoTitle || article.title,
+      description: article.seoDescription || article.excerpt || '',
       url: `/blog/${article.slug}`,
       image: article.coverImageUrl,
       type: 'article',

@@ -10,10 +10,11 @@ import { PublicProfileService } from '../../core/services/public-profile.service
 import { AnalyticsTrackingService } from '../../core/services/analytics-tracking.service';
 import { CookieConsentService } from '../../core/services/cookie-consent.service';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
+import { AccessibleModalDirective } from '../../shared/directives/accessible-modal.directive';
 
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe, AccessibleModalDirective],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

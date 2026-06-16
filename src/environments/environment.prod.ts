@@ -9,9 +9,14 @@ export const environment = {
   apiVersion: 'v1',
   ownerAlias: 'leonardo-catananti',
   siteUrl: 'https://catananti.dev',
-  // INC-12/SEC-06: Google reCAPTCHA v3 Site Key — public key, prod-domain restricted
-  // Build-time injection (NG_APP_RECAPTCHA_SITE_KEY) is recommended but not required:
-  // reCAPTCHA site keys are public by design and safe to hardcode.
+  // INC-12/SEC-06: Google reCAPTCHA v3 Site Key — public key, prod-domain restricted.
+  // reCAPTCHA site keys are public by design and safe to hardcode (not a secret).
+  // fe-security-contract-5: This currently reuses the same key as environment.ts.
+  // A dedicated PRODUCTION reCAPTCHA key (domain-scoped to catananti.dev) should be
+  // provisioned so dev/prod traffic, analytics, and domain validation stay separate.
+  // This file (environment.prod.ts) IS the build-time injection point: angular.json's
+  // `fileReplacements` swaps environment.ts → environment.prod.ts for production builds,
+  // so the dedicated prod key belongs here once provisioned.
   recaptchaSiteKey: '6LcCNGgsAAAAADA_ubUZ2dj68W7Lin6h0RbPSqJi',
   recaptchaEnabled: true,
   // Q8.11: Configurable scroll depth tracking thresholds (percentage points)

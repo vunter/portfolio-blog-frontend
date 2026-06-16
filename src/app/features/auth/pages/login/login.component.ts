@@ -98,6 +98,7 @@ export class LoginComponent {
 
     this.loading.set(true);
     this.error.set(null);
+    this.loginForm.disable();
 
     from(this.recaptcha.execute('login')).pipe(
       switchMap(recaptchaToken => this.authService
@@ -112,6 +113,7 @@ export class LoginComponent {
         // If MFA is required, redirect to MFA verify page instead of completing login
         if (response.mfaRequired && response.mfaToken) {
           this.loading.set(false);
+          this.loginForm.enable();
           this.router.navigate(['/auth/mfa-verify'], {
             state: {
               mfaToken: response.mfaToken,
@@ -148,6 +150,7 @@ export class LoginComponent {
         },
         error: (err) => {
           this.loading.set(false);
+          this.loginForm.enable();
           if (err.status === 401) {
             this.error.set(this.i18n.t('auth.login.invalidCredentials'));
             this.onLoginFailure();

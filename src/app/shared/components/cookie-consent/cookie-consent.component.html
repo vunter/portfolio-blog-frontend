@@ -1,6 +1,6 @@
 ﻿@if (showBanner()) {
  <div class="cookie-backdrop" (click)="$event.stopPropagation()">
- <div class="cookie-banner" role="dialog" aria-label="Cookie consent">
+ <div class="cookie-banner" appAccessibleModal ariaLabelledBy="cookie-banner-title" (closed)="onEscape()">
  <div class="cookie-header">
  <svg class="cookie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
  <circle cx="12" cy="12" r="10"/>
@@ -9,7 +9,7 @@
  <circle cx="10" cy="14" r="1" fill="currentColor"/>
  <circle cx="16" cy="13" r="1" fill="currentColor"/>
  </svg>
- <h3>{{ i18n.t('cookie.banner.title') }}</h3>
+ <h3 id="cookie-banner-title">{{ i18n.t('cookie.banner.title') }}</h3>
  </div>
 
  <p class="cookie-description">{{ i18n.t('cookie.banner.description') }}</p>

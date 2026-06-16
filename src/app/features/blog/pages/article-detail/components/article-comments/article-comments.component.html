@@ -49,7 +49,7 @@
  <!-- Inline reply form -->
  @if (replyingTo()?.id === comment.id && authStore.isAuthenticated()) {
  <div class="reply-form">
- <textarea [(ngModel)]="replyContent" name="replyContent" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
+ <textarea [(ngModel)]="replyContent" name="replyContent" [placeholder]="i18n.t('article.comments.replyPlaceholder')" [attr.aria-label]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
  <div class="reply-form__actions">
  <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
  <button class="reply-form__submit" (click)="submitReply()" [disabled]="replyContent().length < 10 || submittingReply()">
@@ -92,7 +92,7 @@
 
  @if (replyingTo()?.id === reply.id && authStore.isAuthenticated()) {
  <div class="reply-form">
- <textarea [(ngModel)]="replyContent" name="replyContent2" [placeholder]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
+ <textarea [(ngModel)]="replyContent" name="replyContent2" [placeholder]="i18n.t('article.comments.replyPlaceholder')" [attr.aria-label]="i18n.t('article.comments.replyPlaceholder')" rows="3" required minlength="10"></textarea>
  <div class="reply-form__actions">
  <button class="reply-form__cancel" (click)="cancelReply()">{{ i18n.t('common.cancel') }}</button>
  <button class="reply-form__submit" (click)="submitReply()" [disabled]="replyContent().length < 10 || submittingReply()">

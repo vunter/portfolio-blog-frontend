@@ -1,5 +1,3 @@
-import { UserResponse } from './user.model';
-
 // ============================================
 // ARTICLE
 // ============================================
@@ -40,7 +38,6 @@ export interface ArticleResponse {
   contentHtml: string;
   excerpt?: string;
   coverImageUrl?: string;
-  featuredImageUrl?: string; // Alias for coverImageUrl
   status: ArticleStatus;
   publishedAt?: string;
   scheduledAt?: string;
@@ -51,9 +48,7 @@ export interface ArticleResponse {
   commentCount: number;
   readingTimeMinutes: number;
   seoTitle?: string;
-  metaTitle?: string; // Alias for seoTitle
   seoDescription?: string;
-  metaDescription?: string; // Alias for seoDescription
   seoKeywords?: string;
   createdAt: string;
   updatedAt: string;
@@ -65,7 +60,6 @@ export interface ArticleSummaryResponse {
   title: string;
   excerpt?: string;
   coverImageUrl?: string;
-  featuredImageUrl?: string; // Alias for coverImageUrl
   status: ArticleStatus;
   publishedAt?: string;
   author: AuthorInfo;
@@ -159,12 +153,11 @@ export interface CommentResponse {
   articleId: string;
   articleSlug: string;
   articleTitle: string;
-  author?: UserResponse;
   authorName?: string;
-  authorEmail?: string;
   content: string;
   status: CommentStatus;
   parentId?: string;
+  moderationNote?: string;
   likesCount?: number;
   replies?: CommentResponse[];
   createdAt: string;

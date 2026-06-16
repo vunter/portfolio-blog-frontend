@@ -36,8 +36,7 @@
               }
             ],
             "styles": [
-              "src/styles.scss",
-              "node_modules/prismjs/themes/prism-tomorrow.css"
+              "src/styles.scss"
             ],
             "scripts": []
           },

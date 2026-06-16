@@ -5,6 +5,7 @@ import {
   output,
   signal,
   effect,
+  untracked,
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
@@ -91,7 +92,7 @@ export class ArticleCommentsComponent {
   loadComments(): void {
     const slug = this.articleSlug();
     this.commentPage.set(0);
-    const sort = this.commentSort();
+    const sort = untracked(() => this.commentSort());
     this.commentService.getCommentsPaged(slug, 0, 20, sort).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.comments.set(response.content ?? []);
@@ -199,7 +200,6 @@ export class ArticleCommentsComponent {
               articleSlug: slug,
               articleTitle: this.articleTitle(),
               authorName: name,
-              authorEmail: email,
               content,
               status: 'APPROVED',
               createdAt: new Date().toISOString(),
@@ -256,7 +256,6 @@ export class ArticleCommentsComponent {
       articleSlug: slug,
       articleTitle: this.articleTitle(),
       authorName: name,
-      authorEmail: user.email || '',
       content,
       status: 'APPROVED',
       parentId,

@@ -25,7 +25,6 @@
           id="code"
           formControlName="code"
           [placeholder]="i18n.t(usingBackup() ? 'auth.mfa.backupCodePlaceholder' : 'auth.mfa.codePlaceholder')"
-          [disabled]="loading()"
           [maxlength]="usingBackup() ? 9 : 6"
           autocomplete="one-time-code"
           [attr.inputmode]="usingBackup() ? 'text' : 'numeric'"

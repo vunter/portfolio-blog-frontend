@@ -88,6 +88,11 @@ export class AnalyticsTrackingService {
     });
   }
 
+  // Web-vitals observers are tracked here so they are explicitly disconnected on
+  // service teardown even if the page is never hidden (each per-handler disconnect
+  // only fires on visibilitychange / page-hide).
+  private readonly webVitalObservers: PerformanceObserver[] = [];
+
   /**
    * Q13.4: Collect Core Web Vitals (LCP, CLS, INP) via PerformanceObserver.
    * Reports once per page load. Consent-gated.
@@ -107,6 +112,7 @@ export class AnalyticsTrackingService {
         lcpObserver.disconnect();
       });
       lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+      this.webVitalObservers.push(lcpObserver);
     } catch { /* unsupported */ }
 
     // CLS — Cumulative Layout Shift
@@ -120,6 +126,7 @@ export class AnalyticsTrackingService {
         }
       });
       clsObserver.observe({ type: 'layout-shift', buffered: true });
+      this.webVitalObservers.push(clsObserver);
       // Report CLS on page hide
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && clsValue > 0) {
@@ -138,6 +145,7 @@ export class AnalyticsTrackingService {
         }
       });
       inpObserver.observe({ type: 'event', buffered: true });
+      this.webVitalObservers.push(inpObserver);
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && maxInp > 0) {
           this.trackBeacon({ eventType: 'WEB_VITAL', metadata: { metric: 'INP', value: maxInp } });
@@ -217,6 +225,8 @@ export class AnalyticsTrackingService {
         document.removeEventListener('visibilitychange', this.visibilityHandler);
         this.visibilityHandler = null;
       }
+      this.webVitalObservers.forEach(o => o.disconnect());
+      this.webVitalObservers.length = 0;
       this.trackQueue$.complete();
     });
   }

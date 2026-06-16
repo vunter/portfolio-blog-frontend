@@ -87,6 +87,7 @@ export class RegisterComponent {
 
     this.loading.set(true);
     this.error.set(null);
+    this.registerForm.disable();
 
     from(this.recaptcha.execute('register')).pipe(
       switchMap(recaptchaToken => this.authService
@@ -115,6 +116,7 @@ export class RegisterComponent {
         },
         error: (err) => {
           this.loading.set(false);
+          this.registerForm.enable();
           if (err.status === 409) {
             this.error.set(this.i18n.t('auth.register.emailExists'));
           } else if (err.status === 400 && err.error?.validationErrors) {

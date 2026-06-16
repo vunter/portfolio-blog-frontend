@@ -392,17 +392,15 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       this.apiService.get<ArticleResponse>(`/admin/articles/${this.articleId}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (article) => {
           // Mirror the field mapping used in loadArticle() — the backend's
-          // canonical fields are coverImageUrl/seoTitle/seoDescription. The
-          // featuredImageUrl/metaTitle/metaDescription aliases on the response
-          // type are not always populated.
+          // canonical fields are coverImageUrl/seoTitle/seoDescription.
           this.form.patchValue({
             title: article.title || '',
             slug: article.slug || '',
             excerpt: article.excerpt || '',
             content: article.content || '',
-            featuredImageUrl: article.coverImageUrl || article.featuredImageUrl || '',
-            metaTitle: article.seoTitle || article.metaTitle || article.title || '',
-            metaDescription: article.seoDescription || article.metaDescription || article.excerpt || '',
+            featuredImageUrl: article.coverImageUrl || '',
+            metaTitle: article.seoTitle || article.title || '',
+            metaDescription: article.seoDescription || article.excerpt || '',
           });
           // Update Monaco editor if available
           if (this.monacoEditor) {

@@ -85,6 +85,7 @@ export class MfaVerifyComponent implements OnInit {
 
     this.loading.set(true);
     this.error.set(null);
+    this.mfaForm.disable();
 
     const code = this.mfaForm.getRawValue().code!;
 
@@ -111,6 +112,7 @@ export class MfaVerifyComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
+        this.mfaForm.enable();
         if (err.status === 401) {
           this.error.set(this.i18n.t('auth.mfa.invalidCode'));
         } else {

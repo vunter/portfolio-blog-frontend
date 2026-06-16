@@ -7,6 +7,30 @@ on:
     branches: [main, develop]
 
 jobs:
+  # Supply-chain guardrail (parity with backend ci.yml): every third-party action
+  # must reference an immutable commit SHA, not a force-pushable tag. actions/* and
+  # github/* are GitHub-maintained and allowed by tag; everything else needs @<sha>.
+  pin-check:
+    name: Action Pin Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Verify third-party actions are pinned by SHA
+        run: |
+          set -euo pipefail
+          mapfile -t bad < <(grep -RhnE '^[[:space:]]*-?[[:space:]]*uses: ' .github/workflows \
+            | grep -vE 'uses: actions/' \
+            | grep -vE 'uses: github/' \
+            | grep -vE 'uses: \./' \
+            | grep -vE 'uses: [^@]+@[a-f0-9]{40}( |$)') || true
+          if [ ${#bad[@]} -gt 0 ]; then
+            echo "::error::The following 'uses:' references are not SHA-pinned:"
+            printf '  %s\n' "${bad[@]}"
+            exit 1
+          fi
+          echo "All third-party actions are SHA-pinned"
+
   secret-scan:
     name: Secret Scan
     runs-on: ubuntu-latest
@@ -139,10 +163,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Build Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           push: false

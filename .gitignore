@@ -4,6 +4,9 @@
 /out-tsc
 /bazel-out
 
+# === Lighthouse CI artifacts ===
+.lighthouseci/
+
 # === Dependencies ===
 /node_modules
 npm-debug.log

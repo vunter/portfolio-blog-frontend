@@ -31,7 +31,6 @@
  id="email"
  formControlName="email"
  [placeholder]="i18n.t('auth.login.emailPlaceholder')"
- [disabled]="loading()"
  [attr.aria-describedby]="error() ? 'login-error' : null"
  />
  </div>
@@ -44,7 +43,6 @@
  id="password"
  formControlName="password"
  placeholder="••••••••"
- [disabled]="loading()"
  />
  <button
  type="button"

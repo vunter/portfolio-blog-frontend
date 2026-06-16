@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { CookieConsentService } from '../../../core/services/cookie-consent.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { AccessibleModalDirective } from '../../directives/accessible-modal.directive';
 
 @Component({
   selector: 'app-cookie-consent',
+  imports: [AccessibleModalDirective],
   templateUrl: './cookie-consent.component.html',
   styleUrl: './cookie-consent.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +33,16 @@ export class CookieConsentComponent {
     this.consentService.rejectOptional();
     // Q14.4: Inform user what features are degraded
     this.notification.info(this.i18n.t('cookie.degradation.rejected'));
+  }
+
+  /**
+   * Esc handler from AccessibleModalDirective. The banner is a required consent
+   * gate, so Esc collapses the expanded settings panel rather than dismissing it.
+   */
+  onEscape(): void {
+    if (this.showSettings()) {
+      this.showSettings.set(false);
+    }
   }
 
   toggleSettings(): void {

@@ -8,7 +8,7 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { GlobalErrorHandler } from './core/services/global-error-handler.service';
-import { PreloadAllModules, provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions } from '@angular/router';
 // provideClientHydration re-enabled — progress interceptor now skips on server
 // to avoid TransferCacheInterceptorFn conflict (see progress.interceptor.ts)
 import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions } from '@angular/platform-browser';
@@ -29,6 +29,7 @@ import { refreshTokenInterceptor } from './core/interceptors/refresh-token.inter
 import { progressInterceptor } from './core/interceptors/progress.interceptor';
 import { AuthStore } from './core/auth/auth.store';
 import { BookmarkService } from './core/services/bookmark.service';
+import { SelectivePreloadStrategy } from './core/strategies/selective-preload.strategy';
 
 registerLocaleData(localePt);
 registerLocaleData(localeEs);
@@ -57,9 +58,10 @@ export const appConfig: ApplicationConfig = {
       routes,
       withViewTransitions(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
-      // Preload all lazy-loaded routes after the first navigation completes
-      // so subsequent in-app transitions don't wait for a chunk fetch.
-      withPreloading(PreloadAllModules),
+      // PERF-2: Opt-in preloading. Only routes flagged with data:{preload:true}
+      // are preloaded after the first navigation — guarded admin/resume/auth
+      // chunks are no longer downloaded for anonymous visitors.
+      withPreloading(SelectivePreloadStrategy),
     ),
     provideHttpClient(
       withFetch(),
