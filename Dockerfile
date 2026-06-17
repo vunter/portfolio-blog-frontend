@@ -18,7 +18,7 @@ COPY . .
 RUN npx ng build --configuration=production
 
 # Runtime: nginx:alpine (~40MB)
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 # Patch all OS packages to the latest in the base image's Alpine branch so
 # Trivy's fixable CRITICAL/HIGH findings are cleared at build time.
