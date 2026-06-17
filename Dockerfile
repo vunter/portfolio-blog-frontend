@@ -6,7 +6,7 @@
 #   FROM nginx:1.27-alpine@sha256:<digest> AS runtime
 # Dependabot's docker ecosystem will keep the digest fresh once pinned.
 
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 
 ARG NPM_REGISTRY=https://registry.npmjs.org/
