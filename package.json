@@ -37,7 +37,7 @@
     "@angular/platform-server": "^20.3.25",
     "@angular/router": "^20.3.25",
     "@angular/service-worker": "^20.3.25",
-    "@angular/ssr": "^20.3.27",
+    "@angular/ssr": "^20.3.29",
     "@ngrx/signals": "^20.1.0",
     "@sentry/angular": "^10.47.0",
     "emoji-picker-element": "^1.29.0",
@@ -51,8 +51,8 @@
     "zone.js": "~0.15.1"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.27",
-    "@angular/cli": "^20.3.27",
+    "@angular/build": "^20.3.29",
+    "@angular/cli": "^20.3.29",
     "@angular/compiler-cli": "^20.3.25",
     "@playwright/test": "^1.58.2",
     "@types/express": "^5.0.6",
