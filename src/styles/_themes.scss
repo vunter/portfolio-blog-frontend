@@ -1,7 +1,11 @@
 /* Dark Theme (optional) */
 [data-theme="dark"],
 .theme-dark {
-  --primary-hover: #60a5fa;
+  /* A11Y: brand blue lightened for dark surfaces. #2563eb (the :root value) is
+     ~3.45:1 on #0f172a and fails AA on every article link; #60a5fa is ~6.9:1 on the
+     page and ~5.4:1 on cards. */
+  --primary-color: #60a5fa;
+  --primary-hover: #93c5fd;
   --primary-light: rgba(59, 130, 246, 0.2);
   
   --bg-primary: #0f172a;

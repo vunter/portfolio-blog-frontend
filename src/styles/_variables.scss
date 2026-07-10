@@ -223,4 +223,54 @@
   --danger-item-hover: rgba(239, 68, 68, 0.1);
   --danger-item-color: #ef4444;
   --dropdown-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+
+  /* ------------------------------------------------------------------------
+     Alias tokens. These names were used across component styles but never
+     defined, so they fell back to hardcoded literals (often the old indigo
+     #6366f1) and never responded to the theme. Aliasing them to the real
+     tokens unifies the brand color and makes dark-theme overrides apply
+     automatically (the aliased token carries its own dark value).
+     ------------------------------------------------------------------------ */
+  --primary: var(--primary-color);
+  --color-primary: var(--primary-color);
+  --color-primary-hover: var(--primary-hover);
+  --primary-bg: var(--primary-light);
+  --primary-alpha: var(--primary-light);
+  --accent: var(--accent-color);
+  --accent-hover: var(--primary-hover);
+  --btn-bg: var(--primary-color);
+  --btn-hover: var(--primary-hover);
+  --hover-bg: var(--card-bg-hover);
+  --bg-hover: var(--card-bg-hover);
+  --nav-hover: var(--card-bg-hover);
+  --nav-text: var(--text-primary);
+  --bg-subtle: var(--bg-secondary);
+  --surface-bg: var(--card-bg);
+  --surface-primary: var(--bg-primary);
+  --dropdown-bg: var(--card-bg);
+  --footer-bg: var(--bg-secondary);
+  --text-tertiary: var(--text-muted);
+  --color-text-secondary: var(--text-secondary);
+  --danger: var(--danger-bg);
+  --danger-tint: var(--error-tint);
+  --danger-border: rgba(239, 68, 68, 0.3);
+  --color-error: var(--error-color);
+  --error-text: var(--alert-error-text);
+  --success: var(--success-color);
+  --success-hover: var(--success-btn-hover);
+  --warning: var(--warning-color);
+  --warning-bg: var(--warning-light);
+  --warning-text: var(--alert-warning-text);
+  --warning-border: var(--warning-color);
+  --info-bg: var(--info-light);
+  --info-text: var(--alert-info-text);
+  --info-border: var(--info-color);
+  --badge-review-bg: var(--badge-info-bg);
+  --badge-review-text: var(--badge-info-text);
+  --unread-bg: var(--primary-light);
+  --unread-bg-hover: var(--card-bg-hover);
+  --editor-bg: var(--code-bg);
+  --sidebar-item-hover-strong: var(--sidebar-item-hover);
+  --sidebar-width-collapsed: 72px;
+  --preview-scale: 1;
 }
