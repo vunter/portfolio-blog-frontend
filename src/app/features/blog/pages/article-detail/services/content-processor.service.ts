@@ -80,10 +80,62 @@ export class ContentProcessorService {
           });
         });
       });
+      // Language label (derived from the `language-*` class ngx-markdown emits),
+      // shown top-left so a reader can tell the code's language at a glance.
+      const lang = this.extractLanguage(pre);
+      if (lang) {
+        const label = renderer.createElement('span');
+        renderer.addClass(label, 'code-lang-label');
+        renderer.appendChild(label, renderer.createText(lang));
+        renderer.setStyle(label, 'position', 'absolute');
+        renderer.setStyle(label, 'top', '0.5rem');
+        renderer.setStyle(label, 'left', '0.75rem');
+        renderer.setStyle(label, 'font-size', '0.7rem');
+        renderer.setStyle(label, 'font-weight', '600');
+        renderer.setStyle(label, 'letter-spacing', '0.05em');
+        renderer.setStyle(label, 'text-transform', 'uppercase');
+        renderer.setStyle(label, 'color', '#64748b');
+        renderer.setStyle(label, 'z-index', '1');
+        renderer.appendChild(wrapper, label);
+      }
+
       cleanups.push(unlisten);
       renderer.appendChild(wrapper, btn);
     });
 
     return cleanups;
+  }
+
+  private extractLanguage(pre: Element): string | null {
+    const code = pre.querySelector('code');
+    const cls = code?.className || pre.className || '';
+    const m = cls.match(/language-([a-z0-9]+)/i);
+    if (!m) return null;
+    const aliases: Record<string, string> = { ts: 'TypeScript', js: 'JavaScript', sh: 'Bash', yml: 'YAML' };
+    const raw = m[1].toLowerCase();
+    return aliases[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
+  }
+
+  /**
+   * Lazily load Prism and highlight the code blocks. Fully defensive: any failure
+   * leaves the code unhighlighted (its previous state) and never throws. Prism +
+   * grammars are dynamically imported so they stay off the initial bundle.
+   */
+  async highlightCode(contentEl: Element): Promise<void> {
+    try {
+      const codeEls = contentEl.querySelectorAll('pre code[class*="language-"]');
+      if (!codeEls.length) return;
+      // One lazy chunk with Prism core + grammars, statically wired for correct
+      // cross-bundler load order (see prism-loader.ts).
+      const Prism = (await import('./prism-loader')).default as {
+        highlightElement?: (el: Element) => void;
+      };
+      const highlightElement = Prism.highlightElement;
+      if (typeof highlightElement === 'function') {
+        codeEls.forEach((el) => highlightElement.call(Prism, el));
+      }
+    } catch {
+      /* Prism is optional — leave code unhighlighted on any failure. */
+    }
   }
 }
