@@ -16,6 +16,7 @@
  [routerLink]="['/blog/tag', tag.slug]"
  class="article-tag"
  [style.background-color]="tag.color || '#6366f1'"
+ [style.color]="(tag.color || '#6366f1') | tagTextColor"
  >
  {{ tag.name }}
  </a>
@@ -94,7 +95,7 @@
  }
 
  <div class="article-content markdown-content">
- <markdown [data]="article()!.content"></markdown>
+ <markdown [data]="article()!.content" (ready)="onMarkdownReady()"></markdown>
  </div>
 
  <footer class="article-footer">
@@ -168,6 +169,26 @@
  }
  </div>
  </footer>
+
+ <!-- Prev/next chronological navigation -->
+ @if (olderArticle() || newerArticle()) {
+ <nav class="article-nav" [attr.aria-label]="i18n.t('article.moreReading')">
+ @if (newerArticle(); as newer) {
+ <a class="article-nav__link article-nav__link--newer" [routerLink]="['/blog', newer.slug]">
+ <span class="article-nav__dir">← {{ i18n.t('article.newerPost') }}</span>
+ <span class="article-nav__title">{{ newer.title }}</span>
+ </a>
+ } @else {
+ <span class="article-nav__spacer" aria-hidden="true"></span>
+ }
+ @if (olderArticle(); as older) {
+ <a class="article-nav__link article-nav__link--older" [routerLink]="['/blog', older.slug]">
+ <span class="article-nav__dir">{{ i18n.t('article.olderPost') }} →</span>
+ <span class="article-nav__title">{{ older.title }}</span>
+ </a>
+ }
+ </nav>
+ }
 
  <!-- Comments Section -->
  <app-article-comments

@@ -79,7 +79,12 @@
   }
 
   table {
+    // display:block + overflow makes a wide table scroll inside its own box on
+    // mobile instead of blowing out the page width.
+    display: block;
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
     margin: 1em 0;
     border-collapse: collapse;
   }
@@ -107,7 +112,7 @@
    -------------------------------------------------------------------------- */
 pre[class*="language-"],
 code[class*="language-"] {
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', monospace !important;
+  font-family: var(--font-family-mono) !important;
   font-size: 0.875rem !important;
   line-height: 1.6 !important;
 }

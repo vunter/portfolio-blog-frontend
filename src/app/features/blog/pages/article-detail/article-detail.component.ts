@@ -21,12 +21,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 import { MarkdownModule } from 'ngx-markdown';
-// PERF-5: PrismJS syntax highlighting is NOT active — the prismjs JS is never
-// imported anywhere in src, so window.Prism is never set and ngx-markdown's
-// highlighting hook never runs. Code blocks rely on the static styling in
-// styles/_content.scss instead. (The unused prism-tomorrow.css global style
-// was removed from angular.json.) To enable real highlighting later, lazy-load
-// prismjs core + the desired language grammars so window.Prism is defined.
+// Syntax highlighting is applied post-render by ContentProcessorService.highlightCode(),
+// which lazy-loads prismjs core + language grammars in the browser only (fully
+// defensive — never breaks the page if a grammar fails). See processArticleContent().
 import { ScrollDepthTrackerService } from './services/scroll-depth-tracker.service';
 import { ArticleService } from '../../services/article.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -37,7 +34,9 @@ import { AuthStore } from '../../../../core/auth/auth.store';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ArticleCardComponent } from '../../../../shared/components/article-card/article-card.component';
 import { BreadcrumbsComponent, Breadcrumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { TagTextColorPipe } from '../../../../shared/utils/tag-text-color.pipe';
 import { getInitials } from '../../../../shared/utils/string.utils';
+import { scrollBehavior } from '../../../../shared/utils/scroll.util';
 import {
   ArticleResponse,
   ArticleSummaryResponse,
@@ -63,6 +62,7 @@ interface TocItem {
     ArticleCardComponent,
     BreadcrumbsComponent,
     ArticleCommentsComponent,
+    TagTextColorPipe,
   ],
   templateUrl: './article-detail.component.html',
   styleUrl: './article-detail.component.scss',
@@ -94,6 +94,11 @@ export class ArticleDetailComponent implements OnInit {
 
   article = signal<ArticleResponse | null>(null);
   relatedArticles = signal<ArticleSummaryResponse[]>([]);
+  // Chronological neighbours for the prev/next footer. The public list is sorted
+  // newest-first, so the entry AFTER the current one is the older post and the
+  // entry BEFORE it is the newer post.
+  olderArticle = signal<ArticleSummaryResponse | null>(null);
+  newerArticle = signal<ArticleSummaryResponse | null>(null);
   loading = signal(true);
   liked = signal(false);
   likePending = signal(false);
@@ -173,20 +178,10 @@ export class ArticleDetailComponent implements OnInit {
       }
     });
 
-    // PERF-01: Use afterNextRender + effect instead of ngAfterViewChecked
-    // This runs only once per render cycle, not on every change detection.
-    // The progress observer ALSO needs to wait for the article DOM to render —
-    // calling it from ngOnInit returned null because .article-content wasn't
-    // in the tree yet.
-    effect(() => {
-      const article = this.article();
-      if (article && isPlatformBrowser(this.platformId)) {
-        requestAnimationFrame(() => {
-          this.processArticleContent();
-          this.zone.runOutsideAngular(() => this.initProgressObserver());
-        });
-      }
-    });
+    // Post-render DOM work (heading IDs, copy buttons, highlighting, progress
+    // observer) is triggered by the markdown component's (ready) event via
+    // onMarkdownReady() — see the template — which fires only after the content
+    // is actually in the DOM, avoiding the render race a bare rAF had here.
   }
 
   ngOnInit(): void {
@@ -222,6 +217,17 @@ export class ArticleDetailComponent implements OnInit {
     this.codeBlocksProcessed = false;
   }
 
+  // ngx-markdown fires (ready) once its content is in the DOM. That is the
+  // reliable point to post-process — assign heading IDs, inject copy buttons and
+  // syntax-highlight — instead of racing a requestAnimationFrame against the async
+  // markdown render. Also re-fires on language reload (new [data]), where the
+  // per-load flags were reset in beginLoad(), so the new content re-processes.
+  onMarkdownReady(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.processArticleContent();
+    this.zone.runOutsideAngular(() => this.initProgressObserver());
+  }
+
   // Q7.1: DOM processing delegated to ContentProcessorService
   private processArticleContent(): void {
     const hostEl = this.elementRef.nativeElement as HTMLElement;
@@ -238,10 +244,15 @@ export class ArticleDetailComponent implements OnInit {
     }
 
     if (!this.codeBlocksProcessed) {
-      const codeBlocks = hostEl.querySelectorAll('.article-content pre');
+      const contentEl = hostEl.querySelector('.article-content');
+      const codeBlocks = contentEl?.querySelectorAll('pre') ?? [];
       if (codeBlocks.length > 0) {
         const cleanups = this.contentProcessor.addCopyButtons(this.renderer, hostEl);
         this.eventCleanups.push(...cleanups);
+        // Lazy syntax highlighting (browser-only; fully defensive inside).
+        if (isPlatformBrowser(this.platformId) && contentEl) {
+          this.contentProcessor.highlightCode(contentEl);
+        }
         this.codeBlocksProcessed = true;
       }
     }
@@ -287,7 +298,13 @@ export class ArticleDetailComponent implements OnInit {
         if (totalHeight <= 0) continue;
         // How far the top of the article has scrolled past the top of the viewport
         const scrolledPast = Math.max(0, -rect.top);
-        const progress = Math.min((scrolledPast / (totalHeight - viewportHeight)) * 100, 100);
+        // Guard the denominator: for an article shorter than the viewport,
+        // (totalHeight - viewportHeight) is <= 0, which would yield NaN/negative
+        // and pin the bar at 0% even when fully read.
+        const scrollable = totalHeight - viewportHeight;
+        const progress = scrollable <= 0
+          ? (scrolledPast >= 0 && rect.bottom <= viewportHeight ? 100 : 0)
+          : Math.min((scrolledPast / scrollable) * 100, 100);
         this.readingProgress.set(Math.max(0, progress));
       }
     }, { threshold: thresholds });
@@ -324,7 +341,31 @@ export class ArticleDetailComponent implements OnInit {
     }
     this.isLanguageReload = false;
     this.loadRelatedArticles(slug);
+    this.loadNeighbours(slug);
     this.loadLikeStatus(slug);
+  }
+
+  // No dedicated adjacent-article API, so derive neighbours from the public list
+  // (newest-first). A single page of 100 covers the whole blog for the foreseeable
+  // future; if it ever grows past that, the neighbours simply fall off the ends.
+  private loadNeighbours(slug: string): void {
+    this.articleService.getArticles(0, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (page) => {
+        const list = page.content;
+        const idx = list.findIndex((a) => a.slug === slug);
+        if (idx === -1) {
+          this.olderArticle.set(null);
+          this.newerArticle.set(null);
+          return;
+        }
+        this.newerArticle.set(idx > 0 ? list[idx - 1] : null);
+        this.olderArticle.set(idx < list.length - 1 ? list[idx + 1] : null);
+      },
+      error: () => {
+        this.olderArticle.set(null);
+        this.newerArticle.set(null);
+      },
+    });
   }
 
   private handleLoadError(): void {
@@ -428,7 +469,7 @@ export class ArticleDetailComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     }
   }
 

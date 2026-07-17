@@ -115,40 +115,40 @@
       line-height: 1.8;
       color: var(--text-primary, #1a1a1a);
 
-      :deep(h2) {
+      ::ng-deep h2 {
         font-size: 1.75rem;
         margin: 2rem 0 1rem;
         border-bottom: 1px solid var(--border-color, #e5e7eb);
         padding-bottom: 0.3em;
       }
 
-      :deep(h3) {
+      ::ng-deep h3 {
         font-size: 1.25rem;
         margin: 1.5rem 0 0.75rem;
       }
 
-      :deep(p) {
+      ::ng-deep p {
         margin: 0 0 1.5rem;
       }
 
-      :deep(ul), :deep(ol) {
+      ::ng-deep ul, ::ng-deep ol {
         margin: 0 0 1.5rem;
         padding-left: 2em;
       }
 
-      :deep(ul) {
+      ::ng-deep ul {
         list-style: disc;
       }
 
-      :deep(ol) {
+      ::ng-deep ol {
         list-style: decimal;
       }
 
-      :deep(li) {
+      ::ng-deep li {
         margin-bottom: 0.35em;
       }
 
-      :deep(a) {
+      ::ng-deep a {
         color: var(--primary-color, #6366f1);
         text-decoration: underline;
 
@@ -157,7 +157,7 @@
         }
       }
 
-      :deep(pre) {
+      ::ng-deep pre {
         background: var(--code-bg, #1e293b) !important;
         color: #e2e8f0;
         padding: 1.25rem;
@@ -167,7 +167,7 @@
         margin: 1.5rem 0;
       }
 
-      :deep(.code-block-wrapper) {
+      ::ng-deep .code-block-wrapper {
         position: relative;
         margin: 1.5rem 0;
 
@@ -176,7 +176,7 @@
         }
       }
 
-      :deep(.code-copy-btn) {
+      ::ng-deep .code-copy-btn {
         position: absolute;
         top: 0.5rem;
         right: 0.5rem;
@@ -201,7 +201,7 @@
         }
       }
 
-      :deep(pre code) {
+      ::ng-deep pre code {
         background: none !important;
         color: inherit;
         padding: 0;
@@ -210,7 +210,7 @@
         line-height: 1.6;
       }
 
-      :deep(code) {
+      ::ng-deep code {
         font-family: 'Fira Code', 'Consolas', monospace;
         font-size: 0.875em;
         background: var(--code-inline-bg, rgba(99, 102, 241, 0.1));
@@ -220,12 +220,12 @@
         border: 1px solid var(--code-border, rgba(0, 0, 0, 0.1));
       }
 
-      :deep(img) {
+      ::ng-deep img {
         max-width: 100%;
         border-radius: 8px;
       }
 
-      :deep(blockquote) {
+      ::ng-deep blockquote {
         border-left: 4px solid var(--primary-color, #6366f1);
         margin: 1.5rem 0;
         padding: 0.5rem 1rem;
@@ -234,24 +234,24 @@
         font-style: italic;
       }
 
-      :deep(table) {
+      ::ng-deep table {
         width: 100%;
         margin: 1.5rem 0;
         border-collapse: collapse;
       }
 
-      :deep(th), :deep(td) {
+      ::ng-deep th, ::ng-deep td {
         padding: 0.75rem;
         border: 1px solid var(--border-color, #e5e7eb);
         text-align: left;
       }
 
-      :deep(th) {
+      ::ng-deep th {
         background: var(--bg-secondary, #f3f4f6);
         font-weight: 600;
       }
 
-      :deep(hr) {
+      ::ng-deep hr {
         border: none;
         border-top: 1px solid var(--border-color, #e5e7eb);
         margin: 2rem 0;
@@ -786,6 +786,62 @@
       padding: 2rem;
     }
 
+    .article-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color, #e5e7eb);
+
+      &__spacer {
+        display: block;
+      }
+
+      &__link {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-primary, #111);
+        background: var(--bg-secondary, #f8fafc);
+        transition: border-color 0.15s, transform 0.15s, background-color 0.15s;
+
+        &:hover {
+          border-color: var(--primary-color, #2563eb);
+          transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--primary-color, #2563eb);
+          outline-offset: 2px;
+        }
+      }
+
+      &__link--older {
+        text-align: right;
+      }
+
+      &__dir {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--primary-color, #2563eb);
+      }
+
+      &__title {
+        font-size: 0.95rem;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
+
     .related-section {
       margin-top: 4rem;
 
@@ -1026,7 +1082,7 @@
         font-size: 12pt;
         line-height: 1.6;
 
-        :deep(pre) {
+        ::ng-deep pre {
           white-space: pre-wrap;
           word-break: break-all;
           border: 1px solid #ccc !important;
@@ -1034,12 +1090,12 @@
           color: #333 !important;
         }
 
-        :deep(a) {
+        ::ng-deep a {
           color: #333;
           text-decoration: underline;
         }
 
-        :deep(img) {
+        ::ng-deep img {
           max-width: 100%;
           page-break-inside: avoid;
         }
@@ -1047,6 +1103,24 @@
 
       .article-footer {
         border-top: 1px solid #ccc;
+      }
+    }
+
+    /* Wide screens: float the ToC into the left gutter as a sticky sidebar.
+       The article body stays 800px here, so a 220px ToC clears the content with
+       a ~16px gap from 1280px up. The >=1440px block below re-tunes the offset
+       for the wider 900px article. */
+    @media (min-width: 1280px) and (max-width: 1439.98px) {
+      .toc {
+        position: fixed;
+        top: 100px;
+        left: max(1rem, calc(50% - 636px));
+        width: 220px;
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+        margin-bottom: 0;
+        background: var(--bg-primary, #fff);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
       }
     }
 
