@@ -71,6 +71,11 @@ export class ArticleCommentsComponent {
 
   // Q8.8: Debounce map for comment like operations
   private readonly pendingLikes = new Map<number | string, ReturnType<typeof setTimeout>>();
+  // Last server-confirmed like state per comment. Used so the debounced toggle is
+  // only sent when the optimistic state actually differs from the server — otherwise
+  // an even number of rapid clicks (like→unlike) would send one net toggle and land
+  // in the wrong state.
+  private readonly commentLikeServerState = new Map<number | string, boolean>();
 
   readonly getInitials = getInitials;
 
@@ -148,6 +153,10 @@ export class ArticleCommentsComponent {
     }
     // Q8.8: Optimistic UI update
     const wasLiked = this.commentLiked()[comment.id] || false;
+    // On the first click of a burst, snapshot the current state as the server truth.
+    if (!this.pendingLikes.has(comment.id) && !this.commentLikeServerState.has(comment.id)) {
+      this.commentLikeServerState.set(comment.id, wasLiked);
+    }
     this.commentLiked.update(map => ({ ...map, [comment.id]: !wasLiked }));
     this.updateCommentLikeCount(comment.id, wasLiked ? -1 : 1);
 
@@ -155,17 +164,28 @@ export class ArticleCommentsComponent {
     const pending = this.pendingLikes.get(comment.id);
     if (pending) clearTimeout(pending);
 
-    // Q8.8: Debounce the backend call — only send final state after 500ms
+    // Q8.8: Debounce the backend call — only send the toggle after 500ms, and only
+    // if the optimistic state actually differs from the server state.
     this.pendingLikes.set(comment.id, setTimeout(() => {
       this.pendingLikes.delete(comment.id);
+      const serverState = this.commentLikeServerState.get(comment.id) ?? false;
+      const optimistic = this.commentLiked()[comment.id] || false;
+      if (optimistic === serverState) {
+        // Net-zero change (e.g. like→unlike): nothing to send, UI already matches server.
+        this.commentLikeServerState.delete(comment.id);
+        return;
+      }
       this.commentService.toggleCommentLike(slug, comment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (res) => {
+          this.commentLikeServerState.delete(comment.id);
           this.commentLiked.update(map => ({ ...map, [comment.id]: res.liked }));
           this.updateCommentLikeCount(comment.id, 0, res.likesCount);
         },
         error: () => {
-          this.commentLiked.update(map => ({ ...map, [comment.id]: wasLiked }));
-          this.updateCommentLikeCount(comment.id, wasLiked ? 0 : -1);
+          // Revert to the last known server truth.
+          this.commentLiked.update(map => ({ ...map, [comment.id]: serverState }));
+          this.updateCommentLikeCount(comment.id, 0, comment.likesCount || 0);
+          this.commentLikeServerState.delete(comment.id);
         },
       });
     }, 500));
@@ -194,23 +214,30 @@ export class ArticleCommentsComponent {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (created) => {
-            const optimistic: CommentResponse = {
-              id: created?.id || crypto.randomUUID(),
+            // Use the REAL server response — never fabricate status 'APPROVED' or a
+            // random id. If moderation queued the comment (status PENDING), the UI must
+            // reflect that instead of showing it as live and having it vanish on reload.
+            const comment: CommentResponse = created ?? {
+              id: crypto.randomUUID(),
               articleId: this.articleId(),
               articleSlug: slug,
               articleTitle: this.articleTitle(),
               authorName: name,
               content,
-              status: 'APPROVED',
+              status: 'PENDING',
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
-            this.comments.update(list => [optimistic, ...list]);
+            this.comments.update(list => [comment, ...list]);
             this.commentTotalElements.update(n => n + 1);
             this.commentCountChange.emit(this.commentTotalElements());
             this.commentContent.set('');
             this.submittingComment.set(false);
-            this.notification.success(this.i18n.t('article.comments.submitted'));
+            this.notification.success(
+              comment.status === 'APPROVED'
+                ? this.i18n.t('article.comments.submitted')
+                : this.i18n.t('article.comments.pendingModeration')
+            );
           },
           error: () => {
             this.submittingComment.set(false);
@@ -300,6 +327,22 @@ export class ArticleCommentsComponent {
         })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
+          next: (created) => {
+            if (!created) return;
+            // Reconcile the optimistic reply with the real server response so it gets
+            // the real id (needed for like/reply) and real status (may be PENDING).
+            const replaceReply = (list: CommentResponse[]): CommentResponse[] =>
+              list.map(c => {
+                if (c.id === directParentId) {
+                  return { ...c, replies: (c.replies || []).map(r => r.id === optimisticId ? created : r) };
+                }
+                if (c.replies?.length) {
+                  return { ...c, replies: replaceReply(c.replies) };
+                }
+                return c;
+              });
+            this.comments.update(replaceReply);
+          },
           error: () => {
             this.comments.update(removeReply);
             this.notification.error(this.i18n.t('blog.failedToComment'));
