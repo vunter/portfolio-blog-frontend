@@ -39,17 +39,23 @@ export class MfaVerifyComponent implements OnInit {
 
   private mfaToken = '';
   private email = '';
-  // Q9.1: Short TTL for MFA token in sessionStorage (2 minutes)
+  private returnUrl = '/';
   private static readonly MFA_STORAGE_KEY = 'mfa_challenge';
-  private static readonly MFA_TTL_MS = 2 * 60 * 1000;
+  // TTL aligned with the backend MFA challenge window. The email-OTP flow (switch
+  // method → wait for email → type code) routinely exceeds a couple of minutes, so a
+  // short TTL would bounce legitimate users to login mid-challenge.
+  private static readonly MFA_TTL_MS = 10 * 60 * 1000;
 
   ngOnInit(): void {
     // Get MFA token from navigation state (primary source)
     const nav = this.router.getCurrentNavigation()?.extras?.state;
     this.mfaToken = nav?.['mfaToken'] ?? '';
     this.email = nav?.['email'] ?? '';
+    this.returnUrl = nav?.['returnUrl'] ?? '/';
     const preferredMethod = nav?.['method'] ?? 'TOTP';
     this.method.set(preferredMethod);
+
+    let sessionExpired = false;
 
     // Q9.1: If navigation state is present, persist to sessionStorage with TTL
     if (this.mfaToken) {
@@ -57,6 +63,7 @@ export class MfaVerifyComponent implements OnInit {
         mfaToken: this.mfaToken,
         email: this.email,
         method: preferredMethod,
+        returnUrl: this.returnUrl,
         expiresAt: Date.now() + MfaVerifyComponent.MFA_TTL_MS,
       }));
     } else {
@@ -67,14 +74,26 @@ export class MfaVerifyComponent implements OnInit {
           this.mfaToken = stored.mfaToken;
           this.email = stored.email;
           this.method.set(stored.method ?? 'TOTP');
+          this.returnUrl = stored.returnUrl ?? '/';
+        } else if (stored && stored.mfaToken) {
+          // A challenge existed but its TTL lapsed — explain the bounce to login.
+          sessionExpired = true;
         }
       } catch { /* invalid or missing — redirect below */ }
     }
 
     if (!this.mfaToken) {
       sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
+      if (sessionExpired) {
+        this.notification.warning(this.i18n.t('auth.mfa.sessionExpired'));
+      }
       this.router.navigate(['/auth/login']);
     }
+  }
+
+  /** Accept only relative same-origin paths as a post-verify redirect target. */
+  private isSafeRedirect(url: string): boolean {
+    return typeof url === 'string' && url.startsWith('/') && !url.startsWith('//');
   }
 
   onSubmit(): void {
@@ -107,8 +126,13 @@ export class MfaVerifyComponent implements OnInit {
         sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
         this.authStore.login(user);
         this.notification.success(this.i18n.t('auth.login.success'));
+        // Honor the original returnUrl (validated) when present; otherwise fall back
+        // to the role-based default, matching the password-only login flow.
         const defaultRoute = user.role === 'VIEWER' ? '/profile' : '/admin';
-        this.router.navigateByUrl(defaultRoute);
+        const target = this.returnUrl !== '/' && this.isSafeRedirect(this.returnUrl)
+          ? this.returnUrl
+          : defaultRoute;
+        this.router.navigateByUrl(target);
       },
       error: (err) => {
         this.loading.set(false);

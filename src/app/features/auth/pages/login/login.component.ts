@@ -114,10 +114,14 @@ export class LoginComponent {
         if (response.mfaRequired && response.mfaToken) {
           this.loading.set(false);
           this.loginForm.enable();
+          // Carry the original returnUrl through the MFA challenge so the user lands
+          // on the page they were heading to, consistent with the password-only flow.
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
           this.router.navigate(['/auth/mfa-verify'], {
             state: {
               mfaToken: response.mfaToken,
               email: response.email,
+              returnUrl,
             },
           });
           return;
