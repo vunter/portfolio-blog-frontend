@@ -1,8 +1,10 @@
 import { ErrorHandler, Injectable, inject, isDevMode, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpBackend } from '@angular/common/http';
-import * as Sentry from '@sentry/angular';
 import { environment } from '../../../environments/environment';
+
+// Lazily-loaded Sentry module type, so the SDK never lands in the initial bundle.
+type SentryModule = typeof import('@sentry/angular');
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
@@ -16,16 +18,35 @@ export class GlobalErrorHandler implements ErrorHandler {
   private static readonly MAX_REPORTS_PER_MINUTE = 5;
   private readonly reportedErrors = new Set<string>();
 
-  // Q13.1: Sentry initialization flag
-  private static sentryInitialized = false;
+  // Q13.1: Sentry is loaded lazily (dynamic import) so its ~200KB stays off the
+  // critical path. This resolves to the module once loaded + initialized.
+  private static sentry: SentryModule | null = null;
+  private static sentryLoading: Promise<SentryModule | null> | null = null;
 
   constructor() {
     if (
-      isPlatformBrowser(inject(PLATFORM_ID)) &&
+      isPlatformBrowser(this.platformId) &&
       environment.sentryEnabled &&
-      environment.sentryDsn &&
-      !GlobalErrorHandler.sentryInitialized
+      environment.sentryDsn
     ) {
+      // Defer the import to browser idle so it never competes with first paint.
+      this.scheduleSentryLoad();
+    }
+  }
+
+  private scheduleSentryLoad(): void {
+    const start = () => { GlobalErrorHandler.sentryLoading ??= this.loadSentry(); };
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback;
+    if (typeof ric === 'function') {
+      ric(start, { timeout: 5000 });
+    } else {
+      setTimeout(start, 3000);
+    }
+  }
+
+  private async loadSentry(): Promise<SentryModule | null> {
+    try {
+      const Sentry = await import('@sentry/angular');
       Sentry.init({
         dsn: environment.sentryDsn,
         environment: environment.production ? 'production' : 'development',
@@ -36,7 +57,11 @@ export class GlobalErrorHandler implements ErrorHandler {
           Sentry.browserTracingIntegration(),
         ],
       });
-      GlobalErrorHandler.sentryInitialized = true;
+      GlobalErrorHandler.sentry = Sentry;
+      return Sentry;
+    } catch {
+      // Sentry is optional — a load/init failure must never break error handling.
+      return null;
     }
   }
 
@@ -62,9 +87,20 @@ export class GlobalErrorHandler implements ErrorHandler {
       return;
     }
 
-    // Q13.1: Report to Sentry if initialized
-    if (GlobalErrorHandler.sentryInitialized && error instanceof Error) {
-      Sentry.captureException(error);
+    // Q13.1: Report to Sentry (lazily loaded). If it hasn't finished loading yet,
+    // capture once it resolves so early errors aren't dropped.
+    if (
+      isPlatformBrowser(this.platformId) &&
+      environment.sentryEnabled &&
+      environment.sentryDsn &&
+      error instanceof Error
+    ) {
+      if (GlobalErrorHandler.sentry) {
+        GlobalErrorHandler.sentry.captureException(error);
+      } else {
+        GlobalErrorHandler.sentryLoading ??= this.loadSentry();
+        GlobalErrorHandler.sentryLoading.then((s) => s?.captureException(error));
+      }
     }
 
     // Q13.3: Also report to custom backend endpoint (production only)
