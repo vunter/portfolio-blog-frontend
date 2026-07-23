@@ -12,6 +12,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ArticleSummaryResponse, SearchSuggestion } from '../../../../models';
+import { scrollBehavior } from '../../../../shared/utils/scroll.util';
 
 @Component({
   selector: 'app-search',
@@ -40,6 +41,8 @@ export class SearchComponent implements OnInit {
   results = signal<ArticleSummaryResponse[]>([]);
   suggestions = signal<SearchSuggestion[]>([]);
   showSuggestions = signal(false);
+  // Active option index for the combobox keyboard model (-1 = none highlighted).
+  highlightedIndex = signal(-1);
   loading = signal(false);
   hasSearched = signal(false);
 
@@ -87,7 +90,43 @@ export class SearchComponent implements OnInit {
     }
   }
 
+  /** Combobox keyboard model over the suggestion list. */
+  onSearchKeydown(event: KeyboardEvent): void {
+    const items = this.suggestions();
+    if (event.key === 'Escape') {
+      this.showSuggestions.set(false);
+      this.highlightedIndex.set(-1);
+      return;
+    }
+    if (!this.showSuggestions() || items.length === 0) return;
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.highlightedIndex.set((this.highlightedIndex() + 1) % items.length);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.highlightedIndex.set((this.highlightedIndex() - 1 + items.length) % items.length);
+        break;
+      case 'Enter': {
+        const i = this.highlightedIndex();
+        if (i >= 0 && i < items.length) {
+          event.preventDefault();
+          this.selectSuggestion(items[i]);
+        }
+        break;
+      }
+    }
+  }
+
   search(query: string): void {
+    // Reset to the first page whenever the query text changes, otherwise a search
+    // performed after paginating would request a stale page of the new result set
+    // (usually empty) and wrongly show "no results". onPageChange passes the same
+    // query, so paging is preserved.
+    if (query !== this.currentQuery()) {
+      this.currentPage.set(0);
+    }
     this.loading.set(true);
     this.hasSearched.set(true);
     this.currentQuery.set(query);
@@ -115,6 +154,7 @@ export class SearchComponent implements OnInit {
           slug: text.toLowerCase().replace(/\s+/g, '-'),
         }));
         this.suggestions.set(mapped);
+        this.highlightedIndex.set(-1);
         this.showSuggestions.set(mapped.length > 0);
       },
       error: () => {
@@ -128,6 +168,7 @@ export class SearchComponent implements OnInit {
     const value = suggestion.text;
     this.searchQuery.set(value);
     this.showSuggestions.set(false);
+    this.highlightedIndex.set(-1);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { q: value },
@@ -138,6 +179,7 @@ export class SearchComponent implements OnInit {
   clearSearch(): void {
     this.searchQuery.set('');
     this.currentQuery.set('');
+    this.currentPage.set(0);
     this.results.set([]);
     this.hasSearched.set(false);
     this.suggestions.set([]);
@@ -152,7 +194,7 @@ export class SearchComponent implements OnInit {
     this.currentPage.set(page);
     this.search(this.currentQuery());
     if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     }
   }
 }

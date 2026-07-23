@@ -100,7 +100,8 @@
   text-align: left;
   transition: background-color 0.15s;
 
-  &:hover {
+  &:hover,
+  &--active {
     background: var(--bg-secondary, #f3f4f6);
   }
 

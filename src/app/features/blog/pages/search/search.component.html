@@ -16,9 +16,14 @@
  type="search"
  [ngModel]="searchQuery()"
  (ngModelChange)="searchQuery.set($event); onSearchChange($event)"
+ (keydown)="onSearchKeydown($event)"
  [placeholder]="i18n.t('search.placeholder')"
  [attr.aria-label]="i18n.t('search.placeholder')"
- aria-labelledby="search-title"
+ role="combobox"
+ aria-autocomplete="list"
+ aria-controls="search-suggestions"
+ [attr.aria-expanded]="showSuggestions() && suggestions().length > 0"
+ [attr.aria-activedescendant]="highlightedIndex() >= 0 ? 'search-opt-' + highlightedIndex() : null"
  class="search-input"
  autocomplete="off"
  />
@@ -43,19 +48,16 @@
  }
 
  @if (showSuggestions() && suggestions().length > 0) {
- <!--
-   aria-selected omitted from each option intentionally: this list has no
-   highlight model, so hardcoding "false" was misleading. When a keyboard
-   navigation model is added, bind aria-selected to the actively highlighted
-   option's index.
- -->
- <div class="suggestions" role="listbox" [attr.aria-label]="i18n.t('search.suggestions')">
- @for (suggestion of suggestions(); track suggestion.text) {
+ <div class="suggestions" id="search-suggestions" role="listbox" [attr.aria-label]="i18n.t('search.suggestions')">
+ @for (suggestion of suggestions(); track suggestion.text; let idx = $index) {
  <button
  type="button"
  class="suggestion-item"
+ [class.suggestion-item--active]="idx === highlightedIndex()"
+ [id]="'search-opt-' + idx"
  role="option"
- [attr.aria-selected]="false"
+ [attr.aria-selected]="idx === highlightedIndex()"
+ (mouseenter)="highlightedIndex.set(idx)"
  (click)="selectSuggestion(suggestion)"
  >
  <span class="suggestion-type">{{ suggestion.type }}</span>
@@ -67,7 +69,7 @@
  </div>
  </header>
 
- <main class="search-results">
+ <div class="search-results">
  @if (loading()) {
  <div class="results-grid">@for (i of [1,2,3,4,5,6]; track i) { <app-skeleton variant="card" /> }</div>
  } @else if (hasSearched() && results().length === 0) {
@@ -81,7 +83,7 @@
  </button>
  </app-empty-state>
  } @else if (results().length > 0) {
- <div class="results-info">
+ <div class="results-info" role="status" aria-live="polite">
  <span>{{ totalElements() }} {{ i18n.t('blog.search.results') }} "{{ currentQuery() }}"</span>
  </div>
  <div class="results-grid">
@@ -108,5 +110,5 @@
  </ul>
  </div>
  }
- </main>
+ </div>
 </div>
