@@ -6,7 +6,7 @@ import {
   HttpHandlerFn,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, filter, map, switchMap, take, throwError } from 'rxjs';
 import { AuthStore } from '../auth/auth.store';
 import { AuthService } from '../auth/auth.service';
 
@@ -25,8 +25,48 @@ import { AuthService } from '../auth/auth.service';
  */
 @Injectable({ providedIn: 'root' })
 export class RefreshTokenState {
+  private readonly authService = inject(AuthService);
+  private readonly authStore = inject(AuthStore);
+
   isRefreshing = false;
   refreshSubject$ = new BehaviorSubject<boolean | null>(null);
+
+  /**
+   * Single-flight token refresh shared by BOTH the 401 interceptor and the auth
+   * route guard. If a refresh is already in progress (started by either path), the
+   * caller waits for its result instead of issuing a second `POST /auth/refresh`
+   * with the same rotating cookie — which would make one of them lose the race and
+   * spuriously log the user out. Emits `true` on success, `false` if the shared
+   * refresh failed; errors only for the initiator (so it can decide to log out).
+   */
+  refreshOnce(): Observable<boolean> {
+    if (this.isRefreshing) {
+      return this.refreshSubject$.pipe(
+        filter((result) => result !== null),
+        take(1),
+        map((result) => !!result),
+      );
+    }
+
+    this.isRefreshing = true;
+    this.refreshSubject$.next(null);
+
+    return this.authService.refreshToken({}).pipe(
+      map((response) => {
+        if (response.expiresIn) {
+          this.authStore.setTokenExpiry(response.expiresIn);
+        }
+        this.isRefreshing = false;
+        this.refreshSubject$.next(true);
+        return true;
+      }),
+      catchError((err) => {
+        this.isRefreshing = false;
+        this.refreshSubject$.next(false);
+        return throwError(() => err);
+      }),
+    );
+  }
 
   reset(): void {
     this.isRefreshing = false;
@@ -39,7 +79,6 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ) => {
   const authStore = inject(AuthStore);
-  const authService = inject(AuthService);
   const router = inject(Router);
   const state = inject(RefreshTokenState);
 
@@ -47,43 +86,27 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !req.url.includes('/auth/')) {
         if (authStore.isAuthenticated()) {
-          if (!state.isRefreshing) {
-            // First 401 — trigger the refresh
-            state.isRefreshing = true;
-            state.refreshSubject$.next(null);
-
-            return authService.refreshToken({}).pipe(
-              switchMap(() => {
-                state.isRefreshing = false;
-                state.refreshSubject$.next(true);
+          // Was a refresh already in flight? Only the initiator observes the refresh
+          // error and decides whether to log out; waiters just replay/fail the request.
+          const isInitiator = !state.isRefreshing;
+          return state.refreshOnce().pipe(
+            switchMap((success) => {
+              if (success) {
                 return next(req.clone({ withCredentials: true }));
-              }),
-              catchError((refreshError) => {
-                state.isRefreshing = false;
-                state.refreshSubject$.next(false);
-                // Only log out if the refresh was explicitly rejected (401/403).
-                // Network errors mean backend is down — preserve session.
-                if (refreshError instanceof HttpErrorResponse &&
-                    (refreshError.status === 401 || refreshError.status === 403)) {
-                  authStore.logout();
-                  router.navigate(['/auth/login']);
-                }
-                return throwError(() => refreshError);
-              })
-            );
-          } else {
-            // Another request hit 401 while refresh is in progress — wait for it
-            return state.refreshSubject$.pipe(
-              filter((result) => result !== null),
-              take(1),
-              switchMap((success) => {
-                if (success) {
-                  return next(req.clone({ withCredentials: true }));
-                }
-                return throwError(() => error);
-              })
-            );
-          }
+              }
+              return throwError(() => error);
+            }),
+            catchError((refreshError) => {
+              // Only log out if the refresh was explicitly rejected (401/403) and this
+              // call initiated it. Network errors mean backend is down — preserve session.
+              if (isInitiator && refreshError instanceof HttpErrorResponse &&
+                  (refreshError.status === 401 || refreshError.status === 403)) {
+                authStore.logout();
+                router.navigate(['/auth/login']);
+              }
+              return throwError(() => refreshError);
+            })
+          );
         } else if (!authStore.isLoading()) {
           // Only force logout when not in the middle of session restoration.
           // During initFromStorage(), isLoading is true and isAuthenticated is false

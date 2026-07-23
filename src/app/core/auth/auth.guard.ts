@@ -3,6 +3,7 @@ import { Router, CanActivateFn } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { AuthStore } from './auth.store';
 import { AuthService } from './auth.service';
+import { RefreshTokenState } from '../interceptors/refresh-token.interceptor';
 
 /**
  * Verifies authentication and attempts token refresh if expired.
@@ -22,12 +23,16 @@ function verifyAuth(state: { url: string }) {
   }
 
   if (authStore.isTokenExpired()) {
-    // Empty object {} is intentional: refresh token is sent automatically
-    // via HttpOnly cookie by the browser — no body payload needed.
-    return authService.refreshToken({}).pipe(
-      switchMap((response) => {
-        if (response.expiresIn) {
-          authStore.setTokenExpiry(response.expiresIn);
+    // Route the refresh through the shared single-flight so a guard-triggered refresh
+    // and an interceptor-triggered 401 refresh cannot race and issue two rotating-cookie
+    // refreshes (which would log the user out). refreshOnce() updates token expiry itself.
+    const refreshState = inject(RefreshTokenState);
+    return refreshState.refreshOnce().pipe(
+      switchMap((success) => {
+        if (!success) {
+          authStore.logout();
+          router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+          return of(false);
         }
         // Re-fetch user info to pick up role changes (VIEWER → DEV, etc.)
         return authService.getCurrentUser().pipe(

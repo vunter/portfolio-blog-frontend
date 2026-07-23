@@ -6,7 +6,7 @@ import {
   withComputed,
   patchState,
 } from '@ngrx/signals';
-import { switchMap, catchError, tap, of, map, firstValueFrom, throwError, take } from 'rxjs';
+import { switchMap, catchError, tap, of, map, firstValueFrom, throwError, take, timeout } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UserResponse } from '../../models';
 import { StorageService } from '../services/storage.service';
@@ -242,6 +242,11 @@ export const AuthStore = signalStore(
         // before the app bootstraps and route guards run.
         return firstValueFrom(
           auth$.pipe(
+            // Bound the blocking bootstrap: if the backend accepts the connection but
+            // stalls, a returning (previously-authenticated) visitor would otherwise see a
+            // blank page for minutes. A timeout errors the stream and is handled by the
+            // catchError below as an unverifiable session (fail closed to not-authenticated).
+            timeout(8000),
             tap((freshUser) => {
               patchState(store, { user: freshUser, isAuthenticated: true, isLoading: false });
               storage.set(STORAGE_KEYS.USER, freshUser);
