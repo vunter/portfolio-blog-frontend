@@ -39,7 +39,7 @@
     "@angular/service-worker": "^20.3.25",
     "@angular/ssr": "^20.3.27",
     "@ngrx/signals": "^20.1.0",
-    "@sentry/angular": "^10.47.0",
+    "@sentry/angular": "^10.68.0",
     "emoji-picker-element": "^1.29.0",
     "express": "^4.22.1",
     "marked": "^16.4.2",
