@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ResumeLayoutComponent } from './layout/resume-layout.component';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const resumeRoutes: Routes = [
   {
@@ -36,6 +37,7 @@ export const resumeRoutes: Routes = [
           import('./pages/template-editor/template-editor.component').then(
             (m) => m.TemplateEditorComponent
           ),
+        canDeactivate: [unsavedChangesGuard],
       },
       {
         path: 'editor/:id',
@@ -43,6 +45,7 @@ export const resumeRoutes: Routes = [
           import('./pages/template-editor/template-editor.component').then(
             (m) => m.TemplateEditorComponent
           ),
+        canDeactivate: [unsavedChangesGuard],
       },
       {
         path: 'preview/:id',

@@ -13,6 +13,7 @@ import {
 } from '../../../../models';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { getLocaleName } from '../../../../shared/utils/locale.utils';
 import { LinkedInImportService } from '../../services/linkedin-import.service';
 import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
@@ -62,6 +63,7 @@ const EMPTY_PROFILE: ProfileForm = {
 export class ResumeProfileComponent implements OnInit, OnDestroy {
   private readonly profileService = inject(ResumeProfileService);
   private readonly notification = inject(NotificationService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly destroyRef = inject(DestroyRef);
   readonly i18n = inject(I18nService);
 
@@ -125,6 +127,28 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
   });
 
   profile: ProfileForm = { ...EMPTY_PROFILE };
+  // Snapshot of the profile as last loaded/saved, to detect unsaved edits before a
+  // locale switch (which reloads and would silently discard them).
+  private profileSnapshot = '';
+
+  private markProfileClean(): void {
+    this.profileSnapshot = JSON.stringify(this.profile);
+  }
+
+  private isProfileDirty(): boolean {
+    return JSON.stringify(this.profile) !== this.profileSnapshot;
+  }
+
+  private async confirmDiscardIfDirty(): Promise<boolean> {
+    if (!this.isProfileDirty()) return true;
+    return this.confirmDialog.confirm({
+      title: this.i18n.t('common.confirm'),
+      message: this.i18n.t('dev.articles.unsavedChanges'),
+      confirmText: this.i18n.t('common.confirm'),
+      cancelText: this.i18n.t('common.cancel'),
+      type: 'warning',
+    });
+  }
 
   ngOnInit(): void {
     this.loadProfile();
@@ -229,11 +253,13 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
           })),
           learningTopics: data.learningTopics || [],
         };
+        this.markProfileClean();
         this.loading.set(false);
       },
       error: () => {
         // Profile not found for this locale — start with empty form
         this.profile = { ...EMPTY_PROFILE };
+        this.markProfileClean();
         this.loading.set(false);
       },
     });
@@ -246,7 +272,10 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  switchLocale(locale: string): void {
+  async switchLocale(locale: string): Promise<void> {
+    if (locale === this.currentLocale) return;
+    // Reloading replaces the whole profile — confirm before discarding unsaved edits.
+    if (!(await this.confirmDiscardIfDirty())) return;
     this.currentLocale = locale;
     this.translateSourceLocale = null;
     this.loadProfile();
@@ -357,6 +386,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
             })),
             learningTopics: saved.learningTopics || [],
           };
+          this.markProfileClean();
           this.saving.set(false);
           this.notification.success(this.i18n.t('resume.profile.saveSuccess'));
           this.loadAvailableLocales();

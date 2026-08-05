@@ -7,6 +7,7 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { ThemeService } from '../../core/services/theme.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { PublicProfileService } from '../../core/services/public-profile.service';
+import { ResumeDownloadService } from '../../core/services/resume-download.service';
 import { AnalyticsTrackingService } from '../../core/services/analytics-tracking.service';
 import { CookieConsentService } from '../../core/services/cookie-consent.service';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
@@ -29,6 +30,8 @@ export class PublicLayoutComponent implements OnInit {
   themeService = inject(ThemeService);
   i18n = inject(I18nService);
   private profileService = inject(PublicProfileService);
+  private resumeDownload = inject(ResumeDownloadService);
+  readonly downloadingCv = this.resumeDownload.downloading;
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
@@ -87,6 +90,11 @@ export class PublicLayoutComponent implements OnInit {
 
   toggleMobileMenu(): void { this.mobileMenuOpen.update(v => !v); }
   closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
+
+  downloadCv(): void {
+    this.resumeDownload.download();
+    this.closeMobileMenu();
+  }
 
   toggleUserMenu(event: Event): void {
     event.stopPropagation();

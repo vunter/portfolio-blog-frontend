@@ -1,11 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, signal, input, computed } from '@angular/core';
-import { ApiService } from '../../../core/services/api.service';
+import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
 import { I18nService } from '../../../core/services/i18n.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { DownloadService } from '../../../core/services/download.service';
-import { AnalyticsTrackingService } from '../../../core/services/analytics-tracking.service';
+import { ResumeDownloadService } from '../../../core/services/resume-download.service';
 import { ContactFormComponent } from '../../../shared/components/contact-form/contact-form.component';
-import { environment } from '../../../../environments/environment';
 import { ResumeProfile } from '../../../models/resume-profile.model';
 
 @Component({
@@ -17,10 +13,7 @@ import { ResumeProfile } from '../../../models/resume-profile.model';
 })
 export class ContactSectionComponent {
   readonly i18n = inject(I18nService);
-  private api = inject(ApiService);
-  private notification = inject(NotificationService);
-  private downloadService = inject(DownloadService);
-  private analyticsTracking = inject(AnalyticsTrackingService);
+  private readonly resumeDownload = inject(ResumeDownloadService);
 
   profile = input<ResumeProfile | null>(null);
 
@@ -67,31 +60,11 @@ export class ContactSectionComponent {
 
   readonly displayTitle = computed(() => this.profile()?.title ?? '');
 
-  downloadingResume = signal(false);
+  // Shared with the header CTA — same in-flight flag, so both spinners agree.
+  readonly downloadingResume = this.resumeDownload.downloading;
 
   downloadResume(): void {
-    if (this.downloadingResume()) return;
-
-    this.downloadingResume.set(true);
-    const lang = this.i18n.language();
-    const alias = environment.ownerAlias;
-
-    this.api.getBlob(`/public/resume/${alias}/pdf`, { lang, t: Date.now() }).subscribe({
-      next: (blob) => {
-        const name = this.profile()?.fullName ?? 'Resume';
-        const safeName = name.replace(/\s+/g, '_');
-        const filename = this.i18n.isEnglish()
-          ? `${safeName}_Resume.pdf`
-          : `${safeName}_Curriculo.pdf`;
-        this.downloadService.downloadBlob(blob, filename);
-        this.analyticsTracking.trackDownload(filename, 'resume');
-        this.downloadingResume.set(false);
-      },
-      error: () => {
-        this.notification.error(this.i18n.t('home.contact.downloadError'));
-        this.downloadingResume.set(false);
-      }
-    });
+    this.resumeDownload.download();
   }
 
   private getHomeCustomization(label: string): string | null {

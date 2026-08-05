@@ -27,6 +27,17 @@
  }
  </div>
  <app-theme-toggle variant="segmented" />
+ <button
+ class="btn btn--outline header__cv-btn"
+ (click)="downloadCv()"
+ [disabled]="downloadingCv()"
+ [attr.aria-busy]="downloadingCv()"
+ >
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ <span>{{ i18n.t('home.contact.downloadCV') }}</span>
+ </button>
  @if (authStore.isAuthenticated()) {
  <div class="user-menu">
  <button class="user-menu__trigger" (click)="toggleUserMenu($event)" [attr.aria-label]="i18n.t('nav.userMenu')" [attr.aria-expanded]="userMenuOpen()">
@@ -109,6 +120,12 @@
  <a routerLink="/about" routerLinkActive="active" #mrlaAbout="routerLinkActive" [attr.aria-current]="mrlaAbout.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.about') }}</a>
  <a routerLink="/search" routerLinkActive="active" #mrlaSearch="routerLinkActive" [attr.aria-current]="mrlaSearch.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.search') }}</a>
  <a [routerLink]="'/'" fragment="contact" (click)="closeMobileMenu()">{{ i18n.t('nav.contact') }}</a>
+ <button class="mobile-nav-link mobile-nav-link--cta" (click)="downloadCv()" [disabled]="downloadingCv()" [attr.aria-busy]="downloadingCv()">
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+ <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+ </svg>
+ {{ i18n.t('home.contact.downloadCV') }}
+ </button>
  </nav>
  @if (authStore.isAuthenticated()) {
  <div class="mobile-auth">

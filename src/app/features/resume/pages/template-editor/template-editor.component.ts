@@ -23,8 +23,23 @@ import { getSnippet } from './utils/template-snippets.util';
   templateUrl: './template-editor.component.html',
   styleUrl: './template-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:beforeunload)': 'onBeforeUnload($event)',
+  },
 })
 export class TemplateEditorComponent implements OnInit, OnDestroy, AfterViewInit {
+  /** Read by the unsavedChangesGuard (canDeactivate) and beforeunload handler. */
+  get hasUnsavedChanges(): boolean {
+    return this.hasChanges();
+  }
+
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasChanges()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
   // ANG20-05: viewChild() signal queries instead of @ViewChild decorators
   readonly monacoContainer = viewChild<ElementRef>('monacoContainer');
   readonly previewIframe = viewChild<ElementRef<HTMLIFrameElement>>('previewIframe');

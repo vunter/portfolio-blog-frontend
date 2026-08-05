@@ -95,7 +95,10 @@ export class ResumeGenerateComponent implements OnInit {
     this.profileService.downloadHtml(this.resumeLang()).subscribe({
       next: (response) => {
         const blob = response.body;
-        if (!blob) return;
+        if (!blob) {
+          this.errorMessage.set(this.i18n.t('resume.generate.errorDownload'));
+          return;
+        }
 
         // Extract filename from Content-Disposition header
         const disposition = response.headers.get('Content-Disposition');
@@ -123,7 +126,13 @@ export class ResumeGenerateComponent implements OnInit {
     this.profileService.downloadPdf(this.resumeLang()).subscribe({
       next: (response) => {
         const blob = response.body;
-        if (!blob) return;
+        if (!blob) {
+          // Empty body — reset the button and surface an error instead of leaving
+          // the spinner stuck forever with no feedback.
+          this.generatingPdf.set(false);
+          this.errorMessage.set(this.i18n.t('resume.generate.errorPdf'));
+          return;
+        }
 
         const disposition = response.headers.get('Content-Disposition');
         let filename = 'resume.pdf';
@@ -165,7 +174,6 @@ export class ResumeGenerateComponent implements OnInit {
     // Separate CSS from HTML for the template
     const fullHtml = this.htmlContent();
     let cssContent = '';
-    const _htmlBody = fullHtml;
 
     const styleMatch = fullHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
     if (styleMatch) {
