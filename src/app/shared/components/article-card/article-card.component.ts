@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { ArticleSummaryResponse } from '../../../models';
 import { BookmarkService } from '../../../core/services/bookmark.service';
 import { getInitials } from '../../utils/string.utils';
+import { TagTextColorPipe } from '../../utils/tag-text-color.pipe';
 
 @Component({
   selector: 'app-article-card',
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [RouterLink, NgOptimizedImage, TagTextColorPipe],
   templateUrl: './article-card.component.html',
   styleUrl: './article-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

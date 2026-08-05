@@ -8,6 +8,7 @@
           [routerLink]="['/blog/tag', tag.slug]"
           class="tag-chip"
           [style.background-color]="tag.color || '#6366f1'"
+          [style.color]="(tag.color || '#6366f1') | tagTextColor"
         >
           {{ tag.name }}
           @if (showCount() && tag.articleCount !== null && tag.articleCount !== undefined) {
@@ -15,7 +16,7 @@
           }
         </a>
       } @else {
-        <span class="tag-chip" [style.background-color]="tag.color || '#6366f1'">
+        <span class="tag-chip" [style.background-color]="tag.color || '#6366f1'" [style.color]="(tag.color || '#6366f1') | tagTextColor">
           {{ tag.name }}
         </span>
       }

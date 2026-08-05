@@ -17,6 +17,7 @@
  <div
  class="tag-card__icon"
  [style.background-color]="tag.color || '#6366f1'"
+ [style.color]="(tag.color || '#6366f1') | tagTextColor"
  >
  #
  </div>

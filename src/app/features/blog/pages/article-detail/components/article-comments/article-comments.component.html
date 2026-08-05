@@ -30,8 +30,8 @@
  </div>
  <p class="comment__text">{{ comment.content }}</p>
  <div class="comment__actions">
- <button class="comment__like-btn" [class.comment__like-btn--liked]="commentLiked()[comment.id]" (click)="toggleCommentLike(comment)">
- <svg width="14" height="14" viewBox="0 0 24 24" [attr.fill]="commentLiked()[comment.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+ <button class="comment__like-btn" [class.comment__like-btn--liked]="commentLiked()[comment.id]" (click)="toggleCommentLike(comment)" [attr.aria-pressed]="!!commentLiked()[comment.id]" [attr.aria-label]="i18n.t('article.comments.likeComment')">
+ <svg width="14" height="14" viewBox="0 0 24 24" [attr.fill]="commentLiked()[comment.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" aria-hidden="true">
  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
  </svg>
  <span>{{ comment.likesCount || 0 }}</span>
@@ -74,8 +74,8 @@
  </div>
  <p class="comment__text">{{ reply.content }}</p>
  <div class="comment__actions">
- <button class="comment__like-btn" [class.comment__like-btn--liked]="commentLiked()[reply.id]" (click)="toggleCommentLike(reply)">
- <svg width="14" height="14" viewBox="0 0 24 24" [attr.fill]="commentLiked()[reply.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+ <button class="comment__like-btn" [class.comment__like-btn--liked]="commentLiked()[reply.id]" (click)="toggleCommentLike(reply)" [attr.aria-pressed]="!!commentLiked()[reply.id]" [attr.aria-label]="i18n.t('article.comments.likeComment')">
+ <svg width="14" height="14" viewBox="0 0 24 24" [attr.fill]="commentLiked()[reply.id] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" aria-hidden="true">
  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
  </svg>
  <span>{{ reply.likesCount || 0 }}</span>

@@ -34,7 +34,16 @@
  </div>
  }
 
- @if (!loading() && assets().length === 0) {
+ @if (!loading() && loadError()) {
+ <div class="empty" role="alert">
+ <p>{{ i18n.t('account.media.loadError') }}</p>
+ <button class="btn-primary" (click)="loadAssets()">
+ {{ i18n.t('account.media.retry') }}
+ </button>
+ </div>
+ }
+
+ @if (!loading() && !loadError() && assets().length === 0) {
  <div class="empty">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -48,12 +57,12 @@
  </div>
  }
 
- @if (!loading() && assets().length > 0) {
+ @if (!loading() && !loadError() && assets().length > 0) {
  <div class="grid">
  @for (asset of assets(); track asset.id) {
  <div class="asset-card" [class.selected]="selectedAssetId() === asset.id"
  (click)="selectAsset(asset)" role="button" tabindex="0"
- (keydown.enter)="selectAsset(asset)" (keydown.space)="selectAsset(asset)">
+ (keydown.enter)="selectAsset(asset)" (keydown.space)="$event.preventDefault(); selectAsset(asset)">
  <div class="asset-thumb">
  <img [ngSrc]="asset.url" [alt]="asset.altText || asset.originalFilename" fill />
  </div>

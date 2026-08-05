@@ -49,7 +49,7 @@
  (mousedown)="selectOption(opt, $event)"
  >
  <span class="multi-select__option-check">
- @if (isSelected(opt.value)) { }
+ @if (isSelected(opt.value)) { ✓ }
  </span>
  <span>{{ i18n.t(opt.labelKey) }}</span>
  </div>

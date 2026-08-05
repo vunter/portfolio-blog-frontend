@@ -29,6 +29,7 @@
  [routerLink]="['/blog/tag', tag.slug]"
  class="article-card__tag"
  [style.background-color]="tag.color || '#6366f1'"
+ [style.color]="(tag.color || '#6366f1') | tagTextColor"
  (click)="$event.stopPropagation()"
  >
  {{ tag.name }}

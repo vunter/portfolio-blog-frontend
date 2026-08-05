@@ -1,5 +1,6 @@
-<!-- Q11.1: Skip-to-content link (WCAG 2.1 Level A) -->
-<a class="skip-link" href="#main-content">Skip to main content</a>
+<!-- Q11.1: Skip-to-content link (WCAG 2.1 Level A). Single, i18n'd, root-level so it
+     covers every layout (public/admin/auth). -->
+<a class="skip-link" href="#main-content">{{ i18n.t('a11y.skipToContent') }}</a>
 <app-progress-bar />
 <router-outlet />
 <app-toast />

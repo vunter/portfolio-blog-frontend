@@ -11,6 +11,7 @@ import { AnalyticsTrackingService } from '../../core/services/analytics-tracking
 import { CookieConsentService } from '../../core/services/cookie-consent.service';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 import { AccessibleModalDirective } from '../../shared/directives/accessible-modal.directive';
+import { scrollBehavior } from '../../shared/utils/scroll.util';
 
 @Component({
   selector: 'app-public-layout',
@@ -20,6 +21,7 @@ import { AccessibleModalDirective } from '../../shared/directives/accessible-mod
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onDocumentClick()',
+    '(document:keydown.escape)': 'onEscape()',
   },
 })
 export class PublicLayoutComponent implements OnInit {
@@ -111,9 +113,16 @@ export class PublicLayoutComponent implements OnInit {
     this.langMenuOpen.set(false);
   }
 
+  // A11y: Escape closes the open header dropdowns (they promise menu semantics but
+  // previously only closed on outside-click — keyboard users were stuck).
+  onEscape(): void {
+    this.userMenuOpen.set(false);
+    this.langMenuOpen.set(false);
+  }
+
   scrollToTop(): void {
     if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     }
   }
 

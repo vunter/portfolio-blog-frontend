@@ -2,6 +2,7 @@ import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/cor
 import { I18nService } from '../../core/services/i18n.service';
 import { SeoService } from '../../core/services/seo.service';
 import { CookieConsentService } from '../../core/services/cookie-consent.service';
+import { scrollBehavior } from '../../shared/utils/scroll.util';
 
 @Component({
   selector: 'app-cookies',
@@ -27,6 +28,6 @@ export class CookiesComponent implements OnInit {
 
   openCookieSettings(): void {
     this.consentService.reopenBanner();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
   }
 }

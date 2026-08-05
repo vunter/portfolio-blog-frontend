@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { TagService } from '../../services/tag.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { TagTextColorPipe } from '../../../../shared/utils/tag-text-color.pipe';
 import { TagResponse } from '../../../../models';
 
 @Component({
   selector: 'app-tags',
-  imports: [RouterLink, SkeletonComponent],
+  imports: [RouterLink, SkeletonComponent, TagTextColorPipe],
   templateUrl: './tags.component.html',
   styleUrl: './tags.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,18 +1,16 @@
-﻿ <!-- Skip to content link for accessibility -->
- <a href="#main-content" class="skip-link">{{ i18n.t('a11y.skipToContent') }}</a>
- 
- <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()" [class.i18n-loading]="i18n.translationsLoading()">
+﻿ <div class="layout" [class.theme-dark]="themeService.isDark()" [class.theme-light]="!themeService.isDark()" [class.i18n-loading]="i18n.translationsLoading()">
  <header class="header">
  <div class="header__container">
  <a routerLink="/" class="header__logo" [attr.aria-label]="i18n.t('nav.home')">
  <img ngSrc="images/logo-simplified.svg" alt="Catananti" class="header__logo-img" width="36" height="36" priority>
  </a>
- <nav class="header__nav" aria-label="Main navigation">
+ <nav class="header__nav" [attr.aria-label]="i18n.t('a11y.mainNav')">
  <a routerLink="/" routerLinkActive="active" #rlaHome="routerLinkActive" [routerLinkActiveOptions]="{exact: true}" [attr.aria-current]="rlaHome.isActive ? 'page' : null">{{ i18n.t('nav.home') }}</a>
  <a routerLink="/blog" routerLinkActive="active" #rlaBlog="routerLinkActive" [attr.aria-current]="rlaBlog.isActive ? 'page' : null">{{ i18n.t('nav.blog') }}</a>
  <a routerLink="/tags" routerLinkActive="active" #rlaTags="routerLinkActive" [attr.aria-current]="rlaTags.isActive ? 'page' : null">{{ i18n.t('nav.tags') }}</a>
  <a routerLink="/about" routerLinkActive="active" #rlaAbout="routerLinkActive" [attr.aria-current]="rlaAbout.isActive ? 'page' : null">{{ i18n.t('nav.about') }}</a>
  <a routerLink="/search" routerLinkActive="active" #rlaSearch="routerLinkActive" [attr.aria-current]="rlaSearch.isActive ? 'page' : null">{{ i18n.t('nav.search') }}</a>
+ <a [routerLink]="'/'" fragment="contact">{{ i18n.t('nav.contact') }}</a>
  </nav>
  <div class="header__actions">
  <div class="lang-dropdown">
@@ -104,12 +102,13 @@
  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
  </svg>
  </button>
- <nav class="mobile-nav" aria-label="Mobile navigation">
+ <nav class="mobile-nav" [attr.aria-label]="i18n.t('a11y.mobileNav')">
  <a routerLink="/" routerLinkActive="active" #mrlaHome="routerLinkActive" [routerLinkActiveOptions]="{exact: true}" [attr.aria-current]="mrlaHome.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.home') }}</a>
  <a routerLink="/blog" routerLinkActive="active" #mrlaBlog="routerLinkActive" [attr.aria-current]="mrlaBlog.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.blog') }}</a>
  <a routerLink="/tags" routerLinkActive="active" #mrlaTags="routerLinkActive" [attr.aria-current]="mrlaTags.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.tags') }}</a>
  <a routerLink="/about" routerLinkActive="active" #mrlaAbout="routerLinkActive" [attr.aria-current]="mrlaAbout.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.about') }}</a>
  <a routerLink="/search" routerLinkActive="active" #mrlaSearch="routerLinkActive" [attr.aria-current]="mrlaSearch.isActive ? 'page' : null" (click)="closeMobileMenu()">{{ i18n.t('nav.search') }}</a>
+ <a [routerLink]="'/'" fragment="contact" (click)="closeMobileMenu()">{{ i18n.t('nav.contact') }}</a>
  </nav>
  @if (authStore.isAuthenticated()) {
  <div class="mobile-auth">
@@ -179,6 +178,7 @@
  <a routerLink="/blog">{{ i18n.t('nav.blog') }}</a>
  <a routerLink="/tags">{{ i18n.t('nav.tags') }}</a>
  <a routerLink="/search">{{ i18n.t('nav.search') }}</a>
+ <a [routerLink]="'/'" fragment="contact">{{ i18n.t('nav.contact') }}</a>
  </div>
  <div class="footer__column">
  <h2>{{ i18n.t('footer.legal') }}</h2>
@@ -209,7 +209,7 @@
  </footer>
 
  @if (showScrollTop()) {
- <button class="scroll-to-top" (click)="scrollToTop()" [attr.aria-label]="'Scroll to top'">
+ <button class="scroll-to-top" (click)="scrollToTop()" [attr.aria-label]="i18n.t('a11y.scrollToTop')">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
  <polyline points="18 15 12 9 6 15"/>
  </svg>

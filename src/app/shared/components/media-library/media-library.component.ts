@@ -2,6 +2,7 @@ import { Component, DestroyRef, inject, input, output, signal, OnInit, ChangeDet
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminApiService, MediaAssetResponse, MediaPurpose } from '../../../features/admin/services/admin-api.service';
 import { I18nService } from '../../../core/services/i18n.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { MediaUploadComponent } from '../media-upload/media-upload.component';
 import { DatePipe, NgOptimizedImage } from '@angular/common';
 
@@ -28,6 +29,7 @@ import { DatePipe, NgOptimizedImage } from '@angular/common';
 export class MediaLibraryComponent implements OnInit {
   private readonly adminApi = inject(AdminApiService);
   readonly i18n = inject(I18nService);
+  private readonly notification = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Filter by purpose, or show all */
@@ -41,6 +43,7 @@ export class MediaLibraryComponent implements OnInit {
 
   assets = signal<MediaAssetResponse[]>([]);
   loading = signal(false);
+  loadError = signal(false);
   totalItems = signal(0);
   currentPage = signal(0);
   selectedAssetId = signal<number | null>(null);
@@ -53,6 +56,7 @@ export class MediaLibraryComponent implements OnInit {
 
   loadAssets(): void {
     this.loading.set(true);
+    this.loadError.set(false);
     const purpose = this.purpose() || undefined;
 
     this.adminApi.getMediaAssets(this.currentPage(), this.pageSize, purpose)
@@ -64,7 +68,10 @@ export class MediaLibraryComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
+        // Distinguish a load failure from a genuinely empty library, so the template
+        // shows a retry affordance instead of the misleading "upload your first" state.
         this.loading.set(false);
+        this.loadError.set(true);
       },
     });
   }
@@ -86,6 +93,9 @@ export class MediaLibraryComponent implements OnInit {
           this.selectedAssetId.set(null);
         }
         this.deleted.emit(asset);
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('account.media.deleteError'));
       },
     });
   }

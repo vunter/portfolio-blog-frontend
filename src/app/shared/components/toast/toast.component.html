@@ -12,7 +12,6 @@
  [class.toast--clickable]="notification.route"
  [attr.role]="notification.type === 'error' ? 'alert' : 'status'"
  [attr.aria-live]="notification.type === 'error' ? 'assertive' : 'polite'"
- [attr.aria-label]="notification.message"
  (click)="onToastClick(notification)"
  >
  <div class="toast__icon">
@@ -47,6 +46,11 @@
  }
  </div>
  <span class="toast__message">{{ notification.message }}</span>
+ @if (notification.route) {
+ <button class="toast__undo" (click)="onToastClick(notification); $event.stopPropagation()">
+ {{ i18n.t('common.view') }}
+ </button>
+ }
  @if (notification.undoAction) {
  <button class="toast__undo" (click)="undo(notification.id); $event.stopPropagation()">
  {{ i18n.t('common.undo') }}
