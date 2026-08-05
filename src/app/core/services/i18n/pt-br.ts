@@ -428,6 +428,7 @@ export const ptBr: Record<string, string> = {
     'common.edit': 'Editar',
     'common.delete': 'Excluir',
     'common.cancel': 'Cancelar',
+    'common.retry': 'Tentar novamente',
     'common.save': 'Salvar',
     'common.create': 'Criar',
     'common.update': 'Atualizar',
@@ -1249,6 +1250,9 @@ export const ptBr: Record<string, string> = {
     'blog.tags.noTags': 'Nenhuma tag encontrada.',
 
     // Article Comments (public)
+    'article.moreReading': 'Mais artigos',
+    'article.newerPost': 'Mais recente',
+    'article.olderPost': 'Mais antigo',
     'article.comments.title': 'Comentários',
     'article.comments.noComments': 'Nenhum comentário ainda. Seja o primeiro!',
     'article.comments.leaveComment': 'Deixe um Comentário',

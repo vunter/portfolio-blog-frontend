@@ -428,6 +428,7 @@ export const es: Record<string, string> = {
     'common.edit': 'Editar',
     'common.delete': 'Eliminar',
     'common.cancel': 'Cancelar',
+    'common.retry': 'Intentar de nuevo',
     'common.save': 'Guardar',
     'common.create': 'Crear',
     'common.update': 'Actualizar',
@@ -1249,6 +1250,9 @@ export const es: Record<string, string> = {
     'blog.tags.noTags': 'No se encontraron etiquetas.',
 
     // Article Comments (public)
+    'article.moreReading': 'Más artículos',
+    'article.newerPost': 'Más reciente',
+    'article.olderPost': 'Más antiguo',
     'article.comments.title': 'Comentarios',
     'article.comments.noComments': 'Aún no hay comentarios. ¡Sé el primero!',
     'article.comments.leaveComment': 'Deja un comentario',
