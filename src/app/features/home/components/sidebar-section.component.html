@@ -11,9 +11,11 @@
  <p>{{ sidebarBio() ?? i18n.t('home.sidebar.bio') }}</p>
  </div>
 
+ <!-- Hide the whole Recent Posts card when the blog has no posts, rather than
+      advertising "No posts yet" on the landing page. -->
+ @if (recentPosts().length > 0) {
  <div class="sidebar-section">
  <h4>{{ i18n.t('home.sidebar.recentPosts') }}</h4>
- @if (recentPosts().length > 0) {
  <ul class="recent-posts">
  @for (post of recentPosts(); track post.id) {
  <li>
@@ -22,16 +24,16 @@
  </li>
  }
  </ul>
- } @else {
- <p class="no-posts">{{ i18n.t('home.sidebar.noPosts') }}</p>
- }
  <a routerLink="/blog" class="view-all-link">{{ i18n.t('home.sidebar.viewAll') }}</a>
  </div>
+ }
 
+ @if (tags().length > 0) {
  <div class="sidebar-section">
  <h4>{{ i18n.t('home.sidebar.popularTags') }}</h4>
  <app-tag-cloud [tags]="tags()" [showCount]="false" />
  </div>
+ }
 
  <!-- INC-07: Newsletter subscribe form in sidebar -->
  <div class="sidebar-section">

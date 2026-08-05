@@ -1,8 +1,8 @@
-﻿<section id="learning" class="section">
+﻿@if (hasLearningTopics()) {
+<section id="learning" class="section">
  <div class="container">
  <h2 class="section-title">{{ i18n.t('home.learning.title') }}</h2>
  <div class="learning-grid">
- @if (hasLearningTopics()) {
  @for (topic of learningTopics(); track topic.id ?? topic.title) {
  <div class="learning-card" [class]="topic.colorTheme ? 'learning-' + topic.colorTheme : ''">
  <h3>
@@ -22,11 +22,7 @@
  <p>{{ topic.description }}</p>
  </div>
  }
- } @else {
- <div class="empty-state">
- <p>{{ i18n.t('home.learning.noData') }}</p>
- </div>
- }
  </div>
  </div>
 </section>
+}

@@ -1,8 +1,8 @@
-﻿<section id="proficiency" class="section">
+﻿@if (hasProficiencies()) {
+<section id="proficiency" class="section">
  <div class="container">
  <h2 class="section-title">{{ i18n.t('home.proficiency.title') }}</h2>
  <div class="proficiency-container">
- @if (hasProficiencies()) {
  @for (prof of proficiencies(); track prof.id ?? prof.skillName) {
  <div class="proficiency-item">
  <div class="proficiency-header">
@@ -25,11 +25,7 @@
  <div class="proficiency-bar" role="progressbar" [attr.aria-valuenow]="prof.percentage" aria-valuemin="0" aria-valuemax="100" [attr.aria-labelledby]="'prof-' + prof.skillName.toLowerCase().replace(' ', '-')"><div class="proficiency-fill" [style.width.%]="prof.percentage"></div></div>
  </div>
  }
- } @else {
- <div class="empty-state">
- <p>{{ i18n.t('home.proficiency.noData') }}</p>
- </div>
- }
  </div>
  </div>
 </section>
+}

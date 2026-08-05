@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, input, computed, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { NgOptimizedImage } from '@angular/common';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ResumeProfile } from '../../../models/resume-profile.model';
 
 @Component({
   selector: 'app-hero-section',
-  imports: [],
+  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './hero-section.component.html',
   styleUrl: './hero-section.component.scss'
@@ -16,7 +17,15 @@ export class HeroSectionComponent {
 
   readonly profile = input<ResumeProfile | null>(null);
 
+  readonly avatarUrl = computed(() => this.profile()?.avatarUrl ?? null);
+
   readonly displayName = computed(() => this.profile()?.fullName ?? '');
+
+  readonly initials = computed(() => {
+    const name = this.displayName();
+    if (!name) return '';
+    return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  });
   readonly displayTitle = computed(() => this.profile()?.title ?? '');
   readonly email = computed(() => this.profile()?.email ?? '');
   readonly linkedinUrl = computed(() => {

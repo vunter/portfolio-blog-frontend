@@ -1,8 +1,10 @@
-﻿<section id="testimonials" class="section">
+﻿<!-- Hidden entirely when there are no testimonials — a public visitor should never
+     see a "no testimonials" placeholder. -->
+@if (hasTestimonials()) {
+<section id="testimonials" class="section">
  <div class="container">
  <h2 class="section-title">{{ i18n.t('home.testimonials.title') }}</h2>
  <div class="testimonials-grid">
- @if (hasTestimonials()) {
  @for (testimonial of testimonials(); track testimonial.id ?? testimonial.authorName; let i = $index) {
  <div class="testimonial-card" [class]="getAccentClass(testimonial, i)">
  <p class="testimonial-text">{{ testimonial.text }}</p>
@@ -12,11 +14,7 @@
  </div>
  </div>
  }
- } @else {
- <div class="empty-state">
- <p>{{ i18n.t('home.testimonials.noData') }}</p>
- </div>
- }
  </div>
  </div>
 </section>
+}

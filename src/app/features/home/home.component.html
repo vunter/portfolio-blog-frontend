@@ -15,7 +15,7 @@
  } @else if (profileService.loading() && !profileService.loaded()) {
  <!-- UX-02: Loading skeleton -->
  <div class="loading-skeleton main-layout">
- <main class="skeleton-main">
+ <div class="skeleton-main">
  <div class="skeleton-hero">
  <div class="skeleton-circle"></div>
  <div class="skeleton-line skeleton-line--lg"></div>
@@ -41,7 +41,7 @@
  </div>
  }
  </div>
- </main>
+ </div>
  <aside class="skeleton-sidebar">
  <div class="skeleton-card">
  <div class="skeleton-line skeleton-line--heading"></div>
@@ -59,18 +59,20 @@
  } @else {
  <div class="main-layout">
  <!-- Main Content (Portfolio) -->
- <main class="portfolio-content">
+ <div class="portfolio-content">
+ <!-- Order tuned for a recruiter's 30s scan: who → proof (experience) →
+      work (projects) → skills → validation (testimonials) → supporting detail. -->
  <app-hero-section [profile]="profileService.profile()" />
- <app-skills-section [profile]="profileService.profile()" />
  <app-experience-section [profile]="profileService.profile()" />
  <app-projects-section [profile]="profileService.profile()" />
+ <app-skills-section [profile]="profileService.profile()" />
+ <app-testimonials-section [profile]="profileService.profile()" />
  <app-education-section [profile]="profileService.profile()" />
  <app-languages-section [profile]="profileService.profile()" />
  <app-proficiency-section [profile]="profileService.profile()" />
  <app-learning-section [profile]="profileService.profile()" />
- <app-testimonials-section [profile]="profileService.profile()" />
  <app-contact-section [profile]="profileService.profile()" />
- </main>
+ </div>
 
  <!-- Blog Sidebar -->
  <app-sidebar-section [profile]="profileService.profile()" />
