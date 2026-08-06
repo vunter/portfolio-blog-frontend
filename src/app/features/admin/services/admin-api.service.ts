@@ -571,7 +571,8 @@ export class AdminApiService {
   // ==================== INT-12: Auth Token Verification ====================
 
   verifyToken(): Observable<{ valid: boolean; email?: string }> {
-    return this.api.get<{ valid: boolean; email?: string }>('/auth/verify');
+    // Backend endpoint is /admin/auth/verify (not /auth/verify, which 404s).
+    return this.api.get<{ valid: boolean; email?: string }>('/admin/auth/verify');
   }
 
   // ==================== INT-12: Fine-grained Cache Invalidation ====================

@@ -123,9 +123,20 @@ export class UserListComponent implements OnInit {
   }
 
   saveUser(): void {
-    // Q7.4: Enforce password complexity for new user creation
-    if (!this.editingUser() && this.formData.password) {
-      const pw = this.formData.password;
+    const isCreate = !this.editingUser();
+
+    // Required-field validation — the form's native validity is not checked on submit,
+    // so guard here before hitting the API.
+    if (!this.formData.name?.trim() || !this.formData.email?.trim()) {
+      this.notification.error(this.i18n.t('admin.users.requiredFields'));
+      return;
+    }
+
+    // Q7.4: Enforce password complexity for new user creation. Runs even when the
+    // password is empty (empty fails the length check) so an empty password can't
+    // slip through to a POST { password: '' }.
+    if (isCreate) {
+      const pw = this.formData.password || '';
       const hasUpper = /[A-Z]/.test(pw);
       const hasLower = /[a-z]/.test(pw);
       const hasDigit = /[0-9]/.test(pw);
@@ -216,6 +227,12 @@ export class UserListComponent implements OnInit {
     this.apiService.delete(`/admin/users/${user.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.users.deleteSuccess'));
+        // Refresh totals/pagination (the optimistic removal alone leaves the pager
+        // stale). Step back a page if this emptied the last page.
+        if (this.users().length === 0 && this.currentPage() > 0) {
+          this.currentPage.set(this.currentPage() - 1);
+        }
+        this.loadUsers();
       },
       error: () => {
         this.users.set(snapshot);

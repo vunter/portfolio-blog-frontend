@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { provideMarkdown } from 'ngx-markdown';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
 import { authGuard, adminGuard, devGuard } from '../../core/auth/auth.guard';
 import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
@@ -8,6 +9,9 @@ export const adminRoutes: Routes = [
     path: '',
     component: AdminLayoutComponent,
     canActivate: [authGuard],
+    // provideMarkdown() scoped to the admin area (article editor/list use it)
+    // instead of the root config — keeps ngx-markdown/marked off the initial bundle.
+    providers: [provideMarkdown()],
     data: { breadcrumb: 'Admin' },
     children: [
       {

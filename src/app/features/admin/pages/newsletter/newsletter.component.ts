@@ -75,6 +75,10 @@ export class NewsletterComponent implements OnInit {
   }
 
   loadSubscribers(): void {
+    // Selection is scoped to the currently-visible page. Clear it whenever the list
+    // reloads (page change, search, filter, refresh) so a bulk delete can never act
+    // on invisible rows selected on a previous page/filter.
+    this.selectedIds.set([]);
     this.error.set(false);
     const params: Record<string, string> = {
       page: this.currentPage().toString(),

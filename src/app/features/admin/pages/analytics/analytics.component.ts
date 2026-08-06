@@ -116,9 +116,12 @@ export class AnalyticsComponent implements OnInit {
   }
 
   getBarHeight(count: number): number {
+    // A zero-view day must read as zero — flooring it at 5% made empty days look
+    // like low-traffic days. Only give non-zero days a small minimum for visibility.
+    if (count <= 0) return 0;
     const max = this.maxViews();
-    if (max === 0) return 5;
-    return Math.max((count / max) * 100, 5);
+    if (max === 0) return 0;
+    return Math.max((count / max) * 100, 2);
   }
 
   getReferrerWidth(count: number): number {
@@ -148,24 +151,31 @@ export class AnalyticsComponent implements OnInit {
     return num.toString();
   }
 
-  calcChange(current?: number, previous?: number): { percent: number; direction: 'positive' | 'negative' | 'neutral' } {
-    if (current == null || previous == null || previous === 0) {
-      return { percent: current && current > 0 ? 100 : 0, direction: current && current > 0 ? 'positive' : 'neutral' };
+  calcChange(current?: number, previous?: number): { percent: number; direction: 'positive' | 'negative' | 'neutral'; isNew: boolean } {
+    if (current == null || previous == null) {
+      return { percent: 0, direction: 'neutral', isNew: false };
+    }
+    if (previous === 0) {
+      // No prior-period baseline: "+100%" would be a fabricated figure — flag as
+      // new so the UI can say "new" instead of an invented percentage.
+      return { percent: 0, direction: current > 0 ? 'positive' : 'neutral', isNew: current > 0 };
     }
     const percent = ((current - previous) / previous) * 100;
     const rounded = Math.round(percent * 10) / 10;
-    if (rounded > 0) return { percent: rounded, direction: 'positive' };
-    if (rounded < 0) return { percent: Math.abs(rounded), direction: 'negative' };
-    return { percent: 0, direction: 'neutral' };
+    if (rounded > 0) return { percent: rounded, direction: 'positive', isNew: false };
+    if (rounded < 0) return { percent: Math.abs(rounded), direction: 'negative', isNew: false };
+    return { percent: 0, direction: 'neutral', isNew: false };
   }
 
   exportToCsv(): void {
     const data = this.data();
     if (!data) return;
 
-    let csv = 'Date,Views,Likes,Shares\n';
+    // dailyViews only carries a view count per day — don't emit fabricated
+    // Likes/Shares columns (they were hardcoded 0 and misled anyone using the export).
+    let csv = 'Date,Views\n';
     for (const day of data.dailyViews) {
-      csv += `${day.date},${day.count},0,0\n`;
+      csv += `${day.date},${day.count}\n`;
     }
     csv += '\nTop Articles\nTitle,Views\n';
     for (const article of data.topArticles) {

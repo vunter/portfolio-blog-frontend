@@ -43,10 +43,14 @@
  <span class="stat-card__label">{{ i18n.t('dev.analytics.pageViews') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="viewsChange().direction">
+ @if (viewsChange().isNew) {
+ {{ i18n.t('dev.analytics.newThisPeriod') }}
+ } @else {
  @if (viewsChange().direction === 'positive') { ↑ }
  @else if (viewsChange().direction === 'negative') { ↓ }
  @else { — }
  {{ viewsChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
+ }
  </span>
  }
  </div>
@@ -59,10 +63,14 @@
  <span class="stat-card__label">{{ i18n.t('dev.analytics.totalLikes') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="likesChange().direction">
+ @if (likesChange().isNew) {
+ {{ i18n.t('dev.analytics.newThisPeriod') }}
+ } @else {
  @if (likesChange().direction === 'positive') { ↑ }
  @else if (likesChange().direction === 'negative') { ↓ }
  @else { — }
  {{ likesChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
+ }
  </span>
  }
  </div>
@@ -71,10 +79,14 @@
  <span class="stat-card__label">{{ i18n.t('dev.analytics.totalShares') }}</span>
  @if (comparison()) {
  <span class="metric-change" [class]="sharesChange().direction">
+ @if (sharesChange().isNew) {
+ {{ i18n.t('dev.analytics.newThisPeriod') }}
+ } @else {
  @if (sharesChange().direction === 'positive') { ↑ }
  @else if (sharesChange().direction === 'negative') { ↓ }
  @else { — }
  {{ sharesChange().percent }}% {{ i18n.t('dev.analytics.vsLastPeriod') }}
+ }
  </span>
  }
  </div>

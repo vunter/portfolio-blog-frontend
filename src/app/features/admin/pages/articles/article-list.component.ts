@@ -163,6 +163,11 @@ export class ArticleListComponent implements OnInit {
     this.apiService.delete(`/admin/articles/${article.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('dev.articles.deleteSuccess'));
+        // Refresh totals/pagination; step back a page if this emptied the last page.
+        if (this.articles().length === 0 && this.currentPage() > 0) {
+          this.currentPage.set(this.currentPage() - 1);
+        }
+        this.loadArticles();
       },
       error: () => {
         this.articles.set(snapshot);
