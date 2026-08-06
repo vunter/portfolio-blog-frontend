@@ -46,6 +46,18 @@
   ],
   "dataGroups": [
     {
+      "name": "api-search",
+      "urls": [
+        "/api/v1/articles/search*"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 0,
+        "maxAge": "0u",
+        "timeout": "0u"
+      }
+    },
+    {
       "name": "api-articles",
       "urls": [
         "/api/v1/articles",
@@ -91,18 +103,6 @@
         "strategy": "performance",
         "maxSize": 10,
         "maxAge": "1h"
-      }
-    },
-    {
-      "name": "api-search",
-      "urls": [
-        "/api/v1/articles/search*"
-      ],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 0,
-        "maxAge": "0u",
-        "timeout": "0u"
       }
     },
     {

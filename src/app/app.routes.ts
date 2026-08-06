@@ -19,6 +19,9 @@ export const routes: Routes = [
       },
       {
         path: 'blog',
+        // PERF-2: preload the blog chunk after first navigation — it's the primary
+        // nav destination, so removing the click-time round-trip is worth it.
+        data: { preload: true },
         loadChildren: () =>
           import('./features/blog/blog.routes').then((m) => m.blogRoutes),
       },

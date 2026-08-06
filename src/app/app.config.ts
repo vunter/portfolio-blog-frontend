@@ -14,7 +14,6 @@ import { provideRouter, withInMemoryScrolling, withPreloading, withViewTransitio
 import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideMarkdown } from 'ngx-markdown';
 import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
@@ -89,7 +88,6 @@ export const appConfig: ApplicationConfig = {
         includePostRequests: false,
       }),
     ),
-    provideMarkdown(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     // Sentry is loaded lazily from GlobalErrorHandler (off the critical path), so it
     // no longer contributes to the initial bundle. The Angular-router TraceService
