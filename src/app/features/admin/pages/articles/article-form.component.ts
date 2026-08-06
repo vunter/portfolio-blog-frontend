@@ -41,6 +41,7 @@ interface ArticleForm {
   imports: [ReactiveFormsModule, RouterLink, DatePipe, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent, SeoPreviewComponent, ArticleReviewPanelComponent, ArticleTranslationsComponent, SplitPaneResizeDirective],
   host: {
     '(window:keydown)': 'onKeyDown($event)',
+    '(window:beforeunload)': 'onBeforeUnload($event)',
   },
   templateUrl: './article-form.component.html',
   styleUrl: './article-form.component.scss',
@@ -114,10 +115,11 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // Ctrl+S / Cmd+S — Save article
+    // Ctrl+S / Cmd+S — Save article and keep working (never navigate away,
+    // never change the current publish state).
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
-      this.saveDraft();
+      this.quickSave();
       return;
     }
 
@@ -126,6 +128,15 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
       this.setEditorMode(this.editorMode() === 'preview' ? 'write' : 'preview');
       return;
+    }
+  }
+
+  // Warn before closing/reloading the tab when there are unsaved edits. The
+  // canDeactivate guard covers in-app navigation; this covers tab close/reload.
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges) {
+      event.preventDefault();
+      event.returnValue = '';
     }
   }
 
@@ -157,13 +168,18 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       this.performAutoSave();
     });
 
-    // Track form changes for auto-save
+    // Track form changes: mark dirty for BOTH new and existing articles (the
+    // canDeactivate guard reads hasUnsavedChanges), but only schedule autosave
+    // in edit mode — a new article has no id to PUT to yet.
     this.form.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      if (this.isEditMode() && this.articleId) {
-        this.hasUnsavedChanges = true;
+      const current = JSON.stringify(this.form.getRawValue());
+      this.hasUnsavedChanges = current !== this.lastSavedContent;
+      if (this.hasUnsavedChanges) {
         this.autoSaveStatus.set('unsaved');
+      }
+      if (this.isEditMode() && this.articleId) {
         this.autoSave$.next();
       }
     });
@@ -199,6 +215,9 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private performAutoSave(): void {
     if (!this.isEditMode() || !this.articleId || !this.hasUnsavedChanges || this.saving()) return;
+    // Never autosave a PUBLISHED/SCHEDULED/REVIEW article — that would push
+    // half-written edits live. Only DRAFTs autosave. Also skip while invalid.
+    if (this.originalStatus !== 'DRAFT' || this.form.invalid) return;
 
     const currentContent = JSON.stringify(this.form.getRawValue());
     if (currentContent === this.lastSavedContent) {
@@ -355,18 +374,23 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   loadArticle(id: string): void {
     this.apiService.get<ArticleResponse>(`/admin/articles/${id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (article) => {
+        // Load SEO fields from the canonical seoTitle/seoDescription — NOT from
+        // title/excerpt, which would overwrite any custom SEO on the next save.
+        // emitEvent:false so this load doesn't mark the form dirty or trigger autosave.
         this.form.patchValue({
           title: article.title,
           slug: article.slug,
           excerpt: article.excerpt || '',
           content: article.content,
           featuredImageUrl: article.coverImageUrl || '',
-          metaTitle: article.title || '',
-          metaDescription: article.excerpt || '',
-        });
+          metaTitle: article.seoTitle || '',
+          metaDescription: article.seoDescription || '',
+        }, { emitEvent: false });
         this.selectedTagIds.set(article.tags?.map((t) => t.id) || []);
         this.originalStatus = article.status || 'DRAFT';
         this.lastSavedContent = JSON.stringify(this.form.getRawValue());
+        this.hasUnsavedChanges = false;
+        this.autoSaveStatus.set(null);
         // Show review panel for articles in REVIEW status
         if (article.status === 'REVIEW') {
           this.showReviewPanel.set(true);
@@ -399,9 +423,13 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
             excerpt: article.excerpt || '',
             content: article.content || '',
             featuredImageUrl: article.coverImageUrl || '',
-            metaTitle: article.seoTitle || article.title || '',
-            metaDescription: article.seoDescription || article.excerpt || '',
-          });
+            metaTitle: article.seoTitle || '',
+            metaDescription: article.seoDescription || '',
+          }, { emitEvent: false });
+          this.originalStatus = article.status || this.originalStatus;
+          this.lastSavedContent = JSON.stringify(this.form.getRawValue());
+          this.hasUnsavedChanges = false;
+          this.autoSaveStatus.set(null);
           // Update Monaco editor if available
           if (this.monacoEditor) {
             this.monacoEditor.setValue(article.content || '');
@@ -485,7 +513,21 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveDraft(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.save('DRAFT');
+  }
+
+  // Ctrl+S: save keeping the current publish state and stay in the editor.
+  quickSave(): void {
+    if (this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.save(this.originalStatus || 'DRAFT', true);
   }
 
   publish(): void {
@@ -555,8 +597,9 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private save(status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED'): void {
+  private save(status: string, stayOnPage = false): void {
     this.saving.set(true);
+    const wasEditMode = this.isEditMode();
     const formValue = this.form.getRawValue();
     const selectedSlugs = this.selectedTagIds()
       .map(id => this.availableTags().find(t => t.id === id)?.slug)
@@ -575,12 +618,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
       seoDescription: formValue.metaDescription || undefined,
     };
 
-    const request = this.isEditMode()
-      ? this.apiService.put(`/admin/articles/${this.articleId}`, data)
-      : this.apiService.post('/admin/articles', data);
+    const request = wasEditMode
+      ? this.apiService.put<ArticleResponse>(`/admin/articles/${this.articleId}`, data)
+      : this.apiService.post<ArticleResponse>('/admin/articles', data);
 
     request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: (response) => {
         this.hasUnsavedChanges = false;
         this.lastSavedContent = JSON.stringify(formValue);
         // Don't .complete() the Subject here — that's terminal and silently
@@ -591,9 +634,19 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoSaveStatus.set(null);
         this.saving.set(false);
         this.notification.success(
-          this.isEditMode() ? this.i18n.t('dev.articleForm.updateSuccess') : this.i18n.t('dev.articleForm.createSuccess')
+          wasEditMode ? this.i18n.t('dev.articleForm.updateSuccess') : this.i18n.t('dev.articleForm.createSuccess')
         );
-        this.router.navigate(['/admin/articles']);
+        if (stayOnPage) {
+          // Keep the author in the editor. For a freshly-created article, switch
+          // to edit mode so subsequent saves/autosave update it (no duplicates).
+          if (!wasEditMode && response?.id) {
+            this.articleId = String(response.id);
+            this.isEditMode.set(true);
+          }
+          this.originalStatus = status;
+        } else {
+          this.router.navigate(['/admin/articles']);
+        }
       },
       error: () => {
         this.notification.error(this.i18n.t('dev.articleForm.saveError'));
