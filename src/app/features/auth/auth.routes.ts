@@ -50,6 +50,13 @@ export const authRoutes: Routes = [
       ),
   },
   {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./pages/verify-email/verify-email.component').then(
+        (m) => m.VerifyEmailComponent
+      ),
+  },
+  {
     path: 'verify-email-change',
     loadComponent: () =>
       import('./pages/verify-email-change/verify-email-change.component').then(
