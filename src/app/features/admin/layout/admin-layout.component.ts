@@ -179,6 +179,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       route: '/admin/reading-history',
       icon: 'readingHistory',
     },
+    {
+      label: this.i18n.t('account.privacy.title'),
+      route: '/admin/privacy',
+      icon: 'privacy',
+    },
   ]);
 
   readonly visibleMenuItems = computed(() => {

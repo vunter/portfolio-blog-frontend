@@ -126,6 +126,10 @@ export const routes: Routes = [
   { path: 'login', redirectTo: 'auth/login', pathMatch: 'full' },
   { path: 'register', redirectTo: 'auth/register', pathMatch: 'full' },
 
+  // Stable deep-links for account self-service pages (used by backend emails);
+  // the pages themselves live in the authenticated profile area.
+  { path: 'account/privacy', redirectTo: 'profile/privacy', pathMatch: 'full' },
+
   // 404
   {
     path: '**',

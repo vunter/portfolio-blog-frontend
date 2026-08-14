@@ -156,6 +156,17 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'account.sidebar.security' },
       },
+      // Intentionally no extra guard beyond parent authGuard — newsletter link,
+      // analytics consents and account deletion are self-service for all
+      // authenticated users.
+      {
+        path: 'privacy',
+        loadComponent: () =>
+          import('./pages/privacy/newsletter-privacy.component').then(
+            (m) => m.NewsletterPrivacyComponent
+          ),
+        data: { breadcrumb: 'account.privacy.title' },
+      },
       // Intentionally no extra guard beyond parent authGuard — reading history
       // is a self-service feature available to all authenticated users.
       {

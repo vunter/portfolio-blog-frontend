@@ -1,0 +1,186 @@
+<div class="newsletter-privacy">
+  <h2>{{ i18n.t('account.privacy.title') }}</h2>
+  <p class="section-desc">{{ i18n.t('account.privacy.description') }}</p>
+
+  @if (loading()) {
+    <div class="loading-spinner" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      {{ i18n.t('common.loading') }}
+    </div>
+  } @else if (loadFailed()) {
+    <div class="load-error" role="alert">
+      <p>{{ i18n.t('account.privacy.loadFailed') }}</p>
+      <button type="button" class="btn btn-secondary" (click)="load()">
+        {{ i18n.t('common.retry') }}
+      </button>
+    </div>
+  } @else {
+    <!-- Analytics consents: two DISTINCT purposes, managed independently -->
+    <section class="consent-section" aria-labelledby="consent-title">
+      <h3 id="consent-title">{{ i18n.t('account.privacy.consentTitle') }}</h3>
+      <p class="section-desc">{{ i18n.t('account.privacy.consentDesc') }}</p>
+
+      <div class="consent-grid">
+        <div class="consent-card">
+          <div class="consent-card-header">
+            <label class="consent-label" for="site-analytics-consent">
+              {{ i18n.t('account.privacy.siteAnalyticsLabel') }}
+            </label>
+            <input
+              type="checkbox"
+              id="site-analytics-consent"
+              role="switch"
+              [checked]="consent()?.siteAnalyticsConsent === true"
+              [attr.aria-checked]="consent()?.siteAnalyticsConsent === true"
+              [disabled]="savingConsent() !== null"
+              aria-describedby="site-analytics-purpose"
+              (change)="onConsentToggle('site', $event)"
+            />
+          </div>
+          <p class="consent-purpose" id="site-analytics-purpose">
+            {{ i18n.t('account.privacy.siteAnalyticsPurpose') }}
+          </p>
+          <p class="consent-status" [class.not-set]="consent()?.siteAnalyticsConsent === null">
+            {{ i18n.t(consentStatusKey(consent()?.siteAnalyticsConsent ?? null)) }}
+            @if (savingConsent() === 'site') {
+              <span class="spinner spinner-sm" aria-hidden="true"></span>
+            }
+          </p>
+        </div>
+
+        <div class="consent-card">
+          <div class="consent-card-header">
+            <label class="consent-label" for="email-analytics-consent">
+              {{ i18n.t('account.privacy.emailAnalyticsLabel') }}
+            </label>
+            <input
+              type="checkbox"
+              id="email-analytics-consent"
+              role="switch"
+              [checked]="consent()?.emailAnalyticsConsent === true"
+              [attr.aria-checked]="consent()?.emailAnalyticsConsent === true"
+              [disabled]="savingConsent() !== null"
+              aria-describedby="email-analytics-purpose"
+              (change)="onConsentToggle('email', $event)"
+            />
+          </div>
+          <p class="consent-purpose" id="email-analytics-purpose">
+            {{ i18n.t('account.privacy.emailAnalyticsPurpose') }}
+          </p>
+          <p class="consent-status" [class.not-set]="consent()?.emailAnalyticsConsent === null">
+            {{ i18n.t(consentStatusKey(consent()?.emailAnalyticsConsent ?? null)) }}
+            @if (savingConsent() === 'email') {
+              <span class="spinner spinner-sm" aria-hidden="true"></span>
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter subscription / account link -->
+    <section class="newsletter-section" aria-labelledby="newsletter-title">
+      <h3 id="newsletter-title">{{ i18n.t('account.privacy.newsletterTitle') }}</h3>
+
+      @if (newsletter(); as nl) {
+        <div class="newsletter-card">
+          @if (nl.subscribed) {
+            <p class="nl-state">{{ i18n.t('account.privacy.nlSubscribed') }}</p>
+            @if (nl.subscriberStatus) {
+              <p class="nl-status-detail">
+                {{ i18n.t('account.privacy.nlStatus', { status: nl.subscriberStatus }) }}
+              </p>
+            }
+
+            @if (nl.linked) {
+              <p class="nl-link-state linked">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                @if (nl.linkedAt) {
+                  {{ i18n.t('account.privacy.nlLinkedSince', { date: (nl.linkedAt | date: 'mediumDate') ?? '' }) }}
+                } @else {
+                  {{ i18n.t('account.privacy.linked') }}
+                }
+              </p>
+              <div class="nl-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="runNewsletterAction('unlink')"
+                  [disabled]="pendingAction() !== null"
+                >
+                  @if (pendingAction() === 'unlink') {
+                    <span class="spinner spinner-sm" aria-hidden="true"></span>
+                  }
+                  {{ i18n.t('account.privacy.unlinkBtn') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-danger-text"
+                  (click)="runNewsletterAction('unsubscribe')"
+                  [disabled]="pendingAction() !== null"
+                >
+                  @if (pendingAction() === 'unsubscribe') {
+                    <span class="spinner spinner-sm" aria-hidden="true"></span>
+                  }
+                  {{ i18n.t('account.privacy.unsubscribeBtn') }}
+                </button>
+              </div>
+            } @else {
+              <p class="nl-link-state">{{ i18n.t('account.privacy.nlNotLinked') }}</p>
+              <div class="nl-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="runNewsletterAction('link')"
+                  [disabled]="pendingAction() !== null"
+                >
+                  @if (pendingAction() === 'link') {
+                    <span class="spinner spinner-sm" aria-hidden="true"></span>
+                  }
+                  {{ i18n.t('account.privacy.linkBtn') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-danger-text"
+                  (click)="runNewsletterAction('unsubscribe')"
+                  [disabled]="pendingAction() !== null"
+                >
+                  @if (pendingAction() === 'unsubscribe') {
+                    <span class="spinner spinner-sm" aria-hidden="true"></span>
+                  }
+                  {{ i18n.t('account.privacy.unsubscribeBtn') }}
+                </button>
+              </div>
+            }
+          } @else {
+            <p class="nl-state">{{ i18n.t('account.privacy.nlNotSubscribed') }}</p>
+            <div class="nl-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="runNewsletterAction('subscribe')"
+                [disabled]="pendingAction() !== null"
+              >
+                @if (pendingAction() === 'subscribe') {
+                  <span class="spinner spinner-sm" aria-hidden="true"></span>
+                }
+                {{ i18n.t('account.privacy.subscribeBtn') }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Account deactivation / deletion entry point -->
+    <section class="danger-section" aria-labelledby="danger-title">
+      <h3 id="danger-title">{{ i18n.t('account.privacy.dangerTitle') }}</h3>
+      <p class="section-desc">{{ i18n.t('account.privacy.dangerDesc') }}</p>
+      <a routerLink="../delete-account" class="btn btn-outline btn-danger-text">
+        {{ i18n.t('account.privacy.dangerLink') }}
+      </a>
+    </section>
+  }
+</div>

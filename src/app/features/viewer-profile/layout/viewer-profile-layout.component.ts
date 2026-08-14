@@ -60,6 +60,13 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
             <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('viewer.sidebar.readingHistory') }}</span>
           </a>
 
+          <a routerLink="/profile/privacy" routerLinkActive="active" class="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="1"/><path d="M12 12v3"/>
+            </svg>
+            <span class="nav-label" [class.hidden]="sidebarCollapsed()">{{ i18n.t('account.privacy.title') }}</span>
+          </a>
+
           @if (authStore.isDev()) {
           <div class="nav-divider"></div>
           <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">

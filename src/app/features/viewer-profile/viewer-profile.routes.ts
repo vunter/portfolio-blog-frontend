@@ -27,6 +27,13 @@ export const viewerProfileRoutes: Routes = [
             (m) => m.ReadingHistoryComponent
           ),
       },
+      {
+        path: 'privacy',
+        loadComponent: () =>
+          import('../admin/pages/privacy/newsletter-privacy.component').then(
+            (m) => m.NewsletterPrivacyComponent
+          ),
+      },
     ],
   },
 ];

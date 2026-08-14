@@ -18,9 +18,13 @@ export class ApiService {
   private static readonly DEFAULT_CACHE_TTL = 60_000; // 1 minute
 
   /**
-   * Q6.3: Retry operator for transient errors.
+   * Q6.3: Retry operator for transient errors on IDEMPOTENT requests only.
    * Retries on network errors (status 0) and gateway errors (502/503/504).
    * Never retries 4xx (client errors) or 500 (server error — request may have been processed).
+   *
+   * Do NOT apply to POST: a 502/504/status-0 can mean the origin completed the
+   * mutation while only the response was lost, so retrying a POST can create
+   * duplicate comments/likes/submissions. PUT/PATCH/DELETE are idempotent and safe.
    */
   private retryTransient<T>(count = 1): MonoTypeOperatorFunction<T> {
     return retry({
@@ -110,7 +114,8 @@ export class ApiService {
         params = params.set(key, String(value));
       });
     }
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000), this.retryTransient());
+    // No retryTransient here: POST is not idempotent (see retryTransient docs).
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { params }).pipe(timeout(30000));
   }
 
   put<T>(endpoint: string, body: unknown, queryParams?: Record<string, string | number | boolean>): Observable<T> {
@@ -133,6 +138,16 @@ export class ApiService {
 
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(timeout(30000), this.retryTransient());
+  }
+
+  /**
+   * DELETE with a request body (e.g. re-authentication payloads).
+   * No transient retry: callers of this variant perform sensitive, destructive
+   * operations (account deletion) where an ambiguous network failure must
+   * surface to the user instead of being silently retried.
+   */
+  deleteWithBody<T>(endpoint: string, body: unknown): Observable<T> {
+    return this.http.delete<T>(`${this.baseUrl}${endpoint}`, { body }).pipe(timeout(30000));
   }
 
   upload<T>(endpoint: string, file: File, fieldName = 'file'): Observable<T> {

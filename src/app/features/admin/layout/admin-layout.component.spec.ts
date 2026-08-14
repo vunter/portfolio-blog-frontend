@@ -155,7 +155,7 @@ describe('AdminLayoutComponent', () => {
 
   it('should have correct number of menu items', () => {
     const items = component.menuItems();
-    expect(items.length).toBe(15);
+    expect(items.length).toBe(16);
   });
 
   it('should call authStore.logout and navigate on logout', () => {
