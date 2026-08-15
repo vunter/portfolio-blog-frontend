@@ -167,6 +167,14 @@ export const adminRoutes: Routes = [
           ),
         data: { breadcrumb: 'account.privacy.title' },
       },
+      {
+        path: 'delete-account',
+        loadComponent: () =>
+          import('./pages/delete-account/delete-account.component').then(
+            (m) => m.DeleteAccountComponent
+          ),
+        data: { breadcrumb: 'account.delete.title' },
+      },
       // Intentionally no extra guard beyond parent authGuard — reading history
       // is a self-service feature available to all authenticated users.
       {

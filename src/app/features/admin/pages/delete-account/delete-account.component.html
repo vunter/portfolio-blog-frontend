@@ -1,0 +1,128 @@
+<div class="delete-account">
+  <h2>{{ i18n.t('account.delete.title') }}</h2>
+  <p class="section-desc">{{ i18n.t('account.delete.description') }}</p>
+
+  <!-- What this affects -->
+  <section class="preview-card" aria-labelledby="preview-title">
+    <h3 id="preview-title">{{ i18n.t('account.delete.previewTitle') }}</h3>
+    @if (previewLoading()) {
+      <div class="loading-spinner" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        {{ i18n.t('common.loading') }}
+      </div>
+    } @else if (preview(); as p) {
+      <ul class="preview-list">
+        <li>{{ i18n.t('account.delete.previewComments', { count: p.commentsCount }) }}</li>
+        <li>{{ i18n.t('account.delete.previewArticles', { count: p.articlesCount }) }}</li>
+        @if (p.newsletterLinked) {
+          <li>
+            {{ i18n.t('account.delete.previewNewsletterLinked') }}
+            @if (p.newsletterStatus) {
+              <span class="nl-status">({{ p.newsletterStatus }})</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+    <p class="public-content-note">{{ i18n.t('account.delete.publicContentNote') }}</p>
+  </section>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Mode choice: deactivate (reversible) vs erase (irreversible) -->
+    <fieldset class="mode-fieldset">
+      <legend>{{ i18n.t('account.delete.modeLegend') }}</legend>
+
+      <div class="mode-option" [class.selected]="mode() === 'DEACTIVATE'">
+        <input
+          type="radio"
+          id="mode-deactivate"
+          name="mode"
+          value="DEACTIVATE"
+          [checked]="mode() === 'DEACTIVATE'"
+          (change)="setMode('DEACTIVATE')"
+          aria-describedby="mode-deactivate-desc"
+        />
+        <div class="mode-text">
+          <label for="mode-deactivate">{{ i18n.t('account.delete.deactivateLabel') }}</label>
+          <p id="mode-deactivate-desc">{{ i18n.t('account.delete.deactivateDesc') }}</p>
+        </div>
+      </div>
+
+      <div class="mode-option danger" [class.selected]="mode() === 'ERASE'">
+        <input
+          type="radio"
+          id="mode-erase"
+          name="mode"
+          value="ERASE"
+          [checked]="mode() === 'ERASE'"
+          (change)="setMode('ERASE')"
+          aria-describedby="mode-erase-desc"
+        />
+        <div class="mode-text">
+          <label for="mode-erase">{{ i18n.t('account.delete.eraseLabel') }}</label>
+          <p id="mode-erase-desc">{{ i18n.t('account.delete.eraseDesc') }}</p>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ERASE requires typing the confirmation word -->
+    @if (mode() === 'ERASE') {
+      <div class="form-group">
+        <label for="confirm-word">
+          {{ i18n.t('account.delete.confirmWordLabel', { word: confirmWord() }) }}
+        </label>
+        <input
+          type="text"
+          id="confirm-word"
+          formControlName="confirmWord"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          [attr.placeholder]="confirmWord()"
+        />
+      </div>
+    }
+
+    <!-- Newsletter cancellation (only when linked) -->
+    @if (preview()?.newsletterLinked) {
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="cancel-newsletter" formControlName="cancelNewsletter" />
+        <label for="cancel-newsletter">{{ i18n.t('account.delete.cancelNewsletterLabel') }}</label>
+      </div>
+    }
+
+    <!-- Re-authentication -->
+    <div class="form-group">
+      <label for="current-password">{{ i18n.t('account.delete.passwordLabel') }}</label>
+      <input
+        type="password"
+        id="current-password"
+        formControlName="password"
+        autocomplete="current-password"
+        aria-describedby="password-help"
+        [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+      />
+      <p class="field-help" id="password-help">{{ i18n.t('account.delete.passwordHelp') }}</p>
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <p class="field-error" role="alert">{{ i18n.t('account.delete.passwordRequired') }}</p>
+      }
+    </div>
+
+    @if (submitErrorKey(); as errorKey) {
+      <p class="form-error" role="alert">{{ i18n.t(errorKey) }}</p>
+    }
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-danger"
+        [disabled]="submitting() || (mode() === 'ERASE' && !confirmWordValid())"
+      >
+        @if (submitting()) {
+          <span class="spinner spinner-sm" aria-hidden="true"></span>
+        }
+        {{ i18n.t(mode() === 'ERASE' ? 'account.delete.submitErase' : 'account.delete.submitDeactivate') }}
+      </button>
+    </div>
+  </form>
+</div>

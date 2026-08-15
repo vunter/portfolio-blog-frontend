@@ -129,6 +129,7 @@ export const routes: Routes = [
   // Stable deep-links for account self-service pages (used by backend emails);
   // the pages themselves live in the authenticated profile area.
   { path: 'account/privacy', redirectTo: 'profile/privacy', pathMatch: 'full' },
+  { path: 'account/delete', redirectTo: 'profile/delete-account', pathMatch: 'full' },
 
   // 404
   {

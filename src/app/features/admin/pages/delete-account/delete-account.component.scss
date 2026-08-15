@@ -1,0 +1,236 @@
+.delete-account {
+  max-width: 640px;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .section-desc {
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 1.5rem;
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  color: var(--text-secondary, #6b7280);
+}
+
+.preview-card {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary, inherit);
+
+  h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.preview-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+
+  li {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .nl-status {
+    color: var(--text-secondary, #6b7280);
+  }
+}
+
+.public-content-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #6b7280);
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  padding-top: 0.75rem;
+}
+
+.mode-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+
+  legend {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin-bottom: 0.75rem;
+    padding: 0;
+  }
+}
+
+.mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  background: var(--card-bg, #fff);
+
+  &.selected {
+    border-color: var(--accent, #6366f1);
+    box-shadow: 0 0 0 1px var(--accent, #6366f1);
+  }
+
+  &.danger.selected {
+    border-color: var(--danger, #ef4444);
+    box-shadow: 0 0 0 1px var(--danger, #ef4444);
+  }
+
+  input[type='radio'] {
+    margin-top: 0.25rem;
+    accent-color: var(--accent, #6366f1);
+    flex-shrink: 0;
+
+    &:focus-visible {
+      outline: 2px solid var(--accent, #6366f1);
+      outline-offset: 2px;
+    }
+  }
+
+  &.danger input[type='radio'] {
+    accent-color: var(--danger, #ef4444);
+  }
+
+  .mode-text {
+    label {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--text-secondary, #6b7280);
+    }
+  }
+
+  &.danger .mode-text label {
+    color: var(--danger, #ef4444);
+  }
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+  }
+
+  input[type='text'],
+  input[type='password'] {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--input-border, #d1d5db);
+    border-radius: 0.375rem;
+    font-size: 0.9375rem;
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, inherit);
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent, #6366f1);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+  }
+
+  &.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input[type='checkbox'] {
+      width: 1.125rem;
+      height: 1.125rem;
+      accent-color: var(--accent, #6366f1);
+      flex-shrink: 0;
+
+      &:focus-visible {
+        outline: 2px solid var(--accent, #6366f1);
+        outline-offset: 2px;
+      }
+    }
+
+    label {
+      margin: 0;
+      cursor: pointer;
+    }
+  }
+}
+
+.field-help {
+  margin: 0.375rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.field-error,
+.form-error {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--danger, #ef4444);
+}
+
+.form-error {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--danger-tint, #fef2f2);
+  border: 1px solid var(--danger-border, #fecaca);
+  border-radius: 0.5rem;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+.btn-danger {
+  background: var(--danger, #ef4444);
+  color: #fff;
+}
+
+.spinner-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-width: 2px;
+}

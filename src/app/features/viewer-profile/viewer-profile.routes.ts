@@ -34,6 +34,13 @@ export const viewerProfileRoutes: Routes = [
             (m) => m.NewsletterPrivacyComponent
           ),
       },
+      {
+        path: 'delete-account',
+        loadComponent: () =>
+          import('../admin/pages/delete-account/delete-account.component').then(
+            (m) => m.DeleteAccountComponent
+          ),
+      },
     ],
   },
 ];
