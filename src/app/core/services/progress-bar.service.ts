@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, untracked } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class ProgressBarService {
@@ -42,7 +42,11 @@ export class ProgressBarService {
 
   private animateToTarget(target: number, duration: number): void {
     this.cancelAnimation();
-    const start = this.progress();
+    // untracked: start() is called synchronously from the HTTP interceptor, i.e.
+    // inside whatever reactive context issued the request. Reading progress()
+    // tracked would make that caller's effect depend on this bar — every
+    // completed request would then re-trigger the effect that issued it.
+    const start = untracked(this.progress);
     const startTime = performance.now();
 
     const tick = (now: number) => {

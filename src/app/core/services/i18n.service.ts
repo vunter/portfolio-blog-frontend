@@ -1,4 +1,4 @@
-﻿import { Injectable, signal, effect, computed, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+﻿import { Injectable, signal, effect, computed, inject, untracked, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpBackend } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -83,7 +83,12 @@ export class I18nService {
       if (typeof document !== 'undefined') {
         document.documentElement.setAttribute('lang', currentLang);
       }
-      this.loadTranslations(currentLang);
+      // untracked: this effect must react to language/consent only. The HTTP
+      // subscribe below runs synchronously inside this reactive context, and the
+      // progress interceptor reads its progress signal on the way — without
+      // untracked that signal becomes a dependency of THIS effect, and every
+      // fast-failing response (429/5xx) re-triggers it: an infinite request loop.
+      untracked(() => this.loadTranslations(currentLang));
     });
   }
 
