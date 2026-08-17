@@ -14,6 +14,17 @@ import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme
 import { AccessibleModalDirective } from '../../shared/directives/accessible-modal.directive';
 import { scrollBehavior } from '../../shared/utils/scroll.util';
 
+/**
+ * Profile social links are stored as the admin typed them — often protocol-less
+ * ("github.com/vunter"). A bare host in [href] is a RELATIVE url and resolves to
+ * catananti.dev/github.com/vunter, so prefix https:// when no scheme is present.
+ */
+export function externalUrl(value: string | null | undefined): string {
+  const v = (value ?? '').trim();
+  if (!v) return '';
+  return /^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`;
+}
+
 @Component({
   selector: 'app-public-layout',
   imports: [RouterLink, RouterLinkActive, RouterOutlet, ThemeToggleComponent, NgOptimizedImage, UpperCasePipe, AccessibleModalDirective],
@@ -51,8 +62,8 @@ export class PublicLayoutComponent implements OnInit {
 
   readonly ownerName = computed(() => this.profileService.profile()?.fullName || '');
   readonly ownerEmail = computed(() => this.profileService.profile()?.email || '');
-  readonly ownerGithub = computed(() => this.profileService.profile()?.github || '');
-  readonly ownerLinkedin = computed(() => this.profileService.profile()?.linkedin || '');
+  readonly ownerGithub = computed(() => externalUrl(this.profileService.profile()?.github));
+  readonly ownerLinkedin = computed(() => externalUrl(this.profileService.profile()?.linkedin));
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
