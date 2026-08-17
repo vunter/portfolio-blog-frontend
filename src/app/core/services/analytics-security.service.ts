@@ -28,7 +28,10 @@ export class AnalyticsSecurityService {
 
   // Cached challenge (pre-solved for fast event submission)
   private cachedSolution: { challengeId: string; solution: string } | null = null;
-  private solvingPromise: Promise<{ challengeId: string; solution: string }> | null = null;
+  // Serializes all challenge consumption/pre-solving. Solutions are single-use
+  // server-side (consumed via getAndDelete), so concurrent callers must NEVER
+  // share one — the second POST would get a 400 "invalid proof of work".
+  private solveQueue: Promise<void> = Promise.resolve();
 
   // Cached session token
   private cachedToken: string | null = null;
@@ -61,42 +64,42 @@ export class AnalyticsSecurityService {
   async getSolvedChallenge(): Promise<{ challengeId: string; solution: string } | null> {
     if (!isPlatformBrowser(this.platformId)) return null;
 
-    // Return pre-solved challenge if available
-    if (this.cachedSolution) {
-      const result = this.cachedSolution;
-      this.cachedSolution = null;
-      // Start pre-solving the next challenge in background
-      this.preSolveChallenge();
-      return result;
-    }
-
-    // Deduplicate concurrent solve requests
-    if (this.solvingPromise) return this.solvingPromise;
-
-    this.solvingPromise = this.fetchAndSolveChallenge();
+    const prior = this.solveQueue;
+    const mine = (async () => {
+      await prior;
+      // Pop the pre-solved challenge if one is waiting; otherwise solve fresh.
+      // Each queued caller pops or solves its OWN challenge — never a shared one.
+      if (this.cachedSolution) {
+        const result = this.cachedSolution;
+        this.cachedSolution = null;
+        return result;
+      }
+      return this.fetchAndSolveChallenge();
+    })();
+    this.solveQueue = mine.then(() => undefined, () => undefined);
     try {
-      const result = await this.solvingPromise;
-      this.solvingPromise = null;
+      return await mine;
+    } finally {
+      // Replenish the cache in the background for the next event
       this.preSolveChallenge();
-      return result;
-    } catch (e) {
-      this.solvingPromise = null;
-      throw e;
     }
   }
 
   /**
    * Pre-fetch and solve a challenge in the background for instant use later.
    * Call this after consent is granted to minimize latency on first event.
+   * Enqueued behind any in-flight consumption so it can see whether the cache
+   * still needs filling; a no-op when a solution is already waiting.
    */
   preSolveChallenge(): void {
-    if (!isPlatformBrowser(this.platformId) || this.cachedSolution || this.solvingPromise) return;
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    this.solvingPromise = this.fetchAndSolveChallenge();
-    this.solvingPromise
-      .then(result => { this.cachedSolution = result; })
-      .catch(() => { /* ignore pre-solve failures */ })
-      .finally(() => { this.solvingPromise = null; });
+    const prior = this.solveQueue;
+    this.solveQueue = (async () => {
+      await prior;
+      if (this.cachedSolution) return;
+      this.cachedSolution = await this.fetchAndSolveChallenge();
+    })().catch(() => { /* ignore pre-solve failures */ });
   }
 
   /**

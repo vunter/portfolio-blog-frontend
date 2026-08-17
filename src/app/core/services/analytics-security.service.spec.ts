@@ -28,6 +28,36 @@ describe('AnalyticsSecurityService', () => {
     http.expectNone(r => r.url.includes('/analytics/token'));
   });
 
+  it('hands each concurrent caller its own solved challenge (solutions are single-use)', async () => {
+    // PoW solutions are consumed server-side via getAndDelete: two callers
+    // sharing one {challengeId, solution} means the second POST gets a 400
+    // "invalid proof of work". Concurrent requests must each solve their own.
+    const tick = () => new Promise(resolve => setTimeout(resolve));
+    const first = service.getSolvedChallenge();
+    const second = service.getSolvedChallenge();
+
+    // difficulty 0 => any attempt matches, solver returns immediately
+    const flushNext = (id: string) => {
+      const req = http.expectOne(r => r.url.includes('/analytics/challenge'));
+      req.flush({ challengeId: id, nonce: 'n-' + id, difficulty: 0, expiresAt: new Date(Date.now() + 60000).toISOString() });
+    };
+    await tick();
+    flushNext('ch-1');
+    const a = await first;
+    await tick();
+    flushNext('ch-2');
+    const b = await second;
+    // background pre-solve kicked off after consumption — satisfy and discard
+    await tick();
+    http.match(r => r.url.includes('/analytics/challenge')).forEach((req, i) =>
+      req.flush({ challengeId: 'pre-' + i, nonce: 'pn' + i, difficulty: 0, expiresAt: new Date(Date.now() + 60000).toISOString() }));
+    await tick();
+
+    expect(a?.challengeId).toBe('ch-1');
+    expect(b?.challengeId).toBe('ch-2');
+    expect(a?.challengeId).not.toBe(b?.challengeId);
+  });
+
   it('invalidateToken drops the cache so the next getToken refetches', async () => {
     // The server side of the token can vanish independently of the client cache
     // (Redis restart/failover/flush). After a 403 the client must not keep
