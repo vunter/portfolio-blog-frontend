@@ -201,4 +201,25 @@ describe('errorInterceptor', () => {
 
     expect(notificationSpy.error).not.toHaveBeenCalled();
   });
+
+  // Background telemetry: the user never initiated these requests, so their
+  // failures must never surface as toasts (analytics token loss after a Redis
+  // restart was popping "Acesso negado" on ordinary page navigation).
+  it('should NOT show notification for analytics endpoint errors', () => {
+    for (const url of ['/api/v1/analytics/event', '/api/v1/analytics/token', '/api/v1/analytics/challenge']) {
+      http.post(url, {}).subscribe({ error: () => {} });
+      const req = httpMock.expectOne(url);
+      req.flush(null, { status: 403, statusText: 'Forbidden' });
+    }
+    expect(notificationSpy.error).not.toHaveBeenCalled();
+  });
+
+  it('should NOT show notification for article view beacon errors', () => {
+    http.post('/api/v1/articles/my-slug/view', null).subscribe({ error: () => {} });
+
+    const req = httpMock.expectOne('/api/v1/articles/my-slug/view');
+    req.flush(null, { status: 500, statusText: 'Server Error' });
+
+    expect(notificationSpy.error).not.toHaveBeenCalled();
+  });
 });

@@ -75,7 +75,13 @@ export const errorInterceptor: HttpInterceptorFn = (
         '/auth/forgot-password',
         '/auth/reset-password',
       ];
-      const isSilent = silentEndpoints.some((endpoint) =>
+      // Background telemetry the user never initiated (analytics events/tokens/
+      // challenges, article view beacons): failures are already swallowed by
+      // their callers — a toast would surface an error for an invisible request.
+      const isBackgroundTelemetry =
+        req.url.includes('/analytics/') ||
+        /\/articles\/[^/]+\/view$/.test(req.url);
+      const isSilent = isBackgroundTelemetry || silentEndpoints.some((endpoint) =>
         req.url.includes(endpoint)
       );
 
