@@ -217,6 +217,12 @@ export class AnalyticsTrackingService {
             this.http.post<void>('/api/v1/analytics/event', payload, { headers })
           ),
           catchError((err) => {
+            // 403 = the server no longer recognizes our token (Redis restart,
+            // failover, flush). Drop the cache so the NEXT event fetches a
+            // fresh one instead of replaying the dead token until expiry.
+            if (err?.status === 403) {
+              this.security.invalidateToken();
+            }
             if (isDevMode()) {
               console.warn('[Analytics] Error:', err);
             }

@@ -99,6 +99,17 @@ export class AnalyticsSecurityService {
       .finally(() => { this.solvingPromise = null; });
   }
 
+  /**
+   * Drop the cached token. Called when the backend rejects it (403): the
+   * server-side half of the token lives in Redis and can vanish independently
+   * of the client cache (restart, failover, flush) — without this, every
+   * active session keeps replaying a dead token until its client-side expiry.
+   */
+  invalidateToken(): void {
+    this.cachedToken = null;
+    this.tokenExpiresAt = 0;
+  }
+
   private async fetchToken(): Promise<string | null> {
     try {
       const resp = await firstValueFrom(
