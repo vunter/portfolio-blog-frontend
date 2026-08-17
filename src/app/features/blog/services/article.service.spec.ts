@@ -152,7 +152,7 @@ describe('ArticleService', () => {
     it('should POST to track article view', () => {
       service.trackView('my-article').subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/analytics/view/my-article`);
+      const req = httpMock.expectOne(`${baseUrl}/articles/my-article/view`);
       expect(req.request.method).toBe('POST');
       req.flush(null);
     });

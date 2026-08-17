@@ -62,11 +62,19 @@ export class AnalyticsTrackingService {
     this.trackQueue$.next(event);
   }
 
-  /** Track an article view by slug. Consent-gated. Simplified path (no PoW/token). */
+  /**
+   * Record an article view by slug. Hits the canonical article-view endpoint, which
+   * increments the public `views_count`, records reading history for authenticated
+   * users, and (only when analytics consent is granted, signalled via the header)
+   * records an analytics VIEW event. The view-count increment itself is an anonymous
+   * aggregate and runs for every visitor, so this is intentionally NOT consent-gated.
+   */
   trackArticleView(slug: string): Observable<void> {
-    if (!this.hasConsent()) return EMPTY;
-    const headers = new HttpHeaders({ 'X-Analytics-Consent': 'granted' });
-    return this.http.post<void>(`/api/v1/analytics/view/${slug}`, null, { headers })
+    let headers = new HttpHeaders();
+    if (this.hasConsent()) {
+      headers = headers.set('X-Analytics-Consent', 'granted');
+    }
+    return this.http.post<void>(`/api/v1/articles/${slug}/view`, null, { headers })
       .pipe(catchError(() => EMPTY));
   }
 

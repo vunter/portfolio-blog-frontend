@@ -64,8 +64,13 @@ export class BookmarkService {
     this.bookmarks.set(current);
     this.persist(current);
 
-    // Sync with backend
-    if (isPlatformBrowser(this.platformId)) {
+    // Backend persistence needs a visitor id, which only exists with functional
+    // consent. Without it, keep the toggle as an in-session state instead of firing a
+    // request the backend rejects (X-Visitor-Id empty) and then self-reverting the
+    // optimistic flip with no feedback — which looked like the button flipping back
+    // on its own.
+    const visitorId = this.getVisitorId();
+    if (isPlatformBrowser(this.platformId) && visitorId) {
       const headers = this.visitorHeaders();
       if (isNowBookmarked) {
         this.http.post(`${this.baseUrl}/${slug}`, null, { headers }).pipe(
