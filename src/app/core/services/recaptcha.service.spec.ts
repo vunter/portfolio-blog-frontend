@@ -79,13 +79,11 @@ describe('RecaptchaService', () => {
     it('should return token when grecaptcha is available', async () => {
       createService('browser', 'test-site-key');
 
-      // Production reads window.grecaptcha.enterprise.* (Enterprise reCAPTCHA),
-      // not the legacy non-enterprise namespace.
+      // AUD18-A2: Production loads the STANDARD v3 api.js script, which exposes
+      // ready/execute directly on window.grecaptcha (no .enterprise namespace).
       (window as any)['grecaptcha'] = {
-        enterprise: {
-          ready: (cb: () => void) => cb(),
-          execute: (_siteKey: string, _opts: any) => Promise.resolve('mock-token-123'),
-        },
+        ready: (cb: () => void) => cb(),
+        execute: (_siteKey: string, _opts: any) => Promise.resolve('mock-token-123'),
       };
 
       // Pre-mark script as loaded by adding a script tag
@@ -101,10 +99,8 @@ describe('RecaptchaService', () => {
       createService('browser', 'test-site-key');
 
       (window as any)['grecaptcha'] = {
-        enterprise: {
-          ready: (cb: () => void) => cb(),
-          execute: () => Promise.reject(new Error('reCAPTCHA failed')),
-        },
+        ready: (cb: () => void) => cb(),
+        execute: () => Promise.reject(new Error('reCAPTCHA failed')),
       };
 
       const script = document.createElement('script');
@@ -139,10 +135,8 @@ describe('RecaptchaService', () => {
       document.head.appendChild(existingScript);
 
       (window as any)['grecaptcha'] = {
-        enterprise: {
-          ready: (cb: () => void) => cb(),
-          execute: () => Promise.resolve('cached-token'),
-        },
+        ready: (cb: () => void) => cb(),
+        execute: () => Promise.resolve('cached-token'),
       };
 
       const token = await service.execute('action');

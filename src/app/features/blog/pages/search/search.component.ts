@@ -148,10 +148,11 @@ export class SearchComponent implements OnInit {
   loadSuggestions(query: string): void {
     this.searchService.getSuggestions(query).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (suggestions: string[]) => {
+        // AUD18-06: no fabricated `slug` — nothing reads it (selectSuggestion
+        // navigates by text) and a client-side slugified title is not a real slug.
         const mapped: SearchSuggestion[] = suggestions.map(text => ({
           text,
           type: 'article' as const,
-          slug: text.toLowerCase().replace(/\s+/g, '-'),
         }));
         this.suggestions.set(mapped);
         this.highlightedIndex.set(-1);

@@ -28,12 +28,12 @@ export function shareNative(ctx: ShareContext): void {
     navigator.share({
       title: article?.title,
       url: shareUrl,
-    }).then(() => ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'native'))
+    }).then(() => ctx.articleService.trackShare(article?.id, 'native'))
       .catch(() => { /* user cancelled */ });
   } else {
     navigator.clipboard.writeText(shareUrl).catch(() => { /* clipboard not available */ });
     ctx.notification.success(ctx.i18n.t('blog.linkCopied'));
-    ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'native');
+    ctx.articleService.trackShare(article?.id, 'native');
   }
 }
 
@@ -45,7 +45,7 @@ export function shareTwitter(ctx: ShareContext): void {
   openShareWindow(
     `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`
   );
-  ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'twitter');
+  ctx.articleService.trackShare(article?.id, 'twitter');
 }
 
 export function shareLinkedIn(ctx: ShareContext): void {
@@ -55,7 +55,7 @@ export function shareLinkedIn(ctx: ShareContext): void {
   openShareWindow(
     `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
   );
-  ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'linkedin');
+  ctx.articleService.trackShare(article?.id, 'linkedin');
 }
 
 export function shareFacebook(ctx: ShareContext): void {
@@ -65,7 +65,7 @@ export function shareFacebook(ctx: ShareContext): void {
   openShareWindow(
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
   );
-  ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'facebook');
+  ctx.articleService.trackShare(article?.id, 'facebook');
 }
 
 export function copyArticleLink(ctx: ShareContext): void {
@@ -75,5 +75,5 @@ export function copyArticleLink(ctx: ShareContext): void {
   navigator.clipboard.writeText(url)
     .then(() => ctx.notification.success(ctx.i18n.t('blog.linkCopied')))
     .catch(() => ctx.notification.error(ctx.i18n.t('common.error')));
-  ctx.articleService.trackShare(article?.id ? +article.id : undefined, 'clipboard');
+  ctx.articleService.trackShare(article?.id, 'clipboard');
 }

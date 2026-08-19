@@ -143,7 +143,7 @@ export class ResumeProfileComponent implements OnInit, OnDestroy {
     if (!this.isProfileDirty()) return true;
     return this.confirmDialog.confirm({
       title: this.i18n.t('common.confirm'),
-      message: this.i18n.t('dev.articles.unsavedChanges'),
+      message: this.i18n.t('dev.articleForm.unsavedChanges'),
       confirmText: this.i18n.t('common.confirm'),
       cancelText: this.i18n.t('common.cancel'),
       type: 'warning',

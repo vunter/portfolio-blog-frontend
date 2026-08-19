@@ -15,6 +15,7 @@ import { ArticleTranslationsComponent } from './components/article-translations/
 import { Subject, debounceTime, timer } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { AdminApiService } from '../../services/admin-api.service';
+import { TagService } from '../../../blog/services/tag.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { ThemeService } from '../../../../core/services/theme.service';
@@ -58,6 +59,7 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
   private readonly adminApi = inject(AdminApiService);
+  private readonly tagService = inject(TagService);
   private readonly notification = inject(NotificationService);
   private readonly themeService = inject(ThemeService);
   private readonly monacoLoader = inject(MonacoLoaderService);
@@ -363,12 +365,24 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadTags(): void {
-    this.apiService.get<TagResponse[]>('/tags').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // AUD18-02: GET /tags returns PageResponse<TagResponse>, not a bare array —
+    // TagService already unwraps `.content` for us.
+    this.tagService.getTags().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (tags) => this.availableTags.set(tags),
       error: () => {
         this.notification.error(this.i18n.t('dev.error.loadTags'));
       },
     });
+  }
+
+  // AUD19C-07 (A4-FE): ISO timestamp → datetime-local value in the user's local
+  // timezone ("yyyy-MM-ddTHH:mm"). Returns '' for absent/invalid input.
+  private isoToDatetimeLocal(iso?: string): string {
+    if (!iso) return '';
+    const date = new Date(iso);
+    if (isNaN(date.getTime())) return '';
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+    return local.toISOString().slice(0, 16);
   }
 
   loadArticle(id: string): void {
@@ -386,6 +400,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
           metaTitle: article.seoTitle || '',
           metaDescription: article.seoDescription || '',
         }, { emitEvent: false });
+        // AUD19C-07 (A4-FE): populate the schedule control so a quickSave of a
+        // SCHEDULED article re-sends its timestamp instead of dropping it.
+        this.scheduledAtControl.setValue(this.isoToDatetimeLocal(article.scheduledAt), { emitEvent: false });
+        if (article.status === 'SCHEDULED') {
+          this.showScheduleInput.set(true);
+        }
         this.selectedTagIds.set(article.tags?.map((t) => t.id) || []);
         this.originalStatus = article.status || 'DRAFT';
         this.lastSavedContent = JSON.stringify(this.form.getRawValue());
@@ -426,6 +446,8 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
             metaTitle: article.seoTitle || '',
             metaDescription: article.seoDescription || '',
           }, { emitEvent: false });
+          // AUD19C-07 (A4-FE): keep the schedule control in sync after a restore.
+          this.scheduledAtControl.setValue(this.isoToDatetimeLocal(article.scheduledAt), { emitEvent: false });
           this.originalStatus = article.status || this.originalStatus;
           this.lastSavedContent = JSON.stringify(this.form.getRawValue());
           this.hasUnsavedChanges = false;

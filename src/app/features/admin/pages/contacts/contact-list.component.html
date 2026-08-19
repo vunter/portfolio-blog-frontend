@@ -105,7 +105,21 @@
  <tr class="expanded-row">
  <td colspan="6">
  <div class="message-body">
- <p>{{ msg.message }}</p>
+ @if (loadingDetail()) {
+ <div class="message-shimmer" aria-hidden="true">
+ <div class="shimmer-line"></div>
+ <div class="shimmer-line"></div>
+ <div class="shimmer-line shimmer-line--short"></div>
+ </div>
+ } @else {
+ @if (detailFetchFailed()) {
+ <p class="detail-warning" role="status">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+ {{ i18n.t('admin.contacts.detailError') }}
+ </p>
+ }
+ <p>{{ (freshMessage() ?? msg).message }}</p>
+ }
  </div>
  </td>
  </tr>
@@ -127,13 +141,13 @@
  class="pagination-btn"
  [disabled]="currentPage() === 0"
  (click)="goToPage(0)"
- [title]="i18n.t('common.first')"
+ [title]="i18n.t('pagination.first')"
  >«</button>
  <button
  class="pagination-btn"
  [disabled]="currentPage() === 0"
  (click)="goToPage(currentPage() - 1)"
- [title]="i18n.t('common.previous')"
+ [title]="i18n.t('pagination.previous')"
  >‹</button>
  <span class="pagination-info">
  {{ currentPage() + 1 }} / {{ totalPages() }}
@@ -143,13 +157,13 @@
  class="pagination-btn"
  [disabled]="currentPage() >= totalPages() - 1"
  (click)="goToPage(currentPage() + 1)"
- [title]="i18n.t('common.next')"
+ [title]="i18n.t('pagination.next')"
  >›</button>
  <button
  class="pagination-btn"
  [disabled]="currentPage() >= totalPages() - 1"
  (click)="goToPage(totalPages() - 1)"
- [title]="i18n.t('common.last')"
+ [title]="i18n.t('pagination.last')"
  >»</button>
  </div>
  }

@@ -21,6 +21,29 @@ export class OAuthCallbackComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
+    // AUD18-A10: MFA-enabled accounts arrive here WITHOUT auth cookies — the backend
+    // redirects with the short-lived MFA challenge in the URL *fragment* (never sent
+    // to the server, so it cannot land in access logs). Route to the same MFA verify
+    // page the password login uses, with the same navigation-state contract.
+    const fragment = this.route.snapshot.fragment;
+    if (fragment) {
+      const params = new URLSearchParams(fragment);
+      const mfaToken = params.get('mfa_token');
+      if (params.get('mfa_required') === 'true' && mfaToken) {
+        this.router.navigate(['/auth/mfa-verify'], {
+          state: {
+            mfaToken,
+            email: params.get('email') ?? '',
+            returnUrl: '/',
+            // AUD19C-MFA-UX: backend mirrors TokenResponse.mfaMethod into the redirect
+            // fragment as `mfa_method` — preselect it on the verify page when present.
+            method: params.get('mfa_method') ?? undefined,
+          },
+        });
+        return;
+      }
+    }
+
     const expiresIn = Number(this.route.snapshot.queryParams['expires_in']) || 900;
 
     this.authStore.setAuthenticated();

@@ -1,6 +1,3 @@
-@if (loading()) {
- <app-skeleton variant="table" />
-} @else {
 <div class="audit-page">
  <header class="page-header">
  <div>
@@ -10,9 +7,42 @@
  </header>
 
  <div class="filters">
+ <!-- AUD19: filter mode segmented control -->
+ <div class="filter-group">
+ <label id="audit-mode-label">{{ i18n.t('admin.audit.modeLabel') }}</label>
+ <div class="segmented" role="group" aria-labelledby="audit-mode-label">
+ <button
+ type="button"
+ class="segmented-btn"
+ [class.segmented-btn--active]="mode() === 'recent'"
+ [attr.aria-pressed]="mode() === 'recent'"
+ (click)="setMode('recent')"
+ >{{ i18n.t('admin.audit.modeRecent') }}</button>
+ <button
+ type="button"
+ class="segmented-btn"
+ [class.segmented-btn--active]="mode() === 'user'"
+ [attr.aria-pressed]="mode() === 'user'"
+ (click)="setMode('user')"
+ >{{ i18n.t('admin.audit.modeByUser') }}</button>
+ <button
+ type="button"
+ class="segmented-btn"
+ [class.segmented-btn--active]="mode() === 'entity'"
+ [attr.aria-pressed]="mode() === 'entity'"
+ (click)="setMode('entity')"
+ >{{ i18n.t('admin.audit.modeByEntity') }}</button>
+ </div>
+ </div>
+
+ @if (mode() === 'recent') {
  <div class="filter-group">
  <label>{{ i18n.t('admin.audit.days') }}</label>
- <select [ngModel]="days()" (ngModelChange)="days.set($event)">
+ <select
+ [ngModel]="days()"
+ (ngModelChange)="days.set($event)"
+ [attr.aria-label]="i18n.t('admin.audit.days')"
+ >
  <option [ngValue]="1">1 {{ getDaysLabel(1) }}</option>
  <option [ngValue]="7">7 {{ getDaysLabel(7) }}</option>
  <option [ngValue]="14">14 {{ getDaysLabel(14) }}</option>
@@ -22,13 +52,18 @@
  </div>
  <div class="filter-group">
  <label>{{ i18n.t('admin.audit.limit') }}</label>
- <select [ngModel]="limit()" (ngModelChange)="limit.set($event)">
+ <select
+ [ngModel]="limit()"
+ (ngModelChange)="limit.set($event)"
+ [attr.aria-label]="i18n.t('admin.audit.limit')"
+ >
  <option [ngValue]="20">20</option>
  <option [ngValue]="50">50</option>
  <option [ngValue]="100">100</option>
  <option [ngValue]="200">200</option>
  </select>
  </div>
+ <!-- AUD19: exports use the days-based endpoints, so they only apply to recent mode -->
  <div class="export-buttons">
  <button class="btn btn-outline" (click)="exportCsv()">
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
@@ -47,8 +82,89 @@
  {{ i18n.t('admin.audit.exportJson') }}
  </button>
  </div>
+ }
+
+ @if (mode() === 'user') {
+ <!-- AUD19: by-user drill-down controls -->
+ <div class="filter-group">
+ <label for="audit-user-id">{{ i18n.t('admin.audit.userIdLabel') }}</label>
+ <!-- AUD19C-02: text input — a number input would round Snowflake ids past 2^53 -->
+ <input
+ id="audit-user-id"
+ type="text"
+ inputmode="numeric"
+ class="filter-input"
+ [ngModel]="userId()"
+ (ngModelChange)="userId.set($event)"
+ (keyup.enter)="searchByUser()"
+ [placeholder]="i18n.t('admin.audit.userIdPlaceholder')"
+ [attr.aria-label]="i18n.t('admin.audit.userIdLabel')"
+ />
+ </div>
+ <div class="filter-group filter-group--action">
+ <button type="button" class="btn btn-primary" (click)="searchByUser()">
+ {{ i18n.t('admin.audit.loadUser') }}
+ </button>
+ </div>
+ }
+
+ @if (mode() === 'entity') {
+ <!-- AUD19: by-entity drill-down controls -->
+ <div class="filter-group">
+ <label for="audit-entity-type">{{ i18n.t('admin.audit.entityTypeLabel') }}</label>
+ <select
+ id="audit-entity-type"
+ [ngModel]="entityType()"
+ (ngModelChange)="entityType.set($event)"
+ [attr.aria-label]="i18n.t('admin.audit.entityTypeLabel')"
+ >
+ <option value="" disabled>{{ i18n.t('admin.audit.entityTypeAll') }}</option>
+ @for (type of entityTypeOptions(); track type) {
+ <option [value]="type">{{ type }}</option>
+ }
+ </select>
+ </div>
+ <div class="filter-group">
+ <label for="audit-entity-id">{{ i18n.t('admin.audit.entityIdLabel') }}</label>
+ <input
+ id="audit-entity-id"
+ type="text"
+ class="filter-input"
+ [ngModel]="entityId()"
+ (ngModelChange)="entityId.set($event)"
+ (keyup.enter)="searchByEntity()"
+ [placeholder]="i18n.t('admin.audit.entityIdPlaceholder')"
+ [attr.aria-label]="i18n.t('admin.audit.entityIdLabel')"
+ />
+ </div>
+ <div class="filter-group filter-group--action">
+ <button type="button" class="btn btn-primary" (click)="searchByEntity()">
+ {{ i18n.t('admin.audit.loadEntity') }}
+ </button>
+ </div>
+ }
  </div>
 
+ @if (loading()) {
+ <app-skeleton variant="table" />
+ } @else if (loadError()) {
+ <!-- AUD19: error state with retry (AUD18-05 pattern) -->
+ <div class="load-error">
+ <p>{{ i18n.t('admin.audit.loadError') }}</p>
+ <button type="button" class="btn btn-outline" (click)="retry()">
+ {{ i18n.t('admin.audit.retry') }}
+ </button>
+ </div>
+ } @else if (mode() !== 'recent' && !searched()) {
+ <!-- AUD19: drill-down prompt before any query -->
+ <div class="drill-prompt">
+ @if (mode() === 'user') {
+ <p>{{ i18n.t('admin.audit.userPrompt') }}</p>
+ } @else {
+ <p>{{ i18n.t('admin.audit.entityPrompt') }}</p>
+ }
+ </div>
+ } @else {
  <div class="table-container">
  <table class="data-table" aria-label="Audit Log">
  <thead>
@@ -66,14 +182,52 @@
  @for (log of logs(); track log.id) {
  <tr>
  <td class="col-date">{{ formatDate(log.createdAt) }}</td>
- <td>{{ log.performedByEmail }}</td>
+ <td>
+ @if (log.performedBy) {
+ <!-- AUD19: click a user to drill into their activity -->
+ <button
+ type="button"
+ class="cell-link"
+ (click)="drillToUser(log)"
+ [title]="i18n.t('admin.audit.viewUserActivity')"
+ [attr.aria-label]="i18n.t('admin.audit.viewUserActivity')"
+ >{{ log.performedByEmail }}</button>
+ } @else {
+ {{ log.performedByEmail }}
+ }
+ </td>
  <td>
  <span class="action-badge" [ngClass]="getActionClass(log.action)">
  {{ log.action }}
  </span>
  </td>
- <td>{{ log.entityType }}</td>
- <td class="col-id">{{ log.entityId }}</td>
+ <td>
+ @if (canDrillToEntity(log)) {
+ <!-- AUD19: click an entity to drill into its history -->
+ <button
+ type="button"
+ class="cell-link cell-link--entity"
+ (click)="drillToEntity(log)"
+ [title]="i18n.t('admin.audit.viewEntityHistory')"
+ [attr.aria-label]="i18n.t('admin.audit.viewEntityHistory')"
+ >{{ log.entityType }}</button>
+ } @else {
+ {{ log.entityType }}
+ }
+ </td>
+ <td class="col-id">
+ @if (canDrillToEntity(log)) {
+ <button
+ type="button"
+ class="cell-link cell-link--entity"
+ (click)="drillToEntity(log)"
+ [title]="i18n.t('admin.audit.viewEntityHistory')"
+ [attr.aria-label]="i18n.t('admin.audit.viewEntityHistory')"
+ >{{ log.entityId }}</button>
+ } @else {
+ {{ log.entityId }}
+ }
+ </td>
  <td class="col-details">{{ log.details }}</td>
  <td class="col-ip">{{ log.ipAddress }}</td>
  </tr>
@@ -87,5 +241,30 @@
  </tbody>
  </table>
  </div>
+
+ @if (mode() === 'user' && searched() && (userPage() > 0 || userHasNext())) {
+ <!-- AUD19: simple prev/next pagination for the by-user endpoint (0-indexed, no total) -->
+ <div class="pagination">
+ <button
+ type="button"
+ class="pagination-btn"
+ [disabled]="userPage() === 0"
+ (click)="goToUserPage(userPage() - 1)"
+ [title]="i18n.t('admin.audit.previousPage')"
+ [attr.aria-label]="i18n.t('admin.audit.previousPage')"
+ >‹</button>
+ <span class="pagination-info">
+ {{ i18n.t('admin.audit.pageLabel') }} {{ userPage() + 1 }}
+ </span>
+ <button
+ type="button"
+ class="pagination-btn"
+ [disabled]="!userHasNext()"
+ (click)="goToUserPage(userPage() + 1)"
+ [title]="i18n.t('admin.audit.nextPage')"
+ [attr.aria-label]="i18n.t('admin.audit.nextPage')"
+ >›</button>
+ </div>
+ }
+ }
 </div>
-}

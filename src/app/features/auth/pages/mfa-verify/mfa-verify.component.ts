@@ -36,23 +36,29 @@ export class MfaVerifyComponent implements OnInit {
   error = signal<string | null>(null);
   method = signal<'TOTP' | 'EMAIL' | 'BACKUP'>('TOTP');
   usingBackup = signal(false);
+  // AUD19C-MFA-UX: backend invalidated the challenge after too many wrong codes (429).
+  // The form stays disabled; the only way forward is the "back to login" CTA.
+  lockedOut = signal(false);
 
   private mfaToken = '';
   private email = '';
   private returnUrl = '/';
   private static readonly MFA_STORAGE_KEY = 'mfa_challenge';
-  // TTL aligned with the backend MFA challenge window. The email-OTP flow (switch
-  // method → wait for email → type code) routinely exceeds a couple of minutes, so a
-  // short TTL would bounce legitimate users to login mid-challenge.
-  private static readonly MFA_TTL_MS = 10 * 60 * 1000;
+  // AUD19C-C1a: TTL matches the backend's 5-minute Redis MFA challenge TTL. A longer
+  // client-side window would keep users on this page with a token the backend has
+  // already expired — every submit would 401 until the sessionStorage entry lapsed.
+  private static readonly MFA_TTL_MS = 5 * 60 * 1000;
 
   ngOnInit(): void {
-    // Get MFA token from navigation state (primary source)
-    const nav = this.router.getCurrentNavigation()?.extras?.state;
-    this.mfaToken = nav?.['mfaToken'] ?? '';
-    this.email = nav?.['email'] ?? '';
-    this.returnUrl = nav?.['returnUrl'] ?? '/';
-    const preferredMethod = nav?.['method'] ?? 'TOTP';
+    // AUD19C-C1a: read the challenge from history.state, not getCurrentNavigation() —
+    // by the time ngOnInit runs the navigation has completed and getCurrentNavigation()
+    // returns null. history.state carries the router's extras.state and survives F5.
+    const nav = (typeof window !== 'undefined' ? window.history.state : null) as
+      Record<string, unknown> | null;
+    this.mfaToken = (nav?.['mfaToken'] as string) ?? '';
+    this.email = (nav?.['email'] as string) ?? '';
+    this.returnUrl = (nav?.['returnUrl'] as string) ?? '/';
+    const preferredMethod = (nav?.['method'] as 'TOTP' | 'EMAIL' | 'BACKUP') ?? 'TOTP';
     this.method.set(preferredMethod);
 
     let sessionExpired = false;
@@ -97,6 +103,7 @@ export class MfaVerifyComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.lockedOut()) return;
     if (this.mfaForm.invalid) {
       this.mfaForm.markAllAsTouched();
       return;
@@ -136,6 +143,22 @@ export class MfaVerifyComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
+        // AUD19C-MFA-UX: 429 — too many wrong codes; the backend deleted the challenge.
+        // Keep the form disabled and point the user back to login (footer CTA).
+        if (err.status === 429) {
+          sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
+          this.lockedOut.set(true);
+          this.error.set(this.i18n.t('auth.mfa.tooManyAttempts'));
+          return;
+        }
+        // AUD19C-MFA-UX: the challenge token itself is invalid/expired (backend sends a
+        // machine-readable `code` on error bodies) — mirror the ngOnInit expiry path.
+        if (err.error?.code === 'error.mfa_token_invalid') {
+          sessionStorage.removeItem(MfaVerifyComponent.MFA_STORAGE_KEY);
+          this.notification.warning(this.i18n.t('auth.mfa.sessionExpired'));
+          this.router.navigate(['/auth/login']);
+          return;
+        }
         this.mfaForm.enable();
         if (err.status === 401) {
           this.error.set(this.i18n.t('auth.mfa.invalidCode'));

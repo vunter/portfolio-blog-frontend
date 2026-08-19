@@ -26,8 +26,17 @@ export class ArticleTranslationsComponent implements OnInit {
   showPanel = signal(false);
   selectedLocale = signal('');
   translating = signal(false);
+  // AUD18-05: distinguish failed loads from "no translations"/"no locales"
+  loadError = signal(false);
 
   ngOnInit(): void {
+    this.loadTranslations();
+    this.loadAvailableLocales();
+  }
+
+  // AUD18-05: single retry entry point for the panel's error state
+  retryLoad(): void {
+    this.loadError.set(false);
     this.loadTranslations();
     this.loadAvailableLocales();
   }
@@ -35,12 +44,16 @@ export class ArticleTranslationsComponent implements OnInit {
   loadTranslations(): void {
     this.adminApi.getArticleTranslations(this.articleId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (translations) => this.translations.set(translations),
+      // AUD18-05: previously subscribe({next}) had no error branch, so a failed
+      // load was indistinguishable from an article without translations.
+      error: () => this.loadError.set(true),
     });
   }
 
   loadAvailableLocales(): void {
     this.adminApi.getArticleTranslationLocales(this.articleId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (locales) => this.availableLocales.set(locales),
+      error: () => this.loadError.set(true),
     });
   }
 

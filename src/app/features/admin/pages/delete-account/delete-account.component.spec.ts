@@ -158,6 +158,25 @@ describe('DeleteAccountComponent', () => {
     expect(alert?.textContent).toContain('account.delete.wrongPassword');
   });
 
+  // AUD19C-DEL: wrong password now comes back as 400 from the backend re-auth check.
+  // The message must show inline and the user must NOT be logged out.
+  it('shows a wrong-password error on 400 without logging out', () => {
+    mockService.deleteAccount.and.returnValue(
+      throwError(() => new HttpErrorResponse({ status: 400 }))
+    );
+    fixture.detectChanges();
+    component.form.controls.password.setValue('wrong');
+
+    component.submit();
+    fixture.detectChanges();
+
+    expect(component.submitErrorKey()).toBe('account.delete.wrongPassword');
+    expect(mockAuthStore.logout).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+    const alert = fixture.nativeElement.querySelector('.form-error[role="alert"]');
+    expect(alert?.textContent).toContain('account.delete.wrongPassword');
+  });
+
   it('shows a generic error on other failures', () => {
     mockService.deleteAccount.and.returnValue(
       throwError(() => new HttpErrorResponse({ status: 500 }))

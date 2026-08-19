@@ -114,7 +114,12 @@ export class DeleteAccountComponent implements OnInit {
         },
         error: (err: unknown) => {
           this.submitting.set(false);
-          if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
+          // AUD19C-DEL: the backend now returns 400 for a wrong password on this
+          // re-auth check (401/403 kept as a harmless legacy fallback).
+          if (
+            err instanceof HttpErrorResponse &&
+            (err.status === 400 || err.status === 401 || err.status === 403)
+          ) {
             this.submitErrorKey.set('account.delete.wrongPassword');
           } else {
             this.submitErrorKey.set('account.delete.failed');

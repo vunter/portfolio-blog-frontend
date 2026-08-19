@@ -7,7 +7,9 @@ import { RecaptchaService } from './recaptcha.service';
 import { EMPTY, Observable, Subject, catchError, from, mergeMap, switchMap } from 'rxjs';
 
 export interface AnalyticsEvent {
-  articleId?: number;
+  // AUD19C-02: Snowflake id — sent as the original string; a Number() round-trip
+  // corrupts ids above 2^53 (the backend coerces string ids in bodies).
+  articleId?: string;
   eventType: string;
   referrer?: string;
   metadata?: Record<string, unknown>;
@@ -173,7 +175,7 @@ export class AnalyticsTrackingService {
   }
 
   /** Track scroll depth at a specific threshold. */
-  trackScrollDepth(depth: number, articleId?: number): void {
+  trackScrollDepth(depth: number, articleId?: string): void {
     if (!this.hasConsent()) return;
     this.track({
       articleId,
@@ -246,7 +248,7 @@ export class AnalyticsTrackingService {
   }
 
   /** Stop time tracking and send the duration event. */
-  stopTimeTracking(articleId?: number, page?: string): void {
+  stopTimeTracking(articleId?: string, page?: string): void {
     if (!isPlatformBrowser(this.platformId)) return;
     if (this.visibilityHandler) {
       document.removeEventListener('visibilitychange', this.visibilityHandler);

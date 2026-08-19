@@ -118,9 +118,36 @@ export class CookieConsentService {
   /**
    * Clear non-essential localStorage/sessionStorage items when functional consent is revoked.
    * We only clear known preference keys — we never touch auth-related items.
+   *
+   * AUD18-M27: the previous list cleared only 'preferred_locale' (written by nothing) and
+   * 'sidebar_collapsed' (the real key is 'admin_sidebar_collapsed'), so every actual
+   * functional-category key survived revocation. The list below matches what the app
+   * really stores under functional consent (see the /cookies policy page):
+   * - 'app-language'            i18n language preference (I18nService)
+   * - 'app-theme'               theme preference (ThemeService)
+   * - 'admin_sidebar_collapsed' admin sidebar state (AdminLayoutComponent)
+   * - 'visitor-id'              bookmark-sync visitor id — created by BookmarkService only
+   *                             when functional consent is granted, so it is functional
+   *                             (NOT analytics) data in this app
+   * - 'bookmarked-articles'     bookmark slugs — BookmarkService.persist() only writes this
+   *                             under functional consent, so revoking functional consent
+   *                             clears the local copy (server-side bookmarks keyed by the
+   *                             visitor id become unreachable once the id is cleared)
+   * Analytics revocation needs no storage cleanup: AnalyticsTrackingService keeps no
+   * client-side state (events are consent-gated at send time).
+   * The two legacy keys stay in the list to scrub stale data from older visitors.
    */
   private clearFunctionalStorage(): void {
-    const functionalKeys = ['preferred_locale', 'sidebar_collapsed'];
+    const functionalKeys = [
+      'app-language',
+      'app-theme',
+      'admin_sidebar_collapsed',
+      'visitor-id',
+      'bookmarked-articles',
+      // Legacy keys (no longer written) — kept for cleanup of old visitors' storage
+      'preferred_locale',
+      'sidebar_collapsed',
+    ];
     for (const key of functionalKeys) {
       try {
         localStorage.removeItem(key);

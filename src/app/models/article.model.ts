@@ -178,21 +178,23 @@ export interface SearchResponse {
   last: boolean;
 }
 
+// AUD18-06: removed dead `slug` — it was fabricated client-side and never read
 export interface SearchSuggestion {
   text: string;
   value?: string; // Alias for text
   type: 'article' | 'tag';
-  slug: string;
 }
 
 // ============================================
 // ARTICLE REVIEW
 // ============================================
 
+// AUD19C-02: Snowflake ids are serialized as JSON strings by the backend —
+// modeling them as number would corrupt values above 2^53.
 export interface ArticleReview {
-  id: number;
-  articleId: number;
-  reviewerId: number;
+  id: string;
+  articleId: string;
+  reviewerId: string;
   status: string; // APPROVED, CHANGES_REQUESTED, PENDING
   feedback?: string;
   createdAt: string;
@@ -204,7 +206,8 @@ export interface ArticleReview {
 // ============================================
 
 export interface ArticleI18nResponse {
-  articleId: number;
+  // AUD19C-02: Snowflake id — string, see ArticleReview note.
+  articleId: string;
   locale: string;
   title: string;
   subtitle: string;

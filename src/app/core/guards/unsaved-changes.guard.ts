@@ -19,7 +19,9 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = async (co
     const confirmDialog = inject(ConfirmDialogService);
     return confirmDialog.confirm({
       title: i18n.t('common.confirm'),
-      message: i18n.t('dev.articles.unsavedChanges'),
+      // AUD19C-I18N: was 'dev.articles.unsavedChanges', which does not exist in
+      // any locale (rendered the raw key). The real key lives under articleForm.
+      message: i18n.t('dev.articleForm.unsavedChanges'),
       confirmText: i18n.t('common.confirm'),
       cancelText: i18n.t('common.cancel'),
       type: 'warning',

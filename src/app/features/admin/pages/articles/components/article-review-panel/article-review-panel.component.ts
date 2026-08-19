@@ -24,14 +24,20 @@ export class ArticleReviewPanelComponent implements OnInit {
 
   reviewHistory = signal<ArticleReview[]>([]);
   feedbackText = signal('');
+  // AUD18-05: distinguish a failed load from an empty history
+  loadError = signal(false);
 
   ngOnInit(): void {
     this.loadReviewHistory();
   }
 
   loadReviewHistory(): void {
+    this.loadError.set(false);
     this.adminApi.getArticleReviews(this.articleId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (reviews) => this.reviewHistory.set(reviews),
+      // AUD18-05: previously subscribe({next}) had no error branch, so a failed
+      // load was indistinguishable from "no reviews yet".
+      error: () => this.loadError.set(true),
     });
   }
 

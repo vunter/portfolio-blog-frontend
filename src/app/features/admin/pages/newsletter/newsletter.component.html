@@ -30,13 +30,16 @@
  <span class="stat-value">{{ totalSubscribers() }}</span>
  <span class="stat-label">{{ i18n.t('admin.newsletter.totalSubscribers') }}</span>
  </div>
+ <!-- AUD18-01: backend stats are confirmed/pending/total -->
  <div class="stat-box">
- <span class="stat-value">{{ activeSubscribers() }}</span>
- <span class="stat-label">{{ i18n.t('admin.newsletter.active') }}</span>
+
+ <span class="stat-value">{{ confirmedSubscribers() }}</span>
+ <span class="stat-label">{{ i18n.t('admin.newsletter.statusConfirmed') }}</span>
  </div>
  <div class="stat-box">
- <span class="stat-value">{{ newThisMonth() }}</span>
- <span class="stat-label">{{ i18n.t('admin.newsletter.newThisMonth') }}</span>
+
+ <span class="stat-value">{{ pendingSubscribers() }}</span>
+ <span class="stat-label">{{ i18n.t('admin.newsletter.statusPending') }}</span>
  </div>
  </div>
 
@@ -54,10 +57,13 @@
  [placeholder]="i18n.t('admin.newsletter.searchPlaceholder')"
  />
  </div>
+ <!-- AUD18-01: real enum values — backend uppercases into SubscriberStatus -->
+
  <select [(ngModel)]="statusFilter" (ngModelChange)="loadSubscribers()">
  <option value="">{{ i18n.t('common.all') }}</option>
- <option value="active">{{ i18n.t('admin.newsletter.active') }}</option>
- <option value="unsubscribed">{{ i18n.t('admin.newsletter.cancelled') }}</option>
+ <option value="confirmed">{{ i18n.t('admin.newsletter.statusConfirmed') }}</option>
+ <option value="pending">{{ i18n.t('admin.newsletter.statusPending') }}</option>
+ <option value="unsubscribed">{{ i18n.t('admin.newsletter.statusUnsubscribed') }}</option>
  </select>
  </div>
 
@@ -76,6 +82,8 @@
  <th>{{ i18n.t('common.email') }}</th>
  <th>{{ i18n.t('common.status') }}</th>
  <th>{{ i18n.t('admin.newsletter.subscribedAt') }}</th>
+ <!-- AUD19C-08: account-link column -->
+ <th>{{ i18n.t('admin.newsletter.accountLink') }}</th>
  <th>{{ i18n.t('common.actions') }}</th>
  </tr>
  </thead>
@@ -91,14 +99,26 @@
  </td>
  <td>{{ subscriber.email }}</td>
  <td>
+ <!-- AUD18-01: three-state badge from subscriber.status -->
  <span
  class="status-badge"
- [class.active]="subscriber.active"
+ [class.confirmed]="subscriber.status === 'CONFIRMED'"
+ [class.pending]="subscriber.status === 'PENDING'"
  >
- {{ subscriber.active ? i18n.t('common.active') : i18n.t('admin.newsletter.cancelled') }}
+ {{ statusLabel(subscriber.status) }}
  </span>
  </td>
  <td>{{ formatDate(subscriber.subscribedAt) }}</td>
+ <td>
+ <!-- AUD19C-08: linked badge with origin/date/userId tooltip -->
+ @if (subscriber.userId) {
+ <span class="link-badge" [title]="linkedTooltip(subscriber)" [attr.aria-label]="linkedTooltip(subscriber)">
+ {{ i18n.t('admin.newsletter.linkedBadge') }}
+ </span>
+ } @else {
+ <span class="not-linked" aria-hidden="true">{{ i18n.t('admin.newsletter.notLinked') }}</span>
+ }
+ </td>
  <td>
  <button
  class="action-btn action-btn--danger"
@@ -115,7 +135,7 @@
  </tr>
  } @empty {
  <tr>
- <td colspan="5" class="empty-message">{{ i18n.t('admin.newsletter.noSubscribers') }}</td>
+ <td colspan="6" class="empty-message">{{ i18n.t('admin.newsletter.noSubscribers') }}</td>
  </tr>
  }
  </tbody>

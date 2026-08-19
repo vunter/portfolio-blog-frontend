@@ -87,12 +87,51 @@
           </div>
         }
 
-        <button class="btn btn-danger" (click)="disableMfa()" [disabled]="disabling()">
-          @if (disabling()) {
-            <span class="spinner"></span>
-          }
-          {{ i18n.t('account.security.disableMfa') }}
-        </button>
+        <!-- AUD19C-A3FE: disabling all MFA requires re-authentication with the current
+             password (inline reveal panel, same pattern as the remove-method flow). -->
+        @if (!disableMfaPanel()) {
+          <button class="btn btn-danger" (click)="startDisableMfa()" [disabled]="disabling()">
+            {{ i18n.t('account.security.disableMfa') }}
+          </button>
+        } @else {
+          <div class="remove-method-verify disable-mfa-verify">
+            <h4>{{ i18n.t('account.security.disableTitle') }}</h4>
+            @if (hasPassword()) {
+              <p>{{ i18n.t('account.security.disableMessage') }}</p>
+              <form class="verify-form" [formGroup]="disableMfaForm" (ngSubmit)="confirmDisableMfa()">
+                <div class="form-group">
+                  <label for="disable-mfa-password">{{ i18n.t('account.security.disablePasswordLabel') }}</label>
+                  <input
+                    type="password"
+                    id="disable-mfa-password"
+                    formControlName="password"
+                    autocomplete="current-password"
+                  />
+                </div>
+                <div class="setup-actions">
+                  <button type="submit" class="btn btn-danger" [disabled]="disabling()">
+                    @if (disabling()) {
+                      <span class="spinner"></span>
+                    }
+                    {{ i18n.t('account.security.disableConfirm') }}
+                  </button>
+                  <button type="button" class="btn btn-secondary" (click)="cancelDisableMfa()">
+                    {{ i18n.t('common.cancel') }}
+                  </button>
+                </div>
+              </form>
+            } @else {
+              <!-- AUD19C-A3FE: social-only account — no password to confirm with; route
+                   the user to the per-method disable flow above instead. -->
+              <p>{{ i18n.t('account.security.disableNoPassword') }}</p>
+              <div class="setup-actions">
+                <button type="button" class="btn btn-secondary" (click)="cancelDisableMfa()">
+                  {{ i18n.t('common.cancel') }}
+                </button>
+              </div>
+            }
+          </div>
+        }
 
         <!-- Add another method -->
         @if (hasAvailableMethods()) {

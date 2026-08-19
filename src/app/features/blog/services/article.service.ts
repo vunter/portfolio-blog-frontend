@@ -67,7 +67,8 @@ export class ArticleService {
     return this.analytics.trackArticleView(slug);
   }
 
-  trackShare(articleId: number | undefined, platform: string): void {
+  // AUD19C-02: articleId is a Snowflake string — never coerce to Number.
+  trackShare(articleId: string | undefined, platform: string): void {
     this.analytics.track({
       articleId,
       eventType: 'SHARE',
@@ -75,7 +76,7 @@ export class ArticleService {
     });
   }
 
-  trackUtmView(articleId: number | undefined, metadata: Record<string, string>): void {
+  trackUtmView(articleId: string | undefined, metadata: Record<string, string>): void {
     this.analytics.track({
       articleId,
       eventType: 'VIEW',

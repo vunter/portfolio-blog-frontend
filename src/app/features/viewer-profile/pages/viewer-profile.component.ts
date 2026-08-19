@@ -55,6 +55,16 @@ export class ViewerProfileComponent implements OnInit {
   roleRequestReason = '';
   submittingRoleRequest = signal(false);
 
+  // AUD19: resend email verification
+  resendingVerification = signal(false);
+  verificationSent = signal(false);
+  /** Seconds left before another resend is allowed (respects backend rate limit). */
+  resendCooldown = signal(0);
+  private cooldownTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly stopCooldownOnDestroy = this.destroyRef.onDestroy(() => this.clearCooldownTimer());
+  /** Only an explicit false shows the notice — undefined means the flag is unknown. */
+  emailNotVerified = computed(() => this.user()?.emailVerified === false);
+
   // Sensitive field editing (email/username require password confirmation)
   editingEmail = signal(false);
   editingUsername = signal(false);
@@ -110,6 +120,46 @@ export class ViewerProfileComponent implements OnInit {
       next: (req) => this.roleRequest.set(req),
       error: () => {}, // 204 No Content or error — no pending request
     });
+  }
+
+  // AUD19: resend the verification email for the authenticated user's own address.
+  // Same direct-ApiService pattern the verify-email pages use.
+  resendVerification(): void {
+    if (this.resendingVerification() || this.resendCooldown() > 0) return;
+    this.resendingVerification.set(true);
+    this.api.post<{ message: string }>('/admin/auth/resend-verification', {})
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.resendingVerification.set(false);
+          this.verificationSent.set(true);
+          this.notification.success(this.i18n.t('account.profile.resendVerificationSent'));
+          this.startResendCooldown(60);
+        },
+        error: () => {
+          this.resendingVerification.set(false);
+          this.notification.error(this.i18n.t('account.profile.resendVerificationError'));
+        },
+      });
+  }
+
+  private startResendCooldown(seconds: number): void {
+    this.clearCooldownTimer();
+    this.resendCooldown.set(seconds);
+    this.cooldownTimer = setInterval(() => {
+      const remaining = this.resendCooldown() - 1;
+      this.resendCooldown.set(remaining);
+      if (remaining <= 0) {
+        this.clearCooldownTimer();
+      }
+    }, 1000);
+  }
+
+  private clearCooldownTimer(): void {
+    if (this.cooldownTimer !== null) {
+      clearInterval(this.cooldownTimer);
+      this.cooldownTimer = null;
+    }
   }
 
   enableEditEmail(): void {

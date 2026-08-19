@@ -74,6 +74,10 @@ export const errorInterceptor: HttpInterceptorFn = (
         '/auth/register',
         '/auth/forgot-password',
         '/auth/reset-password',
+        // AUD19C-MFA-UX: the MFA verify page owns its error display (429 lockout,
+        // invalid-token redirect, wrong code) — a global toast would duplicate it.
+        // Also matches /admin/mfa/verify-setup, whose component owns errors too.
+        '/admin/mfa/verify',
       ];
       // Background telemetry the user never initiated (analytics events/tokens/
       // challenges, article view beacons): failures are already swallowed by

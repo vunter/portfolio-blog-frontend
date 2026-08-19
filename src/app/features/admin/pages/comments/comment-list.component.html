@@ -29,8 +29,33 @@
  <option value="PENDING">{{ i18n.t('dev.comments.pending') }}</option>
  <option value="APPROVED">{{ i18n.t('dev.comments.approved') }}</option>
  <option value="REJECTED">{{ i18n.t('dev.comments.rejected') }}</option>
+ <!-- AUD19C-05: SPAM is a real backend status (markCommentAsSpam / bulk-spam) -->
+ <option value="SPAM">{{ i18n.t('dev.comments.spam') }}</option>
  </select>
+ <div class="article-filter">
+ <!-- AUD19C-02: text input — a number input would round Snowflake ids past 2^53 -->
+ <input
+ type="text"
+ inputmode="numeric"
+ class="article-filter__input"
+ [placeholder]="i18n.t('dev.comments.articleFilterPlaceholder')"
+ [attr.aria-label]="i18n.t('dev.comments.articleFilterPlaceholder')"
+ [(ngModel)]="articleFilterInput"
+ (keyup.enter)="applyArticleFilter()"
+ />
+ <button class="btn btn-sm btn-secondary" (click)="applyArticleFilter()">{{ i18n.t('dev.comments.articleFilterApply') }}</button>
  </div>
+ </div>
+
+ <!-- Active article-filter chip: clears back to normal paged mode -->
+ @if (articleFilter() !== null) {
+ <div class="active-filters">
+ <button class="filter-chip" (click)="clearArticleFilter()" [attr.aria-label]="i18n.t('dev.comments.clearArticleFilter')" [title]="i18n.t('dev.comments.clearArticleFilter')">
+ {{ i18n.t('dev.comments.articleChip') }} #{{ articleFilter() }}
+ <span class="filter-chip__x" aria-hidden="true">&times;</span>
+ </button>
+ </div>
+ }
 
  <!-- Bulk Action Bar -->
  @if (selectedIds().size > 0) {
@@ -73,9 +98,26 @@
  </div>
  <p class="comment-card__content">{{ comment.content }}</p>
  <div class="comment-card__footer">
+ <span class="article-cell">
+ <!-- AUD19C-05: slug may be absent on some rows — don't render a broken /blog/undefined link -->
+ @if (comment.articleSlug) {
  <a [href]="'/blog/' + comment.articleSlug" target="_blank" class="article-link">
- {{ comment.articleTitle }}
+ {{ comment.articleTitle || comment.articleSlug }}
  </a>
+ } @else {
+ <span class="article-link article-link--plain">{{ comment.articleTitle || '#' + comment.articleId }}</span>
+ }
+ <button
+ class="article-filter-btn"
+ (click)="filterByArticle(comment)"
+ [title]="i18n.t('dev.comments.filterByArticle')"
+ [attr.aria-label]="i18n.t('dev.comments.filterByArticle')"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14">
+ <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+ </svg>
+ </button>
+ </span>
  <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
  </div>
  <div class="comment-card__actions">

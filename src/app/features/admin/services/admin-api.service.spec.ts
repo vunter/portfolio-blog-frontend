@@ -66,7 +66,7 @@ describe('AdminApiService', () => {
   describe('getDashboardActivity', () => {
     it('should GET /admin/dashboard/activity', () => {
       const mockActivity = [
-        { id: 1, type: 'article', action: 'created', title: 'New article', description: 'New article created', createdAt: '2026-02-10T10:00:00Z' },
+        { id: '1', type: 'article', action: 'created', title: 'New article', description: 'New article created', createdAt: '2026-02-10T10:00:00Z' },
       ];
 
       service.getDashboardActivity().subscribe((activity) => {
@@ -218,21 +218,18 @@ describe('AdminApiService', () => {
   // ==================== TAGS ====================
 
   describe('getTags', () => {
-    it('should GET /admin/tags with default page and size', () => {
-      service.getTags().subscribe();
+    // AUD18-04: backend returns a plain List<TagResponse> and ignores pagination
+    it('should GET /admin/tags without pagination params and return an array', () => {
+      const mockTags = [{ id: '1', name: 'Angular', slug: 'angular' }] as TagResponse[];
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/tags?page=0&size=50`);
+      service.getTags().subscribe((tags) => {
+        expect(tags).toEqual(mockTags);
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/tags`);
       expect(req.request.method).toBe('GET');
-      req.flush({ content: [], totalPages: 0, totalElements: 0, page: 0, size: 50, first: true, last: true });
-    });
-
-    it('should GET /admin/tags with custom page and size', () => {
-      service.getTags(2, 25).subscribe();
-
-      const req = httpMock.expectOne(`${baseUrl}/admin/tags?page=2&size=25`);
-      expect(req.request.params.get('page')).toBe('2');
-      expect(req.request.params.get('size')).toBe('25');
-      req.flush({ content: [], totalPages: 0, totalElements: 0, page: 2, size: 25, first: false, last: true });
+      expect(req.request.params.keys().length).toBe(0);
+      req.flush(mockTags);
     });
   });
 
@@ -334,23 +331,127 @@ describe('AdminApiService', () => {
     });
   });
 
+  // AUD19: granular cache invalidation
+  describe('granular cache invalidation', () => {
+    it('should DELETE /admin/cache/articles/{slug} with encoded slug', () => {
+      service.clearArticleCache('my article').subscribe((r) => {
+        expect(r.entriesRemoved).toBe(3);
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/cache/articles/my%20article`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'Article cache invalidated', slug: 'my article', entriesRemoved: 3 });
+    });
+
+    it('should DELETE /admin/cache/tags/{tagSlug}', () => {
+      service.clearTagCache('java').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/cache/tags/java`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'ok', tagSlug: 'java', entriesRemoved: 1 });
+    });
+
+    it('should DELETE /admin/cache/comments without id and /admin/cache/comments/{id} with id', () => {
+      service.clearCommentsCache().subscribe();
+      httpMock.expectOne(`${baseUrl}/admin/cache/comments`).flush({ message: 'ok', entriesRemoved: 0 });
+
+      service.clearCommentsCache('42').subscribe();
+      const req = httpMock.expectOne(`${baseUrl}/admin/cache/comments/42`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'ok', articleId: '42', entriesRemoved: 2 });
+    });
+
+    it('should DELETE search and feeds caches', () => {
+      service.clearSearchCache().subscribe();
+      httpMock.expectOne(`${baseUrl}/admin/cache/search`).flush({ message: 'ok', entriesRemoved: 5 });
+
+      service.clearFeedsCache().subscribe();
+      const req = httpMock.expectOne(`${baseUrl}/admin/cache/feeds`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'ok', entriesRemoved: 2 });
+    });
+
+    it('should DELETE all-articles and all-tags caches', () => {
+      service.clearArticlesCache().subscribe();
+      httpMock.expectOne(`${baseUrl}/admin/cache/articles`).flush({ message: 'ok', entriesRemoved: 10 });
+
+      service.clearTagsCache().subscribe();
+      const req = httpMock.expectOne(`${baseUrl}/admin/cache/tags`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'ok', entriesRemoved: 4 });
+    });
+  });
+
+  // AUD19-B: kept-endpoint consumers
+  describe('kept-endpoint consumers', () => {
+    // AUD19C-02: Snowflake string ids pass through untouched
+    it('should GET /admin/comments/article/{articleId} with the raw string id', () => {
+      service.getCommentsByArticle('9007199254740993').subscribe((comments) => {
+        expect(comments).toEqual([]);
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/comments/article/9007199254740993`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should GET /admin/contact/messages/{id}', () => {
+      service.getContactMessage('abc').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/contact/messages/abc`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ id: 'abc' });
+    });
+
+    it('should GET /admin/users/{id} with the raw string id', () => {
+      service.getUserById('7').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/users/7`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ id: '7' });
+    });
+  });
+
+  // AUD19: audit drill-down
+  describe('audit drill-down', () => {
+    it('should GET /admin/audit/user/{userId} with pagination', () => {
+      service.getAuditLogsByUser('7', 1, 50).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/audit/user/7?page=1&size=50`);
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('should GET /admin/audit/entity/{type}/{id} with encoded id', () => {
+      service.getAuditLogsByEntity('ARTICLE', 'slug/with/slash').subscribe();
+
+      const req = httpMock.expectOne(
+        `${baseUrl}/admin/audit/entity/ARTICLE/slug%2Fwith%2Fslash`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+  });
+
   // ==================== ANALYTICS ====================
 
   describe('getAnalyticsSummary', () => {
-    it('should GET /admin/analytics/summary with default period', () => {
+    // AUD18-03: backend expects an int `days` param, not a `period` string
+    it('should GET /admin/analytics/summary with default days', () => {
       service.getAnalyticsSummary().subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/analytics/summary?period=30d`);
+      const req = httpMock.expectOne(`${baseUrl}/admin/analytics/summary?days=30`);
       expect(req.request.method).toBe('GET');
-      expect(req.request.params.get('period')).toBe('30d');
+      expect(req.request.params.get('days')).toBe('30');
+      expect(req.request.params.has('period')).toBeFalse();
       req.flush({});
     });
 
-    it('should GET /admin/analytics/summary with custom period', () => {
-      service.getAnalyticsSummary('7d').subscribe();
+    it('should GET /admin/analytics/summary with custom days', () => {
+      service.getAnalyticsSummary(7).subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/admin/analytics/summary?period=7d`);
-      expect(req.request.params.get('period')).toBe('7d');
+      const req = httpMock.expectOne(`${baseUrl}/admin/analytics/summary?days=7`);
+      expect(req.request.params.get('days')).toBe('7');
       req.flush({});
     });
   });
@@ -358,8 +459,9 @@ describe('AdminApiService', () => {
   // ==================== NEWSLETTER ====================
 
   describe('getNewsletterStats', () => {
+    // AUD18-01: backend stats are exactly {confirmed, pending, total}
     it('should GET /admin/newsletter/stats', () => {
-      const mockStats: NewsletterStats = { total: 100, active: 80, confirmed: 75, unsubscribed: 5 };
+      const mockStats: NewsletterStats = { confirmed: 75, pending: 20, total: 95 };
 
       service.getNewsletterStats().subscribe((stats) => {
         expect(stats).toEqual(mockStats);
@@ -371,6 +473,22 @@ describe('AdminApiService', () => {
     });
   });
 
+  describe('deleteSubscribersBatch', () => {
+    // AUD18-01: confirmed=true is required or the backend performs a dry-run
+    it('should POST /admin/newsletter/subscribers/delete-batch with confirmed=true', () => {
+      service.deleteSubscribersBatch(['1', '2']).subscribe((res) => {
+        expect(res.count).toBe(2);
+        expect(res.confirmed).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/newsletter/subscribers/delete-batch?confirmed=true`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.params.get('confirmed')).toBe('true');
+      expect(req.request.body).toEqual({ ids: ['1', '2'] });
+      req.flush({ message: 'Subscribers deleted', count: 2, confirmed: true });
+    });
+  });
+
   describe('getSubscribers', () => {
     it('should GET /admin/newsletter/subscribers with default params', () => {
       service.getSubscribers().subscribe();
@@ -378,6 +496,37 @@ describe('AdminApiService', () => {
       const req = httpMock.expectOne(`${baseUrl}/admin/newsletter/subscribers?page=0&size=20`);
       expect(req.request.method).toBe('GET');
       req.flush({ content: [], totalPages: 0, totalElements: 0, page: 0, size: 20, first: true, last: true });
+    });
+  });
+
+  // ==================== EXPORT / IMPORT ====================
+
+  // AUD19C-04 (A2): the backend takes @RequestBody String (JSON) + an
+  // `overwrite` query param — never a multipart file, never double-stringified.
+  describe('importBlog', () => {
+    const fixture = { version: '1.0', articles: [{ title: 'Hello' }], exportedBy: 'admin', stats: {} };
+
+    it('should POST the JSON body once with overwrite=false by default', () => {
+      service.importBlog(fixture).subscribe((res) => {
+        expect(res.articlesImported).toBe(1);
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/export/import?overwrite=false`);
+      expect(req.request.method).toBe('POST');
+      // The object goes through HttpClient serialization exactly once —
+      // the body must still be the object, not a pre-stringified string.
+      expect(req.request.body).toEqual(fixture);
+      expect(typeof req.request.body).not.toBe('string');
+      expect(req.request.params.get('overwrite')).toBe('false');
+      req.flush({ message: 'Import completed', articlesImported: 1, articlesTotal: 1, tagsImported: 0, errors: [] });
+    });
+
+    it('should pass overwrite=true when requested', () => {
+      service.importBlog(fixture, true).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/admin/export/import?overwrite=true`);
+      expect(req.request.params.get('overwrite')).toBe('true');
+      req.flush({ message: 'Import completed', articlesImported: 1, articlesTotal: 1, tagsImported: 0, errors: [] });
     });
   });
 

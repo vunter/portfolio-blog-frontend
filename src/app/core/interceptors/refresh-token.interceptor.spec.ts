@@ -21,7 +21,7 @@ describe('refreshTokenInterceptor', () => {
   let httpMock: HttpTestingController;
   let routerSpy: jasmine.SpyObj<Router>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let mockAuthStore: { isAuthenticated: ReturnType<typeof signal<boolean>>; isLoading: ReturnType<typeof signal<boolean>>; logout: jasmine.Spy };
+  let mockAuthStore: { isAuthenticated: ReturnType<typeof signal<boolean>>; isLoading: ReturnType<typeof signal<boolean>>; logout: jasmine.Spy; setTokenExpiry: jasmine.Spy };
   let refreshState: RefreshTokenState;
 
   beforeEach(() => {
@@ -31,6 +31,7 @@ describe('refreshTokenInterceptor', () => {
       isAuthenticated: signal(true),
       isLoading: signal(false),
       logout: jasmine.createSpy('logout'),
+      setTokenExpiry: jasmine.createSpy('setTokenExpiry'),
     };
 
     TestBed.configureTestingModule({
@@ -151,20 +152,48 @@ describe('refreshTokenInterceptor', () => {
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
   });
 
-  it('should logout and navigate when 401 and user is NOT authenticated and NOT loading', () => {
+  // AUD19C-A5FE: an unauthenticated 401 (e.g. wrong MFA code mid-login) has no session
+  // to clear — the error must reach the subscriber without any logout/redirect.
+  it('should NOT logout on 401 when user is not authenticated — error reaches subscriber', () => {
     mockAuthStore.isAuthenticated.set(false);
     mockAuthStore.isLoading.set(false);
 
+    let received: HttpErrorResponse | null = null;
     http.get('/api/v1/admin/dashboard').subscribe({
-      error: () => {},
+      error: (err: HttpErrorResponse) => (received = err),
     });
 
     const req = httpMock.expectOne('/api/v1/admin/dashboard');
     req.flush(null, { status: 401, statusText: 'Unauthorized' });
 
     expect(authServiceSpy.refreshToken).not.toHaveBeenCalled();
-    expect(mockAuthStore.logout).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth/login']);
+    expect(mockAuthStore.logout).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(received!.status).toBe(401);
+  });
+
+  // AUD19C-A5FE: a business-level 401 AFTER a successful refresh (e.g. re-auth password
+  // check rejected) must propagate to the caller without forcing a logout.
+  it('should propagate a 401 from the retried request after successful refresh without logout', () => {
+    authServiceSpy.refreshToken.and.returnValue(of({ expiresIn: 900 } as any));
+
+    let received: HttpErrorResponse | null = null;
+    http.get('/api/v1/admin/dashboard').subscribe({
+      error: (err: HttpErrorResponse) => (received = err),
+    });
+
+    const req = httpMock.expectOne('/api/v1/admin/dashboard');
+    req.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authServiceSpy.refreshToken).toHaveBeenCalled();
+
+    // Retried request also 401s — business rejection, not a session failure
+    const retryReq = httpMock.expectOne('/api/v1/admin/dashboard');
+    retryReq.flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(received!.status).toBe(401);
+    expect(mockAuthStore.logout).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
   it('should NOT logout during session restoration (isLoading=true, isAuthenticated=false)', () => {

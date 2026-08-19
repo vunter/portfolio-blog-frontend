@@ -18,7 +18,7 @@ export class ScrollDepthTrackerService {
    * Init scroll depth tracking on the given article content element.
    * Creates sentinel divs at configured threshold percentages.
    */
-  init(articleId: number | undefined): void {
+  init(articleId: string | undefined): void {
     if (!isPlatformBrowser(this.platformId) || !this.analytics.hasConsent()) return;
     this.destroy();
 

@@ -124,3 +124,15 @@
   font-size: 0.875rem;
   padding: 1rem 0;
 }
+
+// AUD18-05: failed-load state with retry
+.translation-load-error {
+  text-align: center;
+  padding: 1rem 0;
+
+  p {
+    color: var(--badge-error-text, #dc2626);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem;
+  }
+}

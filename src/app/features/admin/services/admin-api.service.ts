@@ -10,8 +10,10 @@ import { ArticleVersionResponse, ArticleVersionListResponse, VersionCompareRespo
 // ADMIN-SPECIFIC RESPONSE TYPES
 // ============================================
 
+// AUD19C-02: ids are Snowflake strings end-to-end (backend serializes Long ids
+// as JSON strings; Number would corrupt values > 2^53).
 export interface CustomVariable {
-  id: number;
+  id: string;
   key: string;
   value: string;
   description: string;
@@ -19,7 +21,7 @@ export interface CustomVariable {
 }
 
 export interface TranslationItem {
-  id: number;
+  id: string;
   translationKey: string;
   locale: string;
   value: string;
@@ -49,7 +51,7 @@ export interface DashboardStats {
 }
 
 export interface DashboardActivity {
-  id: number;
+  id: string;
   type: string;
   action: string;
   title: string;
@@ -90,21 +92,28 @@ export interface ContactMessage {
   createdAt: string;
 }
 
+// AUD18-01: Aligned with backend NewsletterService.getStats() — the API sends
+// exactly {confirmed, pending, total}; `active`/`unsubscribed` were never sent.
 export interface NewsletterStats {
-  total: number;
-  active: number;
   confirmed: number;
-  unsubscribed: number;
+  pending: number;
+  total: number;
 }
 
 // CQ-09: Typed subscriber response instead of Record<string, unknown>
+// AUD18-01: Field names aligned with backend SubscriberResponse (subscribedAt,
+// not createdAt; plus account-link fields).
 export interface SubscriberResponse {
   id: string;
   email: string;
   name?: string;
   status: string;
+  subscribedAt: string;
   confirmedAt?: string;
-  createdAt: string;
+  unsubscribedAt?: string;
+  userId?: string;
+  linkedAt?: string;
+  linkOrigin?: string;
 }
 
 export interface CacheStats {
@@ -116,6 +125,8 @@ export interface CacheStats {
 }
 
 // INT-12: Analytics types — aligned with backend AnalyticsSummary DTO
+// AUD18-03: Removed never-sent `period`; added topDevices/topBrowsers/topCountries
+// which the backend DTO includes.
 export interface AnalyticsSummary {
   totalViews: number;
   totalLikes: number;
@@ -125,7 +136,9 @@ export interface AnalyticsSummary {
   dailyViews: { date: string; count: number }[];
   topReferrers: { referrer: string; count: number }[];
   topSources: { source: string; medium: string; count: number }[];
-  period: string;
+  topDevices: { deviceType: string; count: number }[];
+  topBrowsers: { browser: string; count: number }[];
+  topCountries: { countryCode: string; count: number }[];
 }
 
 export interface AnalyticsTrend {
@@ -150,13 +163,8 @@ export interface AnalyticsComparison {
   previousShares: number;
 }
 
-// INT-12: User stats
-export interface UserStats {
-  totalUsers: number;
-  activeUsers: number;
-  admins: number;
-  authors: number;
-}
+// AUD19C-03: UserStats + getUserStats() removed — verified orphan; the backend
+// endpoint is being deleted in parallel.
 
 // Q8.3: User activity response (was previously untyped `any`)
 export interface UserActivity {
@@ -166,17 +174,37 @@ export interface UserActivity {
   commentsPosted: number;
 }
 
+// AUD19: response shape of AdminCacheController invalidation endpoints
+export interface CacheInvalidationResult {
+  message: string;
+  entriesRemoved: number;
+  slug?: string;
+  tagSlug?: string;
+  articleId?: string;
+}
+
 // Audit log entry
+// AUD19C-02: id/performedBy are Snowflake strings (see note above CustomVariable).
 export interface AuditLog {
-  id: number;
+  id: string;
   action: string;
   entityType: string;
   entityId: string;
-  performedBy: number;
+  performedBy: string;
   performedByEmail: string;
   details: string;
   ipAddress: string;
   createdAt: string;
+}
+
+// AUD19C-04 (A2): response of POST /admin/export/import — mirrors the
+// AdminExportController response map.
+export interface ImportBlogResult {
+  message: string;
+  articlesImported: number;
+  articlesTotal: number;
+  tagsImported: number;
+  errors: string[];
 }
 
 // Reading history entry
@@ -193,7 +221,7 @@ export interface ReadingHistoryEntry {
 export type MediaPurpose = 'AVATAR' | 'BLOG_COVER' | 'BLOG_CONTENT' | 'COMMENT' | 'PROJECT' | 'TESTIMONIAL' | 'GENERAL';
 
 export interface MediaAssetResponse {
-  id: number;
+  id: string;
   originalFilename: string;
   contentType: string;
   fileSize: number;
@@ -296,6 +324,12 @@ export class AdminApiService {
     return this.api.get<PageResponse<AdminComment>>('/admin/comments', params);
   }
 
+  // AUD19-B: per-article comment moderation (backend AdminCommentController, capped at 500)
+  // AUD19C-02: articleId is a Snowflake string — never coerce to Number.
+  getCommentsByArticle(articleId: string): Observable<AdminComment[]> {
+    return this.api.get<AdminComment[]>(`/admin/comments/article/${articleId}`);
+  }
+
   approveComment(id: string): Observable<AdminComment> {
     return this.api.put<AdminComment>(`/admin/comments/${id}/approve`, {});
   }
@@ -312,6 +346,11 @@ export class AdminApiService {
 
   getContactMessages(page = 0, size = 20): Observable<PageResponse<ContactMessage>> {
     return this.api.get<PageResponse<ContactMessage>>('/admin/contact/messages', { page, size });
+  }
+
+  // AUD19-B: fresh single-message fetch (backend AdminContactController)
+  getContactMessage(id: string): Observable<ContactMessage> {
+    return this.api.get<ContactMessage>(`/admin/contact/messages/${id}`);
   }
 
   markMessageAsRead(id: string): Observable<ContactMessage> {
@@ -348,6 +387,12 @@ export class AdminApiService {
 
   getUsers(page = 0, size = 20): Observable<PageResponse<UserResponse>> {
     return this.api.get<PageResponse<UserResponse>>('/admin/users', { page, size });
+  }
+
+  // AUD19-B: fresh single-user fetch for the detail drawer (backend AdminUserController)
+  // AUD19C-02: id is a Snowflake string — never coerce to Number.
+  getUserById(id: string): Observable<UserResponse> {
+    return this.api.get<UserResponse>(`/admin/users/${id}`);
   }
 
   createUser(data: Record<string, unknown>): Observable<UserResponse> {
@@ -444,19 +489,20 @@ export class AdminApiService {
   }
 
   // ==================== INT-12: Export/Import ====================
-
-  exportBlog(): Observable<Blob> {
-    const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
-    return this.http.get(`${baseUrl}/admin/export`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
-  }
+  // AUD19C-03: exportBlog() (GET /admin/export) removed — verified orphan; the
+  // backend endpoint is being deleted in parallel. Use exportBlogJson().
 
   exportBlogJson(): Observable<Blob> {
     const baseUrl = `${environment.apiUrl}/${environment.apiVersion}`;
     return this.http.get(`${baseUrl}/admin/export/json`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
   }
 
-  importBlog(file: File): Observable<{ message: string }> {
-    return this.api.upload<{ message: string }>('/admin/export/import', file);
+  // AUD19C-04 (A2): the backend endpoint takes @RequestBody String + an
+  // `overwrite` query param — a multipart file upload was never parseable.
+  // HttpClient serializes the object once; do NOT pre-stringify or wrap in a
+  // Blob/File. Response shape mirrors AdminExportController's response map.
+  importBlog(json: unknown, overwrite = false): Observable<ImportBlogResult> {
+    return this.api.post<ImportBlogResult>('/admin/export/import', json, { overwrite });
   }
 
   exportArticlesMarkdown(): Observable<Blob> {
@@ -464,14 +510,15 @@ export class AdminApiService {
     return this.http.get(`${baseUrl}/admin/export/markdown`, { responseType: 'blob', withCredentials: true }).pipe(timeout(60000), this.retryTransient());
   }
 
-  getExportStats(): Observable<Record<string, number>> {
-    return this.api.get<Record<string, number>>('/admin/export/stats');
-  }
+  // AUD19C-03: getExportStats() (GET /admin/export/stats) removed — verified
+  // orphan; the backend endpoint is being deleted in parallel.
 
   // ==================== INT-12: Analytics ====================
 
-  getAnalyticsSummary(period = '30d'): Observable<AnalyticsSummary> {
-    return this.api.get<AnalyticsSummary>('/admin/analytics/summary', { period });
+  // AUD18-03: Backend expects an int `days` param (@RequestParam int days),
+  // not a `period` string — sending `period=30d` silently fell back to the default.
+  getAnalyticsSummary(days = 30): Observable<AnalyticsSummary> {
+    return this.api.get<AnalyticsSummary>('/admin/analytics/summary', { days });
   }
 
   getAnalytics(period = '30d'): Observable<AnalyticsSummary> {
@@ -488,8 +535,10 @@ export class AdminApiService {
 
   // ==================== INC-05: Tag CRUD (update + delete) ====================
 
-  getTags(page = 0, size = 50): Observable<PageResponse<TagResponse>> {
-    return this.api.get<PageResponse<TagResponse>>('/admin/tags', { page, size });
+  // AUD18-04: Backend AdminTagController returns a plain List<TagResponse> and
+  // ignores pagination — the previous PageResponse typing + page/size params were fake.
+  getTags(): Observable<TagResponse[]> {
+    return this.api.get<TagResponse[]>('/admin/tags');
   }
 
   createTag(data: { name: string; description?: string; color?: string }): Observable<TagResponse> {
@@ -514,10 +563,6 @@ export class AdminApiService {
 
   updateUserRole(id: string, role: string): Observable<UserResponse> {
     return this.api.put<UserResponse>(`/admin/users/${id}/role`, { role });
-  }
-
-  getUserStats(): Observable<UserStats> {
-    return this.api.get<UserStats>('/admin/users/stats');
   }
 
   // ==================== EMAIL TEMPLATE MANAGEMENT ====================
@@ -560,31 +605,60 @@ export class AdminApiService {
     return this.api.post(`/admin/settings/email-templates/custom-variables`, data);
   }
 
-  updateCustomVariable(id: number, data: { value: string; description?: string }): Observable<CustomVariable> {
+  updateCustomVariable(id: string, data: { value: string; description?: string }): Observable<CustomVariable> {
     return this.api.put(`/admin/settings/email-templates/custom-variables/${id}`, data);
   }
 
-  deleteCustomVariable(id: number): Observable<{ message: string }> {
+  deleteCustomVariable(id: string): Observable<{ message: string }> {
     return this.api.delete(`/admin/settings/email-templates/custom-variables/${id}`);
   }
 
-  // ==================== INT-12: Auth Token Verification ====================
-
-  verifyToken(): Observable<{ valid: boolean; email?: string }> {
-    // Backend endpoint is /admin/auth/verify (not /auth/verify, which 404s).
-    return this.api.get<{ valid: boolean; email?: string }>('/admin/auth/verify');
-  }
+  // AUD19C-03: verifyToken() (GET /admin/auth/verify) removed — verified
+  // orphan; the backend endpoint is being deleted in parallel.
 
   // ==================== INT-12: Fine-grained Cache Invalidation ====================
 
-  clearCacheByName(cacheName: string): Observable<void> {
-    return this.api.delete<void>(`/admin/cache/${cacheName}`);
+  // AUD19: granular cache invalidation (backend AdminCacheController path-based endpoints)
+  clearArticlesCache(): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>('/admin/cache/articles');
+  }
+
+  clearArticleCache(slug: string): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>(`/admin/cache/articles/${encodeURIComponent(slug)}`);
+  }
+
+  clearTagsCache(): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>('/admin/cache/tags');
+  }
+
+  clearTagCache(tagSlug: string): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>(`/admin/cache/tags/${encodeURIComponent(tagSlug)}`);
+  }
+
+  clearCommentsCache(articleId?: string): Observable<CacheInvalidationResult> {
+    return articleId
+      ? this.api.delete<CacheInvalidationResult>(`/admin/cache/comments/${encodeURIComponent(articleId)}`)
+      : this.api.delete<CacheInvalidationResult>('/admin/cache/comments');
+  }
+
+  clearSearchCache(): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>('/admin/cache/search');
+  }
+
+  clearFeedsCache(): Observable<CacheInvalidationResult> {
+    return this.api.delete<CacheInvalidationResult>('/admin/cache/feeds');
   }
 
   // ==================== INT-12: Newsletter Batch Delete ====================
 
-  deleteSubscribersBatch(ids: string[]): Observable<void> {
-    return this.api.post<void>('/admin/newsletter/subscribers/delete-batch', { ids });
+  // AUD18-01: Without `confirmed=true` the backend treats the call as a dry-run
+  // preview and deletes nothing.
+  deleteSubscribersBatch(ids: string[]): Observable<{ message: string; count: number; confirmed: boolean }> {
+    return this.api.post<{ message: string; count: number; confirmed: boolean }>(
+      '/admin/newsletter/subscribers/delete-batch',
+      { ids },
+      { confirmed: true }
+    );
   }
 
   // ==================== I18N: Translation Management ====================
@@ -595,15 +669,15 @@ export class AdminApiService {
     return this.api.get<TranslationPage>('/admin/settings/translations', params);
   }
 
-  updateTranslation(id: number, value: string): Observable<{ status: string }> {
+  updateTranslation(id: string, value: string): Observable<{ status: string }> {
     return this.api.put<{ status: string }>(`/admin/settings/translations/${id}`, { value });
   }
 
-  createTranslation(body: { translationKey: string; locale: string; value: string; namespace?: string; visibility?: string }): Observable<{ id: number; status: string }> {
-    return this.api.post<{ id: number; status: string }>('/admin/settings/translations', body);
+  createTranslation(body: { translationKey: string; locale: string; value: string; namespace?: string; visibility?: string }): Observable<{ id: string; status: string }> {
+    return this.api.post<{ id: string; status: string }>('/admin/settings/translations', body);
   }
 
-  deleteTranslation(id: number): Observable<{ status: string }> {
+  deleteTranslation(id: string): Observable<{ status: string }> {
     return this.api.delete<{ status: string }>(`/admin/settings/translations/${id}`);
   }
 
@@ -615,6 +689,16 @@ export class AdminApiService {
 
   getRecentAuditLogs(days: number, limit: number): Observable<AuditLog[]> {
     return this.api.get<AuditLog[]>('/admin/audit/recent', { days, limit });
+  }
+
+  // AUD19: per-user / per-entity audit drill-down (backend AdminAuditController)
+  // AUD19C-02: userId is a Snowflake string — never coerce to Number.
+  getAuditLogsByUser(userId: string, page = 0, size = 20): Observable<AuditLog[]> {
+    return this.api.get<AuditLog[]>(`/admin/audit/user/${userId}`, { page, size });
+  }
+
+  getAuditLogsByEntity(entityType: string, entityId: string): Observable<AuditLog[]> {
+    return this.api.get<AuditLog[]>(`/admin/audit/entity/${entityType}/${encodeURIComponent(entityId)}`);
   }
 
   exportAuditCsv(days: number): Observable<string> {

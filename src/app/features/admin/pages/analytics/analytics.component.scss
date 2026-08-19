@@ -339,6 +339,63 @@ a {
   }
 }
 
+/* AUD19: Audience section — three side-by-side cards, stacked on mobile */
+.audience {
+  margin-top: 2rem;
+}
+
+.audience__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.audience-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.audience-rank {
+  display: inline-block;
+  min-width: 1.25rem;
+  margin-right: 0.375rem;
+  font-weight: 600;
+  color: var(--text-muted, #9ca3af);
+}
+
+.audience-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #666);
+  }
+}
+
 .search-analytics {
   background: var(--card-bg);
   border-radius: 12px;

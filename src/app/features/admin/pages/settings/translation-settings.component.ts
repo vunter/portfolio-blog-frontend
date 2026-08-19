@@ -24,7 +24,8 @@ export class TranslationSettingsComponent {
   transPage = signal(0);
   transData = signal<TranslationPage | null>(null);
   transLoading = signal(false);
-  transEditId = signal<number | null>(null);
+  // AUD19C-02: translation ids are Snowflake strings
+  transEditId = signal<string | null>(null);
   transEditValue = signal('');
   transSaving = signal(false);
   showAddTrans = signal(false);

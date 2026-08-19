@@ -122,6 +122,8 @@ export class LoginComponent {
               mfaToken: response.mfaToken,
               email: response.email,
               returnUrl,
+              // AUD19C-MFA-UX: preselect the user's preferred MFA method on the verify page
+              method: response.mfaMethod ?? undefined,
             },
           });
           return;

@@ -11,9 +11,18 @@
  </div>
 
  <div class="contact-buttons">
+ <!-- AUD19C-09: the public profile strips email/phone on the username-fallback
+      path — guard each anchor so we never render mailto:/href="" dead links.
+      The section itself stays: it still holds the CV download and contact form. -->
+ @if (email()) {
  <a [href]="'mailto:' + email()" class="btn btn-primary" [attr.aria-label]="i18n.t('home.contact.emailAriaLabel')">{{ i18n.t('home.contact.sendEmail') }}</a>
+ }
+ @if (linkedinUrl()) {
  <a [href]="linkedinUrl()" class="btn btn-secondary" target="_blank" rel="noopener" [attr.aria-label]="i18n.t('home.contact.linkedinAriaLabel')">LinkedIn</a>
+ }
+ @if (githubUrl()) {
  <a [href]="githubUrl()" class="btn btn-secondary" target="_blank" rel="noopener" [attr.aria-label]="i18n.t('home.contact.githubAriaLabel')">GitHub</a>
+ }
  <button class="btn btn-outline btn-download" (click)="downloadResume()" [disabled]="downloadingResume()">
  @if (downloadingResume()) {
  <span class="btn-spinner"></span>

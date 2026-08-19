@@ -27,6 +27,10 @@
  <span class="comment__date">
  {{ comment.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}
  </span>
+ <!-- AUD19C-06: moderation-pending indicator -->
+ @if (comment.status && comment.status !== 'APPROVED') {
+ <span class="comment__pending-badge">{{ i18n.t('article.comments.pendingBadge') }}</span>
+ }
  </div>
  <p class="comment__text">{{ comment.content }}</p>
  <div class="comment__actions">
@@ -71,6 +75,9 @@
  <div class="comment__header">
  <span class="comment__author">{{ reply.authorName || i18n.t('blog.anonymous') }}</span>
  <span class="comment__date">{{ reply.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}</span>
+ @if (reply.status && reply.status !== 'APPROVED') {
+ <span class="comment__pending-badge">{{ i18n.t('article.comments.pendingBadge') }}</span>
+ }
  </div>
  <p class="comment__text">{{ reply.content }}</p>
  <div class="comment__actions">
@@ -114,6 +121,9 @@
  <div class="comment__header">
  <span class="comment__author">{{ subReply.authorName || i18n.t('blog.anonymous') }}</span>
  <span class="comment__date">{{ subReply.createdAt | date : 'dd/MM/yyyy HH:mm' : '' : dateLocale() }}</span>
+ @if (subReply.status && subReply.status !== 'APPROVED') {
+ <span class="comment__pending-badge">{{ i18n.t('article.comments.pendingBadge') }}</span>
+ }
  </div>
  <p class="comment__text">{{ subReply.content }}</p>
  </div>

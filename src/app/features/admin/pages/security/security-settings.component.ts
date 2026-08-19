@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MfaService } from '../../../../core/services/mfa.service';
 import { ApiService } from '../../../../core/services/api.service';
@@ -8,6 +8,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MfaSetupResponse, MfaStatusResponse } from '../../../../models';
 import { AuthService, SessionInfo } from '../../../../core/auth/auth.service';
+import { AuthStore } from '../../../../core/auth/auth.store';
 import { DatePipe } from '@angular/common';
 import { environment } from '../../../../../environments/environment';
 
@@ -29,6 +30,7 @@ export class SecuritySettingsComponent implements OnInit {
   private mfaService = inject(MfaService);
   private api = inject(ApiService);
   private authService = inject(AuthService);
+  private authStore = inject(AuthStore);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
@@ -59,9 +61,20 @@ export class SecuritySettingsComponent implements OnInit {
     code: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
   });
 
+  // AUD19C-A3FE: disabling ALL MFA is re-authenticated with the current password
+  // (inline reveal panel, mirroring the removeMethodForm pattern). Social-only
+  // accounts (hasPassword === false) can't provide one — they get a hint routing
+  // them to the per-method disable flow instead.
+  disableMfaPanel = signal(false);
+  disableMfaForm = this.fb.group({
+    password: ['', [Validators.required]],
+  });
+  hasPassword = computed(() => this.authStore.user()?.hasPassword !== false);
+
   sessions = signal<SessionInfo[]>([]);
   sessionsLoading = signal(false);
-  revokingId = signal<number | null>(null);
+  // AUD19C-A3FE: session ids are Snowflake strings (see SessionInfo.id)
+  revokingId = signal<string | null>(null);
   backupCodes = signal<string[]>([]);
   generatingCodes = signal(false);
   socialAccounts = signal<SocialAccount[]>([]);
@@ -233,26 +246,44 @@ export class SecuritySettingsComponent implements OnInit {
     });
   }
 
-  async disableMfa(): Promise<void> {
-    const confirmed = await this.confirmDialog.confirm({
-      title: this.i18n.t('account.security.disableTitle'),
-      message: this.i18n.t('account.security.disableMessage'),
-      confirmText: this.i18n.t('account.security.disableConfirm'),
-      type: 'danger',
-    });
-    if (!confirmed) return;
+  /** AUD19C-A3FE: open the inline password-confirmation panel (or the social-only hint). */
+  startDisableMfa(): void {
+    this.disableMfaForm.reset();
+    this.disableMfaPanel.set(true);
+  }
+
+  cancelDisableMfa(): void {
+    this.disableMfaPanel.set(false);
+    this.disableMfaForm.reset();
+  }
+
+  confirmDisableMfa(): void {
+    if (this.disableMfaForm.invalid) {
+      this.disableMfaForm.markAllAsTouched();
+      return;
+    }
+
     this.disabling.set(true);
-    this.mfaService.disable().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const password = this.disableMfaForm.getRawValue().password!;
+
+    this.mfaService.disable(password).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('account.security.mfaDisabled'));
         this.disabling.set(false);
+        this.disableMfaPanel.set(false);
+        this.disableMfaForm.reset();
         this.showSetup.set(false);
         this.setupData.set(null);
         this.loadStatus();
       },
-      error: () => {
-        this.notification.error(this.i18n.t('account.security.disableFailed'));
+      error: (err) => {
         this.disabling.set(false);
+        // AUD19C-A3FE: 400 = wrong password (backend re-auth check)
+        if (err.status === 400) {
+          this.notification.error(this.i18n.t('account.security.wrongPassword'));
+        } else {
+          this.notification.error(this.i18n.t('account.security.disableFailed'));
+        }
       },
     });
   }
@@ -326,7 +357,7 @@ export class SecuritySettingsComponent implements OnInit {
     });
   }
 
-  revokeSession(sessionId: number): void {
+  revokeSession(sessionId: string): void {
     this.revokingId.set(sessionId);
     this.authService.revokeSession(sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {

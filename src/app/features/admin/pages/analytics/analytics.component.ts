@@ -17,6 +17,15 @@ interface AnalyticsData {
   topSources: { source: string; medium: string; count: number }[];
 }
 
+// AUD19: Audience breakdown from GET /admin/analytics/summary?days=N —
+// device_type/browser_family are parsed server-side (DeviceParser) and
+// country_code is a GeoIP ISO 3166-1 alpha-2 code.
+interface AudienceData {
+  topDevices: { deviceType: string; count: number }[];
+  topBrowsers: { browser: string; count: number }[];
+  topCountries: { countryCode: string; count: number }[];
+}
+
 @Component({
   selector: 'app-analytics',
   imports: [SkeletonComponent],
@@ -39,6 +48,20 @@ export class AnalyticsComponent implements OnInit {
   maxViews = signal(0);
   maxReferrerCount = signal(0);
   maxSourceCount = signal(0);
+
+  // AUD19: Audience section state — separate endpoint (getAnalyticsSummary),
+  // so it gets its own loading/error lifecycle with an inline retry.
+  audience = signal<AudienceData | null>(null);
+  audienceLoading = signal(true);
+  audienceError = signal(false);
+
+  readonly maxDeviceCount = computed(() => Math.max(0, ...(this.audience()?.topDevices ?? []).map((d) => d.count)));
+  readonly maxBrowserCount = computed(() => Math.max(0, ...(this.audience()?.topBrowsers ?? []).map((b) => b.count)));
+  readonly maxCountryCount = computed(() => Math.max(0, ...(this.audience()?.topCountries ?? []).map((c) => c.count)));
+
+  // Intl.DisplayNames is cached per locale — recreated lazily when the UI language changes.
+  private regionNamesLocale: string | null = null;
+  private regionNames: Intl.DisplayNames | null = null;
 
   readonly viewsChange = computed(() => this.calcChange(this.comparison()?.currentViews, this.comparison()?.previousViews));
   readonly likesChange = computed(() => this.calcChange(this.comparison()?.currentLikes, this.comparison()?.previousLikes));
@@ -113,6 +136,38 @@ export class AnalyticsComponent implements OnInit {
       next: (comp) => this.comparison.set(comp),
       error: () => this.comparison.set(null),
     });
+    this.loadAudience();
+  }
+
+  // AUD19: Audience data comes from the summary endpoint, which takes an int
+  // `days` param — translate the page's period string ('7d'/'30d'/'90d') to days.
+  loadAudience(): void {
+    this.audienceLoading.set(true);
+    this.audienceError.set(false);
+    this.adminApi
+      .getAnalyticsSummary(this.periodToDays(this.period()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (summary) => {
+          this.audience.set({
+            topDevices: summary.topDevices ?? [],
+            topBrowsers: summary.topBrowsers ?? [],
+            topCountries: summary.topCountries ?? [],
+          });
+          this.audienceLoading.set(false);
+        },
+        error: () => {
+          this.audienceLoading.set(false);
+          this.audienceError.set(true);
+        },
+      });
+  }
+
+  // Mirrors backend AdminAnalyticsController.parsePeriod: clamp to [1, 365], default 30.
+  periodToDays(period: string): number {
+    const days = parseInt(period, 10);
+    if (!Number.isFinite(days) || days < 1) return 30;
+    return Math.min(days, 365);
   }
 
   getBarHeight(count: number): number {
@@ -134,6 +189,79 @@ export class AnalyticsComponent implements OnInit {
     const max = this.maxSourceCount();
     if (max === 0) return 5;
     return Math.max((count / max) * 100, 5);
+  }
+
+  // AUD19: proportional bar for the audience cards (same 5% visibility floor
+  // as the referrer/source bars).
+  getAudienceWidth(count: number, max: number): number {
+    if (max <= 0) return 5;
+    return Math.max((count / max) * 100, 5);
+  }
+
+  // AUD19: backend DeviceParser emits uppercase enums (DESKTOP/MOBILE/TABLET/BOT/UNKNOWN).
+  deviceLabel(deviceType: string | null | undefined): string {
+    const value = deviceType?.trim();
+    if (!value || value.toUpperCase() === 'UNKNOWN') {
+      return this.i18n.t('dev.analytics.unknown');
+    }
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  }
+
+  // AUD19: browser_family is already human-cased server-side ("Chrome", "Samsung Internet", …).
+  browserLabel(browser: string | null | undefined): string {
+    const value = browser?.trim();
+    if (!value || value.toLowerCase() === 'unknown') {
+      return this.i18n.t('dev.analytics.unknown');
+    }
+    return value;
+  }
+
+  // AUD19: readable region name for a GeoIP ISO 3166-1 alpha-2 code, in the
+  // current UI locale. Falls back to the raw code when Intl.DisplayNames is
+  // unavailable, the code is invalid, or no localized name exists.
+  countryName(code: string | null | undefined): string {
+    const raw = code?.trim();
+    if (!raw || raw.toLowerCase() === 'unknown') {
+      return this.i18n.t('dev.analytics.unknown');
+    }
+    const upper = raw.toUpperCase();
+    const names = this.getRegionNames();
+    if (names) {
+      try {
+        const name = names.of(upper);
+        if (name && name !== upper) return name;
+      } catch {
+        // Invalid region code syntax (RangeError) — fall through to raw code.
+      }
+    }
+    return upper;
+  }
+
+  // AUD19: ISO code badge next to the readable name; empty for unknown values.
+  countryCodeLabel(code: string | null | undefined): string {
+    const raw = code?.trim();
+    if (!raw || raw.toLowerCase() === 'unknown') return '';
+    return raw.toUpperCase();
+  }
+
+  private getRegionNames(): Intl.DisplayNames | null {
+    const locale = this.i18n.language();
+    if (this.regionNamesLocale === locale) return this.regionNames;
+    this.regionNamesLocale = locale;
+    this.regionNames = null;
+    if (typeof Intl !== 'undefined' && 'DisplayNames' in Intl) {
+      try {
+        this.regionNames = new Intl.DisplayNames([locale], { type: 'region' });
+      } catch {
+        // Unsupported locale tag — try English before giving up.
+        try {
+          this.regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+        } catch {
+          this.regionNames = null;
+        }
+      }
+    }
+    return this.regionNames;
   }
 
   getSourceIcon(source: string): string {

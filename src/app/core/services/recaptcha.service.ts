@@ -37,15 +37,18 @@ export class RecaptchaService {
     await this.loadScript();
 
     return new Promise<string | null>((resolve) => {
-      const recaptchaEnterprise = window.grecaptcha?.enterprise;
-      if (!recaptchaEnterprise) {
+      // AUD18-A2: The loaded script is the STANDARD v3 api.js (see loadScript), and the
+      // backend verifies against the standard siteverify endpoint — so read the standard
+      // window.grecaptcha object, not grecaptcha.enterprise (which api.js never defines).
+      const recaptcha = window.grecaptcha;
+      if (!recaptcha) {
         // CQ-07: reCAPTCHA unavailable — resolve null silently
         resolve(null);
         return;
       }
 
-      recaptchaEnterprise.ready(() => {
-        recaptchaEnterprise
+      recaptcha.ready(() => {
+        recaptcha
           .execute(this.siteKey, { action })
           .then((token) => resolve(token))
           .catch(() => {

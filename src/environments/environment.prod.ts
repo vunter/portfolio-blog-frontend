@@ -21,7 +21,11 @@ export const environment = {
   recaptchaEnabled: true,
   // Q8.11: Configurable scroll depth tracking thresholds (percentage points)
   scrollDepthThresholds: [25, 50, 75, 100] as readonly number[],
-  // Q13.1: Sentry DSN — inject via CI/CD build-time replacement
+  // AUD18-M9: Sentry is OFF. No CI/CD injection of the DSN exists today — the
+  // previous "inject via CI/CD" comment described machinery that was never built,
+  // leaving sentryEnabled:true with an empty DSN (a silent no-op). To enable:
+  // provision a real DSN, add an actual build-time injection step (or hardcode the
+  // DSN here — Sentry DSNs are not secrets), then flip sentryEnabled to true.
   sentryDsn: '',
-  sentryEnabled: true,
+  sentryEnabled: false,
 } as const;

@@ -76,7 +76,7 @@ export class AuthService {
     });
   }
 
-  revokeSession(sessionId: number): Observable<void> {
+  revokeSession(sessionId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/admin/auth/sessions/${sessionId}`, {
       withCredentials: true,
     });
@@ -90,7 +90,9 @@ export class AuthService {
 }
 
 export interface SessionInfo {
-  id: number;
+  // AUD19C-A3FE: Snowflake ids exceed Number.MAX_SAFE_INTEGER — the backend now
+  // serializes them as strings; parsing to number would silently corrupt the id.
+  id: string;
   deviceName: string;
   ipAddress: string;
   createdAt: string;

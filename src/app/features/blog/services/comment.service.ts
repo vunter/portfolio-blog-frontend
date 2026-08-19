@@ -37,10 +37,12 @@ export class CommentService {
     if (commentIds.length === 0) {
       return new Observable(sub => { sub.next({}); sub.complete(); });
     }
-    // Backend expects numeric IDs; the comment-id strings round-trip cleanly through Long.
+    // AUD19C-01: Send the ids as the original strings. Snowflake ids exceed
+    // Number.MAX_SAFE_INTEGER, so a Number() round-trip corrupts them; the
+    // backend (Jackson) coerces string ids in request bodies just fine.
     return this.api.post<Record<string, { liked: boolean; likesCount: number }>>(
       `/articles/${articleSlug}/comments/like/status/batch`,
-      { commentIds: commentIds.map(id => Number(id)) },
+      { commentIds },
     );
   }
 

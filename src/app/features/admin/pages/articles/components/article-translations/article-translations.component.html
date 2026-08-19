@@ -9,6 +9,15 @@
  </div>
  @if (showPanel()) {
  <div class="translation-content">
+ @if (loadError()) {
+ <!-- AUD18-05: error state with retry -->
+ <div class="translation-load-error">
+ <p>{{ i18n.t('dev.articles.translationsLoadError') }}</p>
+ <button type="button" class="btn btn-outline btn-sm" (click)="retryLoad()">
+ {{ i18n.t('dev.common.retry') }}
+ </button>
+ </div>
+ } @else {
  <div class="translate-action">
  <label>{{ i18n.t('dev.articles.translateTo') }}</label>
  <div class="translate-row">
@@ -54,6 +63,7 @@
  </div>
  } @else {
  <p class="translation-empty">{{ i18n.t('dev.articles.noTranslations') }}</p>
+ }
  }
  </div>
  }

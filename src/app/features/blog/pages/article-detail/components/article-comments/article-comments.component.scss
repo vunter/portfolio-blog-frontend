@@ -33,6 +33,19 @@
       }
     }
 
+    // AUD19C-06: moderation-pending badge on comments/replies
+    .comment__pending-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--warning-bg, #fef3c7);
+      color: var(--warning-text, #92400e);
+      border: 1px solid var(--warning-border, #fcd34d);
+      white-space: nowrap;
+    }
+
     .comment__actions {
       display: flex;
       align-items: center;

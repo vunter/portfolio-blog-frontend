@@ -10,7 +10,8 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
-import { NewsletterSubscriber, PageResponse } from '../../../../models';
+import { NewsletterSubscriber, NewsletterSubscriberStatus, PageResponse } from '../../../../models';
+import { NewsletterStats } from '../../services/admin-api.service';
 import { getDateLocale } from '../../../../core/utils/date-format.util';
 
 @Component({
@@ -42,9 +43,11 @@ export class NewsletterComponent implements OnInit {
   totalPages = signal(0);
   totalElements = signal(0);
 
+  // AUD18-01: Backend stats are {confirmed, pending, total} — `active` and
+  // `newThisMonth` were never sent and always rendered 0.
   totalSubscribers = signal(0);
-  activeSubscribers = signal(0);
-  newThisMonth = signal(0);
+  confirmedSubscribers = signal(0);
+  pendingSubscribers = signal(0);
 
   ngOnInit(): void {
     this.searchSubject.pipe(
@@ -60,13 +63,13 @@ export class NewsletterComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.apiService.get<{ total: number; active: number; newThisMonth: number }>(
+    this.apiService.get<NewsletterStats>(
       '/admin/newsletter/stats'
     ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (stats) => {
         this.totalSubscribers.set(stats.total ?? 0);
-        this.activeSubscribers.set(stats.active ?? 0);
-        this.newThisMonth.set(stats.newThisMonth ?? 0);
+        this.confirmedSubscribers.set(stats.confirmed ?? 0);
+        this.pendingSubscribers.set(stats.pending ?? 0);
       },
       error: () => {
         this.notification.error(this.i18n.t('dev.error.loadNewsletter'));
@@ -171,9 +174,11 @@ export class NewsletterComponent implements OnInit {
     });
     if (!confirmed) return;
 
+    // AUD18-01: confirmed=true is required — without it the backend only
+    // returns a dry-run preview and deletes nothing.
     this.apiService.post('/admin/newsletter/subscribers/delete-batch', {
       ids: this.selectedIds(),
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    }, { confirmed: true }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success(this.i18n.t('admin.newsletter.removeBulkSuccess'));
         this.selectedIds.set([]);
@@ -201,5 +206,50 @@ export class NewsletterComponent implements OnInit {
 
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString(getDateLocale(this.i18n.language()));
+  }
+
+  // AUD19C-08: newsletter↔account link visibility (backend sends
+  // userId/linkedAt/linkOrigin on SubscriberResponse when linked).
+  linkOriginLabel(origin?: string): string {
+    switch (origin) {
+      case 'AUTO_REGISTER':
+        return this.i18n.t('admin.newsletter.originAutoRegister');
+      case 'AUTO_SUBSCRIBE':
+        return this.i18n.t('admin.newsletter.originAutoSubscribe');
+      case 'MANUAL_USER':
+        return this.i18n.t('admin.newsletter.originManualUser');
+      case 'AUTO_BACKFILL':
+        return this.i18n.t('admin.newsletter.originAutoBackfill');
+      default:
+        // Unknown origin — show the raw value rather than hiding it.
+        return origin ?? '';
+    }
+  }
+
+  linkedTooltip(subscriber: NewsletterSubscriber): string {
+    const base = this.i18n.t('admin.newsletter.linkedTooltip', {
+      userId: subscriber.userId ?? '',
+      date: subscriber.linkedAt ? this.formatDate(subscriber.linkedAt) : '',
+    });
+    const origin = this.linkOriginLabel(subscriber.linkOrigin);
+    return origin ? `${origin} — ${base}` : base;
+  }
+
+  // AUD18-01: Three-state badge from the backend `status` enum (the previous
+  // `active` boolean does not exist on SubscriberResponse).
+  statusLabel(status: NewsletterSubscriberStatus): string {
+    switch (status) {
+      case 'CONFIRMED':
+
+        return this.i18n.t('admin.newsletter.statusConfirmed');
+      case 'PENDING':
+
+        return this.i18n.t('admin.newsletter.statusPending');
+      case 'UNSUBSCRIBED':
+
+        return this.i18n.t('admin.newsletter.statusUnsubscribed');
+      default:
+        return status;
+    }
   }
 }

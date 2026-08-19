@@ -222,6 +222,99 @@
  </div>
  }
 
+ <!-- AUD19: Audience (devices / browsers / countries from /admin/analytics/summary?days=N) -->
+ <section class="audience" aria-labelledby="audience-title">
+ <h3 id="audience-title" class="audience__title">{{ i18n.t('dev.analytics.audienceTitle') }}</h3>
+ @if (audienceLoading()) {
+ <app-skeleton variant="stats" />
+ } @else if (audienceError()) {
+ <div class="audience-error">
+ <p>{{ i18n.t('dev.common.errorMessage') }}</p>
+ <button class="retry-btn" (click)="loadAudience()">{{ i18n.t('dev.common.retry') }}</button>
+ </div>
+ } @else {
+ <div class="audience-grid">
+ <!-- Top Devices -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('dev.analytics.topDevices') }}</h3>
+ @if ((audience()?.topDevices || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>
+ <p>{{ i18n.t('dev.analytics.noData') }}</p>
+ </div>
+ } @else {
+ <ol class="audience-list">
+ @for (device of audience()?.topDevices || []; track device.deviceType; let i = $index) {
+ <li class="source-item">
+ <div class="source-info">
+ <span class="source-name"><span class="audience-rank">{{ i + 1 }}</span>{{ deviceLabel(device.deviceType) }}</span>
+ <span class="source-percentage">{{ formatNumber(device.count) }}</span>
+ </div>
+ <div class="source-bar" aria-hidden="true">
+ <div class="source-bar__fill" [style.width.%]="getAudienceWidth(device.count, maxDeviceCount())"></div>
+ </div>
+ </li>
+ }
+ </ol>
+ }
+ </div>
+
+ <!-- Top Browsers -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('dev.analytics.topBrowsers') }}</h3>
+ @if ((audience()?.topBrowsers || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+ <p>{{ i18n.t('dev.analytics.noData') }}</p>
+ </div>
+ } @else {
+ <ol class="audience-list">
+ @for (browser of audience()?.topBrowsers || []; track browser.browser; let i = $index) {
+ <li class="source-item">
+ <div class="source-info">
+ <span class="source-name"><span class="audience-rank">{{ i + 1 }}</span>{{ browserLabel(browser.browser) }}</span>
+ <span class="source-percentage">{{ formatNumber(browser.count) }}</span>
+ </div>
+ <div class="source-bar" aria-hidden="true">
+ <div class="source-bar__fill" [style.width.%]="getAudienceWidth(browser.count, maxBrowserCount())"></div>
+ </div>
+ </li>
+ }
+ </ol>
+ }
+ </div>
+
+ <!-- Top Countries -->
+ <div class="chart-card">
+ <h3>{{ i18n.t('dev.analytics.topCountries') }}</h3>
+ @if ((audience()?.topCountries || []).length === 0) {
+ <div class="chart-empty">
+ <svg width="48" height="48" fill="none" stroke="var(--text-muted, #9ca3af)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+ <p>{{ i18n.t('dev.analytics.noData') }}</p>
+ </div>
+ } @else {
+ <ol class="audience-list">
+ @for (country of audience()?.topCountries || []; track country.countryCode; let i = $index) {
+ <li class="source-item">
+ <div class="source-info">
+ <span class="source-name"><span class="audience-rank">{{ i + 1 }}</span>{{ countryName(country.countryCode) }}</span>
+ @if (countryCodeLabel(country.countryCode)) {
+ <span class="source-badge">{{ countryCodeLabel(country.countryCode) }}</span>
+ }
+ <span class="source-percentage">{{ formatNumber(country.count) }}</span>
+ </div>
+ <div class="source-bar" aria-hidden="true">
+ <div class="source-bar__fill source-bar__fill--utm" [style.width.%]="getAudienceWidth(country.count, maxCountryCount())"></div>
+ </div>
+ </li>
+ }
+ </ol>
+ }
+ </div>
+ </div>
+ }
+ </section>
+
  <!-- Search Analytics -->
  @if (searchData()) {
  <section class="search-analytics">

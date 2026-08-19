@@ -32,6 +32,14 @@ export class CommentListComponent implements OnInit {
   error = signal(false);
   statusFilter = '';
   searchQuery = signal('');
+  // AUD19-B: article filter mode — when set, comments are loaded in a single
+  // fetch (≤500) via GET /admin/comments/article/{id}; the status/search params
+  // are not sent to the server and are instead applied client-side so that both
+  // filters compose with the article filter.
+  // AUD19C-02: the id is a Snowflake string — kept as string end-to-end (a
+  // parseInt/Number round-trip corrupts ids above 2^53).
+  articleFilter = signal<string | null>(null);
+  articleFilterInput = '';
   selectedIds = signal<Set<string>>(new Set());
   currentPage = signal(0);
   pageSize = signal(10);
@@ -61,6 +69,11 @@ export class CommentListComponent implements OnInit {
 
   loadComments(): void {
     this.error.set(false);
+    const articleId = this.articleFilter();
+    if (articleId !== null) {
+      this.loadArticleComments(articleId);
+      return;
+    }
     const params: Record<string, string> = {
       page: this.currentPage().toString(),
       size: this.pageSize().toString(),
@@ -83,6 +96,74 @@ export class CommentListComponent implements OnInit {
         this.error.set(true);
       },
     });
+  }
+
+  // AUD19-B: single-fetch article mode. The backend endpoint returns full
+  // CommentResponse objects (AdminCommentController#getCommentsByArticle maps
+  // to the same DTO as the paged endpoint); the service's narrower AdminComment
+  // typing is widened here.
+  private loadArticleComments(articleId: string): void {
+    this.adminApi.getCommentsByArticle(articleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        let list = response as unknown as CommentResponse[];
+        // Status + search compose client-side (list is capped at 500 rows).
+        if (this.statusFilter) {
+          list = list.filter(c => c.status === this.statusFilter);
+        }
+        const q = this.searchQuery().trim().toLowerCase();
+        if (q) {
+          list = list.filter(c =>
+            c.content?.toLowerCase().includes(q) ||
+            c.authorName?.toLowerCase().includes(q) ||
+            c.articleTitle?.toLowerCase().includes(q)
+          );
+        }
+        this.comments.set(list);
+        // Single fetch — no server pagination in article mode.
+        this.totalPages.set(1);
+        this.totalElements.set(list.length);
+        this.loading.set(false);
+        this.clearSelection();
+      },
+      error: () => {
+        this.notification.error(this.i18n.t('dev.error.loadComments'));
+        this.loading.set(false);
+        this.error.set(true);
+      },
+    });
+  }
+
+  applyArticleFilter(): void {
+    const id = this.articleFilterInput.trim();
+    // AUD19C-02/05: validate the string without parsing it (Snowflake ids
+    // overflow Number) and tell the admin about bad input instead of a
+    // silent no-op.
+    if (!/^\d+$/.test(id)) {
+      this.notification.error(this.i18n.t('dev.comments.articleFilterInvalid'));
+      return;
+    }
+    this.enterArticleMode(id);
+  }
+
+  // Drill-down from a comment row's article cell.
+  filterByArticle(comment: CommentResponse): void {
+    const id = (comment.articleId ?? '').trim();
+    if (!/^\d+$/.test(id)) return;
+    this.articleFilterInput = id;
+    this.enterArticleMode(id);
+  }
+
+  private enterArticleMode(articleId: string): void {
+    this.articleFilter.set(articleId);
+    this.currentPage.set(0);
+    this.loadComments();
+  }
+
+  clearArticleFilter(): void {
+    this.articleFilter.set(null);
+    this.articleFilterInput = '';
+    this.currentPage.set(0);
+    this.loadComments();
   }
 
   approve(comment: CommentResponse): void {
@@ -228,6 +309,7 @@ export class CommentListComponent implements OnInit {
       PENDING: this.i18n.t('dev.comments.pending'),
       APPROVED: this.i18n.t('dev.comments.approved'),
       REJECTED: this.i18n.t('dev.comments.rejected'),
+      SPAM: this.i18n.t('dev.comments.spam'),
     };
     return labels[status] || status;
   }

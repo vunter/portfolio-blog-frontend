@@ -161,6 +161,51 @@ select {
   }
 }
 
+// AUD19-B: loading shimmer + fallback warning for the fresh-detail fetch
+.message-shimmer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.shimmer-line {
+  height: 0.85rem;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--border-color, #e5e7eb) 25%,
+    var(--bg-secondary, #f9fafb) 50%,
+    var(--border-color, #e5e7eb) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+
+  &--short {
+    width: 60%;
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.detail-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--badge-warning-bg, #fef3c7);
+  color: var(--badge-warning-text, #92400e);
+  font-size: 0.8125rem !important;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 .empty-message {
   text-align: center;
   color: var(--text-secondary, #666);

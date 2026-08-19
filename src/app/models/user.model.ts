@@ -16,6 +16,9 @@ export interface LoginResponse {
   name: string;
   mfaRequired?: boolean;
   mfaToken?: string;
+  // AUD19C-MFA-UX: backend includes the user's preferred MFA method on the challenge
+  // response so the verify page can open on the right method (TOTP vs EMAIL).
+  mfaMethod?: 'TOTP' | 'EMAIL';
 }
 
 export interface PasswordResetRequest {
@@ -52,6 +55,9 @@ export interface UserResponse {
   bio?: string;
   role: Role;
   active: boolean;
+  // AUD19: exposed by the backend /admin/users/me response so the account page
+  // can offer "resend verification" only to unverified users.
+  emailVerified?: boolean;
   hasPassword?: boolean;
   termsAccepted?: boolean;
   preferredLocale?: string;

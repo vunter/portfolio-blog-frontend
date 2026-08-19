@@ -1,4 +1,5 @@
 <!-- Translations Management -->
+<!-- AUD18-LOW4: hardcoded English converted to i18n keys (admin.settings.translations.*) -->
 <section class="settings-section">
 <h2>
   <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -9,9 +10,9 @@
     <path d="m22 22-5-10-5 10"/>
     <path d="M14 18h6"/>
   </svg>
-  Translations
+  {{ i18n.t('admin.settings.translations.title') }}
 </h2>
-<p class="section-desc">Manage i18n translations stored in the database. Changes take effect after cache invalidation.</p>
+<p class="section-desc">{{ i18n.t('admin.settings.translations.description') }}</p>
 
 <div class="settings-card trans-panel">
   <!-- Locale tabs -->
@@ -22,19 +23,19 @@
       </button>
     }
     <div class="trans-tabs__spacer"></div>
-    <button class="trans-tab" [class.active]="transNamespace() === 'frontend'" (click)="setTransNamespace('frontend')">Frontend</button>
-    <button class="trans-tab" [class.active]="transNamespace() === 'backend'" (click)="setTransNamespace('backend')">Backend</button>
+    <button class="trans-tab" [class.active]="transNamespace() === 'frontend'" (click)="setTransNamespace('frontend')">{{ i18n.t('admin.settings.translations.frontend') }}</button>
+    <button class="trans-tab" [class.active]="transNamespace() === 'backend'" (click)="setTransNamespace('backend')">{{ i18n.t('admin.settings.translations.backend') }}</button>
   </div>
 
   <!-- Search & actions bar -->
   <div class="trans-toolbar">
-    <input class="trans-search" type="text" placeholder="Search keys or values..." [value]="transSearch()" (input)="searchTranslations($event)" />
-    <button class="btn btn-sm btn-secondary" (click)="loadTranslations()">Refresh</button>
+    <input class="trans-search" type="text" [placeholder]="i18n.t('admin.settings.translations.searchPlaceholder')" [value]="transSearch()" (input)="searchTranslations($event)" />
+    <button class="btn btn-sm btn-secondary" (click)="loadTranslations()">{{ i18n.t('admin.settings.translations.refresh') }}</button>
     <button class="btn btn-sm btn-secondary" (click)="invalidateI18nCache()" [disabled]="transInvalidating()">
-      {{ transInvalidating() ? 'Invalidating...' : 'Invalidate Cache' }}
+      {{ transInvalidating() ? i18n.t('admin.settings.translations.invalidating') : i18n.t('admin.settings.translations.invalidateCache') }}
     </button>
     <button class="btn btn-sm btn-primary" (click)="showAddTrans.set(!showAddTrans())">
-      {{ showAddTrans() ? 'Cancel' : '+ Add' }}
+      {{ showAddTrans() ? i18n.t('common.cancel') : i18n.t('admin.settings.translations.add') }}
     </button>
   </div>
 
@@ -42,29 +43,29 @@
   @if (showAddTrans()) {
     <div class="trans-add-form">
       <input class="form-input form-input-sm" placeholder="translation.key" [value]="newTransKey()" (input)="newTransKey.set($any($event.target).value)" />
-      <input class="form-input form-input-sm" placeholder="Translated value" [value]="newTransValue()" (input)="newTransValue.set($any($event.target).value)" />
+      <input class="form-input form-input-sm" [placeholder]="i18n.t('admin.settings.translations.valuePlaceholder')" [value]="newTransValue()" (input)="newTransValue.set($any($event.target).value)" />
       <select class="form-select form-select-sm" [value]="newTransVisibility()" (change)="newTransVisibility.set($any($event.target).value)">
         <option value="public">public</option>
         <option value="viewer">viewer</option>
         <option value="dev">dev</option>
         <option value="admin">admin</option>
       </select>
-      <button class="btn btn-sm btn-primary" (click)="addTranslation()" [disabled]="!newTransKey() || !newTransValue()">Create</button>
+      <button class="btn btn-sm btn-primary" (click)="addTranslation()" [disabled]="!newTransKey() || !newTransValue()">{{ i18n.t('common.create') }}</button>
     </div>
   }
 
   <!-- Table -->
   @if (transLoading()) {
-    <div class="trans-loading">Loading translations...</div>
+    <div class="trans-loading">{{ i18n.t('admin.settings.translations.loading') }}</div>
   } @else if (transData(); as data) {
     <div class="trans-table-wrap">
       <table class="trans-table">
         <thead>
           <tr>
-            <th class="col-key">Key</th>
-            <th class="col-value">Value</th>
-            <th class="col-vis">Visibility</th>
-            <th class="col-actions">Actions</th>
+            <th class="col-key">{{ i18n.t('admin.settings.translations.colKey') }}</th>
+            <th class="col-value">{{ i18n.t('admin.settings.translations.colValue') }}</th>
+            <th class="col-vis">{{ i18n.t('admin.settings.translations.colVisibility') }}</th>
+            <th class="col-actions">{{ i18n.t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -81,16 +82,16 @@
               <td class="col-vis"><span class="trans-vis-badge trans-vis--{{ item.visibility }}">{{ item.visibility }}</span></td>
               <td class="col-actions">
                 @if (transEditId() === item.id) {
-                  <button class="btn-icon" (click)="saveTranslation()" [disabled]="transSaving()" title="Save" aria-label="Save">&#x2713;</button>
-                  <button class="btn-icon" (click)="cancelEditTranslation()" title="Cancel" aria-label="Cancel">&#x2715;</button>
+                  <button class="btn-icon" (click)="saveTranslation()" [disabled]="transSaving()" [title]="i18n.t('common.save')" [attr.aria-label]="i18n.t('common.save')">&#x2713;</button>
+                  <button class="btn-icon" (click)="cancelEditTranslation()" [title]="i18n.t('common.cancel')" [attr.aria-label]="i18n.t('common.cancel')">&#x2715;</button>
                 } @else {
-                  <button class="btn-icon" (click)="startEditTranslation(item)" title="Edit" aria-label="Edit">&#x270E;</button>
-                  <button class="btn-icon btn-icon--danger" (click)="deleteTrans(item)" title="Delete" aria-label="Delete">&#x1F5D1;</button>
+                  <button class="btn-icon" (click)="startEditTranslation(item)" [title]="i18n.t('common.edit')" [attr.aria-label]="i18n.t('common.edit')">&#x270E;</button>
+                  <button class="btn-icon btn-icon--danger" (click)="deleteTrans(item)" [title]="i18n.t('common.delete')" [attr.aria-label]="i18n.t('common.delete')">&#x1F5D1;</button>
                 }
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="trans-empty">No translations found</td></tr>
+            <tr><td colspan="4" class="trans-empty">{{ i18n.t('admin.settings.translations.empty') }}</td></tr>
           }
         </tbody>
       </table>
@@ -99,13 +100,13 @@
     <!-- Pagination -->
     @if (data.totalPages > 1) {
       <div class="trans-pagination">
-        <button class="btn btn-sm btn-secondary" [disabled]="data.page === 0" (click)="transPageTo(data.page - 1)">&larr; Prev</button>
-        <span class="trans-page-info">Page {{ data.page + 1 }} of {{ data.totalPages }} ({{ data.total }} keys)</span>
-        <button class="btn btn-sm btn-secondary" [disabled]="data.page >= data.totalPages - 1" (click)="transPageTo(data.page + 1)">Next &rarr;</button>
+        <button class="btn btn-sm btn-secondary" [disabled]="data.page === 0" (click)="transPageTo(data.page - 1)">&larr; {{ i18n.t('admin.settings.translations.prev') }}</button>
+        <span class="trans-page-info">{{ i18n.t('admin.settings.translations.pageInfo', { page: data.page + 1, totalPages: data.totalPages, count: data.total }) }}</span>
+        <button class="btn btn-sm btn-secondary" [disabled]="data.page >= data.totalPages - 1" (click)="transPageTo(data.page + 1)">{{ i18n.t('admin.settings.translations.next') }} &rarr;</button>
       </div>
     } @else if (data.total > 0) {
       <div class="trans-pagination">
-        <span class="trans-page-info">{{ data.total }} keys</span>
+        <span class="trans-page-info">{{ i18n.t('admin.settings.translations.keyCount', { count: data.total }) }}</span>
       </div>
     }
   }

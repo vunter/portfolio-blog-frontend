@@ -72,8 +72,11 @@
        </tr>
      </thead>
      <tbody>
+       <!-- AUD18-M27: key names corrected to the ones the app actually writes
+            (app-theme, admin_sidebar_collapsed) and the two bookmark-related
+            functional keys (visitor-id, bookmarked-articles) are now disclosed. -->
        <tr>
-         <td><code>theme</code></td>
+         <td><code>app-theme</code></td>
          <td>{{ i18n.t('cookies.functional.theme') }}</td>
          <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
        </tr>
@@ -83,13 +86,18 @@
          <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
        </tr>
        <tr>
-         <td><code>sidebar_collapsed</code></td>
+         <td><code>admin_sidebar_collapsed</code></td>
          <td>{{ i18n.t('cookies.functional.sidebar') }}</td>
          <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
        </tr>
        <tr>
-         <td><code>preferred_locale</code></td>
-         <td>{{ i18n.t('cookies.functional.locale') }}</td>
+         <td><code>visitor-id</code></td>
+         <td>{{ i18n.t('cookies.functional.visitorId') }}</td>
+         <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
+       </tr>
+       <tr>
+         <td><code>bookmarked-articles</code></td>
+         <td>{{ i18n.t('cookies.functional.bookmarks') }}</td>
          <td>{{ i18n.t('cookies.necessary.persistent') }}</td>
        </tr>
      </tbody>

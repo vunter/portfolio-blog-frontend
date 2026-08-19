@@ -1,7 +1,8 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { AdminApiService } from '../../services/admin-api.service';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { AdminApiService, CacheInvalidationResult } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { DownloadService } from '../../../../core/services/download.service';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -25,7 +26,7 @@ interface HealthStatus {
 
 @Component({
   selector: 'app-settings',
-  imports: [ReactiveFormsModule, SkeletonComponent, EmailTemplatesSettingsComponent, TranslationSettingsComponent],
+  imports: [ReactiveFormsModule, FormsModule, SkeletonComponent, EmailTemplatesSettingsComponent, TranslationSettingsComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +48,19 @@ export class SettingsComponent implements OnInit {
   exportingMd = signal(false);
   importing = signal(false);
   cacheStats = signal({ entries: 0, size: '0 MB' });
+
+  // AUD19: granular cache invalidation state
+  /** Actions currently in flight — keyed so every button has its own busy state. */
+  private granularBusyActions = signal<ReadonlySet<string>>(new Set());
+  /** Result of the most recent granular invalidation, surfaced inline. */
+  lastGranularResult = signal<{ action: string; entriesRemoved: number } | null>(null);
+  articleSlug = '';
+  tagSlug = '';
+  commentsArticleId = '';
+
+  // AUD19C-04 (A2): overwrite existing articles/tags on import (backend
+  // `overwrite` query param; default false = skip existing).
+  importOverwrite = false;
 
   // Health status
   healthLoading = signal(false);
@@ -147,6 +161,90 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  // ==================== AUD19: Granular cache invalidation ====================
+
+  isGranularBusy(action: string): boolean {
+    return this.granularBusyActions().has(action);
+  }
+
+  private setGranularBusy(action: string, busy: boolean): void {
+    this.granularBusyActions.update((current) => {
+      const next = new Set(current);
+      if (busy) {
+        next.add(action);
+      } else {
+        next.delete(action);
+      }
+      return next;
+    });
+  }
+
+  private runGranularInvalidation(action: string, call$: Observable<CacheInvalidationResult>): void {
+    if (this.isGranularBusy(action)) return;
+    this.setGranularBusy(action, true);
+    call$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (result) => {
+        this.setGranularBusy(action, false);
+        this.lastGranularResult.set({ action, entriesRemoved: result.entriesRemoved ?? 0 });
+        this.notification.success(
+          this.i18n.t('admin.settings.granularCache.success', { count: result.entriesRemoved ?? 0 })
+        );
+        this.loadCacheStats();
+      },
+      error: () => {
+        this.setGranularBusy(action, false);
+        this.notification.error(this.i18n.t('admin.settings.granularCache.error'));
+      },
+    });
+  }
+
+  clearArticlesCache(): void {
+    this.runGranularInvalidation('articles', this.adminApi.clearArticlesCache());
+  }
+
+  clearTagsCache(): void {
+    this.runGranularInvalidation('tags', this.adminApi.clearTagsCache());
+  }
+
+  clearAllCommentsCache(): void {
+    this.runGranularInvalidation('comments', this.adminApi.clearCommentsCache());
+  }
+
+  clearSearchCache(): void {
+    this.runGranularInvalidation('search', this.adminApi.clearSearchCache());
+  }
+
+  clearFeedsCache(): void {
+    this.runGranularInvalidation('feeds', this.adminApi.clearFeedsCache());
+  }
+
+  clearArticleBySlug(): void {
+    const slug = this.articleSlug.trim();
+    if (!slug) {
+      this.notification.error(this.i18n.t('admin.settings.granularCache.valueRequired'));
+      return;
+    }
+    this.runGranularInvalidation('article-slug', this.adminApi.clearArticleCache(slug));
+  }
+
+  clearTagBySlug(): void {
+    const slug = this.tagSlug.trim();
+    if (!slug) {
+      this.notification.error(this.i18n.t('admin.settings.granularCache.valueRequired'));
+      return;
+    }
+    this.runGranularInvalidation('tag-slug', this.adminApi.clearTagCache(slug));
+  }
+
+  clearCommentsByArticleId(): void {
+    const articleId = this.commentsArticleId.trim();
+    if (!articleId) {
+      this.notification.error(this.i18n.t('admin.settings.granularCache.valueRequired'));
+      return;
+    }
+    this.runGranularInvalidation('comments-id', this.adminApi.clearCommentsCache(articleId));
+  }
+
   // Export/Import methods
 
   exportBlogJson(): void {
@@ -168,7 +266,9 @@ export class SettingsComponent implements OnInit {
     this.exportingMd.set(true);
     this.adminApi.exportArticlesMarkdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
-        this.downloadService.downloadBlob(blob, `articles-markdown-${new Date().toISOString().slice(0, 10)}.zip`);
+        // AUD19C-04: the endpoint returns a JSON document (slug → markdown map),
+        // not a zip archive — name the download accordingly.
+        this.downloadService.downloadBlob(blob, `articles-markdown-${new Date().toISOString().slice(0, 10)}.json`);
         this.notification.success(this.i18n.t('admin.settings.exportSuccess'));
         this.exportingMd.set(false);
       },
@@ -191,9 +291,11 @@ export class SettingsComponent implements OnInit {
     const obj = data as Record<string, unknown>;
 
     // Validate expected top-level structure
+    // AUD19C-04 (A2): 'exportedBy' and 'stats' are part of the export shape —
+    // a freshly exported file must validate without manual editing.
     const allowedKeys = new Set([
       'articles', 'tags', 'comments', 'settings', 'subscribers',
-      'users', 'metadata', 'version', 'exportedAt',
+      'users', 'metadata', 'version', 'exportedAt', 'exportedBy', 'stats',
     ]);
     const unknownKeys = Object.keys(obj).filter(k => !allowedKeys.has(k));
     if (unknownKeys.length > 0) {
@@ -288,13 +390,19 @@ export class SettingsComponent implements OnInit {
     }
 
     this.importing.set(true);
-    // Send sanitized data as a new Blob/File
-    const sanitizedBlob = new Blob([JSON.stringify(sanitizedData)], { type: 'application/json' });
-    const sanitizedFile = new File([sanitizedBlob], file.name, { type: 'application/json' });
-
-    this.adminApi.importBlog(sanitizedFile).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.notification.success(this.i18n.t('admin.settings.importSuccess'));
+    // AUD19C-04 (A2): the backend takes @RequestBody String (JSON), not a
+    // multipart file — send the sanitized object directly (HttpClient
+    // serializes it exactly once) plus the overwrite flag.
+    this.adminApi.importBlog(sanitizedData, this.importOverwrite).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (result) => {
+        this.notification.success(
+          result && typeof result.articlesImported === 'number'
+            ? this.i18n.t('admin.settings.importSuccessDetail', {
+                imported: result.articlesImported,
+                total: result.articlesTotal,
+              })
+            : this.i18n.t('admin.settings.importSuccess')
+        );
         this.importing.set(false);
         input.value = '';
       },

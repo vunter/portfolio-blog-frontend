@@ -28,8 +28,8 @@ describe('DashboardComponent', () => {
   };
 
   const mockActivity = [
-    { id: 1, type: 'article' as const, action: 'Created', title: 'Test Article', description: 'A test article', createdAt: '2026-02-10T10:00:00Z' },
-    { id: 2, type: 'comment' as const, action: 'Approved', title: 'Nice post', description: 'Comment approved', createdAt: '2026-02-10T09:00:00Z' },
+    { id: '1', type: 'article' as const, action: 'Created', title: 'Test Article', description: 'A test article', createdAt: '2026-02-10T10:00:00Z' },
+    { id: '2', type: 'comment' as const, action: 'Approved', title: 'Nice post', description: 'Comment approved', createdAt: '2026-02-10T09:00:00Z' },
   ];
 
   beforeEach(async () => {

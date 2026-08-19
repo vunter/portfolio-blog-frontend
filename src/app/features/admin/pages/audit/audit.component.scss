@@ -37,6 +37,64 @@
   }
 }
 
+// AUD19: text/number inputs share the select styling of the filter bar
+.filter-group .filter-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--card-bg, white);
+  color: var(--text-primary, #1a1a1a);
+  width: 12rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color, #6366f1);
+  }
+}
+
+// AUD19: aligns the search button with the bottom-aligned filter controls
+.filter-group--action {
+  justify-content: flex-end;
+}
+
+// AUD19: segmented control for the filter mode
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--card-bg, white);
+  overflow: hidden;
+}
+
+.segmented-btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  font-size: 0.9375rem;
+  color: var(--text-primary, #1a1a1a);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  & + & {
+    border-left: 1px solid var(--border-color, #e5e7eb);
+  }
+
+  &:hover:not(.segmented-btn--active) {
+    background: var(--bg-secondary, #f9fafb);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #6366f1);
+    outline-offset: -2px;
+  }
+}
+
+.segmented-btn--active {
+  background: var(--primary-color, #6366f1);
+  color: white;
+}
+
 .export-buttons {
   display: flex;
   gap: 0.5rem;
@@ -158,4 +216,102 @@
   text-align: center;
   color: var(--text-secondary, #666);
   padding: 3rem !important;
+}
+
+// AUD19: clickable user/entity cells for drill-down
+.cell-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--primary-color, #6366f1);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #6366f1);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.cell-link--entity {
+  font-family: inherit;
+}
+
+.col-id .cell-link--entity {
+  font-family: monospace;
+  font-size: 0.8125rem;
+}
+
+// AUD19: error state with retry (AUD18-05 pattern)
+.load-error {
+  background: var(--card-bg, white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
+  padding: 3rem;
+  text-align: center;
+
+  p {
+    color: var(--text-secondary, #666);
+    margin-bottom: 1rem;
+  }
+}
+
+// AUD19: prompt shown in drill-down modes before a query runs
+.drill-prompt {
+  background: var(--card-bg, white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-secondary, #666);
+}
+
+// AUD19: prev/next pagination for by-user mode (matches contacts page styling)
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, white);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-primary, #1a1a1a);
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-color, #6366f1);
+    color: white;
+    border-color: var(--primary-color, #6366f1);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+  padding: 0 0.75rem;
 }

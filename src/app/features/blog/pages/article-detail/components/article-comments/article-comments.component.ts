@@ -277,6 +277,9 @@ export class ArticleCommentsComponent {
     if (content.length < 10) return;
 
     const optimisticId = crypto.randomUUID();
+    // AUD19C-06: never fabricate APPROVED — moderation may queue the reply. The
+    // optimistic row starts PENDING and is reconciled with the real server
+    // status below (same policy as top-level comments in submitComment()).
     const optimisticReply: CommentResponse = {
       id: optimisticId,
       articleId: this.articleId(),
@@ -284,7 +287,7 @@ export class ArticleCommentsComponent {
       articleTitle: this.articleTitle(),
       authorName: name,
       content,
-      status: 'APPROVED',
+      status: 'PENDING',
       parentId,
       replies: [],
       createdAt: new Date().toISOString(),
@@ -329,6 +332,11 @@ export class ArticleCommentsComponent {
         .subscribe({
           next: (created) => {
             if (!created) return;
+            // AUD19C-06: surface moderation queuing to the author, consistent
+            // with top-level comments in submitComment().
+            if (created.status !== 'APPROVED') {
+              this.notification.success(this.i18n.t('article.comments.pendingModeration'));
+            }
             // Reconcile the optimistic reply with the real server response so it gets
             // the real id (needed for like/reply) and real status (may be PENDING).
             const replaceReply = (list: CommentResponse[]): CommentResponse[] =>

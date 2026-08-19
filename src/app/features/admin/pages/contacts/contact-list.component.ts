@@ -8,6 +8,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { PageResponse } from '../../../../models/common.model';
 import { ContactResponse } from '../../../../models/contact.model';
+import { AdminApiService } from '../../services/admin-api.service';
 
 @Component({
   selector: 'app-contact-list',
@@ -19,6 +20,7 @@ import { ContactResponse } from '../../../../models/contact.model';
 export class ContactListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
@@ -30,6 +32,10 @@ export class ContactListComponent implements OnInit {
   loading = signal(true);
   error = signal(false);
   expandedId = signal<string | null>(null);
+  // AUD19-B: fresh copy of the opened message (list body may be truncated/stale).
+  freshMessage = signal<ContactResponse | null>(null);
+  loadingDetail = signal(false);
+  detailFetchFailed = signal(false);
   sortAsc = signal(false);
   currentPage = signal(0);
   totalElements = signal(0);
@@ -83,8 +89,15 @@ export class ContactListComponent implements OnInit {
 
   goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages()) return;
-    this.expandedId.set(null);
+    this.collapseExpanded();
     this.loadMessages(page);
+  }
+
+  private collapseExpanded(): void {
+    this.expandedId.set(null);
+    this.freshMessage.set(null);
+    this.detailFetchFailed.set(false);
+    this.loadingDetail.set(false);
   }
 
   private applySorting(): void {
@@ -102,15 +115,54 @@ export class ContactListComponent implements OnInit {
   }
 
   toggleExpand(id: string): void {
-    this.expandedId.update((current) => (current === id ? null : id));
+    const next = this.expandedId() === id ? null : id;
+    this.expandedId.set(next);
+    if (next !== null) {
+      this.loadFreshMessage(next);
+    } else {
+      this.freshMessage.set(null);
+      this.detailFetchFailed.set(false);
+    }
+  }
+
+  // AUD19-B: on open, fetch the message fresh via GET /admin/contact/messages/{id}
+  // and render from that copy; on failure, fall back to the (possibly stale)
+  // list row with a non-blocking inline warning.
+  private loadFreshMessage(id: string): void {
+    this.loadingDetail.set(true);
+    this.detailFetchFailed.set(false);
+    this.freshMessage.set(null);
+
+    this.adminApi.getContactMessage(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (fresh) => {
+        // Ignore late responses for a row that was collapsed/switched meanwhile.
+        if (this.expandedId() !== id) return;
+        this.freshMessage.set(fresh);
+        this.loadingDetail.set(false);
+        // Reconcile the list row with the fresh copy (read flag / body).
+        this.messages.update((list) => list.map((m) => (m.id === id ? { ...m, ...fresh } : m)));
+        this.applySorting();
+      },
+      error: () => {
+        if (this.expandedId() !== id) return;
+        this.loadingDetail.set(false);
+        this.detailFetchFailed.set(true);
+      },
+    });
   }
 
   markAsRead(msg: ContactResponse): void {
-    this.apiService.put(`${this.endpoint}/${msg.id}/read`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+    // AUD19-B: the PUT returns the full updated ContactMessage — reuse it as the
+    // fresh copy instead of issuing an extra GET.
+    this.adminApi.markMessageAsRead(msg.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (updated) => {
         this.messages.update((list) =>
-          list.map((m) => (m.id === msg.id ? { ...m, read: true } : m))
+          list.map((m) => (m.id === msg.id ? { ...m, ...updated, read: true } : m))
         );
+        if (this.expandedId() === msg.id) {
+          this.freshMessage.set({ ...updated, read: true });
+          this.detailFetchFailed.set(false);
+        }
         this.applySorting();
         this.notification.success(this.i18n.t('admin.contacts.markedAsRead'));
       },
@@ -133,7 +185,7 @@ export class ContactListComponent implements OnInit {
     this.apiService.delete(`${this.endpoint}/${msg.id}`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         if (this.expandedId() === msg.id) {
-          this.expandedId.set(null);
+          this.collapseExpanded();
         }
         // Reload current page to keep pagination in sync
         this.loadMessages(this.currentPage());

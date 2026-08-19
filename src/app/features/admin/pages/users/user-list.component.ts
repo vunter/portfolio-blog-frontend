@@ -11,7 +11,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { AccessibleModalDirective } from '../../../../shared/directives/accessible-modal.directive';
 import { UserResponse, PageResponse } from '../../../../models';
-import { UserActivity } from '../../services/admin-api.service';
+import { AdminApiService, UserActivity } from '../../services/admin-api.service';
 
 @Component({
   selector: 'app-user-list',
@@ -23,6 +23,7 @@ import { UserActivity } from '../../services/admin-api.service';
 export class UserListComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private apiService = inject(ApiService);
+  private adminApi = inject(AdminApiService);
   private notification = inject(NotificationService);
   private confirmDialog = inject(ConfirmDialogService);
   i18n = inject(I18nService);
@@ -40,10 +41,15 @@ export class UserListComponent implements OnInit {
   totalPages = signal(0);
   totalElements = signal(0);
 
-  // User activity modal
+  // User activity modal (F-140), extended into a detail view (AUD19-B):
+  // the profile and activity sections load and fail independently.
   selectedUserActivity = signal<UserActivity | null>(null);
   showActivityModal = signal(false);
   loadingActivity = signal(false);
+  activityError = signal(false);
+  selectedUserDetail = signal<UserResponse | null>(null);
+  loadingDetail = signal(false);
+  detailError = signal(false);
 
   formData = {
     name: '',
@@ -243,8 +249,12 @@ export class UserListComponent implements OnInit {
 
   viewActivity(userId: string): void {
     this.loadingActivity.set(true);
+    this.loadingDetail.set(true);
     this.showActivityModal.set(true);
     this.selectedUserActivity.set(null);
+    this.selectedUserDetail.set(null);
+    this.activityError.set(false);
+    this.detailError.set(false);
 
     this.apiService
       .get<UserActivity>(`/admin/users/${userId}/activity`)
@@ -255,9 +265,26 @@ export class UserListComponent implements OnInit {
           this.loadingActivity.set(false);
         },
         error: () => {
-          this.notification.error(this.i18n.t('admin.users.activity.noActivity'));
+          // AUD19-B: per-section error — the profile section may still succeed,
+          // so keep the modal open instead of tearing it down.
+          this.activityError.set(true);
           this.loadingActivity.set(false);
-          this.showActivityModal.set(false);
+        },
+      });
+
+    // AUD19-B: fresh profile fetch, independent of the activity call.
+    // AUD19C-02: userId is a Snowflake string — pass it through untouched.
+    this.adminApi
+      .getUserById(userId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (user) => {
+          this.selectedUserDetail.set(user);
+          this.loadingDetail.set(false);
+        },
+        error: () => {
+          this.detailError.set(true);
+          this.loadingDetail.set(false);
         },
       });
   }
@@ -265,6 +292,9 @@ export class UserListComponent implements OnInit {
   closeActivityModal(): void {
     this.showActivityModal.set(false);
     this.selectedUserActivity.set(null);
+    this.selectedUserDetail.set(null);
+    this.activityError.set(false);
+    this.detailError.set(false);
   }
 
   getRoleLabel(role: string): string {

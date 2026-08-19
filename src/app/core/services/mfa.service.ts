@@ -43,9 +43,14 @@ export class MfaService {
     });
   }
 
-  /** Disable MFA for the authenticated user. */
-  disable(): Observable<void> {
+  /**
+   * Disable MFA for the authenticated user.
+   * AUD19C-A3FE: the backend now re-authenticates this destructive action — the
+   * current password travels in the DELETE body; a wrong password returns 400.
+   */
+  disable(password: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/disable`, {
+      body: { password },
       withCredentials: true,
     });
   }

@@ -128,10 +128,32 @@ select {
   background: var(--badge-secondary-bg);
   color: var(--badge-secondary-text);
 
-  &.active {
+  // AUD18-01: three-state badge (CONFIRMED/PENDING/UNSUBSCRIBED-as-default)
+  &.confirmed {
     background: var(--badge-success-bg);
     color: var(--badge-success-text);
   }
+
+  &.pending {
+    background: var(--badge-pending-bg);
+    color: var(--badge-pending-text);
+  }
+}
+
+// AUD19C-08: account-link badge + unlinked dash
+.link-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  cursor: help;
+}
+
+.not-linked {
+  color: var(--text-secondary, #6b7280);
 }
 
 .action-btn {

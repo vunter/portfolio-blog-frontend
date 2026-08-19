@@ -178,15 +178,53 @@
       (closed)="closeActivityModal()" (click)="closeActivityModal()">
  <div class="modal activity-modal" (click)="$event.stopPropagation()">
  <div class="modal__header">
- <h2 id="user-activity-title">{{ i18n.t('admin.users.activity.title') }}</h2>
+ <h2 id="user-activity-title">{{ i18n.t('admin.users.detail.title') }}</h2>
  <button class="modal__close" (click)="closeActivityModal()" [attr.aria-label]="i18n.t('common.close')">✕</button>
  </div>
  <div class="modal__body">
+ <!-- Profile section (AUD19-B): fresh fetch via GET /admin/users/{id} -->
+ <h3 class="detail-section-title">{{ i18n.t('admin.users.detail.profile') }}</h3>
+ @if (loadingDetail()) {
+ <div class="activity-loading">
+ <div class="spinner"></div>
+ <span>{{ i18n.t('common.loading') }}</span>
+ </div>
+ } @else if (detailError()) {
+ <p class="section-error">{{ i18n.t('admin.users.detail.error') }}</p>
+ } @else if (selectedUserDetail(); as user) {
+ <div class="activity-grid detail-grid">
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.emailColumn') }}</span>
+ <span class="activity-item__value activity-item__value--wrap">{{ user.email }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.roleColumn') }}</span>
+ <span class="activity-item__value">{{ getRoleLabel(user.role) }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.statusColumn') }}</span>
+ <span class="activity-item__value">{{ user.active ? i18n.t('common.active') : i18n.t('common.inactive') }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.detail.emailVerified') }}</span>
+ <span class="activity-item__value">{{ user.emailVerified ? i18n.t('admin.users.detail.verified') : i18n.t('admin.users.detail.notVerified') }}</span>
+ </div>
+ <div class="activity-item">
+ <span class="activity-item__label">{{ i18n.t('admin.users.createdAt') }}</span>
+ <span class="activity-item__value">{{ user.createdAt ? formatDate(user.createdAt) : '—' }}</span>
+ </div>
+ </div>
+ }
+
+ <!-- Activity section (F-140) -->
+ <h3 class="detail-section-title">{{ i18n.t('admin.users.activity.title') }}</h3>
  @if (loadingActivity()) {
  <div class="activity-loading">
  <div class="spinner"></div>
  <span>{{ i18n.t('common.loading') }}</span>
  </div>
+ } @else if (activityError()) {
+ <p class="section-error">{{ i18n.t('admin.users.activity.error') }}</p>
  } @else if (selectedUserActivity(); as activity) {
  <div class="activity-grid">
  <div class="activity-item">

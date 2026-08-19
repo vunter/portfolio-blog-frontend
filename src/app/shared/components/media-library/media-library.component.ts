@@ -46,7 +46,8 @@ export class MediaLibraryComponent implements OnInit {
   loadError = signal(false);
   totalItems = signal(0);
   currentPage = signal(0);
-  selectedAssetId = signal<number | null>(null);
+  // AUD19C-02: media asset ids are Snowflake strings
+  selectedAssetId = signal<string | null>(null);
   activeTab = signal<'library' | 'upload'>('library');
   readonly pageSize = 20;
 
@@ -83,7 +84,7 @@ export class MediaLibraryComponent implements OnInit {
 
   deleteAsset(asset: MediaAssetResponse, event: Event): void {
     event.stopPropagation();
-    this.adminApi.deleteMediaAsset(String(asset.id))
+    this.adminApi.deleteMediaAsset(asset.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: () => {

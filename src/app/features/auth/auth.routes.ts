@@ -43,7 +43,9 @@ export const authRoutes: Routes = [
   },
   {
     path: 'reset-password',
-    canActivate: [guestGuard],
+    // AUD19C-RESET: intentionally NO guestGuard — a logged-in user following a reset
+    // link (e.g. resetting because of a suspected compromise) must not be bounced away.
+    // Safe: a successful reset revokes all existing tokens server-side anyway.
     loadComponent: () =>
       import('./pages/reset-password/reset-password.component').then(
         (m) => m.ResetPasswordComponent

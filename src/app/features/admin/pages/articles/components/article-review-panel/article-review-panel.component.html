@@ -9,6 +9,15 @@
  </button>
  </div>
  }
+ @if (loadError()) {
+ <!-- AUD18-05: error state with retry -->
+ <div class="review-load-error">
+ <p>{{ i18n.t('dev.articles.reviewHistoryLoadError') }}</p>
+ <button type="button" class="btn btn-outline btn-sm" (click)="loadReviewHistory()">
+ {{ i18n.t('dev.common.retry') }}
+ </button>
+ </div>
+ } @else {
  @for (review of reviewHistory(); track review.id) {
  <div class="review-entry" [class.review-entry--approved]="review.status === 'APPROVED'" [class.review-entry--changes]="review.status === 'CHANGES_REQUESTED'" [class.review-entry--pending]="review.status === 'PENDING'">
  <div class="review-entry-header">
@@ -29,5 +38,6 @@
  </div>
  } @empty {
  <p class="review-empty">{{ i18n.t('dev.articles.noReviews') }}</p>
+ }
  }
 </div>

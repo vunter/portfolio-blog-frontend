@@ -90,12 +90,9 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
           // error and decides whether to log out; waiters just replay/fail the request.
           const isInitiator = !state.isRefreshing;
           return state.refreshOnce().pipe(
-            switchMap((success) => {
-              if (success) {
-                return next(req.clone({ withCredentials: true }));
-              }
-              return throwError(() => error);
-            }),
+            // AUD19C-A5FE: catch REFRESH failures here, before the retry is wired in,
+            // so a 401 from the retried request below is NOT mistaken for a session
+            // failure. Only the refresh call itself failing may end the session.
             catchError((refreshError) => {
               // Only log out if the refresh was explicitly rejected (401/403) and this
               // call initiated it. Network errors mean backend is down — preserve session.
@@ -105,15 +102,22 @@ export const refreshTokenInterceptor: HttpInterceptorFn = (
                 router.navigate(['/auth/login']);
               }
               return throwError(() => refreshError);
+            }),
+            switchMap((success) => {
+              if (success) {
+                // AUD19C-A5FE: refresh succeeded — retry once. If the retry still 401s
+                // it's a business-level rejection (e.g. re-auth password check): the
+                // error propagates to the caller; it must NOT force a logout.
+                return next(req.clone({ withCredentials: true }));
+              }
+              // Shared refresh (initiated elsewhere) failed — fail this request with
+              // the original error; the initiator handles the logout decision.
+              return throwError(() => error);
             })
           );
-        } else if (!authStore.isLoading()) {
-          // Only force logout when not in the middle of session restoration.
-          // During initFromStorage(), isLoading is true and isAuthenticated is false
-          // while the store validates the session — let initFromStorage handle errors.
-          authStore.logout();
-          router.navigate(['/auth/login']);
         }
+        // AUD19C-A5FE: unauthenticated 401 (e.g. wrong MFA code mid-login) — there is
+        // no session to clear; just propagate the error to the caller.
       }
 
       return throwError(() => error);

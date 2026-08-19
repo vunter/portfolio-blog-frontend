@@ -91,13 +91,151 @@
  <section class="settings-section">
  <h2>{{ i18n.t('admin.settings.cache') }}</h2>
  <div class="settings-card">
+ <!-- AUD19: granular invalidation panel -->
+ <div class="setting-item granular-cache">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.granularCache.title') }}</h3>
+ <p>{{ i18n.t('admin.settings.granularCache.desc') }}</p>
+ </div>
+ <div class="granular-actions">
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="articles"
+ (click)="clearArticlesCache()"
+ [disabled]="isGranularBusy('articles')"
+ >
+ {{ isGranularBusy('articles') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.articles') }}
+ </button>
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="tags"
+ (click)="clearTagsCache()"
+ [disabled]="isGranularBusy('tags')"
+ >
+ {{ isGranularBusy('tags') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.tags') }}
+ </button>
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="comments"
+ (click)="clearAllCommentsCache()"
+ [disabled]="isGranularBusy('comments')"
+ >
+ {{ isGranularBusy('comments') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.comments') }}
+ </button>
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="search"
+ (click)="clearSearchCache()"
+ [disabled]="isGranularBusy('search')"
+ >
+ {{ isGranularBusy('search') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.search') }}
+ </button>
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="feeds"
+ (click)="clearFeedsCache()"
+ [disabled]="isGranularBusy('feeds')"
+ >
+ {{ isGranularBusy('feeds') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.feeds') }}
+ </button>
+ </div>
+ </div>
+
+ <!-- AUD19: targeted invalidation rows -->
+ <div class="setting-item granular-cache">
+ <div class="setting-info">
+ <h3>{{ i18n.t('admin.settings.granularCache.targetedTitle') }}</h3>
+ <p>{{ i18n.t('admin.settings.granularCache.targetedDesc') }}</p>
+ </div>
+ <div class="granular-targets">
+ <div class="granular-target-row">
+ <label for="granular-article-slug">{{ i18n.t('admin.settings.granularCache.articleSlugLabel') }}</label>
+ <input
+ id="granular-article-slug"
+ type="text"
+ class="setting-input granular-input"
+ name="granularArticleSlug"
+ [(ngModel)]="articleSlug"
+ [ngModelOptions]="{ standalone: true }"
+ placeholder="my-article-slug"
+ [disabled]="isGranularBusy('article-slug')"
+ />
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="article-slug"
+ (click)="clearArticleBySlug()"
+ [disabled]="isGranularBusy('article-slug')"
+ >
+ {{ isGranularBusy('article-slug') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.clearBtn') }}
+ </button>
+ </div>
+ <div class="granular-target-row">
+ <label for="granular-tag-slug">{{ i18n.t('admin.settings.granularCache.tagSlugLabel') }}</label>
+ <input
+ id="granular-tag-slug"
+ type="text"
+ class="setting-input granular-input"
+ name="granularTagSlug"
+ [(ngModel)]="tagSlug"
+ [ngModelOptions]="{ standalone: true }"
+ placeholder="tag-slug"
+ [disabled]="isGranularBusy('tag-slug')"
+ />
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="tag-slug"
+ (click)="clearTagBySlug()"
+ [disabled]="isGranularBusy('tag-slug')"
+ >
+ {{ isGranularBusy('tag-slug') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.clearBtn') }}
+ </button>
+ </div>
+ <div class="granular-target-row">
+ <label for="granular-comments-id">{{ i18n.t('admin.settings.granularCache.articleIdLabel') }}</label>
+ <input
+ id="granular-comments-id"
+ type="text"
+ class="setting-input granular-input"
+ name="granularCommentsArticleId"
+ [(ngModel)]="commentsArticleId"
+ [ngModelOptions]="{ standalone: true }"
+ placeholder="1234567890"
+ [disabled]="isGranularBusy('comments-id')"
+ />
+ <button
+ type="button"
+ class="btn btn-secondary btn-sm"
+ data-action="comments-id"
+ (click)="clearCommentsByArticleId()"
+ [disabled]="isGranularBusy('comments-id')"
+ >
+ {{ isGranularBusy('comments-id') ? i18n.t('admin.settings.granularCache.clearing') : i18n.t('admin.settings.granularCache.clearBtn') }}
+ </button>
+ </div>
+ @if (lastGranularResult(); as res) {
+ <p class="granular-result" role="status">
+ {{ i18n.t('admin.settings.granularCache.lastResult') }}
+ <span class="granular-result__count">{{ res.entriesRemoved }}</span>
+ </p>
+ }
+ </div>
+ </div>
+
+ <!-- AUD19: clear-all kept as the destructive/global option -->
  <div class="setting-item">
  <div class="setting-info">
  <h3>{{ i18n.t('admin.settings.clearCache') }}</h3>
  <p>{{ i18n.t('admin.settings.clearCacheDesc') }}</p>
  </div>
  <button
- class="btn btn-secondary"
+ class="btn btn-danger"
  (click)="clearCache()"
  [disabled]="clearing()"
  >
@@ -237,6 +375,17 @@
  <p>{{ i18n.t('admin.settings.importDataDesc') }}</p>
  </div>
  <div class="import-actions">
+ <!-- AUD19C-04 (A2): overwrite toggle, read at confirm time -->
+ <label class="import-overwrite">
+ <input
+ type="checkbox"
+ name="importOverwrite"
+ [(ngModel)]="importOverwrite"
+ [ngModelOptions]="{ standalone: true }"
+ [disabled]="importing()"
+ />
+ {{ i18n.t('admin.settings.importOverwrite') }}
+ </label>
  <input
  type="file"
  accept=".json"

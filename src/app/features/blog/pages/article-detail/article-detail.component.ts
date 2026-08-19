@@ -161,7 +161,8 @@ export class ArticleDetailComponent implements OnInit {
       this.progressObserver?.disconnect();
       // Send time-on-page analytics on navigation away
       const article = this.article();
-      this.analytics.stopTimeTracking(article?.id ? +article.id : undefined);
+      // AUD19C-02: pass the Snowflake id string as-is (no +cast).
+      this.analytics.stopTimeTracking(article?.id);
       this.eventCleanups.forEach(cleanup => cleanup());
       this.eventCleanups.length = 0;
     });
@@ -387,7 +388,7 @@ export class ArticleDetailComponent implements OnInit {
     this.analytics.startTimeTracking();
     // Init scroll depth tracking
     const article = this.article();
-    this.scrollDepthTracker.init(article?.id ? +article.id : undefined);
+    this.scrollDepthTracker.init(article?.id);
     // Send UTM attribution if present
     if (isPlatformBrowser(this.platformId)) {
       const params = new URLSearchParams(window.location.search);
@@ -399,7 +400,7 @@ export class ArticleDetailComponent implements OnInit {
         const utmCampaign = params.get('utm_campaign');
         if (utmMedium) metadata['utm_medium'] = utmMedium;
         if (utmCampaign) metadata['utm_campaign'] = utmCampaign;
-        this.articleService.trackUtmView(article?.id ? +article.id : undefined, metadata);
+        this.articleService.trackUtmView(article?.id, metadata);
       }
     }
   }

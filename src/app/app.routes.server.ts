@@ -29,6 +29,13 @@ export const serverRoutes: ServerRoute[] = [
     path: 'terms',
     renderMode: RenderMode.Server,
   },
+  // AUD18-LOW8: /cookies is a public legal page like privacy/terms — SSR it.
+  // Component is SSR-safe: window access only inside a click handler and
+  // CookieConsentService guards storage access with isPlatformBrowser.
+  {
+    path: 'cookies',
+    renderMode: RenderMode.Server,
+  },
   {
     path: 'tags',
     renderMode: RenderMode.Server,

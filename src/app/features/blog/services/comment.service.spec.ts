@@ -97,6 +97,33 @@ describe('CommentService', () => {
     });
   });
 
+  // AUD19C-01: Snowflake ids are sent as the original strings — a Number()
+  // round-trip corrupts ids above 2^53.
+  describe('batchCommentLikeStatus', () => {
+    it('should POST the comment ids as raw strings', () => {
+      const ids = ['9007199254740993', '9007199254740995'];
+
+      service.batchCommentLikeStatus('test-article', ids).subscribe((statuses) => {
+        expect(statuses['9007199254740993'].liked).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/articles/test-article/comments/like/status/batch`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ commentIds: ids });
+      req.flush({
+        '9007199254740993': { liked: true, likesCount: 2 },
+        '9007199254740995': { liked: false, likesCount: 0 },
+      });
+    });
+
+    it('should short-circuit with an empty map for an empty id list', () => {
+      let result: Record<string, unknown> | undefined;
+      service.batchCommentLikeStatus('test-article', []).subscribe((r) => (result = r));
+      expect(result).toEqual({});
+      httpMock.expectNone(`${baseUrl}/articles/test-article/comments/like/status/batch`);
+    });
+  });
+
   describe('createComment', () => {
     it('should POST comment and return created comment', () => {
       const request = { content: 'Nice post!', authorName: 'Reader' };
