@@ -23,7 +23,8 @@
   },
   "private": true,
   "overrides": {
-    "dompurify": "^3.4.10"
+    "dompurify": "^3.4.10",
+    "chokidar": "^4.0.3"
   },
   "dependencies": {
     "@angular/animations": "^20.3.29",
