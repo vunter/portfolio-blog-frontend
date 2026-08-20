@@ -569,9 +569,12 @@ export class ArticleFormComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   minScheduleDate(): string {
+    // A datetime-local input compares against LOCAL wall time, so the bound must
+    // be local too. toISOString() is UTC and would block the next N hours west of
+    // Greenwich (three, in UTC-3) while allowing past times east of it.
     const now = new Date();
     now.setMinutes(now.getMinutes() + 5);
-    return now.toISOString().slice(0, 16);
+    return this.isoToDatetimeLocal(now.toISOString());
   }
 
   submitForReview(): void {

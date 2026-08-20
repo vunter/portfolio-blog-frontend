@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, from, concatMap, toArray } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { AdminApiService } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -20,6 +20,9 @@ import { CommentResponse, PageResponse } from '../../../../models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CommentListComponent implements OnInit {
+  /** Matches the backend's @Size(max = 100) on the bulk-moderation payload. */
+  private static readonly BULK_CHUNK = 100;
+
   private destroyRef = inject(DestroyRef);
   private apiService = inject(ApiService);
   private adminApi = inject(AdminApiService);
@@ -287,16 +290,31 @@ export class CommentListComponent implements OnInit {
     });
     if (!confirmed) return;
 
-    this.adminApi.bulkCommentAction(action, ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.notification.success(this.i18n.t('dev.comments.bulkSuccess'));
-        this.clearSelection();
-        this.loadComments();
-      },
-      error: () => {
-        this.notification.error(this.i18n.t('dev.comments.bulkError'));
-      },
-    });
+    // The API rejects more than BULK_CHUNK ids per request, and the per-article
+    // view can select up to 500, so send them in sequential batches.
+    const batches: string[][] = [];
+    for (let i = 0; i < ids.length; i += CommentListComponent.BULK_CHUNK) {
+      batches.push(ids.slice(i, i + CommentListComponent.BULK_CHUNK));
+    }
+
+    from(batches)
+      .pipe(
+        concatMap((batch) => this.adminApi.bulkCommentAction(action, batch)),
+        toArray(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.notification.success(this.i18n.t('dev.comments.bulkSuccess'));
+          this.clearSelection();
+          this.loadComments();
+        },
+        error: () => {
+          this.notification.error(this.i18n.t('dev.comments.bulkError'));
+          // An earlier batch may have applied — reload so the list reflects reality.
+          this.loadComments();
+        },
+      });
   }
 
   onPageChange(page: number): void {

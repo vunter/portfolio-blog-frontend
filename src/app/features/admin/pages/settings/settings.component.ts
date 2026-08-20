@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminApiService, CacheInvalidationResult } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -348,8 +349,10 @@ export class SettingsComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
 
-    // Q7.9: Size limit (10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Q7.9: size limit — 2 MB, matching the backend's own cap
+    // (AdminExportController rejects a larger body), so an oversized file is
+    // refused here with a clear message instead of failing mid-upload.
+    if (file.size > 2 * 1024 * 1024) {
       this.notification.error(this.i18n.t('admin.settings.importFileTooLarge'));
       input.value = '';
       return;
@@ -406,8 +409,12 @@ export class SettingsComponent implements OnInit {
         this.importing.set(false);
         input.value = '';
       },
-      error: () => {
-        this.notification.error(this.i18n.t('admin.settings.importError'));
+      error: (err: HttpErrorResponse) => {
+        // The backend localizes why it refused (size, structure, a failed row);
+        // prefer that over the generic message, which hid it entirely.
+        this.notification.error(
+          err?.error?.message || this.i18n.t('admin.settings.importError')
+        );
         this.importing.set(false);
         input.value = '';
       },

@@ -92,6 +92,43 @@ describe('CommentListComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The API caps a bulk payload at 100 ids while the per-article view can select
+  // up to 500, so the component has to split the request.
+  it('should send bulk moderation in batches of 100', fakeAsync(() => {
+    mockAdminApi.bulkCommentAction.and.returnValue(of(undefined));
+    fixture.detectChanges();
+    tick();
+
+    const ids = Array.from({ length: 150 }, (_, i) => String(i + 1));
+    component.selectedIds.set(new Set(ids));
+
+    component.bulkAction('approve');
+    tick();
+
+    expect(mockAdminApi.bulkCommentAction).toHaveBeenCalledTimes(2);
+    const [firstAction, firstBatch] = mockAdminApi.bulkCommentAction.calls.argsFor(0);
+    const [, secondBatch] = mockAdminApi.bulkCommentAction.calls.argsFor(1);
+    expect(firstAction).toBe('approve');
+    expect(firstBatch.length).toBe(100);
+    expect(secondBatch.length).toBe(50);
+    expect([...firstBatch, ...secondBatch]).toEqual(ids);
+    expect(mockNotification.success).toHaveBeenCalled();
+    expect(component.selectedIds().size).toBe(0);
+  }));
+
+  it('should send a single bulk request when the selection fits in one batch', fakeAsync(() => {
+    mockAdminApi.bulkCommentAction.and.returnValue(of(undefined));
+    fixture.detectChanges();
+    tick();
+
+    component.selectedIds.set(new Set(['1', '2', '3']));
+    component.bulkAction('reject');
+    tick();
+
+    expect(mockAdminApi.bulkCommentAction).toHaveBeenCalledTimes(1);
+    expect(mockAdminApi.bulkCommentAction.calls.argsFor(0)[1]).toEqual(['1', '2', '3']);
+  }));
+
   it('should load paged comments on init (normal mode)', fakeAsync(() => {
     fixture.detectChanges();
     tick();
