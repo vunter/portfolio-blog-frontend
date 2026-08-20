@@ -33,6 +33,11 @@ describe('RecaptchaService', () => {
     originalRecaptcha = (window as any)['grecaptcha'];
     originalSiteKey = environment.recaptchaSiteKey;
     originalRecaptchaEnabled = (environment as any).recaptchaEnabled;
+
+    // Karma shares one DOM across the whole suite and runs specs in random
+    // order, so a script appended by an earlier test whose promise settled
+    // after its afterEach can still be here. Start from a known-empty head.
+    document.querySelectorAll('script[src*="recaptcha"]').forEach((s) => s.remove());
   });
 
   afterEach(() => {
@@ -133,6 +138,7 @@ describe('RecaptchaService', () => {
       const existingScript = document.createElement('script');
       existingScript.src = 'https://www.google.com/recaptcha/api.js?render=test-site-key';
       document.head.appendChild(existingScript);
+      const scriptsBefore = document.querySelectorAll('script[src*="recaptcha"]').length;
 
       (window as any)['grecaptcha'] = {
         ready: (cb: () => void) => cb(),
@@ -142,9 +148,10 @@ describe('RecaptchaService', () => {
       const token = await service.execute('action');
       expect(token).toBe('cached-token');
 
-      // Should not have added another script tag
-      const scripts = document.querySelectorAll('script[src*="recaptcha"]');
-      expect(scripts.length).toBe(1);
+      // Assert the delta, not an absolute count: the claim is "loadScript added
+      // nothing", which holds no matter what else the shared DOM carries.
+      const scriptsAfter = document.querySelectorAll('script[src*="recaptcha"]').length;
+      expect(scriptsAfter).toBe(scriptsBefore);
     });
 
     it('should not load script on server platform', async () => {
