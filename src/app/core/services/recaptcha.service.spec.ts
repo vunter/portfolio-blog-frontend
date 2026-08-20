@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RecaptchaService } from './recaptcha.service';
 import { environment } from '../../../environments/environment';
@@ -20,7 +20,7 @@ describe('RecaptchaService', () => {
     TestBed.configureTestingModule({
       providers: [
         RecaptchaService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: PLATFORM_ID, useValue: platformId },
       ],

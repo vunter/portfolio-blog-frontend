@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { I18nService } from './i18n.service';
 import { CookieConsentService } from './cookie-consent.service';
@@ -43,7 +43,7 @@ describe('I18nService', () => {
     TestBed.configureTestingModule({
       providers: [
         I18nService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: CookieConsentService, useValue: consentSpy },
       ],

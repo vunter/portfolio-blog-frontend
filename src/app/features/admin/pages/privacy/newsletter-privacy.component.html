@@ -40,7 +40,7 @@
           <p class="consent-purpose" id="site-analytics-purpose">
             {{ i18n.t('account.privacy.siteAnalyticsPurpose') }}
           </p>
-          <p class="consent-status" [class.not-set]="consent()?.siteAnalyticsConsent === null">
+          <p class="consent-status" [class.not-set]="(consent()?.siteAnalyticsConsent ?? null) === null">
             {{ i18n.t(consentStatusKey(consent()?.siteAnalyticsConsent ?? null)) }}
             @if (savingConsent() === 'site') {
               <span class="spinner spinner-sm" aria-hidden="true"></span>
@@ -67,7 +67,7 @@
           <p class="consent-purpose" id="email-analytics-purpose">
             {{ i18n.t('account.privacy.emailAnalyticsPurpose') }}
           </p>
-          <p class="consent-status" [class.not-set]="consent()?.emailAnalyticsConsent === null">
+          <p class="consent-status" [class.not-set]="(consent()?.emailAnalyticsConsent ?? null) === null">
             {{ i18n.t(consentStatusKey(consent()?.emailAnalyticsConsent ?? null)) }}
             @if (savingConsent() === 'email') {
               <span class="spinner spinner-sm" aria-hidden="true"></span>

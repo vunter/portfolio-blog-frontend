@@ -3,6 +3,7 @@ import {
   provideHttpClient,
   withInterceptors,
   HttpClient,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -26,7 +27,7 @@ describe('errorInterceptor', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         { provide: NotificationService, useValue: notificationSpy },
         { provide: Router, useValue: routerSpy },

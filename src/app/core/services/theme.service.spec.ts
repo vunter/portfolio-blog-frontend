@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ThemeService, Theme } from './theme.service';
 import { CookieConsentService } from './cookie-consent.service';
@@ -30,7 +30,7 @@ describe('ThemeService', () => {
     TestBed.configureTestingModule({
       providers: [
         ThemeService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: CookieConsentService, useValue: consentSpy },
       ],

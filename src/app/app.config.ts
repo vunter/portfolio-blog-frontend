@@ -11,7 +11,7 @@ import { GlobalErrorHandler } from './core/services/global-error-handler.service
 import { provideRouter, withInMemoryScrolling, withPreloading, withViewTransitions } from '@angular/router';
 // provideClientHydration re-enabled — progress interceptor now skips on server
 // to avoid TransferCacheInterceptorFn conflict (see progress.interceptor.ts)
-import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions } from '@angular/platform-browser';
+import { provideClientHydration, withEventReplay, withHttpTransferCacheOptions, withNoIncrementalHydration } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -87,6 +87,11 @@ export const appConfig: ApplicationConfig = {
       withHttpTransferCacheOptions({
         includePostRequests: false,
       }),
+      // Angular 22 turns incremental hydration on by default. This app has no
+      // `@defer (hydrate ...)` blocks, so incremental hydration would only add
+      // scheduling machinery with nothing to defer. Opting out keeps the
+      // pre-v22 "hydrate everything on bootstrap" behaviour we already ship.
+      withNoIncrementalHydration(),
     ),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     // Sentry is loaded lazily from GlobalErrorHandler (off the critical path), so it

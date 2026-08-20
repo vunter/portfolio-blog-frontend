@@ -42,11 +42,6 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-      # zone.js 0.16 is outside Angular 20's peer range (@angular/core 20.3.x
-      # declares ~0.15.0; the range only widens in @angular/core 21.1). A bump
-      # here resolves only with --force and was reverted once already. Drop this
-      # entry when the app moves to Angular 21.1+.
-      - dependency-name: "zone.js"
 
   - package-ecosystem: docker
     directory: /

@@ -1,6 +1,6 @@
 ﻿import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthStore } from './auth.store';
 import { StorageService } from '../services/storage.service';
@@ -42,7 +42,7 @@ describe('Auth Guards', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthStore,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: Router, useValue: router },
         { provide: StorageService, useValue: storageSpy },

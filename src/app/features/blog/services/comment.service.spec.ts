@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -19,7 +20,7 @@ describe('CommentService', () => {
     TestBed.configureTestingModule({
       providers: [
         CommentService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
       ],
     });

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi, HttpErrorResponse } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HttpErrorResponse, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthStore } from './auth.store';
 import { StorageService } from '../services/storage.service';
@@ -64,7 +64,7 @@ describe('AuthStore', () => {
     TestBed.configureTestingModule({
       providers: [
         AuthStore,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: StorageService, useValue: storageSpy },
         { provide: AuthService, useValue: authServiceSpy },

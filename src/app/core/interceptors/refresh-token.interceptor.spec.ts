@@ -4,6 +4,7 @@ import {
   withInterceptors,
   HttpClient,
   HttpErrorResponse,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -36,7 +37,7 @@ describe('refreshTokenInterceptor', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([refreshTokenInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([refreshTokenInterceptor])),
         provideHttpClientTesting(),
         RefreshTokenState,
         { provide: AuthStore, useValue: mockAuthStore },

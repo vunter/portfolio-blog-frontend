@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -26,7 +27,7 @@ describe('BookmarkService', () => {
     TestBed.configureTestingModule({
       providers: [
         BookmarkService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: CookieConsentService, useValue: consentSpy },

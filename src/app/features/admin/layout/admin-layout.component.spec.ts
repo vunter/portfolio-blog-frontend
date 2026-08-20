@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component, Input, signal } from '@angular/core';
 import { AdminLayoutComponent } from './admin-layout.component';
@@ -79,7 +79,7 @@ describe('AdminLayoutComponent', () => {
       ],
       providers: [
         provideRouter([]),
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: AuthStore, useValue: mockAuthStore },
         { provide: ThemeService, useValue: mockTheme },
