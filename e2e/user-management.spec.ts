@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS, dismissCookieConsent } from './helpers';
+import { loginAsAdmin, ADMIN_CREDS, dismissCookieConsent, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 
@@ -209,6 +209,7 @@ test.describe('User Management - Security', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
     if (loginRes.ok()) {
       await page.request.post(`${API_BASE}/admin/users`, {
         data: { name: 'Security Test Dev', email: `secdev-${timestamp}@test.com`, password: 'SecDevPass123!@#', role: 'DEV' },
@@ -219,6 +220,7 @@ test.describe('User Management - Security', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: `secdev-${timestamp}@test.com`, password: 'SecDevPass123!@#' },
     });
+    await propagateCsrfToken(page);
     await page.request.put(`${API_BASE}/admin/users/me`, {
       data: { termsAccepted: true },
     }).catch(() => {});
@@ -249,6 +251,7 @@ test.describe('User Management - Security', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
     if (loginRes.ok()) {
       await page.request.post(`${API_BASE}/admin/users`, {
         data: { name: 'Sidebar Test Dev', email: `sidedev-${timestamp}@test.com`, password: 'SideDevPass123!@#', role: 'DEV' },
@@ -259,6 +262,7 @@ test.describe('User Management - Security', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: `sidedev-${timestamp}@test.com`, password: 'SideDevPass123!@#' },
     });
+    await propagateCsrfToken(page);
     await page.request.put(`${API_BASE}/admin/users/me`, {
       data: { termsAccepted: true },
     }).catch(() => {});

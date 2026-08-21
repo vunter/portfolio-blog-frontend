@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, dismissCookieConsent, seedProfile, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, seedProfile, ADMIN_CREDS, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testEmail = `e2e-newsletter-${Date.now()}@test.com`;
@@ -22,6 +22,7 @@ test.describe('Newsletter Subscribe Flow', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
 
     // Try to find and delete the test subscriber
     const res = await page.request.get(`${API_BASE}/admin/newsletter/subscribers?page=0&size=100`);

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, ADMIN_CREDS, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testTemplateName = `E2E Template ${Date.now()}`;
@@ -105,6 +105,7 @@ test.describe('Resume Template CRUD', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
 
     const listRes = await page.request.get(`${API_BASE}/resume/templates`);
     if (listRes.ok()) {
@@ -131,6 +132,7 @@ test.describe('Resume Template CRUD', () => {
       await page.request.post(`${API_BASE}/admin/auth/login`, {
         data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
       });
+      await propagateCsrfToken(page);
 
       const listRes = await page.request.get(`${API_BASE}/resume/templates`);
       if (listRes.ok()) {
@@ -169,6 +171,7 @@ test.describe('Resume Template CRUD', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
 
     const listRes = await page.request.get(`${API_BASE}/resume/templates`);
     let templateId = createdTemplateId;
