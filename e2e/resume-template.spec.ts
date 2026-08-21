@@ -200,8 +200,11 @@ test.describe('Resume Template CRUD', () => {
         if (await deleteBtn.isVisible()) {
           await deleteBtn.click();
 
-          // Confirm in the custom Angular confirm dialog
-          const confirmBtn = page.locator('.btn-danger').last();
+          // Scope the confirm to the dialog and pick the accept button by what
+          // it is not: a bare `.btn-danger` also matches every card's delete
+          // button, and the dialog only carries that class when its type is
+          // 'danger' — so match the non-cancel button inside the modal instead.
+          const confirmBtn = page.locator('.confirm-modal button:not(.btn-secondary)');
           await expect(confirmBtn).toBeVisible({ timeout: 5000 });
           await confirmBtn.click();
           await page.waitForTimeout(2000);

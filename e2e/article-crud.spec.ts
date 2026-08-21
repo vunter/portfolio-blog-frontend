@@ -56,10 +56,14 @@ test.describe('Article CRUD via UI', () => {
     // Fill in content — Monaco editor: click the editor area and type
     const monacoContainer = page.locator('.monaco-editor-container');
     if (await monacoContainer.isVisible({ timeout: 5000 }).catch(() => false)) {
+      // Type through the keyboard rather than filling a hidden textarea.
+      // Monaco 0.56 reworked its input surface: the old `textarea.inputarea`
+      // is gone, and the textarea that replaced it (`.ime-text-area`) is
+      // readonly/aria-hidden and exists only for IME composition, so fill()
+      // times out on it. Focusing the editor and typing exercises the same
+      // path a real user does and does not depend on Monaco's internals.
       await monacoContainer.click();
-      // Monaco uses an internal textarea for input
-      const monacoInput = page.locator('.monaco-editor textarea.inputarea, .monaco-editor [role="textbox"]').first();
-      await monacoInput.fill(testContent);
+      await page.keyboard.type(testContent, { delay: 5 });
     }
 
     // Fill in excerpt

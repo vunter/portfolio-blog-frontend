@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, dismissCookieConsent, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, dismissCookieConsent, ADMIN_CREDS, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testSlug = `e2e-test-article-${Date.now()}`;
@@ -136,6 +136,7 @@ test.describe('Article Detail Page', () => {
     });
 
     if (!loginRes.ok()) return;
+    await propagateCsrfToken(page);
 
     const slug = `detail-test-${Date.now()}`;
     const createRes = await page.request.post(`${API_BASE}/admin/articles`, {
@@ -190,6 +191,7 @@ test.describe('Article Detail Page', () => {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
     if (!loginRes.ok()) return;
+    await propagateCsrfToken(page);
 
     const slug = `code-theme-${Date.now()}`;
     const createRes = await page.request.post(`${API_BASE}/admin/articles`, {

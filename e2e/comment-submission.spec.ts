@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, loginViaUI, acceptTermsIfVisible, dismissCookieConsent, ADMIN_CREDS } from './helpers';
+import { loginAsAdmin, loginViaUI, acceptTermsIfVisible, dismissCookieConsent, ADMIN_CREDS, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 const testSlug = `e2e-comment-test-${Date.now()}`;
@@ -32,6 +32,7 @@ test.describe('Comment Submission Flow', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
 
     // Create an article via API
     await page.request.post(`${API_BASE}/admin/articles`, {
@@ -54,6 +55,7 @@ test.describe('Comment Submission Flow', () => {
     await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: { email: ADMIN_CREDS.email, password: ADMIN_CREDS.password },
     });
+    await propagateCsrfToken(page);
 
     await page.request.delete(`${API_BASE}/admin/articles/${testSlug}`);
     await page.close();

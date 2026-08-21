@@ -7,6 +7,24 @@ export const DEV_CREDS = { email: 'dev@test.com', password: 'DevPass123!@#' };
 export const VIEWER_CREDS = { email: 'viewer@test.com', password: 'ViewerPass123!@#' };
 
 /**
+ * Headers for a mutating API call made through `page.request`.
+ *
+ * The app is protected by cookie-based CSRF: the server issues an XSRF-TOKEN
+ * cookie and requires it echoed back in X-XSRF-TOKEN on every state-changing
+ * request. Angular's HttpClient does that automatically, but Playwright's
+ * APIRequestContext does not — so a raw page.request.post lands on a 403 and
+ * the test reads as a broken feature when the feature is in fact protected.
+ *
+ * Call this on every post/put/patch/delete issued through page.request, after
+ * logging in (the cookie is set by the login response).
+ */
+export async function csrfHeaders(page: Page): Promise<Record<string, string>> {
+  const cookies = await page.context().cookies();
+  const token = cookies.find((c) => c.name === 'XSRF-TOKEN')?.value;
+  return token ? { 'X-XSRF-TOKEN': token } : {};
+}
+
+/**
  * Login via the UI form — simulates a real user typing credentials.
  */
 export async function loginViaUI(page: Page, email: string, password: string, options?: { waitForNavigation?: boolean }) {
@@ -32,6 +50,25 @@ export async function loginViaUI(page: Page, email: string, password: string, op
     // Wait for login POST to complete and page to navigate away from /auth/login
     await page.waitForURL((url) => !url.pathname.startsWith('/auth/login'), { timeout: 30000 });
     await page.waitForLoadState('load');
+  }
+  await propagateCsrfToken(page);
+}
+
+/**
+ * Make the session's CSRF token travel with `page.request` calls.
+ *
+ * Specs drive the API directly through page.request, which shares the browser's
+ * cookies but — unlike Angular's HttpClient — does not echo the XSRF-TOKEN
+ * cookie back in the X-XSRF-TOKEN header. Every mutating call then lands on a
+ * 403 and the spec reads as a broken feature when CSRF is simply doing its job.
+ *
+ * Setting it once as an extra context header covers all of them, instead of
+ * threading a header argument through ~66 call sites.
+ */
+export async function propagateCsrfToken(page: Page) {
+  const token = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN')?.value;
+  if (token) {
+    await page.context().setExtraHTTPHeaders({ 'X-XSRF-TOKEN': token });
   }
 }
 
@@ -134,6 +171,7 @@ export async function seedTestUsers(page: Page) {
     console.log('Admin login failed during seeding:', loginRes.status());
     return;
   }
+  await propagateCsrfToken(page);
 
   // Accept terms for admin user so the modal doesn't block UI tests
   await page.request.put(`${API_BASE}/admin/users/me`, {
@@ -153,10 +191,15 @@ export async function seedTestUsers(page: Page) {
     const createRes = await page.request.post(`${API_BASE}/admin/users`, { data: user });
 
     if (!createRes.ok()) {
-      // User already exists (possibly soft-deleted) — find and reactivate
+      // The account already exists. Re-activate it unconditionally rather than
+      // trusting the listing we fetched a moment ago: these two accounts are
+      // shared fixtures, and specs that run earlier (user management, the
+      // comprehensive suite) deactivate them without restoring. Leaving that
+      // to chance makes every later role test fail at login for a reason that
+      // has nothing to do with roles.
       const existing = existingUsers.find((u: any) => u.email === user.email);
-      if (existing && !existing.active) {
-        await page.request.put(`${API_BASE}/admin/users/${existing.id}/activate`);
+      if (existing) {
+        await page.request.put(`${API_BASE}/admin/users/${existing.id}/activate`).catch(() => {});
       }
     }
   }

@@ -137,8 +137,9 @@ test.describe('User Management (ADMIN)', () => {
     // Check user is active
     await expect(devRow.locator('.status-indicator.active')).toBeVisible();
 
-    // Click deactivate (2nd action button) - opens ConfirmDialog
-    await devRow.locator('.action-btn').nth(1).click();
+    // Target the button by its label, not its position: an activity/detail
+    // button was added ahead of it, so nth(1) now opens that drawer instead.
+    await devRow.locator('.action-btn[title="Deactivate"]').click();
     await expect(page.locator('.confirm-modal')).toBeVisible({ timeout: 3000 });
     await page.locator('.confirm-modal .btn-danger').click();
     await page.waitForTimeout(2000);
@@ -152,7 +153,7 @@ test.describe('User Management (ADMIN)', () => {
     if (await devRow.count() === 0) return;
 
     // Click activate (2nd action button) - opens ConfirmDialog
-    await devRow.locator('.action-btn').nth(1).click();
+    await devRow.locator('.action-btn[title="Activate"]').click();
     await expect(page.locator('.confirm-modal')).toBeVisible({ timeout: 3000 });
     // Activate uses 'warning' type, so the button has btn-warning class
     await page.locator('.confirm-modal .btn-warning, .confirm-modal .btn-primary').first().click();

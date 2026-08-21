@@ -6,8 +6,7 @@ import { test, expect, Page } from '@playwright/test';
 import {
   ADMIN_CREDS, DEV_CREDS, VIEWER_CREDS,
   loginAsAdmin, loginAs, loginViaUI, logoutFromAdmin,
-  seedTestUsers, dismissCookieConsent, seedProfile,
-} from './helpers';
+  seedTestUsers, dismissCookieConsent, seedProfile, propagateCsrfToken } from './helpers';
 
 const API_BASE = 'http://localhost:4200/api/v1';
 
@@ -200,6 +199,8 @@ test.describe('Article Lifecycle', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
     expect(loginRes.ok()).toBeTruthy();
 
     const createRes = await page.request.post(`${API_BASE}/admin/articles`, {
@@ -343,6 +344,8 @@ test.describe('User Management', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     const createRes = await page.request.post(`${API_BASE}/admin/users`, {
       data: {
@@ -402,6 +405,8 @@ test.describe('Tag Management', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     const tagName = `e2e-tag-${Date.now()}`;
     const createRes = await page.request.post(`${API_BASE}/admin/tags`, {
@@ -438,6 +443,8 @@ test.describe('Comments', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     const createRes = await page.request.post(`${API_BASE}/admin/articles`, {
       data: {
@@ -502,6 +509,8 @@ test.describe('Resume Templates', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     // Create template
     const createRes = await page.request.post(`${API_BASE}/resume/templates`, {
@@ -679,6 +688,8 @@ test.describe('Data Persistence', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
     expect(loginRes.ok()).toBeTruthy();
 
     const uniqueTitle = `Persistence Test ${Date.now()}`;
@@ -720,6 +731,8 @@ test.describe('Data Persistence', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     // Update profile
     const profileData = {
@@ -756,6 +769,8 @@ test.describe('Search', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     const searchTerm = `SearchTest${Date.now()}`;
     const createRes = await page.request.post(`${API_BASE}/admin/articles`, {
@@ -800,6 +815,8 @@ test.describe('Cleanup', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     // Get all articles and delete ones with "E2E" or test patterns
     const listRes = await page.request.get(`${API_BASE}/admin/articles?page=0&size=100`);
@@ -822,6 +839,8 @@ test.describe('Cleanup', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     // Get all users and delete test ones
     const listRes = await page.request.get(`${API_BASE}/admin/users`);
@@ -842,6 +861,8 @@ test.describe('Cleanup', () => {
     const loginRes = await page.request.post(`${API_BASE}/admin/auth/login`, {
       data: ADMIN_CREDS,
     });
+    await propagateCsrfToken(page);
+    await propagateCsrfToken(page);
 
     const listRes = await page.request.get(`${API_BASE}/resume/templates`);
     if (listRes.ok()) {
