@@ -2,7 +2,6 @@ import { Component, inject, signal, OnInit, OnDestroy, ElementRef, AfterViewInit
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DatePipe } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { VersionHistoryComponent } from '../../components/version-history/version-history.component';
 import { ArticleMetadataComponent } from './components/article-metadata/article-metadata.component';
@@ -39,7 +38,7 @@ interface ArticleForm {
 
 @Component({
   selector: 'app-article-form',
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent, SeoPreviewComponent, ArticleReviewPanelComponent, ArticleTranslationsComponent, SplitPaneResizeDirective],
+  imports: [ReactiveFormsModule, RouterLink, MarkdownModule, VersionHistoryComponent, ArticleMetadataComponent, ArticleImageComponent, ArticleTagsComponent, EditorToolbarComponent, SeoPreviewComponent, ArticleReviewPanelComponent, ArticleTranslationsComponent, SplitPaneResizeDirective],
   host: {
     '(window:keydown)': 'onKeyDown($event)',
     '(window:beforeunload)': 'onBeforeUnload($event)',
