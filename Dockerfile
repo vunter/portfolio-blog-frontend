@@ -19,7 +19,19 @@ FROM nginx:1.31-alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aea
 
 # Patch all OS packages to the latest in the base image's Alpine branch so
 # Trivy's fixable CRITICAL/HIGH findings are cleared at build time.
-RUN apk upgrade --no-cache
+#
+# Daily cache-bust token — CI and the deploy pass the build date. Without it
+# BuildKit's layer cache (type=gha) serves a STALE upgrade: this layer's
+# instruction and base digest never change, so buildx reuses whatever it built
+# the first time and the patching silently stops happening. That shipped an
+# image with openssl 3.5.7-r0 after Alpine released 3.5.8-r0 for
+# CVE-2026-14456, and Trivy's fixable-HIGH gate failed the build with `#19
+# CACHED` as the only clue. apk's own --no-cache is unrelated: it governs the
+# package index, not the Docker layer. Mirrors APT_SECURITY_REFRESH in the
+# backend image, which was bitten by exactly this.
+ARG APK_SECURITY_REFRESH=manual
+RUN echo "apk security refresh: ${APK_SECURITY_REFRESH}" \
+    && apk upgrade --no-cache
 
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
