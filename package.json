@@ -39,7 +39,7 @@
     "@sentry/angular": "^10.70.0",
     "emoji-picker-element": "^1.29.1",
     "express": "^5.2.1",
-    "marked": "^18.0.10",
+    "marked": "^18.0.11",
     "monaco-editor": "^0.56.0",
     "ngx-markdown": "^22.0.0",
     "prismjs": "^1.30.0",
